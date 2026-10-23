@@ -1,0 +1,35 @@
+name: nightly
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+jobs:
+  nightly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: dotnet build YSharp.slnx -c Release
+      - name: Test (Nightly tier: slow differential, fuzz, soak, slow memory)
+        env:
+          YSHARP_TIER: Nightly
+        run: dotnet test --solution YSharp.slnx -c Release --no-build --report-trx --results-directory TestResults
+      # Placeholders: SharpFuzz harness (TASK-2.11) and benchmark comparison (TASK-2.14).
+      - name: Benchmarks (shell)
+        run: dotnet run -c Release --project bench/YSharp.Benchmarks -- --list flat
+        continue-on-error: true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nightly-results-and-failing-seeds
+          path: |
+            **/TestResults/*.trx
+            **/failing-seeds/**
+          if-no-files-found: ignore

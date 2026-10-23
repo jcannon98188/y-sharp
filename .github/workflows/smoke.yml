@@ -1,0 +1,28 @@
+name: smoke-differential
+on:
+  pull_request:
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    continue-on-error: true # non-gating at first (ADR 0012, 0013)
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: dotnet build YSharp.slnx -c Release
+      - name: Test (Smoke tier)
+        env:
+          YSHARP_TIER: Smoke
+        run: dotnet test --solution YSharp.slnx -c Release --no-build --report-trx --results-directory TestResults
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-results
+          path: "**/TestResults/*.trx"
+          if-no-files-found: ignore

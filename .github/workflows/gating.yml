@@ -1,0 +1,36 @@
+name: gating
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  gating:
+    name: gating (${{ matrix.os }}, ${{ matrix.config }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, config: Debug }
+          - { os: ubuntu-latest, config: Release }
+          - { os: windows-latest, config: Release }
+          - { os: macos-latest, config: Release }
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - run: dotnet build YSharp.slnx -c ${{ matrix.config }}
+      - name: Test (gating tier; Node is not installed)
+        env:
+          YSHARP_TIER: Gating
+        run: dotnet test --solution YSharp.slnx -c ${{ matrix.config }} --no-build --report-trx --results-directory TestResults
+      # Placeholder: traceability check and fixture version-header check land with TASK-2.3 and TASK-2.4.
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.os }}-${{ matrix.config }}
+          path: "**/TestResults/*.trx"
+          if-no-files-found: ignore

@@ -1,0 +1,23 @@
+name: fixture-drift
+on:
+  pull_request:
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Regenerate fixtures
+        working-directory: tools/fixture-gen
+        run: |
+          npm install --no-audit --no-fund
+          npm run gen
+      - name: Fail on fixture drift
+        run: |
+          mkdir -p fixtures
+          git add -N fixtures
+          git diff --exit-code -- fixtures
