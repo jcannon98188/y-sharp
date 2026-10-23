@@ -1,0 +1,853 @@
+# Encoding, updates and delete sets (docs/research/encoding.md; ENC-nn frozen in document order, ref gives the section)
+# Behaviour registry (ADR 0010). IDs are assigned once and never reused or renumbered; a withdrawn entry stays as status: retired.
+# Initial population (TASK-2.3): every entry starts pending with an owning spec (ADR 0019). Fields are best-effort; the owning spec refines them.
+
+- id: ENC-01
+  title: "Encoder buffer"
+  source: "lib0/encoding.js:38"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 1.1"
+
+- id: ENC-02
+  title: "VarUint (lib0/encoding.js:260-266, lib0/decoding.js:241-260)"
+  source: "lib0/encoding.js:260"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 1.2"
+
+- id: ENC-03
+  title: "VarInt (lib0/encoding.js:277-291, lib0/decoding.js:273-298)"
+  source: "lib0/encoding.js:277"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 1.3"
+
+- id: ENC-04
+  title: "Fixed-width reads"
+  source: "lib0/decoding.js:142"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 1.4"
+
+- id: ENC-05
+  title: "VarUint8Array and VarString"
+  source: "lib0/encoding.js:434"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 1.5"
+
+- id: ENC-06
+  title: "Float / BigInt"
+  source: "lib0/encoding.js:467"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 1.6"
+
+- id: ENC-07
+  title: "Any encoding (lib0/encoding.js:536-598, lib0/decoding.js:461-497)"
+  source: "lib0/encoding.js:536"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 1.7"
+
+- id: ENC-08
+  title: "RLE-family encoders (the V2 column encoders)"
+  source: "yjs/src/utils/UpdateEncoder.js:176"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 1.8"
+
+- id: ENC-09
+  title: "State vector"
+  source: "yjs/src/utils/encoding.js:601"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 2"
+
+- id: ENC-10
+  title: "Common skeleton (both versions)"
+  source: "yjs/src/utils/encoding.js:81"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 3.1"
+
+- id: ENC-11
+  title: "Struct (block) layout"
+  source: "yjs/src/structs/Item.js:655"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 3.2"
+
+- id: ENC-12
+  title: "V1 content layouts (UpdateEncoderV1, UpdateEncoder.js:36-125)"
+  source: "yjs/src/utils/UpdateEncoder.js:36"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 3.3"
+
+- id: ENC-13
+  title: "Offsets, diff and split semantics for writing"
+  source: "yjs/src/structs/Item.js:655"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 3.4"
+
+- id: ENC-14
+  title: "V2 container (UpdateEncoderV2, UpdateEncoder.js:162-320)"
+  source: "yjs/src/utils/UpdateEncoder.js:162"
+  kind: match
+  layers: [unit, fixture, port, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 3.5"
+
+- id: ENC-15
+  title: "Worked examples"
+  source: "docs/research/encoding.md:271"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 3.6"
+
+- id: ENC-16
+  title: "Model"
+  source: "yjs/src/utils/DeleteSet.js:16"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 4.1"
+
+- id: ENC-17
+  title: "V1 layout (writeDeleteSet, DeleteSet.js:222-239; DSEncoderV1, UpdateEncoder.js:8-34)"
+  source: "yjs/src/utils/DeleteSet.js:222"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 4.2"
+
+- id: ENC-18
+  title: "V2 layout (DSEncoderV2, UpdateEncoder.js:127-160; DSDecoderV2, UpdateDecoder.js:125-157)"
+  source: "yjs/src/utils/UpdateEncoder.js:127"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 4.3"
+
+- id: ENC-19
+  title: "Which deletes an update carries"
+  source: "yjs/src/utils/DeleteSet.js:188"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 4.4"
+
+- id: ENC-20
+  title: "Applying a delete set (readAndApplyDeleteSet, DeleteSet.js:278-332)"
+  source: "yjs/src/utils/DeleteSet.js:278"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 4.5"
+
+- id: ENC-21
+  title: "Applying updates (applyUpdate, applyUpdateV2)"
+  source: "yjs/src/utils/encoding.js:476"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 5"
+
+- id: ENC-22
+  title: "Unknown / invalid content refs and type refs"
+  source: "yjs/src/structs/Item.js:712"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 5.1"
+
+- id: ENC-23
+  title: "mergeUpdates / mergeUpdatesV2"
+  source: "yjs/src/utils/updates.js:186"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 6"
+
+- id: ENC-24
+  title: "diffUpdate / diffUpdateV2 (updates.js:467-507)"
+  source: "yjs/src/utils/updates.js:467"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 6.1"
+
+- id: ENC-25
+  title: "convertUpdateFormat* (updates.js:579-591, 717-722)"
+  source: "yjs/src/utils/updates.js:579"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 6.2"
+
+- id: ENC-26
+  title: "obfuscateUpdate* (updates.js:603-712)"
+  source: "yjs/src/utils/updates.js:603"
+  kind: match
+  layers: [unit, fixture, port, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 6.3"
+
+- id: ENC-27
+  title: "Update emission sources (what produces bytes)"
+  source: "yjs/src/utils/encoding.js:555"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 7"
+
+- id: ENC-28
+  title: "Truncation sweeps"
+  source: "yjs/src/utils/Transaction.js:432"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.1"
+
+- id: ENC-29
+  title: "Malformed input: empty bytes -> Error: Unexpected end of array"
+  source: "docs/research/encoding.md:415"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-30
+  title: "Malformed input: 00 00 -> OK, no-op"
+  source: "docs/research/encoding.md:416"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-31
+  title: "Malformed input: valid + trailing junk -> OK (junk ignored)"
+  source: "docs/research/encoding.md:417"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-32
+  title: "Malformed input: numStructs = 2^32 -> RangeError: Invalid array length (new Array(n), encoding.js:123)"
+  source: "docs/research/encoding.md:418"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-33
+  title: "Malformed input: numStructs = 2^32-1, body short -> Error: Unexpected end of array (sparse array, fast)"
+  source: "docs/research/encoding.md:419"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-34
+  title: "Malformed input: numClients = 2^32-1 -> Error: Unexpected end of array"
+  source: "docs/research/encoding.md:420"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-35
+  title: "Malformed input: 10x 80 then 00 -> Error: Unexpected end of array (unterminated)"
+  source: "docs/research/encoding.md:421"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-36
+  title: "Malformed input: clock = 2^53-1 -> accepted, pending"
+  source: "docs/research/encoding.md:422"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-37
+  title: "Malformed input: client id >= 2^53 (e.g. 2^63 as 80*9 01) -> accepted; value is the nearest double (precision "
+  source: "docs/research/encoding.md:423"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-38
+  title: "Malformed input: info with content ref 11 -> TypeError (\"not a function\")"
+  source: "docs/research/encoding.md:424"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-39
+  title: "Malformed input: unknown typeRef 9 -> TypeError"
+  source: "docs/research/encoding.md:425"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-40
+  title: "Malformed input: invalid UTF-8 in string or key -> TypeError (fatal decoder)"
+  source: "docs/research/encoding.md:426"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-41
+  title: "Malformed input: ed a0 80 (CESU surrogate) -> TypeError"
+  source: "docs/research/encoding.md:427"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-42
+  title: "Malformed input: string ef bb bf 61 -> OK; text \"﻿a\", length 2"
+  source: "docs/research/encoding.md:428"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-43
+  title: "Malformed input: JSON content {{ -> SyntaxError from JSON.parse"
+  source: "docs/research/encoding.md:429"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-44
+  title: "Malformed input: JSON content text undefined -> OK; element is undefined (special-cased, ContentJSON.js:111-11"
+  source: "docs/research/encoding.md:430"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-45
+  title: "Malformed input: Any tag 0x10, 0x73, 0x80 -> TypeError"
+  source: "docs/research/encoding.md:431"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-46
+  title: "Malformed input: Any tag 7d as the last byte -> the VarInt payload reads as 0 silently (1.3), so the struct *i"
+  source: "docs/research/encoding.md:432"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-47
+  title: "Malformed input: Any float32 truncated -> RangeError: Invalid DataView length 4"
+  source: "docs/research/encoding.md:433"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-48
+  title: "Malformed input: Binary length beyond buffer -> RangeError"
+  source: "docs/research/encoding.md:434"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-49
+  title: "Malformed input: parentInfo = 2 or 5 -> treated as \"parent ID\", misparse, then pending/RangeError/OK depending"
+  source: "docs/research/encoding.md:435"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-50
+  title: "Malformed input: ds with 0 deletes for a client -> accepted, ignored"
+  source: "docs/research/encoding.md:436"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-51
+  title: "Malformed input: ds delete len 0 -> Error: Unexpected case (only on V2 re-encode path, see 4.3)"
+  source: "docs/research/encoding.md:437"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-52
+  title: "Malformed input: ds range beyond known state -> accepted, parked in pendingDs"
+  source: "docs/research/encoding.md:438"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-53
+  title: "Malformed input: ds truncated (count says 2, 1 present) -> Error: Unexpected end of array"
+  source: "docs/research/encoding.md:439"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-54
+  title: "Malformed input: V2 bytes through V1 applier -> accepted on a tiny sample (the leading 00 flag and column byte"
+  source: "docs/research/encoding.md:440"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-55
+  title: "Malformed input: V2 feature flag != 0 -> ignored; OK"
+  source: "docs/research/encoding.md:441"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-56
+  title: "Malformed input: V2 column length larger than remaining -> RangeError"
+  source: "docs/research/encoding.md:442"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-57
+  title: "Malformed input: applyUpdate(doc, undefined) -> TypeError: Cannot read properties of undefined"
+  source: "docs/research/encoding.md:443"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-58
+  title: "Malformed input: plain Array [0,0] instead of Uint8Array -> accepted (decoder only indexes arr[i]; but readUin"
+  source: "docs/research/encoding.md:444"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-59
+  title: "Malformed input: Node Buffer -> accepted, fine"
+  source: "docs/research/encoding.md:445"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.2 row"
+
+- id: ENC-60
+  title: "Reader at EOF: readUint8 -> undefined, advances"
+  source: "docs/research/encoding.md:453"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.3 row"
+
+- id: ENC-61
+  title: "Reader at EOF: readVarUint -> throws"
+  source: "docs/research/encoding.md:454"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.3 row"
+
+- id: ENC-62
+  title: "Reader at EOF: readVarInt (first byte) -> returns 0, advances (silent)"
+  source: "docs/research/encoding.md:455"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.3 row"
+
+- id: ENC-63
+  title: "Reader at EOF: readVarInt (after continuation) -> throws"
+  source: "docs/research/encoding.md:456"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.3 row"
+
+- id: ENC-64
+  title: "Reader at EOF: UintOptRleDecoder.read on empty buffer -> returns 0 forever (silent)"
+  source: "docs/research/encoding.md:457"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.3 row"
+
+- id: ENC-65
+  title: "Reader at EOF: IntDiffOptRleDecoder.read on empty buffer -> returns 0 forever, s stays 0 (silent)"
+  source: "docs/research/encoding.md:458"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.3 row"
+
+- id: ENC-66
+  title: "Reader at EOF: RleDecoder.read on empty buffer -> throws Unexpected end of array: readUint8 returns undefined "
+  source: "docs/research/encoding.md:459"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.3 row"
+
+- id: ENC-67
+  title: "Reader at EOF: RleDecoder after final run -> repeats last value forever"
+  source: "docs/research/encoding.md:460"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.3 row"
+
+- id: ENC-68
+  title: "Reader at EOF: StringDecoder.read beyond joined string -> \"\""
+  source: "docs/research/encoding.md:461"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.3 row"
+
+- id: ENC-69
+  title: "Reader at EOF: readVarUint8Array / readFloat* -> RangeError if beyond backing buffer"
+  source: "docs/research/encoding.md:462"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 8.3 row"
+
+- id: ENC-70
+  title: "Client ids: Doc.js:23 generateNewClientId = random.uint32 (so < 2^32 for generated ids), but the wire accepts..."
+  source: "yjs/src/utils/Doc.js:23"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 9"
+
+- id: ENC-71
+  title: "Clocks and lengths"
+  source: "docs/research/encoding.md:471"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 9"
+
+- id: ENC-72
+  title: "Any integers"
+  source: "docs/research/encoding.md:472"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 9"
+
+- id: ENC-73
+  title: "Strings: lengths are UTF-16 code units in the model (clocks), UTF-8 bytes on the wire (prefix). C# string is..."
+  source: "docs/research/encoding.md:473"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 9"
+
+- id: ENC-74
+  title: "V1 and V2 state vectors are byte-identical"
+  source: "docs/research/encoding.md:479"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 10"
+
+- id: ENC-75
+  title: "V2 ContentEmbed/ContentFormat-value use Any"
+  source: "docs/research/encoding.md:480"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 10"
+
+- id: ENC-76
+  title: "V2 keys never reuse a clock (cache branch in decoder is unreachable from this encoder)"
+  source: "docs/research/encoding.md:481"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 10"
+
+- id: ENC-77
+  title: "V2 info/parentInfo RLE omits the final count"
+  source: "docs/research/encoding.md:482"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 10"
+
+- id: ENC-78
+  title: "Skip lengths are always raw VarUint"
+  source: "docs/research/encoding.md:483"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 10"
+
+- id: ENC-79
+  title: "startClock and numStructs are raw VarUint in V2 (rest buffer), not in columns"
+  source: "docs/research/encoding.md:484"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 10"
+
+- id: ENC-80
+  title: "Delete set in V2 is delta coded with per-client reset"
+  source: "docs/research/encoding.md:485"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 10"
+
+- id: ENC-81
+  title: "Merge never coalesces Items but coalesces GC/Skip"
+  source: "docs/research/encoding.md:486"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 10"
+
+- id: ENC-82
+  title: "mergeUpdates with one argument returns the input instance untouched"
+  source: "docs/research/encoding.md:487"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 10"
+
+- id: ENC-83
+  title: "Diff updates (sv mid-struct) rewrite the first Item's origin and may contain U+FFFD from surrogate splitting"
+  source: "docs/research/encoding.md:488"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 10"
+
+- id: ENC-84
+  title: "Encode of a doc with pending structs/ds goes through merge, not the direct writer"
+  source: "docs/research/encoding.md:489"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 10"
+
+- id: ENC-85
+  title: "info bytes with ref 10 plus flag bits"
+  source: "docs/research/encoding.md:490"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 5
+  status: pending
+  ref: "encoding.md 10"

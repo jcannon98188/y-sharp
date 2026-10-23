@@ -1,0 +1,734 @@
+# Struct model and integration (docs/research/structs.md; STR-nn frozen in document order, ref gives the note's label)
+# Behaviour registry (ADR 0010). IDs are assigned once and never reused or renumbered; a withdrawn entry stays as status: retired.
+# Initial population (TASK-2.3): every entry starts pending with an owning spec (ADR 0019). Fields are best-effort; the owning spec refines them.
+
+- id: STR-01
+  title: "AbstractStruct(id, length) stores id and length"
+  source: "yjs/src/structs/AbstractStruct.js:12"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md A1"
+
+- id: STR-02
+  title: "Per-client contiguity"
+  source: "yjs/src/utils/StructStore.js:69"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md A2"
+
+- id: STR-03
+  title: "addStruct throws unexpectedCase if the new struct's clock != last.clock+last.length for an existing client"
+  source: "yjs/src/utils/StructStore.js:88"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md A3"
+
+- id: STR-04
+  title: "getState(store, client) = last.clock+last.length, or 0 for unknown client"
+  source: "yjs/src/utils/StructStore.js:37"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md A4"
+
+- id: STR-05
+  title: "Item info bit field"
+  source: "yjs/src/structs/Item.js:306"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md A5"
+
+- id: STR-06
+  title: "Item.lastId = id when length==1 (same object reused), else new ID(client, clock+length-1)"
+  source: "yjs/src/structs/Item.js:560"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md A6"
+
+- id: STR-07
+  title: "Item.next / Item.prev skip deleted neighbours"
+  source: "yjs/src/structs/Item.js:538"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md A7"
+
+- id: STR-08
+  title: "Item constructor length = content.getLength()"
+  source: "yjs/src/structs/Item.js:261"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md A8"
+
+- id: STR-09
+  title: "followRedone(store, id)"
+  source: "yjs/src/structs/Item.js:39"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md B1"
+
+- id: STR-10
+  title: "keepItem(item, keep)"
+  source: "yjs/src/structs/Item.js:68"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md B2"
+
+- id: STR-11
+  title: "splitItem(tx, left, diff) (structs/Item.js:85-121)"
+  source: "yjs/src/structs/Item.js:85"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md B3"
+
+- id: STR-12
+  title: "redoItem(...) (structs/Item.js:143-245), used by UndoManager"
+  source: "yjs/src/structs/Item.js:143"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md B4"
+
+- id: STR-13
+  title: "Returns the client id of the first missing dependency, checked in order origin, rightOrigin, parent-as-ID"
+  source: "yjs/src/structs/Item.js:373"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md C1"
+
+- id: STR-14
+  title: "If all present"
+  source: "docs/research/structs.md:64"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md C2"
+
+- id: STR-15
+  title: "Parent resolution"
+  source: "docs/research/structs.md:66"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md C3"
+
+- id: STR-16
+  title: "GC.getMissing and Skip.getMissing always return null"
+  source: "yjs/src/structs/GC.js:57"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md C4"
+
+- id: STR-17
+  title: "Offset handling (offset>0, partially-known struct)"
+  source: "docs/research/structs.md:77"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md D1"
+
+- id: STR-18
+  title: "Conflict loop is entered only if (!left && (!right || right.left != null)) || (left && left.right != right)..."
+  source: "docs/research/structs.md:79"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md D2"
+
+- id: STR-19
+  title: "Scan start o"
+  source: "docs/research/structs.md:81"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md D3"
+
+- id: STR-20
+  title: "Per-o rules, with conflictingItems (set C) and itemsBeforeOrigin (set B), both receiving o on each iteration"
+  source: "docs/research/structs.md:83"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md D4"
+
+- id: STR-21
+  title: "Linking: if left != null: right = left.right; left.right = this. Else: for map item, right = leftmost of key..."
+  source: "docs/research/structs.md:91"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md D5"
+
+- id: STR-22
+  title: "Parent _length += length only if parentSub === null && countable && !deleted"
+  source: "docs/research/structs.md:93"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md D6"
+
+- id: STR-23
+  title: "Order of effects after linking"
+  source: "docs/research/structs.md:95"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md D7"
+
+- id: STR-24
+  title: "parent == null branch"
+  source: "docs/research/structs.md:97"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md D8"
+
+- id: STR-25
+  title: "integrate order matters for ContentDeleted"
+  source: "docs/research/structs.md:99"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md D9"
+
+- id: STR-26
+  title: "delete(tx) idempotent when already deleted"
+  source: "docs/research/structs.md:103"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md E1"
+
+- id: STR-27
+  title: "gc(store, parentGCd)"
+  source: "docs/research/structs.md:105"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md E2"
+
+- id: STR-28
+  title: "mergeWith(right) returns true only if ALL hold"
+  source: "docs/research/structs.md:107"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md E3"
+
+- id: STR-29
+  title: "write(encoder, offset)"
+  source: "docs/research/structs.md:110"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 6
+  status: pending
+  ref: "structs.md E4"
+
+- id: STR-30
+  title: "readItemContent/contentRefs table"
+  source: "yjs/src/structs/Item.js:705"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md E5"
+
+- id: STR-31
+  title: "ref number 0"
+  source: "docs/research/structs.md:122"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md F1"
+
+- id: STR-32
+  title: "mergeWith: true iff same class; lengths add. GC+GC adjacent always merge (no id adjacency check — callers..."
+  source: "docs/research/structs.md:123"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md F2"
+
+- id: STR-33
+  title: "integrate(tx, offset)"
+  source: "docs/research/structs.md:124"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md F3"
+
+- id: STR-34
+  title: "write: writeInfo(0), writeLen(length - offset)"
+  source: "docs/research/structs.md:125"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md F4"
+
+- id: STR-35
+  title: "getMissing -> null"
+  source: "docs/research/structs.md:126"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md F5"
+
+- id: STR-36
+  title: "ref number 10"
+  source: "docs/research/structs.md:130"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md G1"
+
+- id: STR-37
+  title: "integrate always throws unexpectedCase (\"skip structs cannot be integrated\")"
+  source: "docs/research/structs.md:131"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md G2"
+
+- id: STR-38
+  title: "write: writeInfo(10) + raw VarUint length (not writeLen, which in V2 is RLE-encoded) minus offset. Test: byte..."
+  source: "docs/research/structs.md:132"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 6
+  status: pending
+  ref: "structs.md G3"
+
+- id: STR-39
+  title: "Skips only appear in updates (produced by mergeUpdates/diffUpdate when a client range is missing)"
+  source: "docs/research/structs.md:133"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 6
+  status: pending
+  ref: "structs.md G4"
+
+- id: STR-40
+  title: "isCountable()==false for Deleted and Format"
+  source: "docs/research/structs.md:151"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md H0"
+
+- id: STR-41
+  title: "ContentString.splice surrogate handling (ContentString.js:51-66)"
+  source: "yjs/src/structs/ContentString.js:51"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md H1"
+
+- id: STR-42
+  title: "ContentType"
+  source: "docs/research/structs.md:155"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 6
+  status: pending
+  ref: "structs.md H2"
+
+- id: STR-43
+  title: "ContentDoc"
+  source: "docs/research/structs.md:163"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 6
+  status: pending
+  ref: "structs.md H3"
+
+- id: STR-44
+  title: "Throwing splice (Binary, Embed, Format, Type, Doc)"
+  source: "docs/research/structs.md:172"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 6
+  status: pending
+  ref: "structs.md H4"
+
+- id: STR-45
+  title: "ContentAny.mergeWith/ContentJSON.mergeWith/ContentDeleted.mergeWith/ContentString.mergeWith do not type-check..."
+  source: "docs/research/structs.md:174"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md H5"
+
+- id: STR-46
+  title: "findIndexSS(structs, clock)"
+  source: "docs/research/structs.md:178"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md I1"
+
+- id: STR-47
+  title: "find/getItem(store,id)"
+  source: "docs/research/structs.md:180"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md I2"
+
+- id: STR-48
+  title: "findIndexCleanStart(tx, structs, clock)"
+  source: "docs/research/structs.md:182"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md I3"
+
+- id: STR-49
+  title: "getItemCleanStart(tx, id) -> struct starting at id (splitting)"
+  source: "docs/research/structs.md:184"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md I4"
+
+- id: STR-50
+  title: "replaceStruct(store, old, new) replaces array slot found via findIndexSS"
+  source: "docs/research/structs.md:186"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md I5"
+
+- id: STR-51
+  title: "iterateStructs(tx, structs, clockStart, len, f)"
+  source: "docs/research/structs.md:188"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md I6"
+
+- id: STR-52
+  title: "StructStore fields"
+  source: "docs/research/structs.md:190"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md I7"
+
+- id: STR-53
+  title: "Transaction init"
+  source: "docs/research/structs.md:194"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md J1"
+
+- id: STR-54
+  title: "transact(doc, f, origin=null, local=true)"
+  source: "docs/research/structs.md:196"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md J2"
+
+- id: STR-55
+  title: "addChangedTypeToTransaction(tx, type, parentSub)"
+  source: "docs/research/structs.md:203"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md J3"
+
+- id: STR-56
+  title: "nextID(tx) = (doc.clientID, current state of own client)"
+  source: "docs/research/structs.md:205"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md J4"
+
+- id: STR-57
+  title: "writeUpdateMessageFromTransaction(enc, tx)"
+  source: "docs/research/structs.md:207"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md J5"
+
+- id: STR-58
+  title: "cleanupTransactions order, per transaction"
+  source: "docs/research/structs.md:209"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md J6"
+
+- id: STR-59
+  title: "tryGcDeleteSet"
+  source: "docs/research/structs.md:224"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md J7"
+
+- id: STR-60
+  title: "tryMergeDeleteSet / tryToMergeWithLefts"
+  source: "docs/research/structs.md:226"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md J8"
+
+- id: STR-61
+  title: "readClientsStructRefs (encoding.js:112-205)"
+  source: "yjs/src/utils/encoding.js:112"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 6
+  status: pending
+  ref: "structs.md K1"
+
+- id: STR-62
+  title: "integrateStructs (encoding.js:227-359)"
+  source: "yjs/src/utils/encoding.js:227"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 6
+  status: pending
+  ref: "structs.md K2"
+
+- id: STR-63
+  title: "addStackToRestSS"
+  source: "docs/research/structs.md:240"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 6
+  status: pending
+  ref: "structs.md K3"
+
+- id: STR-64
+  title: "readUpdateV2 (:382-449"
+  source: "docs/research/structs.md:242"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 6
+  status: pending
+  ref: "structs.md K4"
+
+- id: STR-65
+  title: "readAndApplyDeleteSet (DeleteSet.js:278-332)"
+  source: "yjs/src/utils/DeleteSet.js:278"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 6
+  status: pending
+  ref: "structs.md K5"
+
+- id: STR-66
+  title: "writeClientsStructs / writeStructs (encoding.js:57-110)"
+  source: "yjs/src/utils/encoding.js:57"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 6
+  status: pending
+  ref: "structs.md K6"
+
+- id: STR-67
+  title: "writeStateAsUpdate = structs + delete set derived from the store (createDeleteSetFromStructStore)"
+  source: "yjs/src/utils/encoding.js:504"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 6
+  status: pending
+  ref: "structs.md K7"
+
+- id: STR-68
+  title: "Applying an update that contains a struct for the receiver's own clientID (client id collision) -> J6.e..."
+  source: "docs/research/structs.md:260"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 6
+  status: pending
+  ref: "structs.md K8"
+
+- id: STR-69
+  title: "unexpectedCase throw sites"
+  source: "docs/research/structs.md:264"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md L1"
+
+- id: STR-70
+  title: "methodUnimplemented throw sites"
+  source: "docs/research/structs.md:265"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md L2"
+
+- id: STR-71
+  title: "Undefined-behaviour (JS TypeError) sites a port must turn into defined errors"
+  source: "docs/research/structs.md:266"
+  kind: unsafe-excluded
+  layers: [unit]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md L3"
+  note: "JS undefined behaviour (TypeError); y-sharp defines errors under ADR 0005."
+
+- id: STR-72
+  title: "Silent-accept cases"
+  source: "docs/research/structs.md:267"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md L4"
+
+- id: STR-73
+  title: "Exceptions inside transact callbacks and observers"
+  source: "docs/research/structs.md:268"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "structs.md L5"

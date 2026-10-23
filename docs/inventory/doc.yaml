@@ -1,0 +1,183 @@
+# Doc (docs/research/doc-features.md)
+# Behaviour registry (ADR 0010). IDs are assigned once and never reused or renumbered; a withdrawn entry stays as status: retired.
+# Initial population (TASK-2.3): every entry starts pending with an owning spec (ADR 0019). Fields are best-effort; the owning spec refines them.
+
+- id: DOC-01
+  title: "Constructor defaults"
+  source: "yjs/src/utils/Doc.js:60"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:9"
+
+- id: DOC-02
+  title: "Client id"
+  source: "yjs/src/utils/Doc.js:23"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:10"
+
+- id: DOC-03
+  title: "get(name, Ctor) idempotence"
+  source: "yjs/src/utils/Doc.js:216"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:11"
+
+- id: DOC-04
+  title: "Generic-to-concrete promotion"
+  source: "yjs/src/utils/Doc.js:222"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:12"
+
+- id: DOC-05
+  title: "Conflicting constructor"
+  source: "yjs/src/utils/Doc.js:243"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:13"
+
+- id: DOC-06
+  title: "Typed getters"
+  source: "yjs/src/utils/Doc.js:256"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:14"
+
+- id: DOC-07
+  title: "toJSON()"
+  source: "yjs/src/utils/Doc.js:309"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:15"
+
+- id: DOC-08
+  title: "transact(f, origin=null)"
+  source: "yjs/src/utils/Doc.js:184"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:16"
+
+- id: DOC-09
+  title: "Transaction event order"
+  source: "yjs/src/utils/Transaction.js:426"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:17"
+
+- id: DOC-10
+  title: "update/updateV2 emitted only if there are listeners and content"
+  source: "yjs/src/utils/Transaction.js:366"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:18"
+
+- id: DOC-11
+  title: "Clientid collision recovery"
+  source: "yjs/src/utils/Transaction.js:360"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:19"
+
+- id: DOC-12
+  title: "load()"
+  source: "yjs/src/utils/Doc.js:153"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:20"
+
+- id: DOC-13
+  title: "isLoaded / whenLoaded"
+  source: "yjs/src/utils/Doc.js:111"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:21"
+
+- id: DOC-14
+  title: "sync event"
+  source: "yjs/src/utils/Doc.js:129"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:22"
+
+- id: DOC-15
+  title: "destroy()"
+  source: "yjs/src/utils/Doc.js:325"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:23"
+
+- id: DOC-16
+  title: "getSubdocs() / getSubdocGuids()"
+  source: "yjs/src/utils/Doc.js:163"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:24"
+
+- id: DOC-17
+  title: "meta, collectionid"
+  source: "yjs/src/structs/ContentDoc.js:39"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:25"
+
+- id: DOC-18
+  title: "ObservableV2 contract"
+  source: "yjs/src/utils/Doc.js:36"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:26"

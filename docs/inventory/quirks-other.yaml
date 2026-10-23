@@ -1,0 +1,38 @@
+# JS quirk register (docs/research/quirks.md)
+# Behaviour registry (ADR 0010). IDs are assigned once and never reused or renumbered; a withdrawn entry stays as status: retired.
+# Initial population (TASK-2.3): every entry starts pending with an owning spec (ADR 0019). Fields are best-effort; the owning spec refines them.
+
+- id: Q30
+  title: "JSON.stringify / JSON.parse fidelity (awareness and V1)"
+  source: "docs/research/quirks.md:358"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  quirk: [Q08, Q11, Q30, Q32]
+  owner: 5
+  status: pending
+  ref: "quirks.md:358"
+
+- id: Q31
+  title: "Buffers are views and decoded content aliases input"
+  source: "docs/research/quirks.md:368"
+  kind: diverge
+  layers: [unit, differential]
+  wire: false
+  quirk: [Q31]
+  owner: 5
+  status: pending
+  ref: "quirks.md:368"
+  note: "Proposal in the quirk register: diverge. Needs a recorded decision (ADR 0003) and a [Diverges] test."
+
+- id: Q32
+  title: "Time and timers"
+  source: "docs/research/quirks.md:378"
+  kind: diverge
+  layers: [unit, differential]
+  wire: false
+  quirk: [Q32]
+  owner: 9
+  status: pending
+  ref: "quirks.md:378"
+  note: "Proposal in the quirk register: diverge for ergonomics. Needs a recorded decision (ADR 0003) and a [Diverges] test."

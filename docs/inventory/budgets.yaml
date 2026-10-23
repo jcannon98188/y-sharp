@@ -1,0 +1,144 @@
+# Allocation and memory budgets (ADR 0009)
+# Behaviour registry (ADR 0010). IDs are assigned once and never reused or renumbered; a withdrawn entry stays as status: retired.
+# Initial population (TASK-2.3): every entry starts pending with an owning spec (ADR 0019). Fields are best-effort; the owning spec refines them.
+
+- id: BUD-01
+  title: "Uncontended Transact/ReadTransact with a static lambda allocates zero bytes"
+  source: "docs/adr/0009-allocation-and-memory-budgets.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 14
+  status: pending
+  ref: "adr 0009"
+  note: "BUD-01..11 are the eleven named hot paths; BUD-12..14 are the other ADR 0009 budgets."
+
+- id: BUD-02
+  title: "TryTransact allocates zero bytes, also when contended"
+  source: "docs/adr/0009-allocation-and-memory-budgets.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 14
+  status: pending
+  ref: "adr 0009"
+
+- id: BUD-03
+  title: "Scalar YValue reads and AttributeEquals allocate zero bytes"
+  source: "docs/adr/0009-allocation-and-memory-budgets.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 14
+  status: pending
+  ref: "adr 0009"
+
+- id: BUD-04
+  title: "Event dispatch with no handlers allocates zero bytes"
+  source: "docs/adr/0009-allocation-and-memory-budgets.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 14
+  status: pending
+  ref: "adr 0009"
+
+- id: BUD-05
+  title: "A commit with no Update subscriber allocates zero bytes"
+  source: "docs/adr/0009-allocation-and-memory-budgets.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 14
+  status: pending
+  ref: "adr 0009"
+
+- id: BUD-06
+  title: "EncodeStateAsUpdate into a pre-sized writer allocates zero bytes"
+  source: "docs/adr/0009-allocation-and-memory-budgets.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 14
+  status: pending
+  ref: "adr 0009"
+
+- id: BUD-07
+  title: "A one-character YText.Insert at the end allocates zero bytes"
+  source: "docs/adr/0009-allocation-and-memory-budgets.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 14
+  status: pending
+  ref: "adr 0009"
+
+- id: BUD-08
+  title: "TryApplyUpdate (V1 and V2) stays within a bounded allocation budget"
+  source: "docs/adr/0009-allocation-and-memory-budgets.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 14
+  status: pending
+  ref: "adr 0009"
+
+- id: BUD-09
+  title: "Push and Set of scalars stay within a bounded allocation budget"
+  source: "docs/adr/0009-allocation-and-memory-budgets.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 14
+  status: pending
+  ref: "adr 0009"
+
+- id: BUD-10
+  title: "A sync Step1/Step2 round trip stays within a bounded allocation budget"
+  source: "docs/adr/0009-allocation-and-memory-budgets.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 14
+  status: pending
+  ref: "adr 0009"
+
+- id: BUD-11
+  title: "Awareness encode and apply stay within a bounded allocation budget"
+  source: "docs/adr/0009-allocation-and-memory-budgets.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 14
+  status: pending
+  ref: "adr 0009"
+
+- id: BUD-12
+  title: "Hostile input of N bytes allocates at most k*N plus a fixed amount"
+  source: "docs/adr/0009-allocation-and-memory-budgets.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 14
+  status: pending
+  ref: "adr 0009"
+
+- id: BUD-13
+  title: "Managed heap per item after forced collection does not exceed the figure Yjs produced on the same workload (1M text inserts, 1M array pushes, 100k map keys)"
+  source: "docs/adr/0009-allocation-and-memory-budgets.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 14
+  status: pending
+  ref: "adr 0009"
+
+- id: BUD-14
+  title: "Zero gen2 collections and no large-object-heap growth during 100k steady-state edits"
+  source: "docs/adr/0009-allocation-and-memory-budgets.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 14
+  status: pending
+  ref: "adr 0009"

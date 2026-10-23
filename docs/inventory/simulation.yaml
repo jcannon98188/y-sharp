@@ -1,0 +1,113 @@
+# Randomized-test simulation (ADR 0017): SIM-01..05 divergences (spec 10), SIM-10.. harness (spec 2)
+# Behaviour registry (ADR 0010). IDs are assigned once and never reused or renumbered; a withdrawn entry stays as status: retired.
+# Initial population (TASK-2.3): every entry starts pending with an owning spec (ADR 0019). Fields are best-effort; the owning spec refines them.
+
+- id: SIM-01
+  title: "checkResult compares each replica with itself upstream; the port compares different replicas"
+  source: "docs/research/js-tests.md:360"
+  kind: diverge
+  layers: [unit]
+  wire: false
+  owner: 10
+  status: pending
+  ref: "adr 0017"
+  note: "ADR 0017 simulation divergence; needs a [Diverges] test or comment naming the upstream behaviour."
+
+- id: SIM-02
+  title: "compare asserts equalDeleteSets; upstream discards the result"
+  source: "docs/research/js-tests.md:360"
+  kind: diverge
+  layers: [unit]
+  wire: false
+  owner: 10
+  status: pending
+  ref: "adr 0017"
+  note: "ADR 0017 simulation divergence; needs a [Diverges] test or comment naming the upstream behaviour."
+
+- id: SIM-03
+  title: "The quill code-block operation uses the key attributes; upstream passes format, which applyDelta ignores"
+  source: "docs/research/js-tests.md:360"
+  kind: diverge
+  layers: [unit]
+  wire: false
+  owner: 10
+  status: pending
+  ref: "adr 0017"
+  note: "ADR 0017 simulation divergence; needs a [Diverges] test or comment naming the upstream behaviour."
+
+- id: SIM-04
+  title: "The coin-flip draw in init selects V1 or V2 for the whole run and the run really uses it; upstream falls back to V1 in both branches"
+  source: "docs/research/js-tests.md:360"
+  kind: diverge
+  layers: [unit]
+  wire: false
+  owner: 10
+  status: pending
+  ref: "adr 0017"
+  note: "ADR 0017 simulation divergence; needs a [Diverges] test or comment naming the upstream behaviour."
+
+- id: SIM-05
+  title: "Payload counters (_uniqueNumber, charCounter) reset for every run so a seed alone reproduces payload text"
+  source: "docs/research/js-tests.md:360"
+  kind: diverge
+  layers: [unit]
+  wire: false
+  owner: 10
+  status: pending
+  ref: "adr 0017"
+  note: "ADR 0017 simulation divergence; needs a [Diverges] test or comment naming the upstream behaviour."
+
+- id: SIM-10
+  title: "TestConnector: synchronous per-pair FIFO message simulation with disconnect, reconnect and random flush"
+  source: "docs/research/js-tests.md:54"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 2
+  status: active
+  ref: "adr 0017 / TASK-2.2"
+  note: "Harness entry owned by spec 2 (ADR 0019); covered by SimHarnessTests."
+
+- id: SIM-11
+  title: "init: one coin-flip draw, client ids 0..N-1, root types array, map, xml, text, then syncAll"
+  source: "docs/research/js-tests.md:54"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 2
+  status: active
+  ref: "adr 0017 / TASK-2.2"
+  note: "Harness entry owned by spec 2 (ADR 0019); covered by SimHarnessTests."
+
+- id: SIM-12
+  title: "compare: reconnect and flush all, assert replicas converge on content, state, delete sets and merged updates"
+  source: "docs/research/js-tests.md:54"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 2
+  status: active
+  ref: "adr 0017 / TASK-2.2"
+  note: "Harness entry owned by spec 2 (ADR 0019); covered by SimHarnessTests."
+
+- id: SIM-13
+  title: "applyRandomTests: the upstream draw order for disconnect, reconnect, flush and operation selection"
+  source: "docs/research/js-tests.md:54"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 2
+  status: active
+  ref: "adr 0017 / TASK-2.2"
+  note: "Harness entry owned by spec 2 (ADR 0019); covered by SimHarnessTests."
+
+- id: SIM-14
+  title: "V2 framing: test-only sync framing with the y-protocols message-type numbers and a V2 payload"
+  source: "docs/research/js-tests.md:54"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 2
+  status: active
+  ref: "adr 0017 / TASK-2.2"
+  note: "Harness entry owned by spec 2 (ADR 0019); covered by SimHarnessTests."

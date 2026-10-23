@@ -1,0 +1,205 @@
+# Concurrency contract (ADR 0006)
+# Behaviour registry (ADR 0010). IDs are assigned once and never reused or renumbered; a withdrawn entry stays as status: retired.
+# Initial population (TASK-2.3): every entry starts pending with an owning spec (ADR 0019). Fields are best-effort; the owning spec refines them.
+
+- id: CC-1
+  title: "One lock per Doc"
+  source: "docs/adr/0006-concurrency-contract.md:11"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 12
+  status: pending
+  ref: "adr 0006:11"
+
+- id: CC-2
+  title: "The lock is re-entrant per thread, with owner tracking"
+  source: "docs/adr/0006-concurrency-contract.md:12"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 12
+  status: pending
+  ref: "adr 0006:12"
+
+- id: CC-3
+  title: "Upgrading from a read transaction to a write transaction on the same thread throws YConcurrencyException"
+  source: "docs/adr/0006-concurrency-contract.md:13"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 12
+  status: pending
+  ref: "adr 0006:13"
+
+- id: CC-4
+  title: "A read transaction never mutates document state, caches included (search markers and similar lazily updated..."
+  source: "docs/adr/0006-concurrency-contract.md:14"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 12
+  status: pending
+  ref: "adr 0006:14"
+
+- id: CC-5
+  title: "The lock is built only from Monitor, Interlocked and explicit state, so a systematic schedule tester can..."
+  source: "docs/adr/0006-concurrency-contract.md:15"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 12
+  status: pending
+  ref: "adr 0006:15"
+
+- id: CC-6
+  title: "Blocking Transact forms take an optional timeout and CancellationToken, and throw TimeoutException or..."
+  source: "docs/adr/0006-concurrency-contract.md:19"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 12
+  status: pending
+  ref: "adr 0006:19"
+
+- id: CC-7
+  title: "An uncontended acquire and release allocates nothing"
+  source: "docs/adr/0006-concurrency-contract.md:20"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 12
+  status: pending
+  ref: "adr 0006:20"
+
+- id: CC-8
+  title: "Every public member of Doc, the shared types and the awareness classes is safe to call from any thread"
+  source: "docs/adr/0006-concurrency-contract.md:24"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 12
+  status: pending
+  ref: "adr 0006:24"
+
+- id: CC-9
+  title: "Live views and enumerators never outlive the transaction that produced them"
+  source: "docs/adr/0006-concurrency-contract.md:25"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 12
+  status: pending
+  ref: "adr 0006:25"
+
+- id: CC-10
+  title: "Options such as ClientId, Guid and ShouldLoad are read lock-free from an immutable snapshot"
+  source: "docs/adr/0006-concurrency-contract.md:26"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 12
+  status: pending
+  ref: "adr 0006:26"
+
+- id: CC-11
+  title: "Observers and events run synchronously on the thread that commits, inside the write lock, in the oracle's..."
+  source: "docs/adr/0006-concurrency-contract.md:30"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 12
+  status: pending
+  ref: "adr 0006:30"
+
+- id: CC-12
+  title: "Observe, ObserveDeep and Unobserve are safe at any time from any thread, including inside a callback, and do..."
+  source: "docs/adr/0006-concurrency-contract.md:31"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 12
+  status: pending
+  ref: "adr 0006:31"
+
+- id: CC-13
+  title: "Each trigger runs a snapshot of the handler list taken when it starts"
+  source: "docs/adr/0006-concurrency-contract.md:32"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 12
+  status: pending
+  ref: "adr 0006:32"
+  note: "Second half (a handler added during dispatch first runs next trigger) is a Divergence from JS (types.md TX-12)."
+
+- id: CC-14
+  title: "Observer faults are contained as in ADR 0005, whichever thread the commit runs on"
+  source: "docs/adr/0006-concurrency-contract.md:33"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  adr: ["0005"]
+  owner: 12
+  status: pending
+  ref: "adr 0006:33"
+
+- id: CC-15
+  title: "A transaction is thread-affine"
+  source: "docs/adr/0006-concurrency-contract.md:37"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 12
+  status: pending
+  ref: "adr 0006:37"
+
+- id: CC-16
+  title: "If a Transact body throws, commit and cleanup still run, the lock is released in a finally block, and the..."
+  source: "docs/adr/0006-concurrency-contract.md:38"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 12
+  status: pending
+  ref: "adr 0006:38"
+
+- id: CC-17
+  title: "Destroy is a write transaction and waits its turn"
+  source: "docs/adr/0006-concurrency-contract.md:39"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 12
+  status: pending
+  ref: "adr 0006:39"
+
+- id: CC-18
+  title: "Each subdoc has its own lock"
+  source: "docs/adr/0006-concurrency-contract.md:43"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 12
+  status: pending
+  ref: "adr 0006:43"
+
+- id: CC-19
+  title: "Awareness has its own re-entrant exclusive lock and never takes a doc lock"
+  source: "docs/adr/0006-concurrency-contract.md:44"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 12
+  status: pending
+  ref: "adr 0006:44"
+
+- id: CC-20
+  title: "UndoManager and PermanentUserData run every public member under the doc lock with an implicit transaction"
+  source: "docs/adr/0006-concurrency-contract.md:45"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 12
+  status: pending
+  ref: "adr 0006:45"

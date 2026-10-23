@@ -1,0 +1,113 @@
+# Garbage collection (docs/research/doc-features.md)
+# Behaviour registry (ADR 0010). IDs are assigned once and never reused or renumbered; a withdrawn entry stays as status: retired.
+# Initial population (TASK-2.3): every entry starts pending with an owning spec (ADR 0019). Fields are best-effort; the owning spec refines them.
+
+- id: GC-01
+  title: "Flag and filter"
+  source: "yjs/src/utils/Transaction.js:327"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "doc-features.md:126"
+
+- id: GC-02
+  title: "Scope"
+  source: "yjs/src/utils/Transaction.js:199"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "doc-features.md:127"
+
+- id: GC-03
+  title: "Eligibility"
+  source: "yjs/src/utils/Transaction.js:214"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "doc-features.md:128"
+
+- id: GC-04
+  title: "Collection forms"
+  source: "yjs/src/structs/Item.js:634"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "doc-features.md:129"
+
+- id: GC-05
+  title: "Undo keep"
+  source: "docs/research/doc-features.md:130"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "doc-features.md:130"
+
+- id: GC-06
+  title: "Wire effects"
+  source: "yjs/src/structs/GC.js:44"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 6
+  status: pending
+  ref: "doc-features.md:131"
+
+- id: GC-07
+  title: "Integration of orphans"
+  source: "yjs/src/structs/Item.js:392"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "doc-features.md:132"
+
+- id: GC-08
+  title: "Merge"
+  source: "yjs/src/utils/Transaction.js:171"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "doc-features.md:133"
+
+- id: GC-09
+  title: "Subdocs"
+  source: "docs/research/doc-features.md:134"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "doc-features.md:134"
+
+- id: GC-10
+  title: "Snapshots"
+  source: "docs/research/doc-features.md:135"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "doc-features.md:135"
+
+- id: GC-11
+  title: "Test helper"
+  source: "docs/research/doc-features.md:136"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 6
+  status: pending
+  ref: "doc-features.md:136"

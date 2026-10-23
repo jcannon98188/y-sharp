@@ -1,0 +1,63 @@
+# PROTOCOL.md discrepancies (docs/research/y-protocols.md)
+# Behaviour registry (ADR 0010). IDs are assigned once and never reused or renumbered; a withdrawn entry stays as status: retired.
+# Initial population (TASK-2.3): every entry starts pending with an owning spec (ADR 0019). Fields are best-effort; the owning spec refines them.
+
+- id: PR-1
+  title: "PROTOCOL.md's example calls awareness.readAwarenessMessage and lists it in messageTypes"
+  source: "docs/research/y-protocols.md:207"
+  kind: port-flag
+  layers: [unit]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:207"
+
+- id: PR-2
+  title: "The example object uses [SyncProtocolMessageType] twice as a key, which is a typo for..."
+  source: "docs/research/y-protocols.md:208"
+  kind: port-flag
+  layers: [unit]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:208"
+
+- id: PR-3
+  title: "The doc says the updater \"must only apply updates if the received clock is newer / larger\", which omits the..."
+  source: "docs/research/y-protocols.md:209"
+  kind: port-flag
+  layers: [unit]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:209"
+
+- id: PR-4
+  title: "The doc says clients not updated for \"longer than 30 seconds\" are removed"
+  source: "docs/research/y-protocols.md:210"
+  kind: port-flag
+  layers: [unit]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:210"
+
+- id: PR-5
+  title: "The doc says that after receiving SyncStep2 \"a client knows that it is now synced\""
+  source: "docs/research/y-protocols.md:211"
+  kind: port-flag
+  layers: [unit]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:211"
+
+- id: PR-6
+  title: "The read-only filtering advice (block [0,1,..] and [0,2,..]) assumes the outer envelope byte 0"
+  source: "docs/research/y-protocols.md:212"
+  kind: port-flag
+  layers: [unit]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:212"

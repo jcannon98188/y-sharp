@@ -1,0 +1,523 @@
+# Awareness (docs/research/y-protocols.md)
+# Behaviour registry (ADR 0010). IDs are assigned once and never reused or renumbered; a withdrawn entry stays as status: retired.
+# Initial population (TASK-2.3): every entry starts pending with an owning spec (ADR 0019). Fields are best-effort; the owning spec refines them.
+
+- id: AW-1
+  title: "outdatedTimeout = 30000, in milliseconds (awareness.js:13)"
+  source: "y-protocols/awareness.js:13"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:28"
+
+- id: AW-2
+  title: "Awareness extends lib0 Observable"
+  source: "y-protocols/awareness.js:39"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:29"
+
+- id: AW-3
+  title: "Fields: doc, clientID (copied from doc.clientID at construction; later changes to doc.clientID are not..."
+  source: "y-protocols/awareness.js:45"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:30"
+
+- id: AW-4
+  title: "states holds only live states"
+  source: "docs/research/y-protocols.md:31"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:31"
+
+- id: AW-5
+  title: "State values are JSON-compatible objects"
+  source: "docs/research/y-protocols.md:32"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:32"
+
+- id: AW-6
+  title: "The constructor calls setLocalState({})"
+  source: "y-protocols/awareness.js:81"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:36"
+
+- id: AW-7
+  title: "getLocalState() returns states.get(clientID) || null"
+  source: "y-protocols/awareness.js:95"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:37"
+
+- id: AW-8
+  title: "setLocalState(state)"
+  source: "y-protocols/awareness.js:101"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:38"
+
+- id: AW-9
+  title: "Event split"
+  source: "y-protocols/awareness.js:131"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:44"
+
+- id: AW-10
+  title: "Quirk: setLocalState(null) when already null still reports removed:[clientID], emits both events, and bumps..."
+  source: "y-protocols/awareness.js:119"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:45"
+
+- id: AW-11
+  title: "Quirk: setLocalState stores the caller's object by reference, and getStates() returns the live internal map...."
+  source: "y-protocols/awareness.js:154"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:46"
+
+- id: AW-12
+  title: "setLocalStateField(field, value) is a no-op if the local state is null"
+  source: "y-protocols/awareness.js:141"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:47"
+
+- id: AW-13
+  title: "getStates() returns the same Map instance each time"
+  source: "y-protocols/awareness.js:154"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:48"
+
+- id: AW-14
+  title: "The check interval is floor(outdatedTimeout/10) = 3000 ms"
+  source: "y-protocols/awareness.js:77"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:52"
+
+- id: AW-15
+  title: "Local renewal"
+  source: "y-protocols/awareness.js:61"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:53"
+
+- id: AW-16
+  title: "Remote expiry"
+  source: "y-protocols/awareness.js:69"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:54"
+
+- id: AW-17
+  title: "Boundaries are inclusive (<=), so exactly 15000 ms and 30000 ms trigger"
+  source: "docs/research/y-protocols.md:55"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:55"
+
+- id: AW-18
+  title: "A removed remote client has states.has == false, so it is not removed again"
+  source: "docs/research/y-protocols.md:56"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:56"
+
+- id: AW-19
+  title: "The local client is never expired by the interval, only renewed"
+  source: "docs/research/y-protocols.md:57"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:57"
+
+- id: AW-20
+  title: "Quirk: if local state is non-null but meta.get(clientID) is missing, the interval would throw (non-null..."
+  source: "y-protocols/awareness.js:61"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:58"
+
+- id: AW-21
+  title: "The interval keeps a Node process alive (no unref)"
+  source: "docs/research/y-protocols.md:59"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:59"
+
+- id: AW-22
+  title: "destroy(), in order"
+  source: "y-protocols/awareness.js:84"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:63"
+
+- id: AW-23
+  title: "doc.on('destroy', () => this.destroy()) is registered in the constructor"
+  source: "y-protocols/awareness.js:78"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:69"
+
+- id: AW-24
+  title: "Quirk: destroy is not idempotent. A second call emits the removal path again (see AW-10), with no listeners"
+  source: "docs/research/y-protocols.md:70"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:70"
+
+- id: AW-25
+  title: "For each id in clients that is currently in states"
+  source: "y-protocols/awareness.js:169"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:74"
+
+- id: AW-26
+  title: "If the removed id is the local client, meta is replaced with {clock"
+  source: "docs/research/y-protocols.md:75"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:75"
+
+- id: AW-27
+  title: "If removed is non-empty, emit change then update, both {added:[], updated:[], removed} with the supplied..."
+  source: "y-protocols/awareness.js:183"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:76"
+
+- id: AW-28
+  title: "Duplicates in clients"
+  source: "docs/research/y-protocols.md:77"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:77"
+
+- id: AW-29
+  title: "The function does not itself produce a network message"
+  source: "docs/research/y-protocols.md:78"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:78"
+
+- id: AW-30
+  title: "Wire format (:194-207"
+  source: "y-protocols/awareness.js:194"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:82"
+
+- id: AW-31
+  title: "Entries are written in the order given in clients"
+  source: "docs/research/y-protocols.md:87"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:87"
+
+- id: AW-32
+  title: "A client id absent from meta throws a TypeError (:201, unguarded .clock)"
+  source: "y-protocols/awareness.js:201"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:88"
+
+- id: AW-33
+  title: "The optional third argument states substitutes the state map but not the meta"
+  source: "docs/research/y-protocols.md:89"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:89"
+
+- id: AW-34
+  title: "Client ids are varUint (lib0 53-bit)"
+  source: "docs/research/y-protocols.md:90"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:90"
+
+- id: AW-35
+  title: "Strings are UTF-8 with a varUint byte-length prefix (not a char count), so non-ASCII state content needs a..."
+  source: "docs/research/y-protocols.md:91"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:91"
+
+- id: AW-36
+  title: "Decodes the whole update, runs modify(state) on each decoded state, and re-encodes with the same ids and..."
+  source: "y-protocols/awareness.js:219"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:95"
+
+- id: AW-37
+  title: "modify is also called for null states (removals), so the callback must tolerate null"
+  source: "docs/research/y-protocols.md:96"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:96"
+
+- id: AW-38
+  title: "If modify returns undefined, JSON.stringify yields undefined and writeVarString fails"
+  source: "docs/research/y-protocols.md:97"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:97"
+
+- id: AW-39
+  title: "Trailing bytes after the declared entries are ignored"
+  source: "docs/research/y-protocols.md:98"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:98"
+
+- id: AW-40
+  title: "An identity modify gives a byte-identical result for input produced by encodeAwarenessUpdate"
+  source: "docs/research/y-protocols.md:99"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:99"
+
+- id: AW-41
+  title: "Decode clientID, clock, state = JSON.parse(string)"
+  source: "docs/research/y-protocols.md:105"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:105"
+
+- id: AW-42
+  title: "Acceptance rule"
+  source: "y-protocols/awareness.js:256"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:106"
+
+- id: AW-43
+  title: "Consequence (quirk, matters for the port)"
+  source: "docs/research/y-protocols.md:107"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:107"
+
+- id: AW-44
+  title: "Equal-clock non-null update is ignored"
+  source: "docs/research/y-protocols.md:108"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:108"
+
+- id: AW-45
+  title: "When accepted and state === null"
+  source: "y-protocols/awareness.js:259"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:109"
+
+- id: AW-46
+  title: "When accepted and non-null, states.set(clientID, state)"
+  source: "docs/research/y-protocols.md:112"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:112"
+
+- id: AW-47
+  title: "On acceptance, meta is set to {clock, lastUpdated"
+  source: "docs/research/y-protocols.md:113"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:113"
+
+- id: AW-48
+  title: "Classification of an accepted entry, tested in this order"
+  source: "y-protocols/awareness.js:273"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:114"
+
+- id: AW-49
+  title: "Quirks following from the classification"
+  source: "docs/research/y-protocols.md:119"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:119"
+
+- id: AW-50
+  title: "Events after the loop"
+  source: "y-protocols/awareness.js:285"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:124"
+
+- id: AW-51
+  title: "Error behaviour"
+  source: "docs/research/y-protocols.md:125"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:125"
+
+- id: AW-52
+  title: "A repeated identical (id, clock) update is idempotent (equal clock non-null is ignored)"
+  source: "docs/research/y-protocols.md:126"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:126"

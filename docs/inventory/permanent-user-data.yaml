@@ -1,0 +1,95 @@
+# PermanentUserData (docs/research/doc-features.md)
+# Behaviour registry (ADR 0010). IDs are assigned once and never reused or renumbered; a withdrawn entry stays as status: retired.
+# Initial population (TASK-2.3): every entry starts pending with an owning spec (ADR 0019). Fields are best-effort; the owning spec refines them.
+
+- id: PUD-01
+  title: "Storage layout"
+  source: "yjs/src/utils/PermanentUserData.js:19"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 8
+  status: pending
+  ref: "doc-features.md:114"
+
+- id: PUD-02
+  title: "Construction"
+  source: "docs/research/doc-features.md:115"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:115"
+
+- id: PUD-03
+  title: "setUserMapping(doc, clientid, description, {filter})"
+  source: "docs/research/doc-features.md:116"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 8
+  status: pending
+  ref: "doc-features.md:116"
+
+- id: PUD-04
+  title: "Overwritten user entries"
+  source: "docs/research/doc-features.md:117"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:117"
+
+- id: PUD-05
+  title: "Each setUserMapping call adds new listeners that are never removed"
+  source: "docs/research/doc-features.md:118"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:118"
+  note: "Candidate divergence in the research note; decide under ADR 0003."
+
+- id: PUD-06
+  title: "Lookups"
+  source: "docs/research/doc-features.md:119"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:119"
+
+- id: PUD-07
+  title: "Key deletion edge"
+  source: "docs/research/doc-features.md:120"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  adr: ["0003"]
+  owner: 8
+  status: pending
+  ref: "doc-features.md:120"
+
+- id: PUD-08
+  title: "Remote delete sets"
+  source: "docs/research/doc-features.md:121"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:121"
+
+- id: PUD-09
+  title: "Clientid reuse"
+  source: "docs/research/doc-features.md:122"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:122"

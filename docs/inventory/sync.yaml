@@ -1,0 +1,203 @@
+# Sync protocol (docs/research/y-protocols.md)
+# Behaviour registry (ADR 0010). IDs are assigned once and never reused or renumbered; a withdrawn entry stays as status: retired.
+# Initial population (TASK-2.3): every entry starts pending with an owning spec (ADR 0019). Fields are best-effort; the owning spec refines them.
+
+- id: SY-1
+  title: "messageYjsSyncStep1 = 0, messageYjsSyncStep2 = 1, messageYjsUpdate = 2"
+  source: "y-protocols/sync.js:38"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:149"
+
+- id: SY-2
+  title: "All payloads are Yjs v1 encoding (Y.encodeStateVector, Y.encodeStateAsUpdate, Y.applyUpdate)"
+  source: "docs/research/y-protocols.md:150"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:150"
+
+- id: SY-3
+  title: "writeSyncStep1(encoder, doc) writes [0, len, ...Y.encodeStateVector(doc)]"
+  source: "y-protocols/sync.js:48"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:154"
+
+- id: SY-4
+  title: "writeSyncStep2(encoder, doc, encodedStateVector?) writes [1, len, ...Y.encodeStateAsUpdate(doc, sv)]"
+  source: "y-protocols/sync.js:59"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:155"
+
+- id: SY-5
+  title: "writeUpdate(encoder, update) writes [2, len, ...update] and does not validate the update bytes"
+  source: "y-protocols/sync.js:96"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:156"
+
+- id: SY-6
+  title: "Writers append to the encoder and may be combined into one encoder (for example envelope type first, then..."
+  source: "docs/research/y-protocols.md:157"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:157"
+
+- id: SY-7
+  title: "readSyncStep1(decoder, encoder, doc) reads the remote state vector and appends a SyncStep2 containing..."
+  source: "y-protocols/sync.js:71"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:161"
+
+- id: SY-8
+  title: "readSyncStep2(decoder, doc, transactionOrigin, errorHandler?) reads a varUint8Array and Y.applyUpdate(doc..."
+  source: "y-protocols/sync.js:82"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:162"
+
+- id: SY-9
+  title: "readUpdate is the same function object as readSyncStep2, so SyncStep2 and Update are behaviourally identical..."
+  source: "y-protocols/sync.js:109"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:163"
+
+- id: SY-10
+  title: "transactionOrigin is passed to applyUpdate and so is visible to update/afterTransaction observers and to..."
+  source: "yjs/tests/testHelper.js:88"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:164"
+
+- id: SY-11
+  title: "readSyncMessage(decoder, encoder, doc, transactionOrigin, errorHandler?) reads varUint type and dispatches to..."
+  source: "y-protocols/sync.js:118"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:165"
+
+- id: SY-12
+  title: "Whether a reply was produced is detected by callers via encoding.length(encoder) > 0 (testHelper.js:196)"
+  source: "docs/research/y-protocols.md:166"
+  kind: match
+  layers: [unit, fixture, port, differential]
+  wire: true
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:166"
+
+- id: SY-13
+  title: "Peer to peer"
+  source: "docs/research/y-protocols.md:170"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:170"
+
+- id: SY-14
+  title: "Convergence property"
+  source: "docs/research/y-protocols.md:171"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:171"
+
+- id: SY-15
+  title: "The yjs tests drive this protocol for every multi-client test via TestConnector..."
+  source: "yjs/tests/testHelper.js:5"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:172"
+
+- id: SY-16
+  title: "Step1 with state vector [0] (empty) yields the full document"
+  source: "docs/research/y-protocols.md:176"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:176"
+
+- id: SY-17
+  title: "Step2 or Update on a doc with missing dependencies leaves structs pending (Yjs pendingStructs) and does not..."
+  source: "docs/research/y-protocols.md:177"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:177"
+
+- id: SY-18
+  title: "Applying the same Step2/Update twice is idempotent"
+  source: "docs/research/y-protocols.md:178"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:178"
+
+- id: SY-19
+  title: "Corrupt update bytes go to the error handler and console.error, not to the caller"
+  source: "docs/research/y-protocols.md:179"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:179"
+
+- id: SY-20
+  title: "A message with a valid type but missing payload bytes"
+  source: "docs/research/y-protocols.md:180"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:180"

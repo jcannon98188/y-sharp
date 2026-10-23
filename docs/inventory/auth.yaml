@@ -1,0 +1,73 @@
+# Auth protocol (docs/research/y-protocols.md)
+# Behaviour registry (ADR 0010). IDs are assigned once and never reused or renumbered; a withdrawn entry stays as status: retired.
+# Initial population (TASK-2.3): every entry starts pending with an owning spec (ADR 0019). Fields are best-effort; the owning spec refines them.
+
+- id: AU-1
+  title: "One message type"
+  source: "y-protocols/auth.js:6"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:186"
+
+- id: AU-2
+  title: "writePermissionDenied(encoder, reason) writes varUint(0) · varString(reason) (UTF-8, length-prefixed)"
+  source: "y-protocols/auth.js:12"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:187"
+
+- id: AU-3
+  title: "readAuthMessage(decoder, y, handler) reads the type"
+  source: "y-protocols/auth.js:29"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:188"
+
+- id: AU-4
+  title: "Quirk: unknown message types are silently ignored (a switch with no default). Nothing further is consumed, so..."
+  source: "docs/research/y-protocols.md:189"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:189"
+
+- id: AU-5
+  title: "A null/undefined handler throws a TypeError when type 0 is read"
+  source: "docs/research/y-protocols.md:190"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:190"
+
+- id: AU-6
+  title: "y is only passed through to the handler and is never used"
+  source: "docs/research/y-protocols.md:191"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:191"
+
+- id: AU-7
+  title: "No tests exist for this module (test.js registers only awareness)"
+  source: "docs/research/y-protocols.md:192"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 9
+  status: pending
+  ref: "y-protocols.md:192"

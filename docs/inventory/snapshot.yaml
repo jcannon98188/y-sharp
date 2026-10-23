@@ -1,0 +1,114 @@
+# Snapshots (docs/research/doc-features.md)
+# Behaviour registry (ADR 0010). IDs are assigned once and never reused or renumbered; a withdrawn entry stays as status: retired.
+# Initial population (TASK-2.3): every entry starts pending with an owning spec (ADR 0019). Fields are best-effort; the owning spec refines them.
+
+- id: SNAP-01
+  title: "Shape"
+  source: "yjs/src/utils/Snapshot.js:28"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:74"
+
+- id: SNAP-02
+  title: "Wire format"
+  source: "yjs/src/utils/Snapshot.js:85"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 8
+  status: pending
+  ref: "doc-features.md:75"
+
+- id: SNAP-03
+  title: "equalSnapshots"
+  source: "yjs/src/utils/Snapshot.js:51"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:76"
+
+- id: SNAP-04
+  title: "emptySnapshot"
+  source: "yjs/src/utils/Snapshot.js:119"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:77"
+  note: "Candidate divergence in the research note; decide under ADR 0003."
+
+- id: SNAP-05
+  title: "isVisible(item, snapshot)"
+  source: "yjs/src/utils/Snapshot.js:134"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:78"
+
+- id: SNAP-06
+  title: "splitSnapshotAffectedStructs"
+  source: "yjs/src/utils/Snapshot.js:142"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:79"
+
+- id: SNAP-07
+  title: "toDelta(snapshot, prevSnapshot, computeYChange)"
+  source: "yjs/src/types/YText.js:1044"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:80"
+
+- id: SNAP-08
+  title: "createDocFromSnapshot(origin, snap, newDoc=new Doc())"
+  source: "yjs/src/utils/Snapshot.js:172"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:81"
+
+- id: SNAP-09
+  title: "Side effect"
+  source: "docs/research/doc-features.md:82"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:82"
+
+- id: SNAP-10
+  title: "snapshotContainsUpdate(V2)"
+  source: "yjs/src/utils/Snapshot.js:218"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:83"
+
+- id: SNAP-11
+  title: "GC interplay"
+  source: "yjs/src/structs/Item.js:642"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:84"

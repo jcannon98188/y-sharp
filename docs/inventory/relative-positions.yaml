@@ -1,0 +1,94 @@
+# Relative positions (docs/research/doc-features.md)
+# Behaviour registry (ADR 0010). IDs are assigned once and never reused or renumbered; a withdrawn entry stays as status: retired.
+# Initial population (TASK-2.3): every entry starts pending with an owning spec (ADR 0019). Fields are best-effort; the owning spec refines them.
+
+- id: RP-01
+  title: "Shape"
+  source: "yjs/src/utils/RelativePosition.js:43"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:88"
+
+- id: RP-02
+  title: "Creation from index"
+  source: "yjs/src/utils/RelativePosition.js:163"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:89"
+
+- id: RP-03
+  title: "Type anchoring"
+  source: "yjs/src/utils/ID.js:81"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:94"
+
+- id: RP-04
+  title: "Binary encoding"
+  source: "yjs/src/utils/RelativePosition.js:195"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 8
+  status: pending
+  ref: "doc-features.md:95"
+
+- id: RP-05
+  title: "JSON"
+  source: "yjs/src/utils/RelativePosition.js:82"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 8
+  status: pending
+  ref: "doc-features.md:96"
+  note: "Candidate divergence in the research note; decide under ADR 0003."
+
+- id: RP-06
+  title: "Resolution"
+  source: "yjs/src/utils/RelativePosition.js:289"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:97"
+
+- id: RP-07
+  title: "compareRelativePositions(a,b)"
+  source: "yjs/src/utils/RelativePosition.js:351"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:106"
+
+- id: RP-08
+  title: "Cross-client determinism"
+  source: "yjs/src/utils/RelativePosition.js:271"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:107"
+
+- id: RP-09
+  title: "Concurrent edits"
+  source: "docs/research/doc-features.md:108"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:108"

@@ -1,0 +1,94 @@
+# Hostile input classes (ADR 0013)
+# Behaviour registry (ADR 0010). IDs are assigned once and never reused or renumbered; a withdrawn entry stays as status: retired.
+# Initial population (TASK-2.3): every entry starts pending with an owning spec (ADR 0019). Fields are best-effort; the owning spec refines them.
+
+- id: HOS-TRUNC
+  title: "truncation at every byte offset of every valid fixture (updates V1/V2, state vectors, sync and awareness..."
+  source: "docs/adr/0013-hostile-input-and-fuzz-strategy.md:6"
+  kind: y-sharp-own
+  layers: [unit, fuzz]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0013:6"
+
+- id: HOS-MUT
+  title: "bit flips, byte overwrites, insertions, deletions and splices of valid bytes"
+  source: "docs/adr/0013-hostile-input-and-fuzz-strategy.md:7"
+  kind: y-sharp-own
+  layers: [unit, fuzz]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0013:7"
+
+- id: HOS-LEN
+  title: "oversized counts and lengths (clients, structs, strings, arrays, buffers, V2 columns), up to 2^53 and the..."
+  source: "docs/adr/0013-hostile-input-and-fuzz-strategy.md:8"
+  kind: y-sharp-own
+  layers: [unit, fuzz]
+  wire: false
+  adr: ["0009"]
+  owner: 11
+  status: pending
+  ref: "adr 0013:8"
+
+- id: HOS-DEEP
+  title: "Any values 100k deep, and documents with 1M nested types"
+  source: "docs/adr/0013-hostile-input-and-fuzz-strategy.md:9"
+  kind: y-sharp-own
+  layers: [unit, fuzz]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0013:9"
+
+- id: HOS-CLOCK
+  title: "gaps, a first clock above 0, overlaps, duplicate clients (last wins), clocks near 2^31 and 2^53, clock+length..."
+  source: "docs/adr/0013-hostile-input-and-fuzz-strategy.md:10"
+  kind: y-sharp-own
+  layers: [unit, fuzz]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0013:10"
+
+- id: HOS-REF
+  title: "missing, self-referencing, cyclic (A to B to A across clients), GC/Skip-targeting or non-type parents"
+  source: "docs/adr/0013-hostile-input-and-fuzz-strategy.md:11"
+  kind: y-sharp-own
+  layers: [unit, fuzz]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0013:11"
+
+- id: HOS-SEM
+  title: "well-formed but meaningless input"
+  source: "docs/adr/0013-hostile-input-and-fuzz-strategy.md:12"
+  kind: y-sharp-own
+  layers: [unit, fuzz]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0013:12"
+
+- id: HOS-AMP
+  title: "amplification"
+  source: "docs/adr/0013-hostile-input-and-fuzz-strategy.md:13"
+  kind: y-sharp-own
+  layers: [unit, fuzz]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0013:13"
+
+- id: HOS-PROTO
+  title: "unknown sync/awareness message types, length overruns, concatenated frames, non-JSON awareness state, clock..."
+  source: "docs/adr/0013-hostile-input-and-fuzz-strategy.md:14"
+  kind: y-sharp-own
+  layers: [unit, fuzz]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0013:14"

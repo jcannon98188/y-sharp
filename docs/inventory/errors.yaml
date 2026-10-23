@@ -1,0 +1,213 @@
+# Error model and crash safety (ADR 0005; ERR-nn frozen in the ADR's bullet order)
+# Behaviour registry (ADR 0010). IDs are assigned once and never reused or renumbered; a withdrawn entry stays as status: retired.
+# Initial population (TASK-2.3): every entry starts pending with an owning spec (ADR 0019). Fields are best-effort; the owning spec refines them.
+
+- id: ERR-01
+  title: "Two entry points: TryApplyUpdate returns an ApplyResult; the throwing ApplyUpdate wraps it in YDecodeException"
+  source: "docs/adr/0005-error-model-and-crash-safety.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0005 / Two entry points"
+
+- id: ERR-02
+  title: "JS error classes and messages are collapsed into error codes and never compared"
+  source: "docs/adr/0005-error-model-and-crash-safety.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0005 / Two entry points"
+
+- id: ERR-03
+  title: "Strict decoding: EOF is always a decode error (JS yields 0 for a varint at EOF and for exhausted V2 columns)"
+  source: "docs/adr/0005-error-model-and-crash-safety.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0005 / Strict decoding"
+
+- id: ERR-04
+  title: "Trailing bytes, duplicate clients (last wins) and unsorted input stay accepted"
+  source: "docs/adr/0005-error-model-and-crash-safety.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0005 / Strict decoding"
+
+- id: ERR-05
+  title: "Atomic decode: the whole update (structs and delete set) is validated before anything integrates; a decode failure changes nothing"
+  source: "docs/adr/0005-error-model-and-crash-safety.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0005 / Atomic decode"
+
+- id: ERR-06
+  title: "Pending structs are retained state, not failure"
+  source: "docs/adr/0005-error-model-and-crash-safety.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0005 / Atomic decode"
+
+- id: ERR-07
+  title: "A well-formed struct that cannot be integrated is rejected with its dependents, never retried, and the rest applies"
+  source: "docs/adr/0005-error-model-and-crash-safety.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0005 / Quarantined integration"
+
+- id: ERR-08
+  title: "YLimits options object with safe defaults (MaxUpdateBytes, MaxAnyDepth, MaxStructsPerUpdate, MaxPendingBytes, MaxStringBytes)"
+  source: "docs/adr/0005-error-model-and-crash-safety.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0005 / Limits"
+
+- id: ERR-09
+  title: "No allocation is sized from a length claim until it is checked against the bytes remaining"
+  source: "docs/adr/0005-error-model-and-crash-safety.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0005 / Limits"
+
+- id: ERR-10
+  title: "At MaxPendingBytes a new update is rejected and the existing pending state is kept"
+  source: "docs/adr/0005-error-model-and-crash-safety.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0005 / Limits"
+
+- id: ERR-11
+  title: "Every internal traversal is iterative; document nesting has no cap"
+  source: "docs/adr/0005-error-model-and-crash-safety.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0005 / No recursion on document depth"
+
+- id: ERR-12
+  title: "Only decoded Any depth is capped (MaxAnyDepth)"
+  source: "docs/adr/0005-error-model-and-crash-safety.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0005 / No recursion on document depth"
+
+- id: ERR-13
+  title: "Observer faults are contained: all handlers run, cleanup completes, data is committed and update is emitted"
+  source: "docs/adr/0005-error-model-and-crash-safety.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0005 / Observer faults"
+
+- id: ERR-14
+  title: "Observer exceptions never unwind through ApplyUpdate, Transact or local mutations; they are reported through ObserverFaulted and the result"
+  source: "docs/adr/0005-error-model-and-crash-safety.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0005 / Observer faults"
+
+- id: ERR-15
+  title: "Exceptions from the caller's own Transact body propagate"
+  source: "docs/adr/0005-error-model-and-crash-safety.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0005 / Observer faults"
+
+- id: ERR-16
+  title: "Programmer errors use an exception family separate from YDecodeException"
+  source: "docs/adr/0005-error-model-and-crash-safety.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0005 / Local API"
+
+- id: ERR-17
+  title: "JS-defined local behaviour is replicated (array overflow throws, text clamps)"
+  source: "docs/adr/0005-error-model-and-crash-safety.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0005 / Local API"
+
+- id: ERR-18
+  title: "Undefined local cases such as negative indexes throw ArgumentOutOfRangeException and are excluded from the differential"
+  source: "docs/adr/0005-error-model-and-crash-safety.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0005 / Local API"
+
+- id: ERR-19
+  title: "OutOfMemoryException and similar environment faults are never caught"
+  source: "docs/adr/0005-error-model-and-crash-safety.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0005 / Environment and internal faults"
+
+- id: ERR-20
+  title: "A violated internal invariant throws YInternalException and marks the document faulted: readable, but rejecting further mutation and apply"
+  source: "docs/adr/0005-error-model-and-crash-safety.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0005 / Environment and internal faults"
+
+- id: ERR-21
+  title: "No input ever faults a document (asserted by the fuzz suite)"
+  source: "docs/adr/0005-error-model-and-crash-safety.md:1"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 11
+  status: pending
+  ref: "adr 0005 / Environment and internal faults"

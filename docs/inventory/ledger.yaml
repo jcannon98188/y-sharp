@@ -1,0 +1,1685 @@
+# JS-test ledger (ADR 0010, 0019): one row per catalogued upstream test.
+# outcome: pending | ported | merged-into | replaced-by-fixture | skipped (skipped needs reason; merged-into needs target).
+# Owner follows the upstream file, except every randomized test (testRepeat*, testInsertAndDeleteAtRandomPositions) is spec 10 (ADR 0019).
+# Reconciliation: yjs/tests/*.js has 209 test exports (11 modules) plus 1 in y-protocols/awareness.test.js = 210 rows; ADR 0010's 209 counts the yjs suite only.
+
+- key: doc.tests.js:testAfterTransactionRecursion
+  file: yjs/tests/doc.tests.js
+  line: 7
+  module: doc
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: doc.tests.js:testOriginInTransaction
+  file: yjs/tests/doc.tests.js
+  line: 25
+  module: doc
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: doc.tests.js:testClientIdDuplicateChange
+  file: yjs/tests/doc.tests.js
+  line: 52
+  module: doc
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: doc.tests.js:testGetTypeEmptyId
+  file: yjs/tests/doc.tests.js
+  line: 66
+  module: doc
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: doc.tests.js:testToJSON
+  file: yjs/tests/doc.tests.js
+  line: 79
+  module: doc
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: doc.tests.js:testSubdoc
+  file: yjs/tests/doc.tests.js
+  line: 106
+  module: doc
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: doc.tests.js:testSubdocLoadEdgeCases
+  file: yjs/tests/doc.tests.js
+  line: 173
+  module: doc
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: doc.tests.js:testSubdocLoadEdgeCasesAutoload
+  file: yjs/tests/doc.tests.js
+  line: 220
+  module: doc
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: doc.tests.js:testSubdocsUndo
+  file: yjs/tests/doc.tests.js
+  line: 262
+  module: doc
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: doc.tests.js:testLoadDocsEvent
+  file: yjs/tests/doc.tests.js
+  line: 277
+  module: doc
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: doc.tests.js:testSyncDocsEvent
+  file: yjs/tests/doc.tests.js
+  line: 293
+  module: doc
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: y-map.tests.js:testIterators
+  file: yjs/tests/y-map.tests.js
+  line: 14
+  module: y-map
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-map.tests.js:testMapEventError
+  file: yjs/tests/y-map.tests.js
+  line: 41
+  module: y-map
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-map.tests.js:testMapHavingIterableAsConstructorParamTests
+  file: yjs/tests/y-map.tests.js
+  line: 62
+  module: y-map
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-map.tests.js:testBasicMapTests
+  file: yjs/tests/y-map.tests.js
+  line: 89
+  module: y-map
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-map.tests.js:testGetAndSetOfMapProperty
+  file: yjs/tests/y-map.tests.js
+  line: 141
+  module: y-map
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-map.tests.js:testYmapSetsYmap
+  file: yjs/tests/y-map.tests.js
+  line: 162
+  module: y-map
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-map.tests.js:testYmapSetsYarray
+  file: yjs/tests/y-map.tests.js
+  line: 174
+  module: y-map
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-map.tests.js:testGetAndSetOfMapPropertySyncs
+  file: yjs/tests/y-map.tests.js
+  line: 187
+  module: y-map
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-map.tests.js:testGetAndSetOfMapPropertyWithConflict
+  file: yjs/tests/y-map.tests.js
+  line: 202
+  module: y-map
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-map.tests.js:testSizeAndDeleteOfMapProperty
+  file: yjs/tests/y-map.tests.js
+  line: 217
+  module: y-map
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-map.tests.js:testGetAndSetAndDeleteOfMapProperty
+  file: yjs/tests/y-map.tests.js
+  line: 231
+  module: y-map
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-map.tests.js:testSetAndClearOfMapProperties
+  file: yjs/tests/y-map.tests.js
+  line: 247
+  module: y-map
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-map.tests.js:testSetAndClearOfMapPropertiesWithConflicts
+  file: yjs/tests/y-map.tests.js
+  line: 265
+  module: y-map
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-map.tests.js:testGetAndSetOfMapPropertyWithThreeConflicts
+  file: yjs/tests/y-map.tests.js
+  line: 290
+  module: y-map
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-map.tests.js:testGetAndSetAndDeleteOfMapPropertyWithThreeConflicts
+  file: yjs/tests/y-map.tests.js
+  line: 307
+  module: y-map
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-map.tests.js:testObserveDeepProperties
+  file: yjs/tests/y-map.tests.js
+  line: 330
+  module: y-map
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-map.tests.js:testObserversUsingObservedeep
+  file: yjs/tests/y-map.tests.js
+  line: 367
+  module: y-map
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-map.tests.js:testPathsOfSiblingEvents
+  file: yjs/tests/y-map.tests.js
+  line: 391
+  module: y-map
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-map.tests.js:testDeepEventPathsWithMultipleDeepObservers
+  file: yjs/tests/y-map.tests.js
+  line: 423
+  module: y-map
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-map.tests.js:testThrowsAddAndUpdateAndDeleteEvents
+  file: yjs/tests/y-map.tests.js
+  line: 492
+  module: y-map
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-map.tests.js:testThrowsDeleteEventsOnClear
+  file: yjs/tests/y-map.tests.js
+  line: 526
+  module: y-map
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-map.tests.js:testChangeEvent
+  file: yjs/tests/y-map.tests.js
+  line: 550
+  module: y-map
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-map.tests.js:testYmapEventExceptionsShouldCompleteTransaction
+  file: yjs/tests/y-map.tests.js
+  line: 598
+  module: y-map
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-map.tests.js:testYmapEventHasCorrectValueWhenSettingAPrimitive
+  file: yjs/tests/y-map.tests.js
+  line: 648
+  module: y-map
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-map.tests.js:testYmapEventHasCorrectValueWhenSettingAPrimitiveFromOtherUser
+  file: yjs/tests/y-map.tests.js
+  line: 665
+  module: y-map
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-map.tests.js:testRepeatGeneratingYmapTests10
+  file: yjs/tests/y-map.tests.js
+  line: 708
+  module: y-map
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-map.tests.js:testRepeatGeneratingYmapTests40
+  file: yjs/tests/y-map.tests.js
+  line: 715
+  module: y-map
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-map.tests.js:testRepeatGeneratingYmapTests42
+  file: yjs/tests/y-map.tests.js
+  line: 722
+  module: y-map
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-map.tests.js:testRepeatGeneratingYmapTests43
+  file: yjs/tests/y-map.tests.js
+  line: 729
+  module: y-map
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-map.tests.js:testRepeatGeneratingYmapTests44
+  file: yjs/tests/y-map.tests.js
+  line: 736
+  module: y-map
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-map.tests.js:testRepeatGeneratingYmapTests45
+  file: yjs/tests/y-map.tests.js
+  line: 743
+  module: y-map
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-map.tests.js:testRepeatGeneratingYmapTests46
+  file: yjs/tests/y-map.tests.js
+  line: 750
+  module: y-map
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-map.tests.js:testRepeatGeneratingYmapTests300
+  file: yjs/tests/y-map.tests.js
+  line: 757
+  module: y-map
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-map.tests.js:testRepeatGeneratingYmapTests400
+  file: yjs/tests/y-map.tests.js
+  line: 764
+  module: y-map
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-map.tests.js:testRepeatGeneratingYmapTests500
+  file: yjs/tests/y-map.tests.js
+  line: 771
+  module: y-map
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-map.tests.js:testRepeatGeneratingYmapTests600
+  file: yjs/tests/y-map.tests.js
+  line: 778
+  module: y-map
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-map.tests.js:testRepeatGeneratingYmapTests1000
+  file: yjs/tests/y-map.tests.js
+  line: 785
+  module: y-map
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-map.tests.js:testRepeatGeneratingYmapTests1800
+  file: yjs/tests/y-map.tests.js
+  line: 792
+  module: y-map
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-map.tests.js:testRepeatGeneratingYmapTests5000
+  file: yjs/tests/y-map.tests.js
+  line: 799
+  module: y-map
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-map.tests.js:testRepeatGeneratingYmapTests10000
+  file: yjs/tests/y-map.tests.js
+  line: 807
+  module: y-map
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-map.tests.js:testRepeatGeneratingYmapTests100000
+  file: yjs/tests/y-map.tests.js
+  line: 815
+  module: y-map
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-array.tests.js:testBasicUpdate
+  file: yjs/tests/y-array.tests.js
+  line: 14
+  module: y-array
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-array.tests.js:testFailsObjectManipulationInDevMode
+  file: yjs/tests/y-array.tests.js
+  line: 26
+  module: y-array
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-array.tests.js:testSlice
+  file: yjs/tests/y-array.tests.js
+  line: 48
+  module: y-array
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-array.tests.js:testArrayFrom
+  file: yjs/tests/y-array.tests.js
+  line: 63
+  module: y-array
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-array.tests.js:testLengthIssue
+  file: yjs/tests/y-array.tests.js
+  line: 76
+  module: y-array
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-array.tests.js:testLengthIssue2
+  file: yjs/tests/y-array.tests.js
+  line: 105
+  module: y-array
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-array.tests.js:testDeleteInsert
+  file: yjs/tests/y-array.tests.js
+  line: 146
+  module: y-array
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-array.tests.js:testInsertThreeElementsTryRegetProperty
+  file: yjs/tests/y-array.tests.js
+  line: 162
+  module: y-array
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-array.tests.js:testConcurrentInsertWithThreeConflicts
+  file: yjs/tests/y-array.tests.js
+  line: 174
+  module: y-array
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-array.tests.js:testConcurrentInsertDeleteWithThreeConflicts
+  file: yjs/tests/y-array.tests.js
+  line: 185
+  module: y-array
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-array.tests.js:testInsertionsInLateSync
+  file: yjs/tests/y-array.tests.js
+  line: 199
+  module: y-array
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-array.tests.js:testDisconnectReallyPreventsSendingMessages
+  file: yjs/tests/y-array.tests.js
+  line: 217
+  module: y-array
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-array.tests.js:testDeletionsInLateSync
+  file: yjs/tests/y-array.tests.js
+  line: 235
+  module: y-array
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-array.tests.js:testInsertThenMergeDeleteOnSync
+  file: yjs/tests/y-array.tests.js
+  line: 249
+  module: y-array
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-array.tests.js:testInsertAndDeleteEvents
+  file: yjs/tests/y-array.tests.js
+  line: 262
+  module: y-array
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-array.tests.js:testNestedObserverEvents
+  file: yjs/tests/y-array.tests.js
+  line: 286
+  module: y-array
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-array.tests.js:testInsertAndDeleteEventsForTypes
+  file: yjs/tests/y-array.tests.js
+  line: 312
+  module: y-array
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-array.tests.js:testObserveDeepEventOrder
+  file: yjs/tests/y-array.tests.js
+  line: 339
+  module: y-array
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-array.tests.js:testObservedeepIndexes
+  file: yjs/tests/y-array.tests.js
+  line: 363
+  module: y-array
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-array.tests.js:testChangeEvent
+  file: yjs/tests/y-array.tests.js
+  line: 384
+  module: y-array
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-array.tests.js:testInsertAndDeleteEventsForTypes2
+  file: yjs/tests/y-array.tests.js
+  line: 411
+  module: y-array
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-array.tests.js:testNewChildDoesNotEmitEventInTransaction
+  file: yjs/tests/y-array.tests.js
+  line: 431
+  module: y-array
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-array.tests.js:testGarbageCollector
+  file: yjs/tests/y-array.tests.js
+  line: 448
+  module: y-array
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-array.tests.js:testEventTargetIsSetCorrectlyOnLocal
+  file: yjs/tests/y-array.tests.js
+  line: 462
+  module: y-array
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-array.tests.js:testEventTargetIsSetCorrectlyOnRemote
+  file: yjs/tests/y-array.tests.js
+  line: 479
+  module: y-array
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-array.tests.js:testIteratingArrayContainingTypes
+  file: yjs/tests/y-array.tests.js
+  line: 497
+  module: y-array
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-array.tests.js:testRepeatGeneratingYarrayTests6
+  file: yjs/tests/y-array.tests.js
+  line: 581
+  module: y-array
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-array.tests.js:testRepeatGeneratingYarrayTests40
+  file: yjs/tests/y-array.tests.js
+  line: 588
+  module: y-array
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-array.tests.js:testRepeatGeneratingYarrayTests42
+  file: yjs/tests/y-array.tests.js
+  line: 595
+  module: y-array
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-array.tests.js:testRepeatGeneratingYarrayTests43
+  file: yjs/tests/y-array.tests.js
+  line: 602
+  module: y-array
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-array.tests.js:testRepeatGeneratingYarrayTests44
+  file: yjs/tests/y-array.tests.js
+  line: 609
+  module: y-array
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-array.tests.js:testRepeatGeneratingYarrayTests45
+  file: yjs/tests/y-array.tests.js
+  line: 616
+  module: y-array
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-array.tests.js:testRepeatGeneratingYarrayTests46
+  file: yjs/tests/y-array.tests.js
+  line: 623
+  module: y-array
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-array.tests.js:testRepeatGeneratingYarrayTests300
+  file: yjs/tests/y-array.tests.js
+  line: 630
+  module: y-array
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-array.tests.js:testRepeatGeneratingYarrayTests400
+  file: yjs/tests/y-array.tests.js
+  line: 637
+  module: y-array
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-array.tests.js:testRepeatGeneratingYarrayTests500
+  file: yjs/tests/y-array.tests.js
+  line: 644
+  module: y-array
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-array.tests.js:testRepeatGeneratingYarrayTests600
+  file: yjs/tests/y-array.tests.js
+  line: 651
+  module: y-array
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-array.tests.js:testRepeatGeneratingYarrayTests1000
+  file: yjs/tests/y-array.tests.js
+  line: 658
+  module: y-array
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-array.tests.js:testRepeatGeneratingYarrayTests1800
+  file: yjs/tests/y-array.tests.js
+  line: 665
+  module: y-array
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-array.tests.js:testRepeatGeneratingYarrayTests3000
+  file: yjs/tests/y-array.tests.js
+  line: 672
+  module: y-array
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-array.tests.js:testRepeatGeneratingYarrayTests5000
+  file: yjs/tests/y-array.tests.js
+  line: 680
+  module: y-array
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-array.tests.js:testRepeatGeneratingYarrayTests30000
+  file: yjs/tests/y-array.tests.js
+  line: 688
+  module: y-array
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-text.tests.js:testDeltaBug
+  file: yjs/tests/y-text.tests.js
+  line: 13
+  module: y-text
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-text.tests.js:testDeltaBug2
+  file: yjs/tests/y-text.tests.js
+  line: 419
+  module: y-text
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-text.tests.js:testDeltaAfterConcurrentFormatting
+  file: yjs/tests/y-text.tests.js
+  line: 1657
+  module: y-text
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-text.tests.js:testBasicInsertAndDelete
+  file: yjs/tests/y-text.tests.js
+  line: 1679
+  module: y-text
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-text.tests.js:testBasicFormat
+  file: yjs/tests/y-text.tests.js
+  line: 1714
+  module: y-text
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-text.tests.js:testFalsyFormats
+  file: yjs/tests/y-text.tests.js
+  line: 1752
+  module: y-text
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-text.tests.js:testMultilineFormat
+  file: yjs/tests/y-text.tests.js
+  line: 1773
+  module: y-text
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-text.tests.js:testNotMergeEmptyLinesFormat
+  file: yjs/tests/y-text.tests.js
+  line: 1796
+  module: y-text
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-text.tests.js:testPreserveAttributesThroughDelete
+  file: yjs/tests/y-text.tests.js
+  line: 1816
+  module: y-text
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-text.tests.js:testGetDeltaWithEmbeds
+  file: yjs/tests/y-text.tests.js
+  line: 1838
+  module: y-text
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-text.tests.js:testTypesAsEmbed
+  file: yjs/tests/y-text.tests.js
+  line: 1851
+  module: y-text
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-text.tests.js:testSnapshot
+  file: yjs/tests/y-text.tests.js
+  line: 1874
+  module: y-text
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-text.tests.js:testSnapshotDeleteAfter
+  file: yjs/tests/y-text.tests.js
+  line: 1916
+  module: y-text
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-text.tests.js:testToJson
+  file: yjs/tests/y-text.tests.js
+  line: 1936
+  module: y-text
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-text.tests.js:testToDeltaEmbedAttributes
+  file: yjs/tests/y-text.tests.js
+  line: 1945
+  module: y-text
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-text.tests.js:testToDeltaEmbedNoAttributes
+  file: yjs/tests/y-text.tests.js
+  line: 1956
+  module: y-text
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-text.tests.js:testFormattingRemoved
+  file: yjs/tests/y-text.tests.js
+  line: 1967
+  module: y-text
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-text.tests.js:testFormattingRemovedInMidText
+  file: yjs/tests/y-text.tests.js
+  line: 1977
+  module: y-text
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-text.tests.js:testFormattingDeltaUnnecessaryAttributeChange
+  file: yjs/tests/y-text.tests.js
+  line: 1990
+  module: y-text
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-text.tests.js:testInsertAndDeleteAtRandomPositions
+  file: yjs/tests/y-text.tests.js
+  line: 2023
+  module: y-text
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-text.tests.js:testAppendChars
+  file: yjs/tests/y-text.tests.js
+  line: 2053
+  module: y-text
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-text.tests.js:testBestCase
+  file: yjs/tests/y-text.tests.js
+  line: 2072
+  module: y-text
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-text.tests.js:testLargeFragmentedDocument
+  file: yjs/tests/y-text.tests.js
+  line: 2111
+  module: y-text
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-text.tests.js:testIncrementalUpdatesPerformanceOnLargeFragmentedDocument
+  file: yjs/tests/y-text.tests.js
+  line: 2143
+  module: y-text
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-text.tests.js:testSplitSurrogateCharacter
+  file: yjs/tests/y-text.tests.js
+  line: 2183
+  module: y-text
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-text.tests.js:testSearchMarkerBug1
+  file: yjs/tests/y-text.tests.js
+  line: 2215
+  module: y-text
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-text.tests.js:testFormattingBug
+  file: yjs/tests/y-text.tests.js
+  line: 2253
+  module: y-text
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-text.tests.js:testDeleteFormatting
+  file: yjs/tests/y-text.tests.js
+  line: 2278
+  module: y-text
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-text.tests.js:testRepeatGenerateTextChanges5
+  file: yjs/tests/y-text.tests.js
+  line: 2342
+  module: y-text
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-text.tests.js:testRepeatGenerateTextChanges30
+  file: yjs/tests/y-text.tests.js
+  line: 2351
+  module: y-text
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-text.tests.js:testRepeatGenerateTextChanges40
+  file: yjs/tests/y-text.tests.js
+  line: 2360
+  module: y-text
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-text.tests.js:testRepeatGenerateTextChanges50
+  file: yjs/tests/y-text.tests.js
+  line: 2369
+  module: y-text
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-text.tests.js:testRepeatGenerateTextChanges70
+  file: yjs/tests/y-text.tests.js
+  line: 2378
+  module: y-text
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-text.tests.js:testRepeatGenerateTextChanges90
+  file: yjs/tests/y-text.tests.js
+  line: 2387
+  module: y-text
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-text.tests.js:testRepeatGenerateTextChanges300
+  file: yjs/tests/y-text.tests.js
+  line: 2396
+  module: y-text
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-text.tests.js:testRepeatGenerateQuillChanges1
+  file: yjs/tests/y-text.tests.js
+  line: 2540
+  module: y-text
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-text.tests.js:testRepeatGenerateQuillChanges2
+  file: yjs/tests/y-text.tests.js
+  line: 2549
+  module: y-text
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-text.tests.js:testRepeatGenerateQuillChanges2Repeat
+  file: yjs/tests/y-text.tests.js
+  line: 2558
+  module: y-text
+  randomized: true
+  owner: 10
+  outcome: pending
+  note: "ADR 0017 plans outcome merged-into testRepeatGenerateQuillChanges2"
+
+- key: y-text.tests.js:testRepeatGenerateQuillChanges3
+  file: yjs/tests/y-text.tests.js
+  line: 2569
+  module: y-text
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-text.tests.js:testRepeatGenerateQuillChanges30
+  file: yjs/tests/y-text.tests.js
+  line: 2576
+  module: y-text
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-text.tests.js:testRepeatGenerateQuillChanges40
+  file: yjs/tests/y-text.tests.js
+  line: 2583
+  module: y-text
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-text.tests.js:testRepeatGenerateQuillChanges70
+  file: yjs/tests/y-text.tests.js
+  line: 2590
+  module: y-text
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-text.tests.js:testRepeatGenerateQuillChanges100
+  file: yjs/tests/y-text.tests.js
+  line: 2597
+  module: y-text
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-text.tests.js:testRepeatGenerateQuillChanges300
+  file: yjs/tests/y-text.tests.js
+  line: 2604
+  module: y-text
+  randomized: true
+  owner: 10
+  outcome: pending
+
+- key: y-xml.tests.js:testCustomTypings
+  file: yjs/tests/y-xml.tests.js
+  line: 6
+  module: y-xml
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-xml.tests.js:testSetProperty
+  file: yjs/tests/y-xml.tests.js
+  line: 36
+  module: y-xml
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-xml.tests.js:testHasProperty
+  file: yjs/tests/y-xml.tests.js
+  line: 48
+  module: y-xml
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-xml.tests.js:testEvents
+  file: yjs/tests/y-xml.tests.js
+  line: 65
+  module: y-xml
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-xml.tests.js:testTreewalker
+  file: yjs/tests/y-xml.tests.js
+  line: 105
+  module: y-xml
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-xml.tests.js:testYtextAttributes
+  file: yjs/tests/y-xml.tests.js
+  line: 124
+  module: y-xml
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-xml.tests.js:testSiblings
+  file: yjs/tests/y-xml.tests.js
+  line: 138
+  module: y-xml
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-xml.tests.js:testInsertafter
+  file: yjs/tests/y-xml.tests.js
+  line: 154
+  module: y-xml
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-xml.tests.js:testClone
+  file: yjs/tests/y-xml.tests.js
+  line: 184
+  module: y-xml
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-xml.tests.js:testFormattingBug
+  file: yjs/tests/y-xml.tests.js
+  line: 201
+  module: y-xml
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: y-xml.tests.js:testElement
+  file: yjs/tests/y-xml.tests.js
+  line: 216
+  module: y-xml
+  randomized: false
+  owner: 7
+  outcome: pending
+
+- key: encoding.tests.js:testStructReferences
+  file: yjs/tests/encoding.tests.js
+  line: 26
+  module: encoding
+  randomized: false
+  owner: 5
+  outcome: pending
+
+- key: encoding.tests.js:testPermanentUserData
+  file: yjs/tests/encoding.tests.js
+  line: 46
+  module: encoding
+  randomized: false
+  owner: 5
+  outcome: pending
+
+- key: encoding.tests.js:testDiffStateVectorOfUpdateIsEmpty
+  file: yjs/tests/encoding.tests.js
+  line: 72
+  module: encoding
+  randomized: false
+  owner: 5
+  outcome: pending
+
+- key: encoding.tests.js:testDiffStateVectorOfUpdateIgnoresSkips
+  file: yjs/tests/encoding.tests.js
+  line: 91
+  module: encoding
+  randomized: false
+  owner: 5
+  outcome: pending
+
+- key: undo-redo.tests.js:testInconsistentFormat
+  file: yjs/tests/undo-redo.tests.js
+  line: 6
+  module: undo-redo
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: undo-redo.tests.js:testInfiniteCaptureTimeout
+  file: yjs/tests/undo-redo.tests.js
+  line: 49
+  module: undo-redo
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: undo-redo.tests.js:testUndoText
+  file: yjs/tests/undo-redo.tests.js
+  line: 62
+  module: undo-redo
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: undo-redo.tests.js:testEmptyTypeScope
+  file: yjs/tests/undo-redo.tests.js
+  line: 109
+  module: undo-redo
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: undo-redo.tests.js:testRejectUpdateExample
+  file: yjs/tests/undo-redo.tests.js
+  line: 122
+  module: undo-redo
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: undo-redo.tests.js:testGlobalScope
+  file: yjs/tests/undo-redo.tests.js
+  line: 176
+  module: undo-redo
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: undo-redo.tests.js:testDoubleUndo
+  file: yjs/tests/undo-redo.tests.js
+  line: 189
+  module: undo-redo
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: undo-redo.tests.js:testUndoMap
+  file: yjs/tests/undo-redo.tests.js
+  line: 210
+  module: undo-redo
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: undo-redo.tests.js:testUndoArray
+  file: yjs/tests/undo-redo.tests.js
+  line: 250
+  module: undo-redo
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: undo-redo.tests.js:testUndoXml
+  file: yjs/tests/undo-redo.tests.js
+  line: 301
+  module: undo-redo
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: undo-redo.tests.js:testUndoEvents
+  file: yjs/tests/undo-redo.tests.js
+  line: 326
+  module: undo-redo
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: undo-redo.tests.js:testTrackClass
+  file: yjs/tests/undo-redo.tests.js
+  line: 351
+  module: undo-redo
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: undo-redo.tests.js:testTypeScope
+  file: yjs/tests/undo-redo.tests.js
+  line: 366
+  module: undo-redo
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: undo-redo.tests.js:testUndoInEmbed
+  file: yjs/tests/undo-redo.tests.js
+  line: 387
+  module: undo-redo
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: undo-redo.tests.js:testUndoDeleteFilter
+  file: yjs/tests/undo-redo.tests.js
+  line: 407
+  module: undo-redo
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: undo-redo.tests.js:testUndoUntilChangePerformed
+  file: yjs/tests/undo-redo.tests.js
+  line: 427
+  module: undo-redo
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: undo-redo.tests.js:testUndoNestedUndoIssue
+  file: yjs/tests/undo-redo.tests.js
+  line: 458
+  module: undo-redo
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: undo-redo.tests.js:testConsecutiveRedoBug
+  file: yjs/tests/undo-redo.tests.js
+  line: 514
+  module: undo-redo
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: undo-redo.tests.js:testUndoXmlBug
+  file: yjs/tests/undo-redo.tests.js
+  line: 565
+  module: undo-redo
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: undo-redo.tests.js:testUndoBlockBug
+  file: yjs/tests/undo-redo.tests.js
+  line: 610
+  module: undo-redo
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: undo-redo.tests.js:testUndoDeleteTextFormat
+  file: yjs/tests/undo-redo.tests.js
+  line: 670
+  module: undo-redo
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: undo-redo.tests.js:testBehaviorOfIgnoreremotemapchangesProperty
+  file: yjs/tests/undo-redo.tests.js
+  line: 708
+  module: undo-redo
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: undo-redo.tests.js:testSpecialDeletionCase
+  file: yjs/tests/undo-redo.tests.js
+  line: 731
+  module: undo-redo
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: undo-redo.tests.js:testUndoDeleteInMap
+  file: yjs/tests/undo-redo.tests.js
+  line: 760
+  module: undo-redo
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: undo-redo.tests.js:testUndoDoingStackItem
+  file: yjs/tests/undo-redo.tests.js
+  line: 790
+  module: undo-redo
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: undo-redo.tests.js:testUndoSetAttributeAndDeleteSyncsAttributes
+  file: yjs/tests/undo-redo.tests.js
+  line: 819
+  module: undo-redo
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: compatibility.tests.js:testArrayCompatibilityV1
+  file: yjs/tests/compatibility.tests.js
+  line: 15
+  module: compatibility
+  randomized: false
+  owner: 5
+  outcome: pending
+
+- key: compatibility.tests.js:testMapDecodingCompatibilityV1
+  file: yjs/tests/compatibility.tests.js
+  line: 26
+  module: compatibility
+  randomized: false
+  owner: 5
+  outcome: pending
+
+- key: compatibility.tests.js:testTextDecodingCompatibilityV1
+  file: yjs/tests/compatibility.tests.js
+  line: 38
+  module: compatibility
+  randomized: false
+  owner: 5
+  outcome: pending
+
+- key: snapshot.tests.js:testBasic
+  file: yjs/tests/snapshot.tests.js
+  line: 8
+  module: snapshot
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: snapshot.tests.js:testBasicXmlAttributes
+  file: yjs/tests/snapshot.tests.js
+  line: 20
+  module: snapshot
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: snapshot.tests.js:testBasicRestoreSnapshot
+  file: yjs/tests/snapshot.tests.js
+  line: 35
+  module: snapshot
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: snapshot.tests.js:testEmptyRestoreSnapshot
+  file: yjs/tests/snapshot.tests.js
+  line: 50
+  module: snapshot
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: snapshot.tests.js:testRestoreSnapshotWithSubType
+  file: yjs/tests/snapshot.tests.js
+  line: 70
+  module: snapshot
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: snapshot.tests.js:testRestoreDeletedItem1
+  file: yjs/tests/snapshot.tests.js
+  line: 93
+  module: snapshot
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: snapshot.tests.js:testRestoreLeftItem
+  file: yjs/tests/snapshot.tests.js
+  line: 109
+  module: snapshot
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: snapshot.tests.js:testDeletedItemsBase
+  file: yjs/tests/snapshot.tests.js
+  line: 127
+  module: snapshot
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: snapshot.tests.js:testDeletedItems2
+  file: yjs/tests/snapshot.tests.js
+  line: 143
+  module: snapshot
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: snapshot.tests.js:testDependentChanges
+  file: yjs/tests/snapshot.tests.js
+  line: 159
+  module: snapshot
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: snapshot.tests.js:testContainsUpdate
+  file: yjs/tests/snapshot.tests.js
+  line: 203
+  module: snapshot
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: snapshot.tests.js:testContainsUpdate2
+  file: yjs/tests/snapshot.tests.js
+  line: 229
+  module: snapshot
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: updates.tests.js:testMergeUpdates
+  file: yjs/tests/updates.tests.js
+  line: 103
+  module: updates
+  randomized: false
+  owner: 5
+  outcome: pending
+
+- key: updates.tests.js:testKeyEncoding
+  file: yjs/tests/updates.tests.js
+  line: 119
+  module: updates
+  randomized: false
+  owner: 5
+  outcome: pending
+
+- key: updates.tests.js:testMergeUpdates1
+  file: yjs/tests/updates.tests.js
+  line: 223
+  module: updates
+  randomized: false
+  owner: 5
+  outcome: pending
+
+- key: updates.tests.js:testMergeUpdates2
+  file: yjs/tests/updates.tests.js
+  line: 243
+  module: updates
+  randomized: false
+  owner: 5
+  outcome: pending
+
+- key: updates.tests.js:testMergePendingUpdates
+  file: yjs/tests/updates.tests.js
+  line: 263
+  module: updates
+  randomized: false
+  owner: 5
+  outcome: pending
+
+- key: updates.tests.js:testObfuscateUpdates
+  file: yjs/tests/updates.tests.js
+  line: 311
+  module: updates
+  randomized: false
+  owner: 5
+  outcome: pending
+
+- key: relativePositions.tests.js:testRelativePositionCase1
+  file: yjs/tests/relativePositions.tests.js
+  line: 25
+  module: relativePositions
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: relativePositions.tests.js:testRelativePositionCase2
+  file: yjs/tests/relativePositions.tests.js
+  line: 39
+  module: relativePositions
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: relativePositions.tests.js:testRelativePositionCase3
+  file: yjs/tests/relativePositions.tests.js
+  line: 49
+  module: relativePositions
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: relativePositions.tests.js:testRelativePositionCase4
+  file: yjs/tests/relativePositions.tests.js
+  line: 61
+  module: relativePositions
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: relativePositions.tests.js:testRelativePositionCase5
+  file: yjs/tests/relativePositions.tests.js
+  line: 71
+  module: relativePositions
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: relativePositions.tests.js:testRelativePositionCase6
+  file: yjs/tests/relativePositions.tests.js
+  line: 82
+  module: relativePositions
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: relativePositions.tests.js:testRelativePositionCase7
+  file: yjs/tests/relativePositions.tests.js
+  line: 93
+  module: relativePositions
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: relativePositions.tests.js:testRelativePositionAssociationDifference
+  file: yjs/tests/relativePositions.tests.js
+  line: 111
+  module: relativePositions
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: relativePositions.tests.js:testRelativePositionWithUndo
+  file: yjs/tests/relativePositions.tests.js
+  line: 128
+  module: relativePositions
+  randomized: false
+  owner: 8
+  outcome: pending
+
+- key: awareness.test.js:testAwareness
+  file: y-protocols/awareness.test.js
+  line: 9
+  module: awareness
+  randomized: false
+  owner: 9
+  outcome: pending

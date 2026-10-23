@@ -1,0 +1,203 @@
+# UndoManager (docs/research/doc-features.md)
+# Behaviour registry (ADR 0010). IDs are assigned once and never reused or renumbered; a withdrawn entry stays as status: retired.
+# Initial population (TASK-2.3): every entry starts pending with an owning spec (ADR 0019). Fields are best-effort; the owning spec refines them.
+
+- id: UM-01
+  title: "Tracked origins"
+  source: "yjs/src/utils/UndoManager.js:181"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:49"
+
+- id: UM-02
+  title: "Scope filter"
+  source: "yjs/src/utils/UndoManager.js:213"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:50"
+
+- id: UM-03
+  title: "Capture merging"
+  source: "yjs/src/utils/UndoManager.js:239"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:51"
+
+- id: UM-04
+  title: "Events"
+  source: "yjs/src/utils/UndoManager.js:259"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:52"
+
+- id: UM-05
+  title: "Redo-stack invalidation"
+  source: "yjs/src/utils/UndoManager.js:227"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:53"
+
+- id: UM-06
+  title: "StackItem contents"
+  source: "yjs/src/utils/UndoManager.js:229"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:54"
+
+- id: UM-07
+  title: "Keep flag"
+  source: "yjs/src/utils/UndoManager.js:253"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:55"
+
+- id: UM-08
+  title: "undo()/redo()"
+  source: "yjs/src/utils/UndoManager.js:349"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:56"
+
+- id: UM-09
+  title: "Pop loop skips no-op stack items"
+  source: "yjs/src/utils/UndoManager.js:63"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:57"
+
+- id: UM-10
+  title: "Undo algorithm"
+  source: "yjs/src/utils/UndoManager.js:75"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:58"
+
+- id: UM-11
+  title: "Redo bookkeeping"
+  source: "yjs/src/structs/Item.js:241"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:59"
+
+- id: UM-12
+  title: "Map-key semantics"
+  source: "yjs/src/structs/Item.js:207"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:60"
+
+- id: UM-13
+  title: "Search markers cleared"
+  source: "yjs/src/utils/UndoManager.js:113"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:61"
+
+- id: UM-14
+  title: "stack-item-popped"
+  source: "yjs/src/utils/UndoManager.js:121"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:62"
+
+- id: UM-15
+  title: "clear(undo=true, redo=true)"
+  source: "yjs/src/utils/UndoManager.js:304"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:63"
+
+- id: UM-16
+  title: "Scope management"
+  source: "yjs/src/utils/UndoManager.js:278"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:64"
+
+- id: UM-17
+  title: "Lifecycle"
+  source: "yjs/src/utils/UndoManager.js:268"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:65"
+
+- id: UM-18
+  title: "Deleted-type content"
+  source: "docs/research/doc-features.md:66"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:66"
+
+- id: UM-19
+  title: "Subdocs"
+  source: "docs/research/doc-features.md:67"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:67"
+
+- id: UM-20
+  title: "Remote-edit interaction"
+  source: "docs/research/doc-features.md:68"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:68"

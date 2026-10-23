@@ -1,0 +1,143 @@
+# Subdocuments (docs/research/doc-features.md)
+# Behaviour registry (ADR 0010). IDs are assigned once and never reused or renumbered; a withdrawn entry stays as status: retired.
+# Initial population (TASK-2.3): every entry starts pending with an owning spec (ADR 0019). Fields are best-effort; the owning spec refines them.
+
+- id: SUB-01
+  title: "Content ref 9; wire format"
+  source: "yjs/src/structs/ContentDoc.js:121"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  owner: 8
+  status: pending
+  ref: "doc-features.md:30"
+
+- id: SUB-02
+  title: "Opts serialization"
+  source: "yjs/src/structs/ContentDoc.js:33"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 8
+  status: pending
+  ref: "doc-features.md:31"
+
+- id: SUB-03
+  title: "Remote decode"
+  source: "yjs/src/structs/ContentDoc.js:11"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:32"
+
+- id: SUB-04
+  title: "Integration"
+  source: "yjs/src/structs/ContentDoc.js:92"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:33"
+
+- id: SUB-05
+  title: "Re-use warning"
+  source: "yjs/src/structs/ContentDoc.js:21"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:34"
+
+- id: SUB-06
+  title: "subdocs event"
+  source: "yjs/src/utils/Transaction.js:380"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:35"
+
+- id: SUB-07
+  title: "Same guid, multiple items"
+  source: "docs/research/doc-features.md:36"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:36"
+
+- id: SUB-08
+  title: "Delete"
+  source: "yjs/src/structs/ContentDoc.js:104"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:37"
+
+- id: SUB-09
+  title: "gc(store) on ContentDoc is a no-op"
+  source: "yjs/src/structs/ContentDoc.js:115"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:38"
+
+- id: SUB-10
+  title: "Copy"
+  source: "yjs/src/structs/Item.js:239"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:39"
+
+- id: SUB-11
+  title: "destroy() on a subdoc resurrects a fresh instance"
+  source: "yjs/src/utils/Doc.js:332"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:40"
+
+- id: SUB-12
+  title: "destroy() on a deleted subdoc's item"
+  source: "yjs/src/utils/Doc.js:335"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:41"
+
+- id: SUB-13
+  title: "Parent destroy cascades"
+  source: "yjs/src/utils/Doc.js:327"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:42"
+
+- id: SUB-14
+  title: "Subdoc type content is independent"
+  source: "yjs/src/structs/ContentDoc.js:121"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 8
+  status: pending
+  ref: "doc-features.md:43"

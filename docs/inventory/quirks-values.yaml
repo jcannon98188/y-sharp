@@ -1,0 +1,129 @@
+# JS quirk register (docs/research/quirks.md)
+# Behaviour registry (ADR 0010). IDs are assigned once and never reused or renumbered; a withdrawn entry stays as status: retired.
+# Initial population (TASK-2.3): every entry starts pending with an owning spec (ADR 0019). Fields are best-effort; the owning spec refines them.
+
+- id: Q01
+  title: "Number tag selection is value-driven, not type-driven"
+  source: "docs/research/quirks.md:52"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  quirk: [Q01]
+  adr: ["0002"]
+  owner: 5
+  status: pending
+  ref: "quirks.md:52"
+
+- id: Q02
+  title: "The integer cutoff is 2^31-1, so int32 minimum is a float32"
+  source: "docs/research/quirks.md:62"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  quirk: [Q02]
+  owner: 5
+  status: pending
+  ref: "quirks.md:62"
+
+- id: Q03
+  title: "Negative zero"
+  source: "docs/research/quirks.md:72"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  quirk: [Q03, Q13]
+  owner: 5
+  status: pending
+  ref: "quirks.md:72"
+
+- id: Q04
+  title: "NaN, Infinity and NaN bit patterns"
+  source: "docs/research/quirks.md:82"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  quirk: [Q01, Q04]
+  owner: 5
+  status: pending
+  ref: "quirks.md:82"
+
+- id: Q05
+  title: "BigInt (tag 122)"
+  source: "docs/research/quirks.md:92"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  quirk: [Q05, Q10]
+  owner: 5
+  status: pending
+  ref: "quirks.md:92"
+
+- id: Q06
+  title: "undefined, functions, symbols"
+  source: "docs/research/quirks.md:102"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  quirk: [Q06]
+  owner: 5
+  status: pending
+  ref: "quirks.md:102"
+
+- id: Q07
+  title: "Values that writeAny flattens silently"
+  source: "docs/research/quirks.md:112"
+  kind: diverge
+  layers: [unit, fixture, differential]
+  wire: true
+  quirk: [Q07, Q10]
+  adr: ["0002"]
+  owner: 5
+  status: pending
+  ref: "quirks.md:112"
+  note: "Proposal in the quirk register: diverge, narrow. Needs a recorded decision (ADR 0003) and a [Diverges] test."
+
+- id: Q08
+  title: "Object key order on encode"
+  source: "docs/research/quirks.md:122"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  quirk: [Q08, Q26]
+  owner: 5
+  status: pending
+  ref: "quirks.md:122"
+
+- id: Q09
+  title: "__proto__ and duplicate keys on decode"
+  source: "docs/research/quirks.md:132"
+  kind: diverge
+  layers: [unit, differential]
+  wire: false
+  quirk: [Q09]
+  owner: 5
+  status: pending
+  ref: "quirks.md:132"
+  note: "Proposal in the quirk register: diverge. Needs a recorded decision (ADR 0003) and a [Diverges] test."
+
+- id: Q10
+  title: "Which JS types Yjs accepts for insertion"
+  source: "docs/research/quirks.md:142"
+  kind: diverge
+  layers: [unit, differential]
+  wire: false
+  quirk: [Q10]
+  owner: 7
+  status: pending
+  ref: "quirks.md:142"
+  note: "Proposal in the quirk register: diverge, by construction. Needs a recorded decision (ADR 0003) and a [Diverges] test."
+
+- id: Q11
+  title: "V1 uses JSON.stringify for embeds/formats and legacy ContentJSON"
+  source: "docs/research/quirks.md:152"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  quirk: [Q08, Q11, Q28, Q30]
+  owner: 5
+  status: pending
+  ref: "quirks.md:152"

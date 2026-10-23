@@ -1,0 +1,115 @@
+# JS quirk register (docs/research/quirks.md)
+# Behaviour registry (ADR 0010). IDs are assigned once and never reused or renumbered; a withdrawn entry stays as status: retired.
+# Initial population (TASK-2.3): every entry starts pending with an owning spec (ADR 0019). Fields are best-effort; the owning spec refines them.
+
+- id: Q20
+  title: "Client IDs come from crypto.getRandomValues, not Math.random"
+  source: "docs/research/quirks.md:254"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  quirk: [Q12, Q20]
+  owner: 6
+  status: pending
+  ref: "quirks.md:254"
+
+- id: Q21
+  title: "Client ID arithmetic and comparisons assume doubles"
+  source: "docs/research/quirks.md:264"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  quirk: [Q12, Q21]
+  owner: 6
+  status: pending
+  ref: "quirks.md:264"
+
+- id: Q22
+  title: "Clocks and lengths are doubles"
+  source: "docs/research/quirks.md:274"
+  kind: diverge
+  layers: [unit, fixture, differential]
+  wire: true
+  quirk: [Q22]
+  owner: 6
+  status: pending
+  ref: "quirks.md:274"
+  note: "Proposal in the quirk register: diverge internally, match observably. Needs a recorded decision (ADR 0003) and a [Diverges] test."
+
+- id: Q23
+  title: "Observer and event ordering"
+  source: "docs/research/quirks.md:284"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  quirk: [Q23, Q25, Q26]
+  owner: 7
+  status: pending
+  ref: "quirks.md:284"
+
+- id: Q24
+  title: "Error aggregation: which exception surfaces"
+  source: "docs/research/quirks.md:294"
+  kind: diverge
+  layers: [unit, differential]
+  wire: false
+  quirk: [Q24]
+  owner: 7
+  status: pending
+  ref: "quirks.md:294"
+  note: "Proposal in the quirk register: diverge deliberately, narrow. Needs a recorded decision (ADR 0003) and a [Diverges] test."
+
+- id: Q25
+  title: "Array.prototype.sort is stable; List<T>.Sort is not"
+  source: "docs/research/quirks.md:304"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  quirk: [Q25]
+  owner: 6
+  status: pending
+  ref: "quirks.md:304"
+
+- id: Q26
+  title: "Map iteration and for...in order"
+  source: "docs/research/quirks.md:314"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  quirk: [Q08, Q23, Q26]
+  owner: 7
+  status: pending
+  ref: "quirks.md:314"
+
+- id: Q27
+  title: "Attribute equality in YText"
+  source: "docs/research/quirks.md:324"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  quirk: [Q27]
+  owner: 7
+  status: pending
+  ref: "quirks.md:324"
+
+- id: Q28
+  title: "Number to string conversion"
+  source: "docs/research/quirks.md:334"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  quirk: [Q11, Q28, Q30]
+  owner: 5
+  status: pending
+  ref: "quirks.md:334"
+
+- id: Q29
+  title: "Locale and default sort"
+  source: "docs/research/quirks.md:344"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  quirk: [Q29]
+  owner: 7
+  status: pending
+  ref: "quirks.md:344"

@@ -1,0 +1,1355 @@
+# Shared types, events and transactions (docs/research/types.md)
+# Behaviour registry (ADR 0010). IDs are assigned once and never reused or renumbered; a withdrawn entry stays as status: retired.
+# Initial population (TASK-2.3): every entry starts pending with an owning spec (ADR 0019). Fields are best-effort; the owning spec refines them.
+
+- id: T-0.1
+  title: "A differential test must assert the concrete event class per type, notably that YXmlText events are YTextEvent"
+  source: "docs/research/types.md:32"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:32"
+
+- id: T-0.2
+  title: "AbstractType.parent returns _item.parent or null for root types (AT:299-301)"
+  source: "yjs/src/types/AbstractType.js:299"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:34"
+
+- id: T-0.3
+  title: "A bare AbstractType placeholder is created by doc.get(name) with no constructor (yjs/src/utils/Doc.js:215)"
+  source: "yjs/src/utils/Doc.js:215"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:35"
+
+- id: T-0.4
+  title: "Premature access"
+  source: "yjs/src/types/AbstractType.js:25"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:42"
+
+- id: T-0.5
+  title: "Before a type is attached to a doc it buffers writes"
+  source: "yjs/src/types/YArray.js:44"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:50"
+
+- id: T-0.6
+  title: "On _integrate the buffered content is replayed (YA:76-80, YM:76-82, YXF:161-165, YXE:66-72, YT:887-895)"
+  source: "yjs/src/types/YArray.js:76"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:53"
+
+- id: T-0.7
+  title: "Constructor sugar"
+  source: "yjs/src/types/YText.js:861"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:56"
+
+- id: T-0.8
+  title: "Nested prelim types"
+  source: "docs/research/types.md:59"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:59"
+
+- id: T-0.9
+  title: "clone() produces an unattached copy that is only readable after attachment"
+  source: "yjs/src/types/YArray.js:96"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:61"
+
+- id: T-0.10
+  title: "List insert (typeListInsertGenericsAfter, AT:645-698)"
+  source: "yjs/src/types/AbstractType.js:645"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:68"
+
+- id: T-0.11
+  title: "Map set (typeMapSet, AT:846-879)"
+  source: "yjs/src/types/AbstractType.js:846"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:74"
+
+- id: T-0.12
+  title: "Returned references"
+  source: "yjs/src/types/YMap.js:221"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:78"
+
+- id: T-0.13
+  title: "Inserting a type that is already integrated elsewhere is undefined behaviour in Yjs (no guard)"
+  source: "docs/research/types.md:80"
+  kind: unsafe-excluded
+  layers: [unit]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:80"
+  note: "Undefined in Yjs; y-sharp defines its own behaviour (ADR 0005), excluded from the differential."
+
+- id: A-1
+  title: "insert(i, [..]) inserts before element i"
+  source: "yjs/src/types/YArray.js:139"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:94"
+
+- id: A-2
+  title: "insert(i>length) throws Length exceeded! (AT:712-714, AT:700)"
+  source: "yjs/src/types/AbstractType.js:712"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:95"
+
+- id: A-3
+  title: "insert(0, []) and push([])"
+  source: "yjs/src/utils/Transaction.js:131"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:96"
+
+- id: A-4
+  title: "push appends after the last item (AT:763-773)"
+  source: "yjs/src/types/AbstractType.js:763"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:98"
+
+- id: A-5
+  title: "delete(i, n) deletes n elements"
+  source: "yjs/src/types/AbstractType.js:785"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:99"
+
+- id: A-6
+  title: "delete on an empty array with n>=1 throws Length exceeded! (same path)"
+  source: "docs/research/types.md:102"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:102"
+
+- id: A-7
+  title: "get(i) out of range returns undefined (no throw) (AT:618-634)"
+  source: "yjs/src/types/AbstractType.js:618"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:103"
+
+- id: A-8
+  title: "slice(start,end)"
+  source: "yjs/src/types/AbstractType.js:419"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:104"
+
+- id: A-9
+  title: "Nested types are returned by reference"
+  source: "docs/research/types.md:108"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:108"
+
+- id: A-10
+  title: "toJSON() recursively calls toJSON on nested AbstractTypes"
+  source: "yjs/src/types/YArray.js:227"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:109"
+
+- id: A-11
+  title: "forEach(f) passes (value, index, type)"
+  source: "yjs/src/types/AbstractType.js:501"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:111"
+
+- id: A-12
+  title: "Iterator (AT:543-583)"
+  source: "yjs/src/types/AbstractType.js:543"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:112"
+
+- id: A-13
+  title: "Length bookkeeping"
+  source: "yjs/src/structs/Item.js:517"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:114"
+
+- id: A-14
+  title: "Search markers (AT:27-215, max 80)"
+  source: "yjs/src/types/AbstractType.js:27"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:116"
+
+- id: A-15
+  title: "Binary content"
+  source: "yjs/src/types/AbstractType.js:679"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:119"
+
+- id: A-16
+  title: "Mixed run splitting"
+  source: "yjs/src/types/AbstractType.js:739"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:120"
+
+- id: A-17
+  title: "Insert inside a deleted region"
+  source: "yjs/src/types/AbstractType.js:734"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:122"
+
+- id: A-18
+  title: "Concurrent insert ordering at the same index is deterministic (YATA)"
+  source: "docs/research/types.md:123"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:123"
+
+- id: A-19
+  title: "Array as list of arrays"
+  source: "docs/research/types.md:125"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:125"
+
+- id: A-20
+  title: "Negative / fractional / NaN indices are not validated by Yjs (insert(-1,..)"
+  source: "docs/research/types.md:128"
+  kind: unsafe-excluded
+  layers: [unit]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:128"
+  note: "Undefined in Yjs; y-sharp defines its own behaviour (ADR 0005), excluded from the differential."
+
+- id: A-E1
+  title: "One transaction => at most one YArrayEvent per array, regardless of number of ops (UT..."
+  source: "docs/research/types.md:134"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:134"
+
+- id: A-E2
+  title: "event.changes.delta ops are {insert"
+  source: "yjs/src/utils/YEvent.js:189"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:135"
+
+- id: A-E3
+  title: "changes.added/changes.deleted are Set<Item>"
+  source: "docs/research/types.md:141"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:141"
+
+- id: A-E4
+  title: "Insert-then-delete of the same elements in one transaction"
+  source: "yjs/src/utils/YEvent.js:204"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:143"
+
+- id: A-E5
+  title: "event.keys for YArray is an empty Map (only null sub in changed) (YE:95-96)"
+  source: "yjs/src/utils/YEvent.js:95"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:146"
+
+- id: A-E6
+  title: "event.target === array, event.currentTarget === array in observe"
+  source: "yjs/src/utils/Transaction.js:301"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:147"
+
+- id: A-E7
+  title: "Re-entrancy"
+  source: "yjs/src/utils/Transaction.js:415"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:149"
+
+- id: A-E8
+  title: "A child type created and mutated inside the same transaction that inserts it does not emit its own event (UT"
+  source: "yjs/src/utils/Transaction.js:159"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:151"
+
+- id: A-E9
+  title: "Deleting an array that has observers"
+  source: "yjs/src/utils/Transaction.js:282"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:154"
+
+- id: A-E10
+  title: "observe/unobserve"
+  source: "docs/research/types.md:156"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:156"
+
+- id: M-1
+  title: "set(k,v) creates a new Item"
+  source: "yjs/src/structs/Item.js:509"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:171"
+
+- id: M-2
+  title: "get(missing) => undefined"
+  source: "yjs/src/types/AbstractType.js:889"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:173"
+
+- id: M-3
+  title: "has(k) true iff Item present and not deleted, including keys whose value is undefined or null (AT:924-928)"
+  source: "yjs/src/types/AbstractType.js:924"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:174"
+
+- id: M-4
+  title: "delete(missing) is a no-op"
+  source: "yjs/src/types/AbstractType.js:830"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:175"
+
+- id: M-5
+  title: "clear() deletes every live key inside one transaction (YM:255-265)"
+  source: "yjs/src/types/YMap.js:255"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:177"
+
+- id: M-6
+  title: "size counts live keys (YM:144-146)"
+  source: "yjs/src/types/YMap.js:144"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:179"
+
+- id: M-7
+  title: "toJSON recursively JSON-ifies nested types (YM:124-137)"
+  source: "yjs/src/types/YMap.js:124"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:183"
+
+- id: M-8
+  title: "Value kinds round-trip"
+  source: "docs/research/types.md:184"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:184"
+
+- id: M-9
+  title: "Concurrent set on same key"
+  source: "docs/research/types.md:187"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:187"
+
+- id: M-10
+  title: "Constructor with iterable (YM:51-64)"
+  source: "yjs/src/types/YMap.js:51"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:189"
+
+- id: M-11
+  title: "Key edge cases"
+  source: "yjs/src/types/YMap.js:129"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:190"
+
+- id: M-12
+  title: "Deleting the value (a nested type) deletes the whole subtree"
+  source: "yjs/src/structs/ContentType.js:105"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:193"
+
+- id: M-E1
+  title: "event.keysChanged"
+  source: "yjs/src/utils/YEvent.js:108"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:199"
+
+- id: M-E2
+  title: "changes.keys.get(k) is {action, oldValue} with exact semantics (YE:87-138)"
+  source: "yjs/src/utils/YEvent.js:87"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:202"
+
+- id: M-E3
+  title: "oldValue for nested types is the type object (possibly already deleted)"
+  source: "docs/research/types.md:210"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:210"
+
+- id: M-E4
+  title: "event.changes.delta for YMap is [], added/deleted are empty sets (YE:191-192 only loops when..."
+  source: "yjs/src/utils/YEvent.js:191"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:211"
+
+- id: M-E5
+  title: "Event data may only be computed during the callback"
+  source: "yjs/src/utils/YEvent.js:10"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:212"
+
+- id: M-E6
+  title: "Exceptions in observers"
+  source: "yjs/src/utils/Transaction.js:267"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:215"
+
+- id: M-E7
+  title: "Map event after a remote update carries target = local type (UT testEventTargetIsSetCorrectlyOnRemote for..."
+  source: "docs/research/types.md:220"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:220"
+
+- id: T-1
+  title: "insert(i, s) inserts at UTF-16 offset i"
+  source: "yjs/src/types/YText.js:1125"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:239"
+
+- id: T-2
+  title: "delete(i, n)"
+  source: "yjs/src/types/YText.js:539"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:241"
+
+- id: T-3
+  title: "toString() concatenates non-deleted ContentStrings only, embeds are skipped (YT:935-949)"
+  source: "yjs/src/types/YText.js:935"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:242"
+
+- id: T-4
+  title: "new Y.Text('x') + attach"
+  source: "docs/research/types.md:244"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:244"
+
+- id: T-5
+  title: "Surrogate pairs"
+  source: "yjs/src/structs/ContentString.js:51"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:245"
+
+- id: T-6
+  title: "applyDelta accepts {insert}, {retain}, {delete} ops (YT:971-997)"
+  source: "yjs/src/types/YText.js:971"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:249"
+
+- id: T-7
+  title: "Prelim applyDelta before attach is queued (YT:995) but note it re-calls applyDelta(delta) with default opts..."
+  source: "yjs/src/types/YText.js:995"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:252"
+
+- id: T-8
+  title: "applyDelta insert of empty string is skipped (YT:984)"
+  source: "yjs/src/types/YText.js:984"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:254"
+
+- id: T-9
+  title: "applyDelta delete/retain beyond end"
+  source: "yjs/src/types/YText.js:338"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:255"
+
+- id: F-1
+  title: "insert(i, s, attrs)"
+  source: "yjs/src/types/YText.js:224"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:262"
+
+- id: F-2
+  title: "insert(i, s) without attributes inherits the formatting at position i (YT:1132-1136"
+  source: "yjs/src/types/YText.js:1132"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:265"
+
+- id: F-3
+  title: "Attribute value null means \"remove attribute\" (YT:184-191, updateCurrentAttributes)"
+  source: "yjs/src/types/YText.js:184"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:268"
+
+- id: F-4
+  title: "Falsy but non-null values (false, 0, '') are real attribute values (UT testFalsyFormats y-text.tests.js:1752)"
+  source: "docs/research/types.md:270"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:270"
+
+- id: F-5
+  title: "Attribute equality (equalAttrs YT:42)"
+  source: "yjs/src/types/YText.js:42"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:271"
+
+- id: F-6
+  title: "format(i, n, attrs)"
+  source: "yjs/src/types/YText.js:1206"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:274"
+
+- id: F-7
+  title: "Format cleanup"
+  source: "yjs/src/types/YText.js:366"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:276"
+
+- id: F-8
+  title: "Remote-change cleanup"
+  source: "yjs/src/utils/Transaction.js:316"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:279"
+
+- id: F-9
+  title: "Concurrent formatting results (UT testDeltaAfterConcurrentFormatting)"
+  source: "docs/research/types.md:283"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:283"
+
+- id: E-1
+  title: "insertEmbed(i, obj, attrs?) where obj is an object or an AbstractType (YT:1154-1164)"
+  source: "yjs/src/types/YText.js:1154"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:288"
+
+- id: E-2
+  title: "Embed value is JSON-like (\"any\") content"
+  source: "docs/research/types.md:290"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:290"
+
+- id: E-3
+  title: "toDelta emits embeds as {insert"
+  source: "docs/research/types.md:292"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:292"
+
+- id: E-4
+  title: "applyDelta([{insert:{linebreak:'s'}}]) round-trips (UT testGetDeltaWithEmbeds)"
+  source: "docs/research/types.md:293"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:293"
+
+- id: E-5
+  title: "Deleting an embedded type deletes the subtree (ContentType.delete) and deleteText handles..."
+  source: "yjs/src/types/YText.js:545"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:295"
+
+- id: E-6
+  title: "Embeds do not merge with neighbouring strings"
+  source: "yjs/src/types/YText.js:1065"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:296"
+
+- id: D-1
+  title: "Output: array of {insert: string|object|AbstractType, attributes?} with adjacent strings of identical..."
+  source: "yjs/src/types/YText.js:1084"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:300"
+
+- id: D-2
+  title: "attributes object only present when currentAttributes.size > 0 (strings"
+  source: "yjs/src/types/YText.js:1035"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:304"
+
+- id: D-3
+  title: "toDelta(snapshot, prevSnapshot, computeYChange) adds ychange attribute to changed ranges (YT:1009-1112)"
+  source: "yjs/src/types/YText.js:1009"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:305"
+
+- id: D-4
+  title: "toDelta of empty text is []"
+  source: "docs/research/types.md:307"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:307"
+
+- id: X-1
+  title: "setAttribute/getAttribute/getAttributes/removeAttribute use the same map machinery as YMap (YT:1225-1281)"
+  source: "yjs/src/types/YText.js:1225"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:311"
+
+- id: X-2
+  title: "getAttributes() returns only live attributes (AT:902-914)"
+  source: "yjs/src/types/AbstractType.js:902"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:313"
+
+- id: Y-1
+  title: "childListChanged true iff the sequence changed"
+  source: "yjs/src/types/YText.js:619"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:317"
+
+- id: Y-2
+  title: "event.delta (YT:655-839)"
+  source: "yjs/src/types/YText.js:655"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:318"
+
+- id: Y-3
+  title: "event.changes for YText"
+  source: "yjs/src/types/YText.js:631"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:320"
+
+- id: Y-4
+  title: "Side effect in a getter"
+  source: "yjs/src/types/YText.js:784"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:321"
+
+- id: Y-5
+  title: "Insert+delete in same txn => delta [] (UT)"
+  source: "yjs/src/types/YText.js:723"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:324"
+
+- id: Y-6
+  title: "Concurrent format event deltas"
+  source: "docs/research/types.md:325"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:325"
+
+- id: Y-7
+  title: "event.keys works as for maps"
+  source: "docs/research/types.md:326"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:326"
+
+- id: X-E1
+  title: "nodeName default 'UNDEFINED' (YXE:31)"
+  source: "yjs/src/types/YXmlElement.js:31"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:351"
+
+- id: X-E2
+  title: "Attributes are a string-keyed map of any-values (typed string in docs)"
+  source: "yjs/src/types/YXmlElement.js:138"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:352"
+
+- id: X-E3
+  title: "toString() (YXE:113-130)"
+  source: "yjs/src/types/YXmlElement.js:113"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:354"
+
+- id: X-E4
+  title: "nextSibling/prevSibling = neighbour Items in the parent's list including deleted? Uses _item.next/prev..."
+  source: "yjs/src/types/YXmlElement.js:43"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:357"
+
+- id: X-E5
+  title: "Events: attribute changes => attributesChanged Set contains the key; child changes => childListChanged (UT..."
+  source: "docs/research/types.md:359"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:359"
+
+- id: X-E6
+  title: "clone copies attributes and deep-clones children (YXE:90-100)"
+  source: "yjs/src/types/YXmlElement.js:90"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:361"
+
+- id: X-E7
+  title: "Element attribute events changes.keys use map semantics (section 2.3)"
+  source: "docs/research/types.md:362"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:362"
+
+- id: X-E8
+  title: "getXmlElement(name) on the doc creates a root element with nodeName 'UNDEFINED' (constructor default)..."
+  source: "yjs/src/utils/Doc.js:218"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:363"
+
+- id: V-1
+  title: "Fields: target, currentTarget (initially == target), transaction, lazily path, keys, delta, changes (YE:16-53)"
+  source: "yjs/src/utils/YEvent.js:16"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:390"
+
+- id: V-2
+  title: "path (YE:68-70, getPathTo YE:256-277)"
+  source: "yjs/src/utils/YEvent.js:68"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:391"
+
+- id: V-3
+  title: "path is cached in _path"
+  source: "yjs/src/utils/Transaction.js:296"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:394"
+
+- id: V-4
+  title: "adds(struct)"
+  source: "yjs/src/utils/YEvent.js:160"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:398"
+
+- id: V-5
+  title: "keys semantics"
+  source: "yjs/src/utils/YEvent.js:103"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:399"
+
+- id: V-6
+  title: "changes / delta for list types"
+  source: "yjs/src/utils/YEvent.js:172"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:400"
+
+- id: V-7
+  title: "Deleted-then-reinserted values count separately (no \"update\" for lists)"
+  source: "docs/research/types.md:402"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:402"
+
+- id: V-8
+  title: "Events are only created for types in transaction.changed"
+  source: "yjs/src/utils/Transaction.js:159"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:403"
+
+- id: V-9
+  title: "transaction.changed maps type -> Set of parentSubs (null for list changes)"
+  source: "docs/research/types.md:405"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:405"
+
+- id: TX-1
+  title: "Event order (single transaction, no nested)"
+  source: "docs/research/types.md:429"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:429"
+
+- id: TX-2
+  title: "observe handlers for *all* changed types run before *any* deep handler (even a deep handler on a child)..."
+  source: "yjs/src/utils/Transaction.js:287"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:432"
+
+- id: TX-3
+  title: "doc.transact(f) with an empty body still emits beforeTransaction, beforeObserverCalls, afterTransaction..."
+  source: "yjs/src/utils/Transaction.js:131"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:433"
+
+- id: TX-4
+  title: "transact returns f's return value (TX:450)"
+  source: "yjs/src/utils/Transaction.js:450"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:434"
+
+- id: TX-5
+  title: "Nested transact inside f"
+  source: "docs/research/types.md:436"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:436"
+
+- id: TX-6
+  title: "Mutation inside an observer"
+  source: "yjs/src/utils/Transaction.js:431"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:437"
+
+- id: TX-7
+  title: "Exceptions: see M-E6. A throwing handler: remaining handlers and post-processing still execute; the first..."
+  source: "yjs/src/utils/Transaction.js:434"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:440"
+
+- id: TX-8
+  title: "transaction.changed"
+  source: "yjs/src/utils/Transaction.js:48"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:442"
+
+- id: TX-9
+  title: "observe is NOT called for a type whose _item.deleted at cleanup time (TX:282), e.g"
+  source: "yjs/src/utils/Transaction.js:282"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:444"
+
+- id: TX-10
+  title: "Event dedupe"
+  source: "docs/research/types.md:446"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:446"
+
+- id: TX-11
+  title: "Deep observer on a type whose own observe is not registered still works (TX:292"
+  source: "yjs/src/utils/Transaction.js:292"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:448"
+
+- id: TX-12
+  title: "Handler list mutation while dispatching"
+  source: "docs/research/types.md:449"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:449"
+
+- id: TX-13
+  title: "unobserveDeep symmetrical to unobserve (AT:397-399)"
+  source: "yjs/src/types/AbstractType.js:397"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:451"
+
+- id: TX-14
+  title: "Remote updates"
+  source: "yjs/src/types/AbstractType.js:360"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 7
+  status: pending
+  ref: "types.md:452"
+
+- id: TX-15
+  title: "doc.on('update') handlers are only encoded when listeners exist (TX:366)"
+  source: "yjs/src/utils/Transaction.js:366"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  owner: 7
+  status: pending
+  ref: "types.md:454"
+
+- id: TX-16
+  title: "Same-client-id guard (TX:360-363)"
+  source: "yjs/src/utils/Transaction.js:360"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:455"
+
+- id: TX-17
+  title: "YEvent data availability"
+  source: "docs/research/types.md:456"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:456"
+
+- id: TX-18
+  title: "Every changed type and all its ancestors up to the root get the event appended (AT:246-253)"
+  source: "yjs/src/types/AbstractType.js:246"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:460"
+
+- id: TX-19
+  title: "Cross-type depth"
+  source: "docs/research/types.md:462"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: pending
+  ref: "types.md:462"

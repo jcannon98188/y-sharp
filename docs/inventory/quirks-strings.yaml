@@ -1,0 +1,47 @@
+# JS quirk register (docs/research/quirks.md)
+# Behaviour registry (ADR 0010). IDs are assigned once and never reused or renumbered; a withdrawn entry stays as status: retired.
+# Initial population (TASK-2.3): every entry starts pending with an owning spec (ADR 0019). Fields are best-effort; the owning spec refines them.
+
+- id: Q16
+  title: "YText indexing and lengths are UTF-16 code units"
+  source: "docs/research/quirks.md:210"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  quirk: [Q16, Q17, Q19]
+  owner: 5
+  status: pending
+  ref: "quirks.md:210"
+
+- id: Q17
+  title: "Splitting a surrogate pair inserts U+FFFD on both sides"
+  source: "docs/research/quirks.md:220"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  quirk: [Q17]
+  owner: 5
+  status: pending
+  ref: "quirks.md:220"
+
+- id: Q18
+  title: "Lone surrogates and UTF-8 conversion"
+  source: "docs/research/quirks.md:230"
+  kind: match
+  layers: [unit, fixture, differential, fuzz]
+  wire: true
+  quirk: [Q18]
+  owner: 5
+  status: pending
+  ref: "quirks.md:230"
+
+- id: Q19
+  title: "V2 StringEncoder concatenates and relies on code-unit lengths"
+  source: "docs/research/quirks.md:240"
+  kind: match
+  layers: [unit, fixture, differential]
+  wire: true
+  quirk: [Q13, Q17, Q19]
+  owner: 5
+  status: pending
+  ref: "quirks.md:240"
