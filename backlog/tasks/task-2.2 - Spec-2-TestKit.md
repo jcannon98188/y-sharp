@@ -4,6 +4,7 @@ title: 'Spec 2: TestKit'
 status: To Do
 assignee: []
 created_date: '2026-10-23 22:01'
+updated_date: '2026-10-23 22:26'
 labels: []
 dependencies:
   - TASK-2.1
@@ -31,3 +32,9 @@ Wave 0. The shared library every test project uses (ADR 0015). Owns the SIM-10+ 
 - [ ] #4 Allocation helper (GC.GetAllocatedBytesForCurrentThread, Release only, EventListener rerun on failure) and virtual TimeProvider exist
 - [ ] #5 Node child-process client per ADR 0012 exists; port of the JS testHelper (TestConnector, init, compare) done with SIM-10+ entries covered
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+PRNG done: Xorshift32, Xoroshiro128Plus, Prng helpers; goldens from lib0 via tests/YSharp.TestKit/Goldens/generate-prng-goldens.mjs (10 seeds x 200 draws + 40-call helper script). Added xunit.v3.assert/extensibility.core to Directory.Packages.props (TestKit needs them). TestKit tests live in tests/YSharp.Tests/TestKit.
+<!-- SECTION:NOTES:END -->
