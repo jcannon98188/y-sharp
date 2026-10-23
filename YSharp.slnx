@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/YSharp/YSharp.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/YSharp.TestKit/YSharp.TestKit.csproj" />
+    <Project Path="tests/YSharp.Tests/YSharp.Tests.csproj" />
+    <Project Path="tests/YSharp.Interop.Tests/YSharp.Interop.Tests.csproj" />
+    <Project Path="tests/YSharp.Fuzz.Tests/YSharp.Fuzz.Tests.csproj" />
+  </Folder>
+  <Folder Name="/bench/">
+    <Project Path="bench/YSharp.Benchmarks/YSharp.Benchmarks.csproj" />
+  </Folder>
+</Solution>
