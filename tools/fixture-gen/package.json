@@ -1,0 +1,9 @@
+{
+  "name": "ysharp-fixture-gen",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Node fixture generator shell; Spec 4 (TASK-2.4) implements it.",
+  "scripts": {
+    "gen": "node generate.mjs"
+  }
+}

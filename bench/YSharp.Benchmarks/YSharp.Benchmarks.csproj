@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\tests\YSharp.TestKit\YSharp.TestKit.csproj" />
+    <ProjectReference Include="..\..\src\YSharp\YSharp.csproj" />
+  </ItemGroup>
+</Project>
