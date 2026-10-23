@@ -1,8 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
+    <RootNamespace>YSharp.TestKit</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="xunit.v3.assert" />
+    <PackageReference Include="xunit.v3.extensibility.core" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\src\YSharp\YSharp.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Goldens\prng-goldens.json" LogicalName="YSharp.TestKit.Goldens.prng-goldens.json" />
   </ItemGroup>
 </Project>
