@@ -1,0 +1,9 @@
+[submodule "yjs"]
+	path = yjs
+	url = https://github.com/yjs/yjs.git
+[submodule "y-protocols"]
+	path = y-protocols
+	url = https://github.com/yjs/y-protocols.git
+[submodule "lib0"]
+	path = lib0
+	url = https://github.com/dmonad/lib0.git

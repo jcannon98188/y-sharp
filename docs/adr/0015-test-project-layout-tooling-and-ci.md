@@ -1,0 +1,19 @@
+# One solution, a shared TestKit, trait-based tiers and a Linux-first CI
+
+Extends ADR 0009 to 0014: this says where the suite lives, what it is built from, and which CI job runs which tier.
+
+- **Layout.** `YSharp.slnx` at the root. `src/YSharp`; `tests/YSharp.Tests`, `tests/YSharp.Interop.Tests`, `tests/YSharp.Fuzz.Tests`, `tests/YSharp.TestKit`; `bench/YSharp.Benchmarks`; `tools/fixture-gen` (Node); `fixtures/` (golden and `hostile/`); `docs/inventory/` (ADR 0010). The submodules `yjs/`, `lib0/` and `y-protocols/` stay at the root and CI checks them out recursively.
+- **TestKit.** One non-test class library referenced by the three test projects and the benchmarks. It holds the port of the JS `testHelper` (`TestConnector`, `init`, `compare`), the ops-script interpreter and tagged-value reader (ADR 0011), the fixture loader and header version check, the YAML registry reader, the hex and structural diff assertions, the allocation helper (ADR 0009), the virtual `TimeProvider`, and the Node child-process client (ADR 0012).
+- **PRNG.** The lib0 `Xoroshiro128plus` (including its `Xorshift32` seeding and `_fresh` toggling) and the `prng` draw helpers are ported bit-exact into TestKit and checked against goldens generated from lib0. Ported random tests can then reproduce upstream seeds. Fixtures still replay recorded op logs and never depend on it (ADR 0011). Draw order in ported tests must match JS.
+- **Packages.** xUnit v3 on the Microsoft.Testing.Platform runner; FsCheck for properties (ADR 0012, 0013); YamlDotNet for the registry; BenchmarkDotNet in the benchmarks only; SharpFuzz in a separate nightly harness. Coyote versus a hand-rolled scheduler stays with the concurrency test-spec ticket. Assertions are plain xUnit `Assert` plus TestKit helpers; no assertion library is added.
+- **Build conventions.** `Directory.Build.props` (net10.0, nullable, implicit usings off, warnings as errors, .NET analyzers on) and `Directory.Packages.props` (central package versions). `InternalsVisibleTo` from `YSharp` to `YSharp.Tests`, `YSharp.Fuzz.Tests` and `YSharp.Benchmarks` only; the interop project sees the public API alone.
+- **Naming.** Test classes are named after the subject (`YTextInsertTests`); methods are `Subject_Condition_Outcome`. Each test carries `[Covers]`, `[PortOf]` or `[Diverges]` (ADR 0010). Ported JS tests keep the upstream name in `[PortOf]`, not in the method name. Fixture files follow `fixtures/<area>/<scenario>.json`.
+- **Tiers.** A trait `Tier` with values `Gating`, `Smoke` and `Nightly` (default `Gating`) selects tests through an environment-driven filter. Tests that need Node carry a `Needs=Node` trait and are never `Gating`. Allocation tests (ADR 0009) run only in Release, in their own serial collection, and are skipped visibly in Debug; stress and soak tests (ADR 0006) are in a serial collection too. Everything else runs in parallel.
+- **CI (GitHub Actions).**
+  - *Gating*: Linux runs the full gating suite in Debug and Release, including the traceability check and the fixture version-header check; Windows and macOS run the gating suite in Release. Node is not installed.
+  - *Fixture drift*: Linux, Node from `.nvmrc`, runs `npm run gen` and fails on any diff in `fixtures/` (ADR 0011).
+  - *Smoke differential*: Linux, PR job, non-gating at first (ADR 0012, 0013).
+  - *Nightly*: Linux, slow differential, fuzz and soak tiers, the slow memory tier (ADR 0009), SharpFuzz, and the benchmark comparison; failing seeds and scripts are uploaded as artifacts.
+  - Every job uploads test results and, for gating, the traceability matrix.
+- **Coverage.** Collected on the Linux gating run and published as an artifact and PR summary. There is no threshold; the traceability check is the gate.
+- **Local use.** `dotnet test` runs the gating tier with no Node. A documented `YSHARP_TIER` variable and the `YSHARP_REPLAY` variable (ADR 0012) cover the other tiers and failure replay.

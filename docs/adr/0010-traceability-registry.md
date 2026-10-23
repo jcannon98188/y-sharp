@@ -1,0 +1,12 @@
+# One YAML registry traces every behaviour to a test, checked by the gating suite
+
+"Every behaviour is tested" has to be checkable, so behaviours live in a machine-readable registry and tests point at it.
+
+- **IDs.** Existing IDs from the research notes and ADRs stay canonical (`DOC-`, `UM-`, `SNAP-`, `AW-`, `SY-`, `CC-`, `Q`, and the `types.md` prefixes). `structs.md` entries become `STR-nn`, `encoding.md` entries `ENC-nn`, and the ADR 0005 rules `ERR-nn`. An ID is assigned once, never reused or renumbered; a withdrawn entry stays as `retired`.
+- **Registry.** YAML files under `docs/inventory/`, one per area, are the source of truth; the research notes remain narrative. One entry is one assertable behaviour. Fields: `id`, `title`, `source` (`file:line` in the pinned submodules), `kind` (`match`, `diverge`, `y-sharp-own`, `port-flag`, `unsafe-excluded`), `layers`, `wire`, `quirk` and `adr` references, and `status` (`active`, `pending`, `excluded`, `retired`). Oracle behaviours, y-sharp's own guarantees (`CC-*`, `ERR-*`) and the allocation budgets (`BUD-*`) share it.
+- **Tags.** `[Covers("ID", ...)]` implements xUnit v3's trait-attribute interface (exact name to verify at spec time) so IDs are filterable. `[PortOf("file:test", catalogId)]` marks ported JS tests; `[Diverges("Q17", adr: "0003")]` marks the test that shows the JS behaviour for a recorded divergence. Fixture headers carry `covers: [...]` beside the yjs/lib0 versions and seed.
+- **Layers.** An active `match` entry needs a unit or port test; `wire: true` entries also need a fixture. Differential and fuzz coverage is declared per entry and reported, not gated.
+- **Exclusions.** Only with a reason: `js-undefined`, `js-crash`, `upstream-defect` or `not-applicable`. Excluded entries leave the differential layers; if y-sharp defines its own behaviour they still need a `[Diverges]` test.
+- **JS test ledger.** All 209 catalogued upstream tests get an outcome: `ported`, `merged-into`, `replaced-by-fixture` or `skipped` with a reason.
+- **The check.** A gating xUnit test reflects over the built test assemblies and reads fixture headers and the YAML. It fails on duplicate or reused IDs, unknown IDs in tags, an active entry with no covering test, a `diverge` entry with no `[Diverges]` test, a declared layer with no test, and a ledger gap. It writes a traceability matrix as a CI artifact.
+- **Rollout.** `pending` entries (with an owner) pass but are reported; their count may only fall against a committed high-water mark, and a release gate requires zero.

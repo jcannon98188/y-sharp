@@ -1,0 +1,3 @@
+# Implement y-sharp in pure C#, not a native core with a wrapper
+
+A Rust or C core wrapped in C# would remove GC pressure from the CRDT core. It would also add panics and native stack overflow across the FFI boundary, marshalling allocations on the managed side, callbacks into managed code under the document lock, per-platform binaries, and allocation tests that cannot see native memory. y-sharp stays managed. The GC-pressure and memory-layout risk is carried by the implementation work, which must design for it (structs, arenas, pooling, `Span`) and prove it with the memory and allocation budgets.
