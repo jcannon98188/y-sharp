@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace YSharp.TestKit.Prng;
+namespace YSharp.TestKit.Rng;
 
 /// <summary>
 /// Port of the lib0 <c>prng.js</c> draw helpers. Numbers are doubles, as in JS, and every helper consumes

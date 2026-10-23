@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text.Json;
 using Xunit;
 using YSharp.TestKit;
-using YSharp.TestKit.Prng;
+using YSharp.TestKit.Rng;
 
 namespace YSharp.Tests.TestKit;
 

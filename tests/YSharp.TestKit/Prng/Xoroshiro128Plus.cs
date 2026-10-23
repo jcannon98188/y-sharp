@@ -1,4 +1,4 @@
-namespace YSharp.TestKit.Prng;
+namespace YSharp.TestKit.Rng;
 
 /// <summary>
 /// Bit-exact port of lib0 <c>prng/Xoroshiro128plus.js</c> (32-bit variant, two draws per 64-bit step,

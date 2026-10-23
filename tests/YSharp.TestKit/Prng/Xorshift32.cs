@@ -1,4 +1,4 @@
-namespace YSharp.TestKit.Prng;
+namespace YSharp.TestKit.Rng;
 
 /// <summary>A source of doubles in [0,1), the only thing the lib0 draw helpers need.</summary>
 public interface IPrng

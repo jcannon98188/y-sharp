@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 using Xunit;
 using YSharp.TestKit.Fixtures;
 using YSharp.TestKit.Node;
+using YSharp.TestKit.Tiers;
 
 namespace YSharp.Tests.TestKit;
 
-[Trait("Needs", "Node")]
-[Trait("Tier", "Smoke")]
+[NeedsNode]
+[Tier(Tier.Smoke)]
 public class NodeClientTests
 {
     private static string ServerScript => Path.Combine(AppContext.BaseDirectory, "TestKit", "Node", "echo-server.mjs");
