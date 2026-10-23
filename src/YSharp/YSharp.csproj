@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <RootNamespace>YSharp</RootNamespace>
+    <!-- Stub only: events are declared but never raised until the implementation lands. Remove then. -->
+    <NoWarn>$(NoWarn);CS0067</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="YSharp.Tests" />
+    <InternalsVisibleTo Include="YSharp.Fuzz.Tests" />
+    <InternalsVisibleTo Include="YSharp.Benchmarks" />
+  </ItemGroup>
+</Project>
