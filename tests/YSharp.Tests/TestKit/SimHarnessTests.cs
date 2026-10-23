@@ -5,6 +5,7 @@ using System.Linq;
 using Xunit;
 using YSharp.TestKit.Rng;
 using YSharp.TestKit.Sim;
+using YSharp.TestKit.Traceability;
 
 namespace YSharp.Tests.TestKit;
 
@@ -27,7 +28,7 @@ public class SimHarnessTests
     // ------------------------------------------------------------ pure parts
 
     [Fact]
-    [Trait("Covers", "SIM-10")]
+    [Covers("SIM-10")]
     public void OrderedSet_RemoveThenAdd_MovesToEnd_LikeAJsSet()
     {
         var s = new OrderedSet<int>();
@@ -42,7 +43,7 @@ public class SimHarnessTests
     }
 
     [Fact]
-    [Trait("Covers", "SIM-14")]
+    [Covers("SIM-14")]
     public void V2Framing_UsesSyncMessageTypeNumbers_AndRoundTripsPayloads()
     {
         var payload = Enumerable.Range(0, 300).Select(i => (byte)i).ToArray();
@@ -59,7 +60,7 @@ public class SimHarnessTests
     }
 
     [Fact]
-    [Trait("Covers", "SIM-14")]
+    [Covers("SIM-14")]
     public void V2Framing_TruncatedFrame_Throws()
     {
         var frame = SimFraming.FrameV2(SyncMessageType.Update, new byte[] { 1, 2, 3 });
@@ -67,7 +68,7 @@ public class SimHarnessTests
     }
 
     [Fact]
-    [Trait("Covers", "SIM-13")]
+    [Covers("SIM-13")]
     public void ChooseNetworkAction_MatchesJsDrawOrderAndShortCircuit()
     {
         // 0.02*101 = 2.02 -> 2 (<=2): disconnect when the bool draw is >= 0.5, else reconnect
@@ -93,7 +94,7 @@ public class SimHarnessTests
     }
 
     [Fact]
-    [Trait("Covers", "SIM-11")]
+    [Covers("SIM-11")]
     public void ChooseEncoding_OneBoolDraw_SelectsV1OrV2ForTheWholeRun()
     {
         var low = new ScriptedPrng(0.1);
@@ -103,7 +104,7 @@ public class SimHarnessTests
     }
 
     [Fact]
-    [Trait("Covers", "SIM-10")]
+    [Covers("SIM-10")]
     public void PayloadCounters_AreFreshPerConnector()
     {
         var a = new PayloadCounters();
@@ -122,8 +123,8 @@ public class SimHarnessTests
     }
 
     [Theory]
-    [Trait("Covers", "SIM-11")]
-    [Trait("Covers", "SIM-12")]
+    [Covers("SIM-11")]
+    [Covers("SIM-12")]
     [InlineData(1u)]
     [InlineData(2u)]
     [InlineData(3u)]
@@ -140,7 +141,7 @@ public class SimHarnessTests
     }
 
     [Fact]
-    [Trait("Covers", "SIM-13")]
+    [Covers("SIM-13")]
     public void ApplyRandomTests_TextEdits_ConvergeForFixedSeeds()
     {
         RunOrSkip(() =>

@@ -27,7 +27,13 @@ jobs:
         env:
           YSHARP_TIER: Gating
         run: dotnet test --solution YSharp.slnx -c ${{ matrix.config }} --no-build --report-trx --results-directory TestResults
-      # Placeholder: traceability check and fixture version-header check land with TASK-2.3 and TASK-2.4.
+      # The traceability check (TASK-2.3) runs inside the gating tests and writes the matrix below. The fixture version-header check lands with TASK-2.4.
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: traceability-matrix-${{ matrix.os }}-${{ matrix.config }}
+          path: TestResults/traceability/
+          if-no-files-found: warn
       - uses: actions/upload-artifact@v4
         if: always()
         with:
