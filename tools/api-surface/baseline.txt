@@ -1,0 +1,735 @@
+YSharp.AbsolutePosition|base System.ValueType
+YSharp.AbsolutePosition|ctor(YSharp.YType Type, System.Int32 Index, System.Int32 Assoc)
+YSharp.AbsolutePosition|implements System.IEquatable<YSharp.AbsolutePosition>
+YSharp.AbsolutePosition|method System.Void Deconstruct(out YSharp.YType Type, out System.Int32 Index, out System.Int32 Assoc)
+YSharp.AbsolutePosition|method override System.Boolean Equals(System.Object obj)
+YSharp.AbsolutePosition|method override System.Int32 GetHashCode()
+YSharp.AbsolutePosition|method override System.String ToString()
+YSharp.AbsolutePosition|method sealed-override System.Boolean Equals(YSharp.AbsolutePosition other)
+YSharp.AbsolutePosition|method static System.Boolean op_Equality(YSharp.AbsolutePosition left, YSharp.AbsolutePosition right)
+YSharp.AbsolutePosition|method static System.Boolean op_Inequality(YSharp.AbsolutePosition left, YSharp.AbsolutePosition right)
+YSharp.AbsolutePosition|property System.Int32 Assoc {get;set;}
+YSharp.AbsolutePosition|property System.Int32 Index {get;set;}
+YSharp.AbsolutePosition|property YSharp.YType Type {get;set;}
+YSharp.AbsolutePosition|struct readonly
+YSharp.AllTransactionsHandler|base System.MulticastDelegate
+YSharp.AllTransactionsHandler|ctor(System.Object object, System.IntPtr method)
+YSharp.AllTransactionsHandler|delegate
+YSharp.AllTransactionsHandler|implements System.ICloneable
+YSharp.AllTransactionsHandler|implements System.Runtime.Serialization.ISerializable
+YSharp.AllTransactionsHandler|method virtual System.IAsyncResult BeginInvoke(System.Collections.Generic.IReadOnlyList<YSharp.Transaction> transactions, YSharp.Doc doc, System.AsyncCallback callback, System.Object object)
+YSharp.AllTransactionsHandler|method virtual System.Void EndInvoke(System.IAsyncResult result)
+YSharp.AllTransactionsHandler|method virtual System.Void Invoke(System.Collections.Generic.IReadOnlyList<YSharp.Transaction> transactions, YSharp.Doc doc)
+YSharp.ApplyResult|base System.ValueType
+YSharp.ApplyResult|property System.Boolean Ok {get;}
+YSharp.ApplyResult|property System.Int32 ObserverFaults {get;}
+YSharp.ApplyResult|property System.Int32 RejectedStructs {get;}
+YSharp.ApplyResult|property YSharp.YError Error {get;}
+YSharp.ApplyResult|struct readonly
+YSharp.AwarenessChange|base System.ValueType
+YSharp.AwarenessChange|property System.Collections.Generic.IReadOnlyList<System.UInt64> Added {get;}
+YSharp.AwarenessChange|property System.Collections.Generic.IReadOnlyList<System.UInt64> Removed {get;}
+YSharp.AwarenessChange|property System.Collections.Generic.IReadOnlyList<System.UInt64> Updated {get;}
+YSharp.AwarenessChange|struct readonly
+YSharp.AwarenessHandler|base System.MulticastDelegate
+YSharp.AwarenessHandler|ctor(System.Object object, System.IntPtr method)
+YSharp.AwarenessHandler|delegate
+YSharp.AwarenessHandler|implements System.ICloneable
+YSharp.AwarenessHandler|implements System.Runtime.Serialization.ISerializable
+YSharp.AwarenessHandler|method virtual System.IAsyncResult BeginInvoke(YSharp.AwarenessChange change, System.Object origin, System.AsyncCallback callback, System.Object object)
+YSharp.AwarenessHandler|method virtual System.Void EndInvoke(System.IAsyncResult result)
+YSharp.AwarenessHandler|method virtual System.Void Invoke(YSharp.AwarenessChange change, System.Object origin)
+YSharp.AwarenessMeta|base System.ValueType
+YSharp.AwarenessMeta|ctor(System.Int64 Clock, System.DateTimeOffset LastUpdated)
+YSharp.AwarenessMeta|implements System.IEquatable<YSharp.AwarenessMeta>
+YSharp.AwarenessMeta|method System.Void Deconstruct(out System.Int64 Clock, out System.DateTimeOffset LastUpdated)
+YSharp.AwarenessMeta|method override System.Boolean Equals(System.Object obj)
+YSharp.AwarenessMeta|method override System.Int32 GetHashCode()
+YSharp.AwarenessMeta|method override System.String ToString()
+YSharp.AwarenessMeta|method sealed-override System.Boolean Equals(YSharp.AwarenessMeta other)
+YSharp.AwarenessMeta|method static System.Boolean op_Equality(YSharp.AwarenessMeta left, YSharp.AwarenessMeta right)
+YSharp.AwarenessMeta|method static System.Boolean op_Inequality(YSharp.AwarenessMeta left, YSharp.AwarenessMeta right)
+YSharp.AwarenessMeta|property System.DateTimeOffset LastUpdated {get;set;}
+YSharp.AwarenessMeta|property System.Int64 Clock {get;set;}
+YSharp.AwarenessMeta|struct readonly
+YSharp.Awareness|base System.Object
+YSharp.Awareness|ctor(YSharp.Doc doc, System.TimeProvider timeProvider = null)
+YSharp.Awareness|event System.Action Destroyed
+YSharp.Awareness|event YSharp.AwarenessHandler Change
+YSharp.Awareness|event YSharp.AwarenessHandler Update
+YSharp.Awareness|field static readonly System.TimeSpan OutdatedTimeout
+YSharp.Awareness|implements System.IDisposable
+YSharp.Awareness|method System.Collections.Generic.IReadOnlyDictionary<System.UInt64, YSharp.YValue> GetStates()
+YSharp.Awareness|method System.Void EncodeUpdate(System.Buffers.IBufferWriter<System.Byte> writer)
+YSharp.Awareness|method System.Void RemoveStates(System.ReadOnlySpan<System.UInt64> clients, System.Object origin)
+YSharp.Awareness|method System.Void SetLocalState(in YSharp.YValue state)
+YSharp.Awareness|method System.Void SetLocalStateField(System.String field, in YSharp.YValue value)
+YSharp.Awareness|method YSharp.ApplyResult TryApplyUpdate(System.ReadOnlySpan<System.Byte> update, System.Object origin)
+YSharp.Awareness|method YSharp.YStatus TryEncodeUpdate(System.Buffers.IBufferWriter<System.Byte> writer, System.ReadOnlySpan<System.UInt64> clients, System.Collections.Generic.IReadOnlyDictionary<System.UInt64, YSharp.YValue> states = null)
+YSharp.Awareness|method sealed-override System.Void Dispose()
+YSharp.Awareness|method static YSharp.YStatus TryModifyUpdate(System.ReadOnlySpan<System.Byte> update, System.Func<YSharp.YValue, YSharp.YValue> modify, System.Buffers.IBufferWriter<System.Byte> output)
+YSharp.Awareness|property System.Collections.Generic.IReadOnlyDictionary<System.UInt64, YSharp.AwarenessMeta> Meta {get;}
+YSharp.Awareness|property System.UInt64 ClientId {get;}
+YSharp.Awareness|property YSharp.YValue LocalState {get;}
+YSharp.Awareness|sealed class
+YSharp.DeleteSet|base System.Object
+YSharp.DeleteSet|ctor()
+YSharp.DeleteSet|method System.Boolean Contains(YSharp.ItemId id)
+YSharp.DeleteSet|method System.Void Encode(System.Buffers.IBufferWriter<System.Byte> writer, YSharp.UpdateFormat format = 0)
+YSharp.DeleteSet|sealed class
+YSharp.DeltaKind|enum
+YSharp.DeltaKind|enum Delete = 1
+YSharp.DeltaKind|enum Insert = 0
+YSharp.DeltaKind|enum Retain = 2
+YSharp.DeltaKind|implements System.IComparable
+YSharp.DeltaKind|implements System.IConvertible
+YSharp.DeltaKind|implements System.IFormattable
+YSharp.DeltaKind|implements System.ISpanFormattable
+YSharp.DocOptions|base System.Object
+YSharp.DocOptions|ctor()
+YSharp.DocOptions|implements System.IEquatable<YSharp.DocOptions>
+YSharp.DocOptions|method YSharp.DocOptions <Clone>$()
+YSharp.DocOptions|method override System.Boolean Equals(System.Object obj)
+YSharp.DocOptions|method override System.Int32 GetHashCode()
+YSharp.DocOptions|method override System.String ToString()
+YSharp.DocOptions|method sealed-override System.Boolean Equals(YSharp.DocOptions other)
+YSharp.DocOptions|method static System.Boolean op_Equality(YSharp.DocOptions left, YSharp.DocOptions right)
+YSharp.DocOptions|method static System.Boolean op_Inequality(YSharp.DocOptions left, YSharp.DocOptions right)
+YSharp.DocOptions|property System.Boolean AutoLoad {get;set;}
+YSharp.DocOptions|property System.Boolean Gc {get;set;}
+YSharp.DocOptions|property System.Boolean ShouldLoad {get;set;}
+YSharp.DocOptions|property System.Func<YSharp.ItemView, System.Boolean> GcFilter {get;set;}
+YSharp.DocOptions|property System.Nullable<System.UInt64> ClientId {get;set;}
+YSharp.DocOptions|property System.String CollectionId {get;set;}
+YSharp.DocOptions|property System.String Guid {get;set;}
+YSharp.DocOptions|property System.TimeProvider TimeProvider {get;set;}
+YSharp.DocOptions|property YSharp.IClientIdGenerator ClientIdGenerator {get;set;}
+YSharp.DocOptions|property YSharp.YLimits Limits {get;set;}
+YSharp.DocOptions|property YSharp.YValue Meta {get;set;}
+YSharp.DocOptions|sealed class
+YSharp.Doc|base System.Object
+YSharp.Doc|ctor(YSharp.DocOptions options = null)
+YSharp.Doc|event System.Action<YSharp.Doc> Destroyed
+YSharp.Doc|event System.Action<YSharp.Doc> Destroying
+YSharp.Doc|event System.Action<YSharp.Doc> Loaded
+YSharp.Doc|event System.Action<YSharp.Doc> Synced
+YSharp.Doc|event YSharp.AllTransactionsHandler AfterAllTransactions
+YSharp.Doc|event YSharp.ObserverFaultHandler ObserverFaulted
+YSharp.Doc|event YSharp.SubdocsHandler SubdocsChanged
+YSharp.Doc|event YSharp.TransactionHandler AfterTransaction
+YSharp.Doc|event YSharp.TransactionHandler AfterTransactionCleanup
+YSharp.Doc|event YSharp.TransactionHandler BeforeAllTransactions
+YSharp.Doc|event YSharp.TransactionHandler BeforeObserverCalls
+YSharp.Doc|event YSharp.TransactionHandler BeforeTransaction
+YSharp.Doc|event YSharp.UpdateHandler Update
+YSharp.Doc|event YSharp.UpdateHandler UpdateV2
+YSharp.Doc|implements System.IDisposable
+YSharp.Doc|method System.Byte[] EncodeStateAsUpdate(System.ReadOnlySpan<System.Byte> targetStateVector = default, YSharp.UpdateFormat format = 0)
+YSharp.Doc|method System.Collections.Generic.IReadOnlyCollection<System.String> GetSubdocGuids()
+YSharp.Doc|method System.Void ApplyUpdate(System.ReadOnlySpan<System.Byte> update, System.Object origin = null, YSharp.UpdateFormat format = 0)
+YSharp.Doc|method System.Void Destroy()
+YSharp.Doc|method System.Void EncodeStateAsUpdate(System.Buffers.IBufferWriter<System.Byte> writer, System.ReadOnlySpan<System.Byte> targetStateVector = default, YSharp.UpdateFormat format = 0)
+YSharp.Doc|method System.Void EncodeStateVector(System.Buffers.IBufferWriter<System.Byte> writer)
+YSharp.Doc|method System.Void Load()
+YSharp.Doc|method System.Void ReadTransact(System.Action<YSharp.Transaction> body)
+YSharp.Doc|method System.Void Transact(System.Action<YSharp.Transaction> body, System.Object origin = null)
+YSharp.Doc|method System.Void Transact<TState>(TState state, System.Action<TState, YSharp.Transaction> body, System.Object origin = null)
+YSharp.Doc|method System.Void TransactWithTimeout(System.Action<YSharp.Transaction> body, System.Object origin, System.TimeSpan timeout, System.Threading.CancellationToken ct = default)
+YSharp.Doc|method TResult Transact<TResult>(System.Func<YSharp.Transaction, TResult> body, System.Object origin = null)
+YSharp.Doc|method TResult Transact<TState, TResult>(TState state, System.Func<TState, YSharp.Transaction, TResult> body, System.Object origin = null)
+YSharp.Doc|method YSharp.ApplyResult TryApplyUpdate(System.ReadOnlySpan<System.Byte> update, System.Object origin = null, YSharp.UpdateFormat format = 0)
+YSharp.Doc|method YSharp.StateVector GetStateVector()
+YSharp.Doc|method YSharp.TransactionScope BeginReadTransaction()
+YSharp.Doc|method YSharp.TransactionScope BeginTransaction(System.Object origin = null)
+YSharp.Doc|method YSharp.TryTransactResult TryTransact(System.Action<YSharp.Transaction> body, System.Object origin = null)
+YSharp.Doc|method YSharp.YArray GetArray(System.String name = "")
+YSharp.Doc|method YSharp.YMap GetMap(System.String name = "")
+YSharp.Doc|method YSharp.YText GetText(System.String name = "")
+YSharp.Doc|method YSharp.YType Get(System.String name)
+YSharp.Doc|method YSharp.YValue ToJson()
+YSharp.Doc|method YSharp.YXmlElement GetXmlElement(System.String name = "")
+YSharp.Doc|method YSharp.YXmlFragment GetXmlFragment(System.String name = "")
+YSharp.Doc|method YSharp.YXmlText GetXmlText(System.String name = "")
+YSharp.Doc|method sealed-override System.Void Dispose()
+YSharp.Doc|property System.Boolean Gc {get;set;}
+YSharp.Doc|property System.Boolean IsDestroyed {get;}
+YSharp.Doc|property System.Boolean IsFaulted {get;}
+YSharp.Doc|property System.Boolean IsLoaded {get;}
+YSharp.Doc|property System.Boolean IsSynced {get;}
+YSharp.Doc|property System.Collections.Generic.IReadOnlyCollection<YSharp.Doc> Subdocs {get;}
+YSharp.Doc|property System.Collections.Generic.IReadOnlyDictionary<System.String, YSharp.YType> Share {get;}
+YSharp.Doc|property System.String Guid {get;}
+YSharp.Doc|property System.UInt64 ClientId {get;set;}
+YSharp.Doc|property YSharp.Doc ParentDoc {get;}
+YSharp.Doc|property YSharp.YLimits Limits {get;}
+YSharp.Doc|sealed class
+YSharp.IClientIdGenerator|interface
+YSharp.IClientIdGenerator|method abstract System.UInt64 Next()
+YSharp.ItemId|base System.ValueType
+YSharp.ItemId|ctor(System.UInt64 Client, System.Int64 Clock)
+YSharp.ItemId|implements System.IEquatable<YSharp.ItemId>
+YSharp.ItemId|method System.Void Deconstruct(out System.UInt64 Client, out System.Int64 Clock)
+YSharp.ItemId|method override System.Boolean Equals(System.Object obj)
+YSharp.ItemId|method override System.Int32 GetHashCode()
+YSharp.ItemId|method override System.String ToString()
+YSharp.ItemId|method sealed-override System.Boolean Equals(YSharp.ItemId other)
+YSharp.ItemId|method static System.Boolean op_Equality(YSharp.ItemId left, YSharp.ItemId right)
+YSharp.ItemId|method static System.Boolean op_Inequality(YSharp.ItemId left, YSharp.ItemId right)
+YSharp.ItemId|property System.Int64 Clock {get;set;}
+YSharp.ItemId|property System.UInt64 Client {get;set;}
+YSharp.ItemId|struct readonly
+YSharp.ItemView|base System.ValueType
+YSharp.ItemView|property System.Boolean IsDeleted {get;}
+YSharp.ItemView|property YSharp.ItemId Id {get;}
+YSharp.ItemView|struct readonly
+YSharp.KeyChangeAction|enum
+YSharp.KeyChangeAction|enum Add = 0
+YSharp.KeyChangeAction|enum Delete = 2
+YSharp.KeyChangeAction|enum Update = 1
+YSharp.KeyChangeAction|implements System.IComparable
+YSharp.KeyChangeAction|implements System.IConvertible
+YSharp.KeyChangeAction|implements System.IFormattable
+YSharp.KeyChangeAction|implements System.ISpanFormattable
+YSharp.KeyChange|base System.ValueType
+YSharp.KeyChange|ctor(YSharp.KeyChangeAction Action, System.Nullable<YSharp.YEntry> OldValue)
+YSharp.KeyChange|implements System.IEquatable<YSharp.KeyChange>
+YSharp.KeyChange|method System.Void Deconstruct(out YSharp.KeyChangeAction Action, out System.Nullable<YSharp.YEntry> OldValue)
+YSharp.KeyChange|method override System.Boolean Equals(System.Object obj)
+YSharp.KeyChange|method override System.Int32 GetHashCode()
+YSharp.KeyChange|method override System.String ToString()
+YSharp.KeyChange|method sealed-override System.Boolean Equals(YSharp.KeyChange other)
+YSharp.KeyChange|method static System.Boolean op_Equality(YSharp.KeyChange left, YSharp.KeyChange right)
+YSharp.KeyChange|method static System.Boolean op_Inequality(YSharp.KeyChange left, YSharp.KeyChange right)
+YSharp.KeyChange|property System.Nullable<YSharp.YEntry> OldValue {get;set;}
+YSharp.KeyChange|property YSharp.KeyChangeAction Action {get;set;}
+YSharp.KeyChange|struct readonly
+YSharp.ListDeltaOp|base System.ValueType
+YSharp.ListDeltaOp|property System.Int32 Length {get;}
+YSharp.ListDeltaOp|property System.ReadOnlyMemory<YSharp.YEntry> Inserted {get;}
+YSharp.ListDeltaOp|property YSharp.DeltaKind Kind {get;}
+YSharp.ListDeltaOp|struct readonly
+YSharp.ListEnumerator|base System.ValueType
+YSharp.ListEnumerator|method System.Boolean MoveNext()
+YSharp.ListEnumerator|property YSharp.YEntry Current {get;}
+YSharp.ListEnumerator|struct
+YSharp.MapEnumerator|base System.ValueType
+YSharp.MapEnumerator|method System.Boolean MoveNext()
+YSharp.MapEnumerator|property System.Collections.Generic.KeyValuePair<System.String, YSharp.YEntry> Current {get;}
+YSharp.MapEnumerator|struct
+YSharp.ObserverFaultHandler|base System.MulticastDelegate
+YSharp.ObserverFaultHandler|ctor(System.Object object, System.IntPtr method)
+YSharp.ObserverFaultHandler|delegate
+YSharp.ObserverFaultHandler|implements System.ICloneable
+YSharp.ObserverFaultHandler|implements System.Runtime.Serialization.ISerializable
+YSharp.ObserverFaultHandler|method virtual System.IAsyncResult BeginInvoke(System.Exception fault, System.Object handlerOwner, System.AsyncCallback callback, System.Object object)
+YSharp.ObserverFaultHandler|method virtual System.Void EndInvoke(System.IAsyncResult result)
+YSharp.ObserverFaultHandler|method virtual System.Void Invoke(System.Exception fault, System.Object handlerOwner)
+YSharp.PermanentUserDataOptions|base System.Object
+YSharp.PermanentUserDataOptions|ctor()
+YSharp.PermanentUserDataOptions|property System.Action<System.Action> Defer {get;set;}
+YSharp.PermanentUserDataOptions|property YSharp.YMap Store {get;set;}
+YSharp.PermanentUserDataOptions|sealed class
+YSharp.PermanentUserData|base System.Object
+YSharp.PermanentUserData|ctor(YSharp.Doc doc, YSharp.PermanentUserDataOptions options = null)
+YSharp.PermanentUserData|method System.String GetUserByClientId(System.UInt64 clientId)
+YSharp.PermanentUserData|method System.String GetUserByDeletedId(YSharp.ItemId id)
+YSharp.PermanentUserData|method System.Void SetUserMapping(YSharp.Doc doc, System.UInt64 clientId, System.String description, System.Func<YSharp.Transaction, YSharp.DeleteSet, System.Boolean> filter = null)
+YSharp.PermanentUserData|sealed class
+YSharp.RelativePosition|base System.ValueType
+YSharp.RelativePosition|ctor(System.Nullable<YSharp.ItemId> Item, System.String TypeName, System.Nullable<YSharp.ItemId> Type, System.Int32 Assoc)
+YSharp.RelativePosition|implements System.IEquatable<YSharp.RelativePosition>
+YSharp.RelativePosition|method System.Nullable<YSharp.AbsolutePosition> Resolve(YSharp.Doc doc, System.Boolean followUndoneDeletions = true)
+YSharp.RelativePosition|method System.Void Deconstruct(out System.Nullable<YSharp.ItemId> Item, out System.String TypeName, out System.Nullable<YSharp.ItemId> Type, out System.Int32 Assoc)
+YSharp.RelativePosition|method System.Void Encode(System.Buffers.IBufferWriter<System.Byte> writer)
+YSharp.RelativePosition|method YSharp.YValue ToJson()
+YSharp.RelativePosition|method override System.Boolean Equals(System.Object obj)
+YSharp.RelativePosition|method override System.Int32 GetHashCode()
+YSharp.RelativePosition|method override System.String ToString()
+YSharp.RelativePosition|method sealed-override System.Boolean Equals(YSharp.RelativePosition other)
+YSharp.RelativePosition|method static System.Boolean op_Equality(YSharp.RelativePosition left, YSharp.RelativePosition right)
+YSharp.RelativePosition|method static System.Boolean op_Inequality(YSharp.RelativePosition left, YSharp.RelativePosition right)
+YSharp.RelativePosition|method static YSharp.YStatus TryDecode(System.ReadOnlySpan<System.Byte> bytes, out YSharp.RelativePosition position)
+YSharp.RelativePosition|method static YSharp.YStatus TryFromJson(in YSharp.YValue json, out YSharp.RelativePosition position)
+YSharp.RelativePosition|property System.Int32 Assoc {get;set;}
+YSharp.RelativePosition|property System.Nullable<YSharp.ItemId> Item {get;set;}
+YSharp.RelativePosition|property System.Nullable<YSharp.ItemId> Type {get;set;}
+YSharp.RelativePosition|property System.String TypeName {get;set;}
+YSharp.RelativePosition|struct readonly
+YSharp.StackItemEvent|base System.ValueType
+YSharp.StackItemEvent|ctor(YSharp.StackItem Item, System.Object Origin, System.Boolean IsRedo, System.Collections.Generic.IReadOnlyCollection<YSharp.YType> ChangedParentTypes)
+YSharp.StackItemEvent|implements System.IEquatable<YSharp.StackItemEvent>
+YSharp.StackItemEvent|method System.Void Deconstruct(out YSharp.StackItem Item, out System.Object Origin, out System.Boolean IsRedo, out System.Collections.Generic.IReadOnlyCollection<YSharp.YType> ChangedParentTypes)
+YSharp.StackItemEvent|method override System.Boolean Equals(System.Object obj)
+YSharp.StackItemEvent|method override System.Int32 GetHashCode()
+YSharp.StackItemEvent|method override System.String ToString()
+YSharp.StackItemEvent|method sealed-override System.Boolean Equals(YSharp.StackItemEvent other)
+YSharp.StackItemEvent|method static System.Boolean op_Equality(YSharp.StackItemEvent left, YSharp.StackItemEvent right)
+YSharp.StackItemEvent|method static System.Boolean op_Inequality(YSharp.StackItemEvent left, YSharp.StackItemEvent right)
+YSharp.StackItemEvent|property System.Boolean IsRedo {get;set;}
+YSharp.StackItemEvent|property System.Collections.Generic.IReadOnlyCollection<YSharp.YType> ChangedParentTypes {get;set;}
+YSharp.StackItemEvent|property System.Object Origin {get;set;}
+YSharp.StackItemEvent|property YSharp.StackItem Item {get;set;}
+YSharp.StackItemEvent|struct readonly
+YSharp.StackItem|base System.Object
+YSharp.StackItem|ctor()
+YSharp.StackItem|property System.Collections.Generic.Dictionary<System.Object, System.Object> Meta {get;}
+YSharp.StackItem|property YSharp.DeleteSet Deletions {get;}
+YSharp.StackItem|property YSharp.DeleteSet Insertions {get;}
+YSharp.StackItem|sealed class
+YSharp.StateVector|base System.Object
+YSharp.StateVector|ctor()
+YSharp.StateVector|method System.Void Encode(System.Buffers.IBufferWriter<System.Byte> writer)
+YSharp.StateVector|method static YSharp.StateVector Decode(System.ReadOnlySpan<System.Byte> v1)
+YSharp.StateVector|method static YSharp.StateVector Of(YSharp.Doc doc)
+YSharp.StateVector|property System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<System.UInt64, System.Int64>> Clients {get;}
+YSharp.StateVector|property System.Int64 Item {get;}
+YSharp.StateVector|sealed class
+YSharp.SubdocsChange|base System.ValueType
+YSharp.SubdocsChange|property System.Collections.Generic.IReadOnlyList<YSharp.Doc> Added {get;}
+YSharp.SubdocsChange|property System.Collections.Generic.IReadOnlyList<YSharp.Doc> Loaded {get;}
+YSharp.SubdocsChange|property System.Collections.Generic.IReadOnlyList<YSharp.Doc> Removed {get;}
+YSharp.SubdocsChange|struct readonly
+YSharp.SubdocsHandler|base System.MulticastDelegate
+YSharp.SubdocsHandler|ctor(System.Object object, System.IntPtr method)
+YSharp.SubdocsHandler|delegate
+YSharp.SubdocsHandler|implements System.ICloneable
+YSharp.SubdocsHandler|implements System.Runtime.Serialization.ISerializable
+YSharp.SubdocsHandler|method virtual System.IAsyncResult BeginInvoke(YSharp.SubdocsChange change, YSharp.Doc doc, YSharp.Transaction tx, System.AsyncCallback callback, System.Object object)
+YSharp.SubdocsHandler|method virtual System.Void EndInvoke(System.IAsyncResult result)
+YSharp.SubdocsHandler|method virtual System.Void Invoke(YSharp.SubdocsChange change, YSharp.Doc doc, YSharp.Transaction tx)
+YSharp.Subscription|base System.ValueType
+YSharp.Subscription|implements System.IDisposable
+YSharp.Subscription|method sealed-override System.Void Dispose()
+YSharp.Subscription|struct readonly
+YSharp.SyncMessageType|enum
+YSharp.SyncMessageType|enum Step1 = 0
+YSharp.SyncMessageType|enum Step2 = 1
+YSharp.SyncMessageType|enum Update = 2
+YSharp.SyncMessageType|implements System.IComparable
+YSharp.SyncMessageType|implements System.IConvertible
+YSharp.SyncMessageType|implements System.IFormattable
+YSharp.SyncMessageType|implements System.ISpanFormattable
+YSharp.SyncReadResult|base System.ValueType
+YSharp.SyncReadResult|property System.Boolean ReplyWritten {get;}
+YSharp.SyncReadResult|property YSharp.ApplyResult Apply {get;}
+YSharp.SyncReadResult|property YSharp.SyncMessageType Type {get;}
+YSharp.SyncReadResult|struct readonly
+YSharp.TextDeltaOp|base System.ValueType
+YSharp.TextDeltaOp|ctor(YSharp.DeltaKind kind, System.Int32 length, System.String text = null, YSharp.YEntry embed = default, YSharp.YValue attributes = default)
+YSharp.TextDeltaOp|property System.Int32 Length {get;}
+YSharp.TextDeltaOp|property System.String Text {get;}
+YSharp.TextDeltaOp|property YSharp.DeltaKind Kind {get;}
+YSharp.TextDeltaOp|property YSharp.YEntry Embed {get;}
+YSharp.TextDeltaOp|property YSharp.YValue Attributes {get;}
+YSharp.TextDeltaOp|struct readonly
+YSharp.TransactionHandler|base System.MulticastDelegate
+YSharp.TransactionHandler|ctor(System.Object object, System.IntPtr method)
+YSharp.TransactionHandler|delegate
+YSharp.TransactionHandler|implements System.ICloneable
+YSharp.TransactionHandler|implements System.Runtime.Serialization.ISerializable
+YSharp.TransactionHandler|method virtual System.IAsyncResult BeginInvoke(YSharp.Transaction tx, YSharp.Doc doc, System.AsyncCallback callback, System.Object object)
+YSharp.TransactionHandler|method virtual System.Void EndInvoke(System.IAsyncResult result)
+YSharp.TransactionHandler|method virtual System.Void Invoke(YSharp.Transaction tx, YSharp.Doc doc)
+YSharp.TransactionScope|base System.ValueType
+YSharp.TransactionScope|method System.Void Dispose()
+YSharp.TransactionScope|property YSharp.Transaction Transaction {get;}
+YSharp.TransactionScope|ref struct
+YSharp.Transaction|base System.Object
+YSharp.Transaction|ctor()
+YSharp.Transaction|property System.Boolean IsLocal {get;}
+YSharp.Transaction|property System.Boolean IsValid {get;}
+YSharp.Transaction|property System.Boolean IsWrite {get;}
+YSharp.Transaction|property System.Collections.Generic.IReadOnlyCollection<YSharp.YType> ChangedParentTypes {get;}
+YSharp.Transaction|property System.Collections.Generic.IReadOnlyCollection<YSharp.YType> ChangedTypes {get;}
+YSharp.Transaction|property System.Object Origin {get;}
+YSharp.Transaction|property YSharp.DeleteSet DeleteSet {get;}
+YSharp.Transaction|property YSharp.Doc Doc {get;}
+YSharp.Transaction|property YSharp.StateVector AfterState {get;}
+YSharp.Transaction|property YSharp.StateVector BeforeState {get;}
+YSharp.Transaction|sealed class
+YSharp.TryTransactResult|base System.ValueType
+YSharp.TryTransactResult|property System.Boolean Acquired {get;}
+YSharp.TryTransactResult|property YSharp.TryTransactStatus Status {get;}
+YSharp.TryTransactResult|struct readonly
+YSharp.TryTransactStatus|enum
+YSharp.TryTransactStatus|enum Acquired = 0
+YSharp.TryTransactStatus|enum Contended = 1
+YSharp.TryTransactStatus|enum UpgradeRefused = 2
+YSharp.TryTransactStatus|implements System.IComparable
+YSharp.TryTransactStatus|implements System.IConvertible
+YSharp.TryTransactStatus|implements System.IFormattable
+YSharp.TryTransactStatus|implements System.ISpanFormattable
+YSharp.UndoManagerOptions|base System.Object
+YSharp.UndoManagerOptions|ctor()
+YSharp.UndoManagerOptions|property System.Boolean IgnoreRemoteMapChanges {get;set;}
+YSharp.UndoManagerOptions|property System.Collections.Generic.ISet<System.Object> TrackedOrigins {get;set;}
+YSharp.UndoManagerOptions|property System.Func<YSharp.ItemView, System.Boolean> DeleteFilter {get;set;}
+YSharp.UndoManagerOptions|property System.Func<YSharp.Transaction, System.Boolean> CaptureTransaction {get;set;}
+YSharp.UndoManagerOptions|property System.TimeProvider TimeProvider {get;set;}
+YSharp.UndoManagerOptions|property System.TimeSpan CaptureTimeout {get;set;}
+YSharp.UndoManagerOptions|property YSharp.Doc Doc {get;set;}
+YSharp.UndoManagerOptions|sealed class
+YSharp.UndoManager|base System.Object
+YSharp.UndoManager|ctor(System.Collections.Generic.IReadOnlyList<YSharp.YType> scope, YSharp.UndoManagerOptions options = null)
+YSharp.UndoManager|ctor(YSharp.Doc scope, YSharp.UndoManagerOptions options = null)
+YSharp.UndoManager|ctor(YSharp.YType scope, YSharp.UndoManagerOptions options = null)
+YSharp.UndoManager|event System.Action<System.Boolean, System.Boolean> StackCleared
+YSharp.UndoManager|event System.Action<YSharp.StackItemEvent> StackItemAdded
+YSharp.UndoManager|event System.Action<YSharp.StackItemEvent> StackItemPopped
+YSharp.UndoManager|event System.Action<YSharp.StackItemEvent> StackItemUpdated
+YSharp.UndoManager|implements System.IDisposable
+YSharp.UndoManager|method System.Void AddToScope(YSharp.YType type)
+YSharp.UndoManager|method System.Void AddTrackedOrigin(System.Object origin)
+YSharp.UndoManager|method System.Void Clear(System.Boolean undo = true, System.Boolean redo = true)
+YSharp.UndoManager|method System.Void RemoveTrackedOrigin(System.Object origin)
+YSharp.UndoManager|method System.Void StopCapturing()
+YSharp.UndoManager|method YSharp.StackItem Redo()
+YSharp.UndoManager|method YSharp.StackItem Undo()
+YSharp.UndoManager|method sealed-override System.Void Dispose()
+YSharp.UndoManager|property System.Boolean CanRedo {get;}
+YSharp.UndoManager|property System.Boolean CanUndo {get;}
+YSharp.UndoManager|property System.Collections.Generic.IReadOnlyList<YSharp.StackItem> RedoStack {get;}
+YSharp.UndoManager|property System.Collections.Generic.IReadOnlyList<YSharp.StackItem> UndoStack {get;}
+YSharp.UndoManager|sealed class
+YSharp.UpdateFormat|enum
+YSharp.UpdateFormat|enum V1 = 0
+YSharp.UpdateFormat|enum V2 = 1
+YSharp.UpdateFormat|implements System.IComparable
+YSharp.UpdateFormat|implements System.IConvertible
+YSharp.UpdateFormat|implements System.IFormattable
+YSharp.UpdateFormat|implements System.ISpanFormattable
+YSharp.UpdateHandler|base System.MulticastDelegate
+YSharp.UpdateHandler|ctor(System.Object object, System.IntPtr method)
+YSharp.UpdateHandler|delegate
+YSharp.UpdateHandler|implements System.ICloneable
+YSharp.UpdateHandler|implements System.Runtime.Serialization.ISerializable
+YSharp.UpdateHandler|method virtual System.IAsyncResult BeginInvoke(System.ReadOnlySpan<System.Byte> update, System.Object origin, YSharp.Doc doc, YSharp.Transaction tx, System.AsyncCallback callback, System.Object object)
+YSharp.UpdateHandler|method virtual System.Void EndInvoke(System.IAsyncResult result)
+YSharp.UpdateHandler|method virtual System.Void Invoke(System.ReadOnlySpan<System.Byte> update, System.Object origin, YSharp.Doc doc, YSharp.Transaction tx)
+YSharp.YArrayEvent|base YSharp.YEvent
+YSharp.YArrayEvent|ctor()
+YSharp.YArrayEvent|property System.ReadOnlySpan<YSharp.ListDeltaOp> Delta {get;}
+YSharp.YArrayEvent|sealed class
+YSharp.YArray|base YSharp.YType
+YSharp.YArray|ctor()
+YSharp.YArray|method System.Void CopyTo(System.Int32 start, System.Span<YSharp.YEntry> destination)
+YSharp.YArray|method System.Void Delete(System.Int32 index, System.Int32 length = 1)
+YSharp.YArray|method System.Void Insert(System.Int32 index, System.ReadOnlySpan<YSharp.YEntry> content)
+YSharp.YArray|method System.Void Push(System.ReadOnlySpan<YSharp.YEntry> content)
+YSharp.YArray|method System.Void Unshift(System.ReadOnlySpan<YSharp.YEntry> content)
+YSharp.YArray|method YSharp.ListEnumerator GetEnumerator()
+YSharp.YArray|method YSharp.YEntry[] Slice(System.Int32 start, System.Nullable<System.Int32> end = default)
+YSharp.YArray|method YSharp.YEntry[] ToArray()
+YSharp.YArray|method override YSharp.YType Clone()
+YSharp.YArray|method override YSharp.YValue ToJson()
+YSharp.YArray|method static YSharp.YArray From(System.Collections.Generic.IEnumerable<YSharp.YEntry> items)
+YSharp.YArray|property System.Int32 Length {get;}
+YSharp.YArray|property YSharp.YEntry Item {get;}
+YSharp.YArray|sealed class
+YSharp.YAuth|base System.Object
+YSharp.YAuth|method static System.Void WritePermissionDenied(System.Buffers.IBufferWriter<System.Byte> writer, System.String reason)
+YSharp.YAuth|method static YSharp.YStatus TryReadMessage(ref System.ReadOnlySpan<System.Byte> input, YSharp.Doc doc, System.Action<YSharp.Doc, System.String> permissionDeniedHandler)
+YSharp.YAuth|static class
+YSharp.YConcurrencyException|base YSharp.YException
+YSharp.YConcurrencyException|ctor()
+YSharp.YConcurrencyException|implements System.Runtime.Serialization.ISerializable
+YSharp.YConcurrencyException|sealed class
+YSharp.YDecodeException|base YSharp.YException
+YSharp.YDecodeException|ctor()
+YSharp.YDecodeException|implements System.Runtime.Serialization.ISerializable
+YSharp.YDecodeException|property YSharp.YError Error {get;}
+YSharp.YDecodeException|sealed class
+YSharp.YDeepEventHandler|base System.MulticastDelegate
+YSharp.YDeepEventHandler|ctor(System.Object object, System.IntPtr method)
+YSharp.YDeepEventHandler|delegate
+YSharp.YDeepEventHandler|implements System.ICloneable
+YSharp.YDeepEventHandler|implements System.Runtime.Serialization.ISerializable
+YSharp.YDeepEventHandler|method virtual System.IAsyncResult BeginInvoke(System.Collections.Generic.IReadOnlyList<YSharp.YEvent> events, YSharp.Transaction tx, System.AsyncCallback callback, System.Object object)
+YSharp.YDeepEventHandler|method virtual System.Void EndInvoke(System.IAsyncResult result)
+YSharp.YDeepEventHandler|method virtual System.Void Invoke(System.Collections.Generic.IReadOnlyList<YSharp.YEvent> events, YSharp.Transaction tx)
+YSharp.YEntryKind|enum
+YSharp.YEntryKind|enum Any = 0
+YSharp.YEntryKind|enum Binary = 1
+YSharp.YEntryKind|enum Doc = 3
+YSharp.YEntryKind|enum Type = 2
+YSharp.YEntryKind|implements System.IComparable
+YSharp.YEntryKind|implements System.IConvertible
+YSharp.YEntryKind|implements System.IFormattable
+YSharp.YEntryKind|implements System.ISpanFormattable
+YSharp.YEntry|base System.ValueType
+YSharp.YEntry|method static YSharp.YEntry op_Implicit(System.Boolean b)
+YSharp.YEntry|method static YSharp.YEntry op_Implicit(System.Double d)
+YSharp.YEntry|method static YSharp.YEntry op_Implicit(System.String s)
+YSharp.YEntry|method static YSharp.YEntry op_Implicit(YSharp.Doc d)
+YSharp.YEntry|method static YSharp.YEntry op_Implicit(YSharp.YType t)
+YSharp.YEntry|method static YSharp.YEntry op_Implicit(YSharp.YValue v)
+YSharp.YEntry|property YSharp.Doc Doc {get;}
+YSharp.YEntry|property YSharp.YEntryKind Kind {get;}
+YSharp.YEntry|property YSharp.YType Type {get;}
+YSharp.YEntry|property YSharp.YValue Value {get;}
+YSharp.YEntry|struct readonly
+YSharp.YError|enum
+YSharp.YError|enum LimitExceeded = 2
+YSharp.YError|enum Malformed = 1
+YSharp.YError|enum None = 0
+YSharp.YError|enum Rejected = 3
+YSharp.YError|enum UnknownMessage = 4
+YSharp.YError|implements System.IComparable
+YSharp.YError|implements System.IConvertible
+YSharp.YError|implements System.IFormattable
+YSharp.YError|implements System.ISpanFormattable
+YSharp.YEventHandler|base System.MulticastDelegate
+YSharp.YEventHandler|ctor(System.Object object, System.IntPtr method)
+YSharp.YEventHandler|delegate
+YSharp.YEventHandler|implements System.ICloneable
+YSharp.YEventHandler|implements System.Runtime.Serialization.ISerializable
+YSharp.YEventHandler|method virtual System.IAsyncResult BeginInvoke(TEvent e, YSharp.Transaction tx, System.AsyncCallback callback, System.Object object)
+YSharp.YEventHandler|method virtual System.Void EndInvoke(System.IAsyncResult result)
+YSharp.YEventHandler|method virtual System.Void Invoke(TEvent e, YSharp.Transaction tx)
+YSharp.YEvent|abstract class
+YSharp.YEvent|base System.Object
+YSharp.YEvent|method System.Boolean Adds(YSharp.ItemId id)
+YSharp.YEvent|method System.Boolean Deletes(YSharp.ItemId id)
+YSharp.YEvent|method System.Collections.Generic.IReadOnlyList<YSharp.YPathSegment> GetPath()
+YSharp.YEvent|property System.Boolean IsValid {get;}
+YSharp.YEvent|property System.Collections.Generic.IReadOnlyDictionary<System.String, YSharp.KeyChange> Keys {get;}
+YSharp.YEvent|property YSharp.Transaction Transaction {get;}
+YSharp.YEvent|property YSharp.YType CurrentTarget {get;}
+YSharp.YEvent|property YSharp.YType Target {get;}
+YSharp.YException|base System.Exception
+YSharp.YException|class
+YSharp.YException|ctor()
+YSharp.YException|implements System.Runtime.Serialization.ISerializable
+YSharp.YInternalException|base YSharp.YException
+YSharp.YInternalException|ctor()
+YSharp.YInternalException|implements System.Runtime.Serialization.ISerializable
+YSharp.YInternalException|sealed class
+YSharp.YLifetimeException|base YSharp.YException
+YSharp.YLifetimeException|ctor()
+YSharp.YLifetimeException|implements System.Runtime.Serialization.ISerializable
+YSharp.YLifetimeException|sealed class
+YSharp.YLimits|base System.Object
+YSharp.YLimits|ctor()
+YSharp.YLimits|implements System.IEquatable<YSharp.YLimits>
+YSharp.YLimits|method YSharp.YLimits <Clone>$()
+YSharp.YLimits|method override System.Boolean Equals(System.Object obj)
+YSharp.YLimits|method override System.Int32 GetHashCode()
+YSharp.YLimits|method override System.String ToString()
+YSharp.YLimits|method sealed-override System.Boolean Equals(YSharp.YLimits other)
+YSharp.YLimits|method static System.Boolean op_Equality(YSharp.YLimits left, YSharp.YLimits right)
+YSharp.YLimits|method static System.Boolean op_Inequality(YSharp.YLimits left, YSharp.YLimits right)
+YSharp.YLimits|property System.Int32 MaxAnyDepth {get;set;}
+YSharp.YLimits|property System.Int32 MaxPendingBytes {get;set;}
+YSharp.YLimits|property System.Int32 MaxStringBytes {get;set;}
+YSharp.YLimits|property System.Int32 MaxStructsPerUpdate {get;set;}
+YSharp.YLimits|property System.Int32 MaxUpdateBytes {get;set;}
+YSharp.YLimits|property static YSharp.YLimits Default {get;}
+YSharp.YLimits|sealed class
+YSharp.YMapEvent|base YSharp.YEvent
+YSharp.YMapEvent|ctor()
+YSharp.YMapEvent|property System.Collections.Generic.IReadOnlyCollection<System.String> KeysChanged {get;}
+YSharp.YMapEvent|sealed class
+YSharp.YMap|base YSharp.YType
+YSharp.YMap|class
+YSharp.YMap|ctor()
+YSharp.YMap|ctor(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<System.String, YSharp.YEntry>> entries)
+YSharp.YMap|method System.Boolean Delete(System.String key)
+YSharp.YMap|method System.Boolean Has(System.String key)
+YSharp.YMap|method System.Boolean TryGet(System.String key, out YSharp.YEntry value)
+YSharp.YMap|method System.Void Clear()
+YSharp.YMap|method System.Void Set(System.String key, YSharp.YEntry value)
+YSharp.YMap|method T Set<T>(System.String key, T type)
+YSharp.YMap|method YSharp.MapEnumerator GetEnumerator()
+YSharp.YMap|method override YSharp.YType Clone()
+YSharp.YMap|method override YSharp.YValue ToJson()
+YSharp.YMap|property System.Collections.Generic.IReadOnlyList<System.String> Keys {get;}
+YSharp.YMap|property System.Int32 Count {get;}
+YSharp.YObjectView|base System.ValueType
+YSharp.YObjectView|method System.Boolean TryGetValue(System.String key, out YSharp.YValue v)
+YSharp.YObjectView|property System.Collections.Generic.KeyValuePair<System.String, YSharp.YValue> Item {get;}
+YSharp.YObjectView|property System.Int32 Count {get;}
+YSharp.YObjectView|struct readonly
+YSharp.YPathSegment|base System.ValueType
+YSharp.YPathSegment|ctor(System.String Key, System.Int32 Index)
+YSharp.YPathSegment|implements System.IEquatable<YSharp.YPathSegment>
+YSharp.YPathSegment|method System.Void Deconstruct(out System.String Key, out System.Int32 Index)
+YSharp.YPathSegment|method override System.Boolean Equals(System.Object obj)
+YSharp.YPathSegment|method override System.Int32 GetHashCode()
+YSharp.YPathSegment|method override System.String ToString()
+YSharp.YPathSegment|method sealed-override System.Boolean Equals(YSharp.YPathSegment other)
+YSharp.YPathSegment|method static System.Boolean op_Equality(YSharp.YPathSegment left, YSharp.YPathSegment right)
+YSharp.YPathSegment|method static System.Boolean op_Inequality(YSharp.YPathSegment left, YSharp.YPathSegment right)
+YSharp.YPathSegment|property System.Int32 Index {get;set;}
+YSharp.YPathSegment|property System.String Key {get;set;}
+YSharp.YPathSegment|struct readonly
+YSharp.YSnapshot|base System.Object
+YSharp.YSnapshot|ctor()
+YSharp.YSnapshot|implements System.IEquatable<YSharp.YSnapshot>
+YSharp.YSnapshot|method System.Boolean ContainsUpdate(System.ReadOnlySpan<System.Byte> update, YSharp.UpdateFormat format = 0)
+YSharp.YSnapshot|method System.Void Encode(System.Buffers.IBufferWriter<System.Byte> writer, YSharp.UpdateFormat format = 0)
+YSharp.YSnapshot|method sealed-override System.Boolean Equals(YSharp.YSnapshot other)
+YSharp.YSnapshot|method static YSharp.Doc CreateDoc(YSharp.Doc origin, YSharp.YSnapshot snapshot, YSharp.Doc target = null)
+YSharp.YSnapshot|method static YSharp.YSnapshot Create(YSharp.Doc doc)
+YSharp.YSnapshot|method static YSharp.YStatus TryDecode(System.ReadOnlySpan<System.Byte> bytes, YSharp.UpdateFormat format, out YSharp.YSnapshot snapshot)
+YSharp.YSnapshot|property YSharp.DeleteSet DeleteSet {get;}
+YSharp.YSnapshot|property YSharp.StateVector StateVector {get;}
+YSharp.YSnapshot|property static YSharp.YSnapshot Empty {get;}
+YSharp.YSnapshot|sealed class
+YSharp.YStatus|base System.ValueType
+YSharp.YStatus|property System.Boolean Ok {get;}
+YSharp.YStatus|property YSharp.YError Error {get;}
+YSharp.YStatus|struct readonly
+YSharp.YSync|base System.Object
+YSharp.YSync|method static System.Void WriteStep1(System.Buffers.IBufferWriter<System.Byte> writer, YSharp.Doc doc)
+YSharp.YSync|method static System.Void WriteStep2(System.Buffers.IBufferWriter<System.Byte> writer, YSharp.Doc doc, System.ReadOnlySpan<System.Byte> targetStateVector = default)
+YSharp.YSync|method static System.Void WriteUpdate(System.Buffers.IBufferWriter<System.Byte> writer, System.ReadOnlySpan<System.Byte> update)
+YSharp.YSync|method static YSharp.YStatus TryReadMessage(ref System.ReadOnlySpan<System.Byte> input, System.Buffers.IBufferWriter<System.Byte> reply, YSharp.Doc doc, System.Object origin, out YSharp.SyncReadResult result, System.Action<YSharp.YError> errorHandler = null)
+YSharp.YSync|static class
+YSharp.YTextEvent|base YSharp.YEvent
+YSharp.YTextEvent|ctor()
+YSharp.YTextEvent|property System.Boolean ChildListChanged {get;}
+YSharp.YTextEvent|property System.Collections.Generic.IReadOnlyCollection<System.String> KeysChanged {get;}
+YSharp.YTextEvent|property System.ReadOnlySpan<YSharp.TextDeltaOp> Delta {get;}
+YSharp.YTextEvent|sealed class
+YSharp.YText|base YSharp.YType
+YSharp.YText|class
+YSharp.YText|ctor(System.String initial = null)
+YSharp.YText|method System.Boolean TryGetAttribute(System.String name, out YSharp.YValue value)
+YSharp.YText|method System.Collections.Generic.IReadOnlyDictionary<System.String, YSharp.YValue> GetAttributes()
+YSharp.YText|method System.Void ApplyDelta(System.ReadOnlySpan<YSharp.TextDeltaOp> delta, System.Boolean sanitize = true)
+YSharp.YText|method System.Void CopyTo(System.Span<System.Char> destination)
+YSharp.YText|method System.Void Delete(System.Int32 index, System.Int32 length)
+YSharp.YText|method System.Void Format(System.Int32 index, System.Int32 length, in YSharp.YValue attributes)
+YSharp.YText|method System.Void Insert(System.Int32 index, System.String text, in YSharp.YValue attributes = default)
+YSharp.YText|method System.Void InsertEmbed(System.Int32 index, YSharp.YType embed, in YSharp.YValue attributes = default)
+YSharp.YText|method System.Void InsertEmbed(System.Int32 index, in YSharp.YValue embed, in YSharp.YValue attributes = default)
+YSharp.YText|method System.Void RemoveAttribute(System.String name)
+YSharp.YText|method System.Void SetAttribute(System.String name, in YSharp.YValue value)
+YSharp.YText|method YSharp.TextDeltaOp[] ToDelta(YSharp.YSnapshot snapshot = null, YSharp.YSnapshot previous = null, System.Func<System.String, YSharp.ItemId, YSharp.YValue> computeYChange = null)
+YSharp.YText|method override System.String ToString()
+YSharp.YText|method override YSharp.YType Clone()
+YSharp.YText|method override YSharp.YValue ToJson()
+YSharp.YText|property System.Int32 Length {get;}
+YSharp.YTypeConflictException|base YSharp.YException
+YSharp.YTypeConflictException|ctor()
+YSharp.YTypeConflictException|implements System.Runtime.Serialization.ISerializable
+YSharp.YTypeConflictException|sealed class
+YSharp.YType|abstract class
+YSharp.YType|base System.Object
+YSharp.YType|method System.Void Unobserve(YSharp.YEventHandler<YSharp.YEvent> handler)
+YSharp.YType|method System.Void UnobserveDeep(YSharp.YDeepEventHandler handler)
+YSharp.YType|method YSharp.RelativePosition CreateRelativePosition(System.Int32 index, System.Int32 assoc = 0)
+YSharp.YType|method YSharp.Subscription Observe(YSharp.YEventHandler<YSharp.YEvent> handler)
+YSharp.YType|method YSharp.Subscription ObserveDeep(YSharp.YDeepEventHandler handler)
+YSharp.YType|method abstract YSharp.YType Clone()
+YSharp.YType|method abstract YSharp.YValue ToJson()
+YSharp.YType|property System.Boolean IsIntegrated {get;}
+YSharp.YType|property YSharp.Doc Doc {get;}
+YSharp.YType|property YSharp.YType Parent {get;}
+YSharp.YUntyped|base YSharp.YType
+YSharp.YUntyped|ctor()
+YSharp.YUntyped|method override YSharp.YType Clone()
+YSharp.YUntyped|method override YSharp.YValue ToJson()
+YSharp.YUntyped|sealed class
+YSharp.YUpdate|base System.Object
+YSharp.YUpdate|method static YSharp.YStatus TryConvert(System.ReadOnlySpan<System.Byte> update, YSharp.UpdateFormat from, YSharp.UpdateFormat to, System.Buffers.IBufferWriter<System.Byte> output, YSharp.YLimits limits = null)
+YSharp.YUpdate|method static YSharp.YStatus TryDiff(System.ReadOnlySpan<System.Byte> update, System.ReadOnlySpan<System.Byte> stateVector, System.Buffers.IBufferWriter<System.Byte> output, YSharp.UpdateFormat format = 0, YSharp.YLimits limits = null)
+YSharp.YUpdate|method static YSharp.YStatus TryMerge(System.Collections.Generic.IReadOnlyList<System.ReadOnlyMemory<System.Byte>> updates, System.Buffers.IBufferWriter<System.Byte> output, YSharp.UpdateFormat format = 0, YSharp.YLimits limits = null)
+YSharp.YUpdate|method static YSharp.YStatus TryStateVectorFromUpdate(System.ReadOnlySpan<System.Byte> update, System.Buffers.IBufferWriter<System.Byte> output, YSharp.UpdateFormat format = 0, YSharp.YLimits limits = null)
+YSharp.YUpdate|method static YSharp.YStatus TryValidate(System.ReadOnlySpan<System.Byte> update, YSharp.UpdateFormat format = 0, YSharp.YLimits limits = null)
+YSharp.YUpdate|static class
+YSharp.YValueKind|enum
+YSharp.YValueKind|enum Array = 7
+YSharp.YValueKind|enum BigInt = 4
+YSharp.YValueKind|enum Bool = 2
+YSharp.YValueKind|enum Bytes = 6
+YSharp.YValueKind|enum Null = 1
+YSharp.YValueKind|enum Number = 3
+YSharp.YValueKind|enum Object = 8
+YSharp.YValueKind|enum String = 5
+YSharp.YValueKind|enum Undefined = 0
+YSharp.YValueKind|implements System.IComparable
+YSharp.YValueKind|implements System.IConvertible
+YSharp.YValueKind|implements System.IFormattable
+YSharp.YValueKind|implements System.ISpanFormattable
+YSharp.YValue|base System.ValueType
+YSharp.YValue|implements System.IEquatable<YSharp.YValue>
+YSharp.YValue|method System.Boolean AsBool()
+YSharp.YValue|method System.Boolean AttributeEquals(in YSharp.YValue other)
+YSharp.YValue|method System.Boolean TryGetArray(out System.ReadOnlySpan<YSharp.YValue> v)
+YSharp.YValue|method System.Boolean TryGetBigInt(out System.Int64 v)
+YSharp.YValue|method System.Boolean TryGetBool(out System.Boolean v)
+YSharp.YValue|method System.Boolean TryGetBytes(out System.ReadOnlySpan<System.Byte> v)
+YSharp.YValue|method System.Boolean TryGetNumber(out System.Double v)
+YSharp.YValue|method System.Boolean TryGetObject(out YSharp.YObjectView v)
+YSharp.YValue|method System.Boolean TryGetString(out System.String v)
+YSharp.YValue|method System.Double AsNumber()
+YSharp.YValue|method System.String AsString()
+YSharp.YValue|method YSharp.YStatus TryWriteJson(System.Buffers.IBufferWriter<System.Byte> writer)
+YSharp.YValue|method override System.Boolean Equals(System.Object o)
+YSharp.YValue|method override System.Int32 GetHashCode()
+YSharp.YValue|method sealed-override System.Boolean Equals(YSharp.YValue other)
+YSharp.YValue|method static System.Boolean op_Equality(YSharp.YValue a, YSharp.YValue b)
+YSharp.YValue|method static System.Boolean op_Inequality(YSharp.YValue a, YSharp.YValue b)
+YSharp.YValue|method static YSharp.YStatus TryParseJson(System.ReadOnlySpan<System.Byte> utf8, in YSharp.YLimits limits, out YSharp.YValue value)
+YSharp.YValue|method static YSharp.YValue Array(System.ReadOnlySpan<YSharp.YValue> items)
+YSharp.YValue|method static YSharp.YValue BigInt(System.Int64 v)
+YSharp.YValue|method static YSharp.YValue Bytes(System.ReadOnlySpan<System.Byte> copy)
+YSharp.YValue|method static YSharp.YValue BytesOwned(System.Byte[] transfer)
+YSharp.YValue|method static YSharp.YValue Number(System.UInt64 v)
+YSharp.YValue|method static YSharp.YValue Object(System.ReadOnlySpan<System.Collections.Generic.KeyValuePair<System.String, YSharp.YValue>> members)
+YSharp.YValue|method static YSharp.YValue op_Implicit(System.Boolean v)
+YSharp.YValue|method static YSharp.YValue op_Implicit(System.Double v)
+YSharp.YValue|method static YSharp.YValue op_Implicit(System.Int32 v)
+YSharp.YValue|method static YSharp.YValue op_Implicit(System.String v)
+YSharp.YValue|method static YSharp.YValue op_Implicit(System.UInt32 v)
+YSharp.YValue|property YSharp.YValueKind Kind {get;}
+YSharp.YValue|property static YSharp.YValue Null {get;}
+YSharp.YValue|property static YSharp.YValue Undefined {get;}
+YSharp.YValue|struct readonly
+YSharp.YXmlElement|base YSharp.YXmlFragment
+YSharp.YXmlElement|ctor(System.String nodeName = "UNDEFINED")
+YSharp.YXmlElement|method System.Boolean HasAttribute(System.String name)
+YSharp.YXmlElement|method System.Boolean TryGetAttribute(System.String name, out YSharp.YValue value)
+YSharp.YXmlElement|method System.Collections.Generic.IReadOnlyDictionary<System.String, YSharp.YValue> GetAttributes(YSharp.YSnapshot snapshot = null)
+YSharp.YXmlElement|method System.Void RemoveAttribute(System.String name)
+YSharp.YXmlElement|method System.Void SetAttribute(System.String name, in YSharp.YValue value)
+YSharp.YXmlElement|method override System.String ToString()
+YSharp.YXmlElement|property System.String NodeName {get;}
+YSharp.YXmlElement|property YSharp.YType NextSibling {get;}
+YSharp.YXmlElement|property YSharp.YType PrevSibling {get;}
+YSharp.YXmlElement|sealed class
+YSharp.YXmlEvent|base YSharp.YEvent
+YSharp.YXmlEvent|ctor()
+YSharp.YXmlEvent|property System.Boolean ChildListChanged {get;}
+YSharp.YXmlEvent|property System.Collections.Generic.IReadOnlyCollection<System.String> AttributesChanged {get;}
+YSharp.YXmlEvent|property System.ReadOnlySpan<YSharp.ListDeltaOp> Delta {get;}
+YSharp.YXmlEvent|sealed class
+YSharp.YXmlFragment|base YSharp.YType
+YSharp.YXmlFragment|class
+YSharp.YXmlFragment|ctor()
+YSharp.YXmlFragment|method System.Collections.Generic.IEnumerable<YSharp.YType> TreeWalk(System.Func<YSharp.YType, System.Boolean> filter = null)
+YSharp.YXmlFragment|method System.Collections.Generic.IReadOnlyList<YSharp.YXmlElement> QuerySelectorAll(System.String nodeName)
+YSharp.YXmlFragment|method System.Void Delete(System.Int32 index, System.Int32 length = 1)
+YSharp.YXmlFragment|method System.Void Insert(System.Int32 index, System.ReadOnlySpan<YSharp.YType> content)
+YSharp.YXmlFragment|method System.Void InsertAfter(YSharp.YType reference, System.ReadOnlySpan<YSharp.YType> content)
+YSharp.YXmlFragment|method System.Void InsertSubdoc(System.Int32 index, YSharp.Doc subdoc)
+YSharp.YXmlFragment|method System.Void Push(System.ReadOnlySpan<YSharp.YType> content)
+YSharp.YXmlFragment|method System.Void Unshift(System.ReadOnlySpan<YSharp.YType> content)
+YSharp.YXmlFragment|method YSharp.YXmlElement QuerySelector(System.String nodeName)
+YSharp.YXmlFragment|method override System.String ToString()
+YSharp.YXmlFragment|method override YSharp.YType Clone()
+YSharp.YXmlFragment|method override YSharp.YValue ToJson()
+YSharp.YXmlFragment|property System.Int32 Length {get;}
+YSharp.YXmlFragment|property YSharp.YType FirstChild {get;}
+YSharp.YXmlFragment|property YSharp.YType Item {get;}
+YSharp.YXmlHook|base YSharp.YMap
+YSharp.YXmlHook|ctor(System.String hookName)
+YSharp.YXmlHook|property System.String HookName {get;}
+YSharp.YXmlHook|sealed class
+YSharp.YXmlText|base YSharp.YText
+YSharp.YXmlText|ctor(System.String initial = null)
+YSharp.YXmlText|method override YSharp.YValue ToJson()
+YSharp.YXmlText|property YSharp.YType NextSibling {get;}
+YSharp.YXmlText|property YSharp.YType PrevSibling {get;}
+YSharp.YXmlText|sealed class

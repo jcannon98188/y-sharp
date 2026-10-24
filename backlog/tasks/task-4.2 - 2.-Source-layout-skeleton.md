@@ -4,6 +4,7 @@ title: 2. Source layout skeleton
 status: To Do
 assignee: []
 created_date: '2026-10-24 19:41'
+updated_date: '2026-10-24 19:55'
 labels:
   - spec
   - 'model:haiku'
@@ -40,3 +41,13 @@ Read first: `docs/handoff-implementation-planning.md`, ADRs 0005, 0006, 0008, 00
 - [ ] #3 Fixture drift check (`npm run check` in `tools/fixture-gen`) is clean
 - [ ] #4 ADR 0022 followed: suite changes in separate `suite:` commits, a Suite changes list in the notes, no open owner decision
 <!-- DOD:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: @orchestrator
+created: 2026-10-24 19:55
+---
+Owner decision needed: ScheduleSeam stays in namespace YSharp, not YSharp.Transactions (ADR 0021), because tests/YSharp.Tests/Concurrency/ConcSupport.cs resolves it through the enclosing namespace; moving it needs a test-file change owned by TASK-4.12. Recommend moving it when TASK-4.12 lands.
+---
+<!-- COMMENTS:END -->
