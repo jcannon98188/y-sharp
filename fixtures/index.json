@@ -53,6 +53,126 @@
       "bytes": 7683
     },
     {
+      "path": "auth/permission-denied.json",
+      "area": "auth",
+      "name": "permission-denied",
+      "covers": ["AU-1","AU-2"],
+      "sha256": "4875be147f6b78e4d1cd73e51479c801fde1a95e212fe60e70325e1b5a582c26",
+      "bytes": 2561
+    },
+    {
+      "path": "awareness/apply-clock-rules.json",
+      "area": "awareness",
+      "name": "apply-clock-rules",
+      "covers": ["AW-41","AW-42","AW-43","AW-44","AW-46","AW-47","AW-48","AW-49","AW-50","AW-52"],
+      "sha256": "2a50d9fe6824f786d5c79874a7f58e37a4dcca0180e8fb6cde27c0d7bb6edff6",
+      "bytes": 6572
+    },
+    {
+      "path": "awareness/apply-trailing-and-truncated.json",
+      "area": "awareness",
+      "name": "apply-trailing-and-truncated",
+      "covers": ["AW-39","AW-41","AW-51"],
+      "sha256": "2d619c1edcda7a04edac84959a555c18de6a9eb6114a4c9e22381cb5cb5604a2",
+      "bytes": 4923
+    },
+    {
+      "path": "awareness/constructor-state.json",
+      "area": "awareness",
+      "name": "constructor-state",
+      "covers": ["AW-3","AW-4","AW-6"],
+      "sha256": "795e923ada6c35eae6e8c8cb27d6996c4d8f21cce4ca296fa0edd7951d85ad14",
+      "bytes": 1286
+    },
+    {
+      "path": "awareness/destroy.json",
+      "area": "awareness",
+      "name": "destroy",
+      "covers": ["AW-22","AW-26"],
+      "sha256": "dda178d28e4eeaf6c494be0ee9f45d1bc87c5f970e6d243881b98f335fd8fe00",
+      "bytes": 2005
+    },
+    {
+      "path": "awareness/encode-wire-vectors.json",
+      "area": "awareness",
+      "name": "encode-wire-vectors",
+      "covers": ["AW-5","AW-30","AW-31","AW-32","AW-33","AW-34","AW-35"],
+      "sha256": "aff7cdd6dc5f0175ad9cd8cf2927fff1416ca1fded4e1488b05953983b14c240",
+      "bytes": 7540
+    },
+    {
+      "path": "awareness/local-client-rules.json",
+      "area": "awareness",
+      "name": "local-client-rules",
+      "covers": ["AW-26","AW-45","AW-46"],
+      "sha256": "e96fa5990c84dea92ef94015423750186c1687f652d5490734fa6e4f01970512",
+      "bytes": 3905
+    },
+    {
+      "path": "awareness/local-renewal-boundary.json",
+      "area": "awareness",
+      "name": "local-renewal-boundary",
+      "covers": ["AW-15","AW-17"],
+      "sha256": "e8e247dcb818b4d25b59977d93eba865d1e5d6c1889cc9d5bd81cc6268064928",
+      "bytes": 1926
+    },
+    {
+      "path": "awareness/local-renewal.json",
+      "area": "awareness",
+      "name": "local-renewal",
+      "covers": ["AW-14","AW-15","AW-17","AW-19","AW-9"],
+      "sha256": "419338c7b7a334af6b83309b37a49d95b02c241046e16d4e8d1cdc414aba0af3",
+      "bytes": 2437
+    },
+    {
+      "path": "awareness/local-state-lifecycle.json",
+      "area": "awareness",
+      "name": "local-state-lifecycle",
+      "covers": ["AW-7","AW-8","AW-9","AW-10","AW-12","AW-26"],
+      "sha256": "959e9f900260ca98eda24f06680e902ccc2214dc362d91b1b0d2fa7550286e91",
+      "bytes": 4096
+    },
+    {
+      "path": "awareness/modify-update.json",
+      "area": "awareness",
+      "name": "modify-update",
+      "covers": ["AW-36","AW-37","AW-38","AW-39","AW-40"],
+      "sha256": "cbc797a1ce59647e445df50184ec28973a2160154ede02dd641a1cc4b6122659",
+      "bytes": 5802
+    },
+    {
+      "path": "awareness/remote-expiry.json",
+      "area": "awareness",
+      "name": "remote-expiry",
+      "covers": ["AW-14","AW-16","AW-17","AW-18","AW-19","AW-49"],
+      "sha256": "1cebc151f6e4eec63fc6df6237c306ab7c4f16a8b2133e6f370879e98003404e",
+      "bytes": 5045
+    },
+    {
+      "path": "awareness/remove-states.json",
+      "area": "awareness",
+      "name": "remove-states",
+      "covers": ["AW-25","AW-26","AW-27","AW-28","AW-29"],
+      "sha256": "cd79c8481d3b31aa2f8ca9574ea5bfb899c69097b8585a14d6ae9ce352505924",
+      "bytes": 4180
+    },
+    {
+      "path": "awareness/structural-equality.json",
+      "area": "awareness",
+      "name": "structural-equality",
+      "covers": ["AW-9","AW-11","AW-50"],
+      "sha256": "dd46a00097093d6454fd3c5a92238ba6d9e6e1c37213df0de2d427af4ab11afe",
+      "bytes": 16028
+    },
+    {
+      "path": "awareness/two-peer-test-awareness.json",
+      "area": "awareness",
+      "name": "two-peer-test-awareness",
+      "covers": ["AW-6","AW-8","AW-9","AW-30","AW-42","AW-43","AW-48","AW-50"],
+      "sha256": "b508e80354dac3b03dfed797a34bdcb307f86fe56d4eba29229442ef5b94d623",
+      "bytes": 5521
+    },
+    {
       "path": "codecs/merge-diff-convert.json",
       "area": "codecs",
       "name": "merge-diff-convert",
@@ -496,6 +616,54 @@
       "covers": ["STR-53","STR-54","STR-57"],
       "sha256": "c56dc86e193e7e7bb0b1e7f5ac19a41cc2a6307cd085dc1ffb67e4aeedba0a51",
       "bytes": 3345
+    },
+    {
+      "path": "sync/empty-doc-messages.json",
+      "area": "sync",
+      "name": "empty-doc-messages",
+      "covers": ["SY-1","SY-2","SY-3","SY-4","SY-5","SY-6"],
+      "sha256": "05502766b78a12b3e3b85f5b1120928d735f0b82f77bd3b71753c9868a103cf5",
+      "bytes": 3437
+    },
+    {
+      "path": "sync/peer-convergence.json",
+      "area": "sync",
+      "name": "peer-convergence",
+      "covers": ["SY-12","SY-13","SY-14"],
+      "sha256": "85cad941365ce8692139b947339e5760536ca6c365864a3b5e9ed97d9d93fdb7",
+      "bytes": 4817
+    },
+    {
+      "path": "sync/pending-and-idempotent.json",
+      "area": "sync",
+      "name": "pending-and-idempotent",
+      "covers": ["SY-17","SY-18","SY-8"],
+      "sha256": "3d516892cbcefcd16cda003e120f0433ef4cd6f3d62cf43eae19e8f744e8c71c",
+      "bytes": 3731
+    },
+    {
+      "path": "sync/read-errors.json",
+      "area": "sync",
+      "name": "read-errors",
+      "covers": ["SY-7","SY-8","SY-11","SY-19","SY-20"],
+      "sha256": "dc55c6d28cc4641c94309ca0881d95c42440cb458d05dc8895d70bbc4d4bbfe3",
+      "bytes": 5688
+    },
+    {
+      "path": "sync/step1-step2-roundtrip.json",
+      "area": "sync",
+      "name": "step1-step2-roundtrip",
+      "covers": ["SY-4","SY-7","SY-8","SY-9","SY-11","SY-12","SY-14","SY-16"],
+      "sha256": "6f4238c1630e3aeca3ead1d185ddcb7e6a006a40556936d8f82f1a45090d6ea6",
+      "bytes": 6889
+    },
+    {
+      "path": "sync/step2-with-state-vector.json",
+      "area": "sync",
+      "name": "step2-with-state-vector",
+      "covers": ["SY-4","SY-16"],
+      "sha256": "bc597b4160bcd1a2e91b8ca178060edc7afbddaea06b96f54358f4383c8a40cf",
+      "bytes": 3411
     },
     {
       "path": "text/apply-delta-edges.json",

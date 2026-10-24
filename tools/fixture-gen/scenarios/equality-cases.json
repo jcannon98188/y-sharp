@@ -1,0 +1,19 @@
+[
+  { "name": "identical-objects", "a": {"$":"obj","pairs":[["x",1]]}, "b": {"$":"obj","pairs":[["x",1]]}, "equal": true },
+  { "name": "key-order-ignored", "a": {"$":"obj","pairs":[["a",1],["b",2]]}, "b": {"$":"obj","pairs":[["b",2],["a",1]]}, "equal": true },
+  { "name": "nested-by-content", "a": {"$":"obj","pairs":[["o",{"$":"obj","pairs":[["k",[1,2,{"$":"obj","pairs":[["z",null]]}]]]}]]}, "b": {"$":"obj","pairs":[["o",{"$":"obj","pairs":[["k",[1,2,{"$":"obj","pairs":[["z",null]]}]]]}]]}, "equal": true },
+  { "name": "array-order-matters", "a": {"$":"obj","pairs":[["l",[1,2]]]}, "b": {"$":"obj","pairs":[["l",[2,1]]]}, "equal": false },
+  { "name": "array-length-differs", "a": {"$":"obj","pairs":[["l",[1]]]}, "b": {"$":"obj","pairs":[["l",[1,1]]]}, "equal": false },
+  { "name": "value-differs", "a": {"$":"obj","pairs":[["x",1]]}, "b": {"$":"obj","pairs":[["x",2]]}, "equal": false },
+  { "name": "extra-key", "a": {"$":"obj","pairs":[["x",1]]}, "b": {"$":"obj","pairs":[["x",1],["y",1]]}, "equal": false },
+  { "name": "missing-key-same-count", "a": {"$":"obj","pairs":[["x",1]]}, "b": {"$":"obj","pairs":[["y",1]]}, "equal": false },
+  { "name": "number-equals-itself", "a": {"$":"obj","pairs":[["n",0.1]]}, "b": {"$":"obj","pairs":[["n",0.1]]}, "equal": true },
+  { "name": "nan-is-not-equal-to-nan", "a": {"$":"obj","pairs":[["n",{"$":"nan"}]]}, "b": {"$":"obj","pairs":[["n",{"$":"nan"}]]}, "equal": false },
+  { "name": "zeros-are-equal", "a": {"$":"obj","pairs":[["n",0]]}, "b": {"$":"obj","pairs":[["n",{"$":"-0"}]]}, "equal": true },
+  { "name": "number-vs-string", "a": {"$":"obj","pairs":[["n",1]]}, "b": {"$":"obj","pairs":[["n","1"]]}, "equal": false },
+  { "name": "bool-vs-number", "a": {"$":"obj","pairs":[["n",true]]}, "b": {"$":"obj","pairs":[["n",1]]}, "equal": false },
+  { "name": "null-vs-missing-value", "a": {"$":"obj","pairs":[["n",null]]}, "b": {"$":"obj","pairs":[["n",false]]}, "equal": false },
+  { "name": "array-vs-object", "a": {"$":"obj","pairs":[["n",[]]]}, "b": {"$":"obj","pairs":[["n",{"$":"obj","pairs":[]}]]}, "equal": false },
+  { "name": "empty-objects", "a": {"$":"obj","pairs":[]}, "b": {"$":"obj","pairs":[]}, "equal": true },
+  { "name": "unicode-strings", "a": {"$":"obj","pairs":[["s","héllo 😀"]]}, "b": {"$":"obj","pairs":[["s","héllo 😀"]]}, "equal": true }
+]

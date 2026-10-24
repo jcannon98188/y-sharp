@@ -1,0 +1,191 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["AW-41","AW-42","AW-43","AW-44","AW-46","AW-47","AW-48","AW-49","AW-50","AW-52"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"rb","clientId":9}],
+    "steps": [
+      {"step":"awareness.new","awareness":"b","doc":"rb"},
+      {
+        "step": "awareness.applyUpdate",
+        "awareness": "b",
+        "bytes": {"$":"bytes","hex":"010500077b2261223a317d"},
+        "origin": "r"
+      },
+      {"step":"tick","ms":10},
+      {
+        "step": "awareness.applyUpdate",
+        "awareness": "b",
+        "bytes": {"$":"bytes","hex":"010501077b2261223a317d"},
+        "origin": "r"
+      },
+      {
+        "step": "awareness.applyUpdate",
+        "awareness": "b",
+        "bytes": {"$":"bytes","hex":"010501077b2261223a327d"},
+        "origin": "r"
+      },
+      {
+        "step": "awareness.applyUpdate",
+        "awareness": "b",
+        "bytes": {"$":"bytes","hex":"010501077b2261223a317d"},
+        "origin": "r"
+      },
+      {"step":"tick","ms":10},
+      {
+        "step": "awareness.applyUpdate",
+        "awareness": "b",
+        "bytes": {"$":"bytes","hex":"010502077b2261223a317d"},
+        "origin": "r"
+      },
+      {
+        "step": "awareness.applyUpdate",
+        "awareness": "b",
+        "bytes": {"$":"bytes","hex":"010503077b2261223a337d"},
+        "origin": "r"
+      },
+      {
+        "step": "awareness.applyUpdate",
+        "awareness": "b",
+        "bytes": {"$":"bytes","hex":"010502077b2261223a397d"},
+        "origin": "r"
+      },
+      {
+        "step": "awareness.applyUpdate",
+        "awareness": "b",
+        "bytes": {"$":"bytes","hex":"010503046e756c6c"},
+        "origin": "r"
+      },
+      {
+        "step": "awareness.applyUpdate",
+        "awareness": "b",
+        "bytes": {"$":"bytes","hex":"010503046e756c6c"},
+        "origin": "r"
+      },
+      {
+        "step": "awareness.applyUpdate",
+        "awareness": "b",
+        "bytes": {"$":"bytes","hex":"010504046e756c6c"},
+        "origin": "r"
+      },
+      {
+        "step": "awareness.applyUpdate",
+        "awareness": "b",
+        "bytes": {"$":"bytes","hex":"010505077b2261223a357d"},
+        "origin": "r"
+      },
+      {
+        "step": "awareness.applyUpdate",
+        "awareness": "b",
+        "bytes": {"$":"bytes","hex":"014d03046e756c6c"},
+        "origin": "r"
+      },
+      {
+        "step": "awareness.applyUpdate",
+        "awareness": "b",
+        "bytes": {"$":"bytes","hex":"014d03077b227a223a317d"},
+        "origin": "r"
+      },
+      {
+        "step": "awareness.applyUpdate",
+        "awareness": "b",
+        "bytes": {"$":"bytes","hex":"014d04077b227a223a317d"},
+        "origin": "r"
+      },
+      {"step":"tick","ms":5},
+      {
+        "step": "awareness.applyUpdate",
+        "awareness": "b",
+        "bytes": {"$":"bytes","hex":"040a01077b226e223a317d0b01077b226e223a327d0506046e756c6c0c01046e756c6c"},
+        "origin": "batch"
+      },
+      {"step":"awareness.applyUpdate","awareness":"b","bytes":{"$":"bytes","hex":"00"},"origin":"empty"},
+      {
+        "step": "awareness.applyUpdate",
+        "awareness": "b",
+        "bytes": {"$":"bytes","hex":"010a01077b226e223a317d"}
+      }
+    ]
+  },
+  "observations": {
+    "updates": {"api":"Doc.on('update'), Doc.on('updateV2')","value":{"rb":{"v1":[],"v2":[]}}},
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "rb": {
+          "v1": {"full":{"$":"bytes","hex":"0000"},"diff":{}},
+          "v2": {"full":{"$":"bytes","hex":"00000000000001000000000000"},"diff":{}}
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {"rb":{"v1":{"$":"bytes","hex":"00"},"v2":{"$":"bytes","hex":"00"}}}
+    },
+    "doc": {"api":"toDelta, toArray, entries, getAttributes walk of every root","value":{"rb":[]}},
+    "events": {
+      "api": "AbstractType.observe",
+      "value": [
+        {"observer":"b","event":"change","at":10,"added":[5],"updated":[],"removed":[],"origin":"r"},
+        {"observer":"b","event":"update","at":10,"added":[5],"updated":[],"removed":[],"origin":"r"},
+        {"observer":"b","event":"update","at":20,"added":[],"updated":[5],"removed":[],"origin":"r"},
+        {"observer":"b","event":"change","at":20,"added":[],"updated":[5],"removed":[],"origin":"r"},
+        {"observer":"b","event":"update","at":20,"added":[],"updated":[5],"removed":[],"origin":"r"},
+        {"observer":"b","event":"change","at":20,"added":[],"updated":[],"removed":[5],"origin":"r"},
+        {"observer":"b","event":"update","at":20,"added":[],"updated":[],"removed":[5],"origin":"r"},
+        {"observer":"b","event":"change","at":20,"added":[],"updated":[],"removed":[5],"origin":"r"},
+        {"observer":"b","event":"update","at":20,"added":[],"updated":[],"removed":[5],"origin":"r"},
+        {"observer":"b","event":"change","at":20,"added":[],"updated":[5],"removed":[],"origin":"r"},
+        {"observer":"b","event":"update","at":20,"added":[],"updated":[5],"removed":[],"origin":"r"},
+        {"observer":"b","event":"change","at":20,"added":[],"updated":[77],"removed":[],"origin":"r"},
+        {"observer":"b","event":"update","at":20,"added":[],"updated":[77],"removed":[],"origin":"r"},
+        {
+          "observer": "b",
+          "event": "change",
+          "at": 25,
+          "added": [10,11],
+          "updated": [],
+          "removed": [5],
+          "origin": "batch"
+        },
+        {
+          "observer": "b",
+          "event": "update",
+          "at": 25,
+          "added": [10,11],
+          "updated": [],
+          "removed": [5],
+          "origin": "batch"
+        }
+      ]
+    },
+    "awareness": {
+      "api": "Awareness.clientID, getStates, meta",
+      "value": {
+        "b": {
+          "clientId": 9,
+          "states": [
+            [9,{"$":"obj","pairs":[]}],
+            [10,{"$":"obj","pairs":[["n",1]]}],
+            [11,{"$":"obj","pairs":[["n",2]]}],
+            [77,{"$":"obj","pairs":[["z",1]]}]
+          ],
+          "meta": [
+            [5,{"clock":6,"lastUpdated":25}],
+            [9,{"clock":0,"lastUpdated":0}],
+            [10,{"clock":1,"lastUpdated":25}],
+            [11,{"clock":1,"lastUpdated":25}],
+            [12,{"clock":1,"lastUpdated":25}],
+            [77,{"clock":4,"lastUpdated":20}]
+          ]
+        }
+      }
+    }
+  }
+}

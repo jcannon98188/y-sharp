@@ -1010,6 +1010,344 @@
             "from"
           ],
           "additionalProperties": false
+        },
+        {
+          "title": "awareness.new",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "awareness.new"
+            },
+            "awareness": {
+              "type": "string"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            }
+          },
+          "required": [
+            "step",
+            "awareness",
+            "doc"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "awareness.setLocal",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "awareness.setLocal"
+            },
+            "awareness": {
+              "type": "string"
+            },
+            "state": {
+              "$ref": "#/$defs/value"
+            }
+          },
+          "required": [
+            "step",
+            "awareness",
+            "state"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "awareness.setLocalField",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "awareness.setLocalField"
+            },
+            "awareness": {
+              "type": "string"
+            },
+            "field": {
+              "type": "string"
+            },
+            "value": {
+              "$ref": "#/$defs/value"
+            }
+          },
+          "required": [
+            "step",
+            "awareness",
+            "field",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "awareness.applyUpdate",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "awareness.applyUpdate"
+            },
+            "awareness": {
+              "type": "string"
+            },
+            "bytes": {
+              "$ref": "#/$defs/bytes"
+            },
+            "from": {
+              "type": "string"
+            },
+            "origin": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "step",
+            "awareness"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "awareness.removeStates",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "awareness.removeStates"
+            },
+            "awareness": {
+              "type": "string"
+            },
+            "clients": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "origin": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "step",
+            "awareness",
+            "clients"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "awareness.encode",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "awareness.encode"
+            },
+            "name": {
+              "type": "string"
+            },
+            "awareness": {
+              "type": "string"
+            },
+            "clients": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "states": {
+              "$ref": "#/$defs/value"
+            }
+          },
+          "required": [
+            "step",
+            "name",
+            "awareness",
+            "clients"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "awareness.modify",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "awareness.modify"
+            },
+            "name": {
+              "type": "string"
+            },
+            "mode": {
+              "enum": [
+                "identity",
+                "blank",
+                "setField",
+                "setFieldKeepNull",
+                "undefined"
+              ]
+            },
+            "bytes": {
+              "$ref": "#/$defs/bytes"
+            },
+            "from": {
+              "type": "string"
+            },
+            "field": {
+              "type": "string"
+            },
+            "value": {
+              "$ref": "#/$defs/value"
+            }
+          },
+          "required": [
+            "step",
+            "name",
+            "mode"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "awareness.destroy",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "awareness.destroy"
+            },
+            "awareness": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "step",
+            "awareness"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "sync.step1",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "sync.step1"
+            },
+            "name": {
+              "type": "string"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "append": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "step",
+            "name",
+            "doc"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "sync.step2",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "sync.step2"
+            },
+            "name": {
+              "type": "string"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "sv": {
+              "$ref": "#/$defs/bytes"
+            },
+            "append": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "step",
+            "name",
+            "doc"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "sync.update",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "sync.update"
+            },
+            "name": {
+              "type": "string"
+            },
+            "update": {
+              "$ref": "#/$defs/bytes"
+            },
+            "append": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "step",
+            "name",
+            "update"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "sync.read",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "sync.read"
+            },
+            "name": {
+              "type": "string"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "bytes": {
+              "$ref": "#/$defs/bytes"
+            },
+            "from": {
+              "type": "string"
+            },
+            "origin": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "step",
+            "name",
+            "doc"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "auth.permissionDenied",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "auth.permissionDenied"
+            },
+            "name": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "step",
+            "name",
+            "reason"
+          ],
+          "additionalProperties": false
         }
       ]
     }

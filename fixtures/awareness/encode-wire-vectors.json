@@ -1,0 +1,229 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["AW-5","AW-30","AW-31","AW-32","AW-33","AW-34","AW-35"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"rb","clientId":2147483648}],
+    "steps": [
+      {"step":"awareness.new","awareness":"b","doc":"rb"},
+      {
+        "step": "awareness.setLocal",
+        "awareness": "b",
+        "state": {"$":"obj","pairs":[["name","héllo ✓ 😀"],["n",1.5]]}
+      },
+      {
+        "step": "awareness.applyUpdate",
+        "awareness": "b",
+        "bytes": {
+          "$": "bytes",
+          "hex": "04ffffffff0f030c7b22626967223a747275657dac0280010a7b226964223a3330307d80800102046e756c6c0101147b2261223a5b312c7b2262223a6e756c6c7d5d7d"
+        },
+        "origin": "r"
+      },
+      {
+        "step": "awareness.applyUpdate",
+        "awareness": "b",
+        "bytes": {"$":"bytes","hex":"010802046e756c6c"},
+        "origin": "r"
+      },
+      {
+        "step": "awareness.encode",
+        "name": "all",
+        "awareness": "b",
+        "clients": [2147483648,4294967295,300,16384,1,8]
+      },
+      {"step":"awareness.encode","name":"reordered","awareness":"b","clients":[1,300,2147483648]},
+      {"step":"awareness.encode","name":"duplicates","awareness":"b","clients":[1,1,300,1]},
+      {"step":"awareness.encode","name":"empty","awareness":"b","clients":[]},
+      {"step":"awareness.encode","name":"missing","awareness":"b","clients":[1,12345]},
+      {
+        "step": "awareness.encode",
+        "name": "substituted",
+        "awareness": "b",
+        "clients": [1,300],
+        "states": [[1,{"$":"obj","pairs":[["replaced","state"]]}]]
+      },
+      {"step":"awareness.encode","name":"tombstone","awareness":"b","clients":[16384,8]},
+      {
+        "step": "awareness.setLocal",
+        "awareness": "b",
+        "state": {
+          "$": "obj",
+          "pairs": [
+            ["quote","a\"b\\c"],
+            ["control","line\nbreak"],
+            ["surrogate","😀"],
+            ["nan",{"$":"nan"}],
+            ["neg",{"$":"-0"}]
+          ]
+        }
+      },
+      {"step":"awareness.encode","name":"json-escapes","awareness":"b","clients":[2147483648]}
+    ]
+  },
+  "observations": {
+    "updates": {"api":"Doc.on('update'), Doc.on('updateV2')","value":{"rb":{"v1":[],"v2":[]}}},
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "rb": {
+          "v1": {"full":{"$":"bytes","hex":"0000"},"diff":{}},
+          "v2": {"full":{"$":"bytes","hex":"00000000000001000000000000"},"diff":{}}
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {"rb":{"v1":{"$":"bytes","hex":"00"},"v2":{"$":"bytes","hex":"00"}}}
+    },
+    "doc": {"api":"toDelta, toArray, entries, getAttributes walk of every root","value":{"rb":[]}},
+    "events": {
+      "api": "AbstractType.observe",
+      "value": [
+        {
+          "observer": "b",
+          "event": "change",
+          "at": 0,
+          "added": [],
+          "updated": [2147483648],
+          "removed": [],
+          "origin": "local"
+        },
+        {
+          "observer": "b",
+          "event": "update",
+          "at": 0,
+          "added": [],
+          "updated": [2147483648],
+          "removed": [],
+          "origin": "local"
+        },
+        {
+          "observer": "b",
+          "event": "change",
+          "at": 0,
+          "added": [4294967295,300,1],
+          "updated": [],
+          "removed": [],
+          "origin": "r"
+        },
+        {
+          "observer": "b",
+          "event": "update",
+          "at": 0,
+          "added": [4294967295,300,1],
+          "updated": [],
+          "removed": [],
+          "origin": "r"
+        },
+        {
+          "observer": "b",
+          "event": "change",
+          "at": 0,
+          "added": [],
+          "updated": [2147483648],
+          "removed": [],
+          "origin": "local"
+        },
+        {
+          "observer": "b",
+          "event": "update",
+          "at": 0,
+          "added": [],
+          "updated": [2147483648],
+          "removed": [],
+          "origin": "local"
+        }
+      ]
+    },
+    "results": {
+      "api": "encodeAwarenessUpdate",
+      "value": {
+        "all": {
+          "api": "encodeAwarenessUpdate",
+          "bytes": {
+            "$": "bytes",
+            "hex": "06808080800801227b226e616d65223a2268c3a96c6c6f20e29c9320f09f9880222c226e223a312e357dffffffff0f030c7b22626967223a747275657dac0280010a7b226964223a3330307d80800102046e756c6c0101147b2261223a5b312c7b2262223a6e756c6c7d5d7d0802046e756c6c"
+          },
+          "threw": false
+        },
+        "reordered": {
+          "api": "encodeAwarenessUpdate",
+          "bytes": {
+            "$": "bytes",
+            "hex": "030101147b2261223a5b312c7b2262223a6e756c6c7d5d7dac0280010a7b226964223a3330307d808080800801227b226e616d65223a2268c3a96c6c6f20e29c9320f09f9880222c226e223a312e357d"
+          },
+          "threw": false
+        },
+        "duplicates": {
+          "api": "encodeAwarenessUpdate",
+          "bytes": {
+            "$": "bytes",
+            "hex": "040101147b2261223a5b312c7b2262223a6e756c6c7d5d7d0101147b2261223a5b312c7b2262223a6e756c6c7d5d7dac0280010a7b226964223a3330307d0101147b2261223a5b312c7b2262223a6e756c6c7d5d7d"
+          },
+          "threw": false
+        },
+        "empty": {"api":"encodeAwarenessUpdate","bytes":{"$":"bytes","hex":"00"},"threw":false},
+        "missing": {"api":"encodeAwarenessUpdate","threw":true},
+        "substituted": {
+          "api": "encodeAwarenessUpdate",
+          "bytes": {"$":"bytes","hex":"020101147b227265706c61636564223a227374617465227dac028001046e756c6c"},
+          "threw": false
+        },
+        "tombstone": {
+          "api": "encodeAwarenessUpdate",
+          "bytes": {"$":"bytes","hex":"0280800102046e756c6c0802046e756c6c"},
+          "threw": false
+        },
+        "json-escapes": {
+          "api": "encodeAwarenessUpdate",
+          "bytes": {
+            "$": "bytes",
+            "hex": "01808080800802517b2271756f7465223a22615c22625c5c63222c22636f6e74726f6c223a226c696e655c6e627265616b222c22737572726f67617465223a22f09f9880222c226e616e223a6e756c6c2c226e6567223a307d"
+          },
+          "threw": false
+        }
+      }
+    },
+    "awareness": {
+      "api": "Awareness.clientID, getStates, meta",
+      "value": {
+        "b": {
+          "clientId": 2147483648,
+          "states": [
+            [1,{"$":"obj","pairs":[["a",[1,{"$":"obj","pairs":[["b",null]]}]]]}],
+            [300,{"$":"obj","pairs":[["id",300]]}],
+            [
+              2147483648,
+              {
+                "$": "obj",
+                "pairs": [
+                  ["quote","a\"b\\c"],
+                  ["control","line\nbreak"],
+                  ["surrogate","😀"],
+                  ["nan",{"$":"nan"}],
+                  ["neg",{"$":"-0"}]
+                ]
+              }
+            ],
+            [4294967295,{"$":"obj","pairs":[["big",true]]}]
+          ],
+          "meta": [
+            [1,{"clock":1,"lastUpdated":0}],
+            [8,{"clock":2,"lastUpdated":0}],
+            [300,{"clock":128,"lastUpdated":0}],
+            [16384,{"clock":2,"lastUpdated":0}],
+            [2147483648,{"clock":2,"lastUpdated":0}],
+            [4294967295,{"clock":3,"lastUpdated":0}]
+          ]
+        }
+      }
+    }
+  }
+}

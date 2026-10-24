@@ -1,0 +1,36 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["AW-3","AW-4","AW-6"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"ra","clientId":7}],
+    "steps": [{"step":"awareness.new","awareness":"a","doc":"ra"}]
+  },
+  "observations": {
+    "updates": {"api":"Doc.on('update'), Doc.on('updateV2')","value":{"ra":{"v1":[],"v2":[]}}},
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "ra": {
+          "v1": {"full":{"$":"bytes","hex":"0000"},"diff":{}},
+          "v2": {"full":{"$":"bytes","hex":"00000000000001000000000000"},"diff":{}}
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {"ra":{"v1":{"$":"bytes","hex":"00"},"v2":{"$":"bytes","hex":"00"}}}
+    },
+    "doc": {"api":"toDelta, toArray, entries, getAttributes walk of every root","value":{"ra":[]}},
+    "awareness": {
+      "api": "Awareness.clientID, getStates, meta",
+      "value": {"a":{"clientId":7,"states":[[7,{"$":"obj","pairs":[]}]],"meta":[[7,{"clock":0,"lastUpdated":0}]]}}
+    }
+  }
+}

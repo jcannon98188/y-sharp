@@ -35,6 +35,7 @@
         "ds": { "$ref": "#/$defs/observation" },
         "events": { "$ref": "#/$defs/observation" },
         "results": { "$ref": "#/$defs/observation" },
+        "awareness": { "$ref": "#/$defs/observation" },
         "truncation": { "$ref": "#/$defs/observation" },
         "malformed": { "$ref": "#/$defs/observation" }
       },

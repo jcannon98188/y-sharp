@@ -1,0 +1,173 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["SY-7","SY-8","SY-11","SY-19","SY-20"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":1}],
+    "steps": [
+      {"step":"text.insert","doc":"a","target":{"root":"t","kind":"text"},"at":0,"value":"hello"},
+      {"step":"sync.read","name":"unknown-type","doc":"a","bytes":{"$":"bytes","hex":"0300"}},
+      {"step":"sync.read","name":"unknown-type-large","doc":"a","bytes":{"$":"bytes","hex":"80010000"}},
+      {"step":"sync.read","name":"step1-missing-payload","doc":"a","bytes":{"$":"bytes","hex":"00"}},
+      {"step":"sync.read","name":"step1-short-payload","doc":"a","bytes":{"$":"bytes","hex":"000501"}},
+      {
+        "step": "sync.read",
+        "name": "step1-bad-state-vector",
+        "doc": "a",
+        "bytes": {"$":"bytes","hex":"0002ffff"}
+      },
+      {"step":"sync.read","name":"step2-missing-payload","doc":"a","bytes":{"$":"bytes","hex":"01"}},
+      {"step":"sync.read","name":"update-missing-payload","doc":"a","bytes":{"$":"bytes","hex":"02"}},
+      {"step":"sync.read","name":"step2-short-payload","doc":"a","bytes":{"$":"bytes","hex":"01090102"}},
+      {
+        "step": "sync.read",
+        "name": "step2-corrupt-update",
+        "doc": "a",
+        "bytes": {"$":"bytes","hex":"0103ffffff"}
+      },
+      {
+        "step": "sync.read",
+        "name": "update-corrupt-update",
+        "doc": "a",
+        "bytes": {"$":"bytes","hex":"0203ffffff"}
+      },
+      {"step":"sync.read","name":"empty-message","doc":"a","bytes":{"$":"bytes","hex":""}},
+      {"step":"sync.read","name":"step2-empty-payload","doc":"a","bytes":{"$":"bytes","hex":"0100"}}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [{"$":"bytes","hex":"01010100040101740568656c6c6f00"}],
+          "v2": [{"$":"bytes","hex":"000001010000010409067468656c6c6f01050101000001010000"}]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {"full":{"$":"bytes","hex":"01010100040101740568656c6c6f00"},"diff":{}},
+          "v2": {"full":{"$":"bytes","hex":"000001010000010409067468656c6c6f01050101000001010000"},"diff":{}}
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {"a":{"v1":{"$":"bytes","hex":"010105"},"v2":{"$":"bytes","hex":"010105"}}}
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {"a":[["t",{"kind":"text","delta":[{"insert":"hello"}]}]]}
+    },
+    "results": {
+      "api": "readSyncMessage",
+      "value": {
+        "unknown-type": {
+          "api": "readSyncMessage",
+          "bytes": {"$":"bytes","hex":""},
+          "type": null,
+          "threw": true,
+          "handlerCalled": false,
+          "consumed": 1
+        },
+        "unknown-type-large": {
+          "api": "readSyncMessage",
+          "bytes": {"$":"bytes","hex":""},
+          "type": null,
+          "threw": true,
+          "handlerCalled": false,
+          "consumed": 2
+        },
+        "step1-missing-payload": {
+          "api": "readSyncMessage",
+          "bytes": {"$":"bytes","hex":""},
+          "type": null,
+          "threw": true,
+          "handlerCalled": false,
+          "consumed": 1
+        },
+        "step1-short-payload": {
+          "api": "readSyncMessage",
+          "bytes": {"$":"bytes","hex":""},
+          "type": null,
+          "threw": true,
+          "handlerCalled": false,
+          "consumed": 2
+        },
+        "step1-bad-state-vector": {
+          "api": "readSyncMessage",
+          "bytes": {"$":"bytes","hex":"01"},
+          "type": null,
+          "threw": true,
+          "handlerCalled": false,
+          "consumed": 4
+        },
+        "step2-missing-payload": {
+          "api": "readSyncMessage",
+          "bytes": {"$":"bytes","hex":""},
+          "type": 1,
+          "threw": false,
+          "handlerCalled": true,
+          "consumed": 1
+        },
+        "update-missing-payload": {
+          "api": "readSyncMessage",
+          "bytes": {"$":"bytes","hex":""},
+          "type": 2,
+          "threw": false,
+          "handlerCalled": true,
+          "consumed": 1
+        },
+        "step2-short-payload": {
+          "api": "readSyncMessage",
+          "bytes": {"$":"bytes","hex":""},
+          "type": 1,
+          "threw": false,
+          "handlerCalled": true,
+          "consumed": 2
+        },
+        "step2-corrupt-update": {
+          "api": "readSyncMessage",
+          "bytes": {"$":"bytes","hex":""},
+          "type": 1,
+          "threw": false,
+          "handlerCalled": true,
+          "consumed": 5
+        },
+        "update-corrupt-update": {
+          "api": "readSyncMessage",
+          "bytes": {"$":"bytes","hex":""},
+          "type": 2,
+          "threw": false,
+          "handlerCalled": true,
+          "consumed": 5
+        },
+        "empty-message": {
+          "api": "readSyncMessage",
+          "bytes": {"$":"bytes","hex":""},
+          "type": null,
+          "threw": true,
+          "handlerCalled": false,
+          "consumed": 0
+        },
+        "step2-empty-payload": {
+          "api": "readSyncMessage",
+          "bytes": {"$":"bytes","hex":""},
+          "type": 1,
+          "threw": false,
+          "handlerCalled": true,
+          "consumed": 2
+        }
+      }
+    }
+  }
+}

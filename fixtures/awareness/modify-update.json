@@ -1,0 +1,154 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["AW-36","AW-37","AW-38","AW-39","AW-40"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"rb","clientId":2}],
+    "steps": [
+      {"step":"awareness.new","awareness":"b","doc":"rb"},
+      {"step":"awareness.setLocal","awareness":"b","state":{"$":"obj","pairs":[["name","héllo"],["k",1]]}},
+      {
+        "step": "awareness.applyUpdate",
+        "awareness": "b",
+        "bytes": {"$":"bytes","hex":"0203020d7b227a223a312c2261223a327d0409046e756c6c"},
+        "origin": "r"
+      },
+      {"step":"awareness.encode","name":"src","awareness":"b","clients":[2,3,4]},
+      {"step":"awareness.modify","name":"identity","mode":"identity","from":"src"},
+      {"step":"awareness.modify","name":"blank","mode":"blank","from":"src"},
+      {
+        "step": "awareness.modify",
+        "name": "setField",
+        "mode": "setField",
+        "from": "src",
+        "field": "by",
+        "value": "server"
+      },
+      {
+        "step": "awareness.modify",
+        "name": "keepNull",
+        "mode": "setFieldKeepNull",
+        "from": "src",
+        "field": "by",
+        "value": "server"
+      },
+      {"step":"awareness.modify","name":"undefined","mode":"undefined","from":"src"},
+      {
+        "step": "awareness.modify",
+        "name": "trailing",
+        "mode": "identity",
+        "bytes": {"$":"bytes","hex":"0103020d7b227a223a312c2261223a327ddead"}
+      },
+      {"step":"awareness.modify","name":"empty","mode":"identity","bytes":{"$":"bytes","hex":"00"}},
+      {
+        "step": "awareness.modify",
+        "name": "truncated",
+        "mode": "identity",
+        "bytes": {"$":"bytes","hex":"010302077b22"}
+      },
+      {
+        "step": "awareness.modify",
+        "name": "spaced-input",
+        "mode": "identity",
+        "bytes": {"$":"bytes","hex":"010302157b20226222203a2031202c20226122203a2032207d"}
+      }
+    ]
+  },
+  "observations": {
+    "updates": {"api":"Doc.on('update'), Doc.on('updateV2')","value":{"rb":{"v1":[],"v2":[]}}},
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "rb": {
+          "v1": {"full":{"$":"bytes","hex":"0000"},"diff":{}},
+          "v2": {"full":{"$":"bytes","hex":"00000000000001000000000000"},"diff":{}}
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {"rb":{"v1":{"$":"bytes","hex":"00"},"v2":{"$":"bytes","hex":"00"}}}
+    },
+    "doc": {"api":"toDelta, toArray, entries, getAttributes walk of every root","value":{"rb":[]}},
+    "events": {
+      "api": "AbstractType.observe",
+      "value": [
+        {"observer":"b","event":"change","at":0,"added":[],"updated":[2],"removed":[],"origin":"local"},
+        {"observer":"b","event":"update","at":0,"added":[],"updated":[2],"removed":[],"origin":"local"},
+        {"observer":"b","event":"change","at":0,"added":[3],"updated":[],"removed":[],"origin":"r"},
+        {"observer":"b","event":"update","at":0,"added":[3],"updated":[],"removed":[],"origin":"r"}
+      ]
+    },
+    "results": {
+      "api": "encodeAwarenessUpdate, modifyAwarenessUpdate",
+      "value": {
+        "src": {
+          "api": "encodeAwarenessUpdate",
+          "bytes": {
+            "$": "bytes",
+            "hex": "030201177b226e616d65223a2268c3a96c6c6f222c226b223a317d03020d7b227a223a312c2261223a327d0409046e756c6c"
+          },
+          "threw": false
+        },
+        "identity": {
+          "api": "modifyAwarenessUpdate",
+          "bytes": {
+            "$": "bytes",
+            "hex": "030201177b226e616d65223a2268c3a96c6c6f222c226b223a317d03020d7b227a223a312c2261223a327d0409046e756c6c"
+          },
+          "threw": false
+        },
+        "blank": {
+          "api": "modifyAwarenessUpdate",
+          "bytes": {"$":"bytes","hex":"030201046e756c6c0302046e756c6c0409046e756c6c"},
+          "threw": false
+        },
+        "setField": {
+          "api": "modifyAwarenessUpdate",
+          "bytes": {
+            "$": "bytes",
+            "hex": "030201257b226e616d65223a2268c3a96c6c6f222c226b223a312c226279223a22736572766572227d03021b7b227a223a312c2261223a322c226279223a22736572766572227d04090f7b226279223a22736572766572227d"
+          },
+          "threw": false
+        },
+        "keepNull": {
+          "api": "modifyAwarenessUpdate",
+          "bytes": {
+            "$": "bytes",
+            "hex": "030201257b226e616d65223a2268c3a96c6c6f222c226b223a312c226279223a22736572766572227d03021b7b227a223a312c2261223a322c226279223a22736572766572227d0409046e756c6c"
+          },
+          "threw": false
+        },
+        "undefined": {"api":"modifyAwarenessUpdate","threw":true},
+        "trailing": {
+          "api": "modifyAwarenessUpdate",
+          "bytes": {"$":"bytes","hex":"0103020d7b227a223a312c2261223a327d"},
+          "threw": false
+        },
+        "empty": {"api":"modifyAwarenessUpdate","bytes":{"$":"bytes","hex":"00"},"threw":false},
+        "truncated": {"api":"modifyAwarenessUpdate","threw":true},
+        "spaced-input": {
+          "api": "modifyAwarenessUpdate",
+          "bytes": {"$":"bytes","hex":"0103020d7b2262223a312c2261223a327d"},
+          "threw": false
+        }
+      }
+    },
+    "awareness": {
+      "api": "Awareness.clientID, getStates, meta",
+      "value": {
+        "b": {
+          "clientId": 2,
+          "states": [[2,{"$":"obj","pairs":[["name","héllo"],["k",1]]}],[3,{"$":"obj","pairs":[["z",1],["a",2]]}]],
+          "meta": [[2,{"clock":1,"lastUpdated":0}],[3,{"clock":2,"lastUpdated":0}],[4,{"clock":9,"lastUpdated":0}]]
+        }
+      }
+    }
+  }
+}

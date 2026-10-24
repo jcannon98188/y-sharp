@@ -139,7 +139,18 @@ export const observe = (ctx, roots, extra = []) => {
   if (ctx.results.size) {
     obs.results = {
       api: Array.from(new Set(Array.from(ctx.results.values(), r => r.api))).join(', '),
-      value: Object.fromEntries(Array.from(ctx.results, ([n, r]) => [n, { api: r.api, bytes: bytes(r.bytes) }]))
+      value: Object.fromEntries(Array.from(ctx.results, ([n, r]) => [n, { api: r.api, ...(r.bytes ? { bytes: bytes(r.bytes) } : {}), ...(r.extra ?? {}) }]))
+    }
+  }
+  if (ctx.awarenesses?.size) {
+    const byId = (a, b) => a[0] - b[0]
+    obs.awareness = {
+      api: 'Awareness.clientID, getStates, meta',
+      value: Object.fromEntries(Array.from(ctx.awarenesses, ([n, a]) => [n, {
+        clientId: a.clientID,
+        states: Array.from(a.getStates(), ([id, st]) => [id, tag(st)]).sort(byId),
+        meta: Array.from(a.meta, ([id, m]) => [id, { clock: m.clock, lastUpdated: m.lastUpdated }]).sort(byId)
+      }]))
     }
   }
   if (extra.includes('structs')) obs.structs = { api: 'doc.store.clients', value: perReplica(d => dumpStructs(d)) }
