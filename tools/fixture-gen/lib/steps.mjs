@@ -23,6 +23,8 @@ export class Ctx {
     this.results = new Map()
     this.depth = new Map()
     this.now = 0
+    this.cleanups = []
+    this.afterTick = null
   }
 
   doc (name) {
@@ -119,7 +121,7 @@ defineStep({
   children: true,
   run: (ctx, s) => inTransaction(ctx, s.doc, s.origin, () => runSteps(ctx, s.steps))
 })
-defineStep({ kind: 'tick', required: ['ms'], run: (ctx, s) => { ctx.now += s.ms } })
+defineStep({ kind: 'tick', required: ['ms'], run: (ctx, s) => { ctx.now += s.ms; ctx.afterTick?.() } })
 defineStep({
   kind: 'sync',
   required: ['from', 'to'],
@@ -283,6 +285,7 @@ export const interpret = script => {
     runSteps(ctx, script.steps ?? [])
   } finally {
     Date.now = realNow
+    for (const f of ctx.cleanups) f()
   }
   return ctx
 }

@@ -1,0 +1,210 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["UM-01","UM-02","UM-05"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":3}],
+    "steps": [
+      {
+        "step": "undo.create",
+        "doc": "a",
+        "name": "tracked",
+        "scope": [{"root":"t","kind":"text"}],
+        "captureTimeout": 0,
+        "trackedOrigins": ["mine",null]
+      },
+      {
+        "step": "undo.create",
+        "doc": "a",
+        "name": "other",
+        "scope": [{"root":"arr","kind":"array"}],
+        "captureTimeout": 0,
+        "trackedOrigins": ["mine"]
+      },
+      {"step":"text.insert","doc":"a","target":{"root":"t","kind":"text"},"at":0,"value":"null-origin"},
+      {
+        "step": "transact",
+        "doc": "a",
+        "origin": "mine",
+        "steps": [
+          {"step":"text.insert","doc":"a","target":{"root":"t","kind":"text"},"at":0,"value":"M"},
+          {"step":"array.push","doc":"a","target":{"root":"arr","kind":"array"},"values":["x"]}
+        ]
+      },
+      {
+        "step": "transact",
+        "doc": "a",
+        "origin": "theirs",
+        "steps": [
+          {"step":"text.insert","doc":"a","target":{"root":"t","kind":"text"},"at":0,"value":"T"},
+          {"step":"array.push","doc":"a","target":{"root":"arr","kind":"array"},"values":["y"]}
+        ]
+      },
+      {"step":"undo.undo","name":"tracked","as":"t1"},
+      {"step":"undo.undo","name":"tracked","as":"t2"},
+      {"step":"undo.undo","name":"tracked","as":"t3"},
+      {"step":"undo.undo","name":"other","as":"o1"},
+      {"step":"undo.undo","name":"other","as":"o2"}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [
+            {"$":"bytes","hex":"01010300040101740b6e756c6c2d6f726967696e00"},
+            {"$":"bytes","hex":"0102030b440300014d0801036172720177017800"},
+            {"$":"bytes","hex":"0102030d44030b015488030c0177017900"},
+            {"$":"bytes","hex":"000103010b01"},
+            {"$":"bytes","hex":"00010301000b"},
+            {"$":"bytes","hex":"000103010c01"}
+          ],
+          "v2": [
+            {"$":"bytes","hex":"00000103000001040f0c746e756c6c2d6f726967696e010b0101000001010000"},
+            {"$":"bytes","hex":"00000243000001000344000807044d6172720103010100010101020b77017800"},
+            {"$":"bytes","hex":"00000243010118011603440088030154010000010101020d77017900"},
+            {"$":"bytes","hex":"0000000000000100000000000103010b00"},
+            {"$":"bytes","hex":"000000000000010000000000010301000a"},
+            {"$":"bytes","hex":"0000000000000100000000000103010c00"}
+          ]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "01050300040101740b6e756c6c2d6f726967696e440300014d0801036172720177017844030b015488030c01770179010301000d"
+            },
+            "diff": {}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "00000243020118020016090400440008004400881711746e756c6c2d6f726967696e4d61727254010b010301010100024100010500770178770179010301000c"
+            },
+            "diff": {}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {"a":{"v1":{"$":"bytes","hex":"01030f"},"v2":{"$":"bytes","hex":"01030f"}}}
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {"a":[["arr",{"kind":"array","items":["y"]}],["t",{"kind":"text","delta":[{"insert":"T"}]}]]}
+    },
+    "events": {
+      "api": "AbstractType.observe",
+      "value": [
+        {"observer":"tracked","type":"stack-item-added","kind":"undo"},
+        {"observer":"tracked","type":"stack-item-added","kind":"undo"},
+        {"observer":"other","type":"stack-item-added","kind":"undo"},
+        {"observer":"tracked","type":"stack-item-added","kind":"redo"},
+        {"observer":"tracked","type":"stack-item-popped","kind":"undo"},
+        {"observer":"tracked","type":"stack-item-added","kind":"redo"},
+        {"observer":"tracked","type":"stack-item-popped","kind":"undo"},
+        {"observer":"other","type":"stack-item-added","kind":"redo"},
+        {"observer":"other","type":"stack-item-popped","kind":"undo"}
+      ]
+    },
+    "results": {
+      "api": "UndoManager.undo, undoStack.length, redoStack.length",
+      "value": {
+        "t1": {
+          "api": "UndoManager.undo, undoStack.length, redoStack.length",
+          "value": {"popped":true,"undoStack":1,"redoStack":1}
+        },
+        "t2": {
+          "api": "UndoManager.undo, undoStack.length, redoStack.length",
+          "value": {"popped":true,"undoStack":0,"redoStack":2}
+        },
+        "t3": {
+          "api": "UndoManager.undo, undoStack.length, redoStack.length",
+          "value": {"popped":false,"undoStack":0,"redoStack":2}
+        },
+        "o1": {
+          "api": "UndoManager.undo, undoStack.length, redoStack.length",
+          "value": {"popped":true,"undoStack":0,"redoStack":1}
+        },
+        "o2": {
+          "api": "UndoManager.undo, undoStack.length, redoStack.length",
+          "value": {"popped":false,"undoStack":0,"redoStack":1}
+        }
+      }
+    },
+    "structs": {
+      "api": "doc.store.clients",
+      "value": {
+        "a": [
+          [
+            3,
+            [
+              {
+                "id": [3,0],
+                "len": 11,
+                "kind": "item",
+                "parent": "t",
+                "content": {"ref":4,"value":"null-origin"},
+                "deleted": true,
+                "keep": true
+              },
+              {
+                "id": [3,11],
+                "len": 1,
+                "kind": "item",
+                "rightOrigin": [3,0],
+                "parent": "t",
+                "content": {"ref":4,"value":"M"},
+                "deleted": true,
+                "keep": true
+              },
+              {
+                "id": [3,12],
+                "len": 1,
+                "kind": "item",
+                "parent": "arr",
+                "content": {"ref":8,"value":["x"]},
+                "deleted": true,
+                "keep": true
+              },
+              {
+                "id": [3,13],
+                "len": 1,
+                "kind": "item",
+                "rightOrigin": [3,11],
+                "parent": "t",
+                "content": {"ref":4,"value":"T"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [3,14],
+                "len": 1,
+                "kind": "item",
+                "origin": [3,12],
+                "parent": "arr",
+                "content": {"ref":8,"value":["y"]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ]
+      }
+    },
+    "ds": {"api":"Y.createDeleteSetFromStructStore","value":{"a":[[3,[[0,13]]]]}}
+  }
+}

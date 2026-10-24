@@ -1,0 +1,429 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["SUB-01","SUB-02","SUB-03","SUB-04","SUB-06","DOC-16","DOC-17","DOC-12"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":1},{"name":"b","clientId":2}],
+    "steps": [
+      {"step":"subdoc.observe","doc":"a","name":"ea"},
+      {"step":"subdoc.observe","doc":"b","name":"eb"},
+      {"step":"subdoc.add","doc":"a","target":{"root":"arr","kind":"array"},"guid":"plain"},
+      {
+        "step": "subdoc.add",
+        "doc": "a",
+        "target": {"root":"arr","kind":"array"},
+        "guid": "full",
+        "opts": {"gc":false,"autoLoad":true,"meta":"m","collectionid":"col"}
+      },
+      {
+        "step": "subdoc.add",
+        "doc": "a",
+        "target": {"root":"arr","kind":"array"},
+        "guid": "lazy",
+        "opts": {"shouldLoad":false,"collectionid":"col2"}
+      },
+      {
+        "step": "subdoc.add",
+        "doc": "a",
+        "target": {"root":"arr","kind":"array"},
+        "guid": "meta-number",
+        "at": 0,
+        "opts": {"meta":7}
+      },
+      {"step":"subdoc.inspect","doc":"a","name":"subA"},
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"sync","from":"b","to":"a"},
+      {"step":"subdoc.inspect","doc":"b","name":"subB"},
+      {"step":"subdoc.load","doc":"b","guid":"plain"},
+      {"step":"subdoc.load","doc":"b","guid":"plain"},
+      {"step":"subdoc.inspect","doc":"b","name":"subB2"}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [
+            {"$":"bytes","hex":"0101010009010361727205706c61696e760000"},
+            {"$":"bytes","hex":"010101018901000466756c6c760302676379086175746f4c6f616478046d65746177016d00"},
+            {"$":"bytes","hex":"01010102890101046c617a79760000"},
+            {"$":"bytes","hex":"010101034901000b6d6574612d6e756d6265727601046d6574617d0700"}
+          ],
+          "v2": [
+            {"$":"bytes","hex":"00000101000001090b08617272706c61696e030501010000010100760000"},
+            {
+              "$": "bytes",
+              "hex": "00000241000100000189060466756c6c04000000010101760302676379086175746f4c6f616478046d65746177016d00"
+            },
+            {"$":"bytes","hex":"0000024100010200018906046c617a7904000000010102760000"},
+            {
+              "$": "bytes",
+              "hex": "000002410000010001490d0b6d6574612d6e756d6265720b0000000101037601046d6574617d0700"
+            }
+          ]
+        },
+        "b": {
+          "v1": [
+            {
+              "$": "bytes",
+              "hex": "0104010009010361727205706c61696e76008901000466756c6c760302676379086175746f4c6f616478046d65746177016d890101046c617a7976004901000b6d6574612d6e756d6265727601046d6574617d0700"
+            }
+          ],
+          "v2": [
+            {
+              "$": "bytes",
+              "hex": "00000241020200020100050900890149211b617272706c61696e66756c6c6c617a796d6574612d6e756d626572030544000b010100000104007600760302676379086175746f4c6f616478046d65746177016d76007601046d6574617d0700"
+            }
+          ]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "0104010009010361727205706c61696e76008901000466756c6c760302676379086175746f4c6f616478046d65746177016d890101046c617a7976004901000b6d6574612d6e756d6265727601046d6574617d0700"
+            },
+            "diff": {"b":{"$":"bytes","hex":"0000"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "00000241020200020100050900890149211b617272706c61696e66756c6c6c617a796d6574612d6e756d626572030544000b010100000104007600760302676379086175746f4c6f616478046d65746177016d76007601046d6574617d0700"
+            },
+            "diff": {"b":{"$":"bytes","hex":"00000000000001000000000000"}}
+          }
+        },
+        "b": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "0104010009010361727205706c61696e76008901000466756c6c760302676379086175746f4c6f616478046d65746177016d890101046c617a7976004901000b6d6574612d6e756d6265727601046d6574617d0700"
+            },
+            "diff": {"a":{"$":"bytes","hex":"0000"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "00000241020200020100050900890149211b617272706c61696e66756c6c6c617a796d6574612d6e756d626572030544000b010100000104007600760302676379086175746f4c6f616478046d65746177016d76007601046d6574617d0700"
+            },
+            "diff": {"a":{"$":"bytes","hex":"00000000000001000000000000"}}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {
+        "a": {"v1":{"$":"bytes","hex":"010104"},"v2":{"$":"bytes","hex":"010104"}},
+        "b": {"v1":{"$":"bytes","hex":"010104"},"v2":{"$":"bytes","hex":"010104"}}
+      }
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {
+        "a": [
+          [
+            "arr",
+            {
+              "kind": "array",
+              "items": [
+                {"kind":"subdoc","guid":"meta-number"},
+                {"kind":"subdoc","guid":"plain"},
+                {"kind":"subdoc","guid":"full"},
+                {"kind":"subdoc","guid":"lazy"}
+              ]
+            }
+          ]
+        ],
+        "b": [
+          [
+            "arr",
+            {
+              "kind": "array",
+              "items": [
+                {"kind":"subdoc","guid":"meta-number"},
+                {"kind":"subdoc","guid":"plain"},
+                {"kind":"subdoc","guid":"full"},
+                {"kind":"subdoc","guid":"lazy"}
+              ]
+            }
+          ]
+        ]
+      }
+    },
+    "events": {
+      "api": "AbstractType.observe",
+      "value": [
+        {"observer":"ea","type":"subdocs","added":["plain"],"removed":[],"loaded":["plain"]},
+        {"observer":"ea","type":"subdocs","added":["full"],"removed":[],"loaded":["full"]},
+        {"observer":"ea","type":"subdocs","added":["lazy"],"removed":[],"loaded":[]},
+        {"observer":"ea","type":"subdocs","added":["meta-number"],"removed":[],"loaded":["meta-number"]},
+        {
+          "observer": "eb",
+          "type": "subdocs",
+          "added": ["plain","full","lazy","meta-number"],
+          "removed": [],
+          "loaded": ["full"]
+        },
+        {"observer":"eb","type":"subdocs","added":[],"removed":[],"loaded":["plain"]}
+      ]
+    },
+    "results": {
+      "api": "Doc.subdocs, Doc.getSubdocGuids, Doc fields",
+      "value": {
+        "subA": {
+          "api": "Doc.subdocs, Doc.getSubdocGuids, Doc fields",
+          "value": {
+            "guids": ["plain","full","lazy","meta-number"],
+            "subdocs": [
+              {
+                "guid": "plain",
+                "shouldLoad": true,
+                "autoLoad": false,
+                "isLoaded": false,
+                "gc": true,
+                "collectionid": null,
+                "meta": null,
+                "clientIdIsParents": true
+              },
+              {
+                "guid": "full",
+                "shouldLoad": true,
+                "autoLoad": true,
+                "isLoaded": false,
+                "gc": false,
+                "collectionid": "col",
+                "meta": "m",
+                "clientIdIsParents": true
+              },
+              {
+                "guid": "lazy",
+                "shouldLoad": false,
+                "autoLoad": false,
+                "isLoaded": false,
+                "gc": true,
+                "collectionid": "col2",
+                "meta": null,
+                "clientIdIsParents": true
+              },
+              {
+                "guid": "meta-number",
+                "shouldLoad": true,
+                "autoLoad": false,
+                "isLoaded": false,
+                "gc": true,
+                "collectionid": null,
+                "meta": 7,
+                "clientIdIsParents": true
+              }
+            ]
+          }
+        },
+        "subB": {
+          "api": "Doc.subdocs, Doc.getSubdocGuids, Doc fields",
+          "value": {
+            "guids": ["plain","full","lazy","meta-number"],
+            "subdocs": [
+              {
+                "guid": "plain",
+                "shouldLoad": false,
+                "autoLoad": false,
+                "isLoaded": false,
+                "gc": true,
+                "collectionid": null,
+                "meta": null,
+                "clientIdIsParents": true
+              },
+              {
+                "guid": "full",
+                "shouldLoad": true,
+                "autoLoad": true,
+                "isLoaded": false,
+                "gc": false,
+                "collectionid": null,
+                "meta": "m",
+                "clientIdIsParents": true
+              },
+              {
+                "guid": "lazy",
+                "shouldLoad": false,
+                "autoLoad": false,
+                "isLoaded": false,
+                "gc": true,
+                "collectionid": null,
+                "meta": null,
+                "clientIdIsParents": true
+              },
+              {
+                "guid": "meta-number",
+                "shouldLoad": false,
+                "autoLoad": false,
+                "isLoaded": false,
+                "gc": true,
+                "collectionid": null,
+                "meta": 7,
+                "clientIdIsParents": true
+              }
+            ]
+          }
+        },
+        "subB2": {
+          "api": "Doc.subdocs, Doc.getSubdocGuids, Doc fields",
+          "value": {
+            "guids": ["plain","full","lazy","meta-number"],
+            "subdocs": [
+              {
+                "guid": "plain",
+                "shouldLoad": true,
+                "autoLoad": false,
+                "isLoaded": false,
+                "gc": true,
+                "collectionid": null,
+                "meta": null,
+                "clientIdIsParents": true
+              },
+              {
+                "guid": "full",
+                "shouldLoad": true,
+                "autoLoad": true,
+                "isLoaded": false,
+                "gc": false,
+                "collectionid": null,
+                "meta": "m",
+                "clientIdIsParents": true
+              },
+              {
+                "guid": "lazy",
+                "shouldLoad": false,
+                "autoLoad": false,
+                "isLoaded": false,
+                "gc": true,
+                "collectionid": null,
+                "meta": null,
+                "clientIdIsParents": true
+              },
+              {
+                "guid": "meta-number",
+                "shouldLoad": false,
+                "autoLoad": false,
+                "isLoaded": false,
+                "gc": true,
+                "collectionid": null,
+                "meta": 7,
+                "clientIdIsParents": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    "structs": {
+      "api": "doc.store.clients",
+      "value": {
+        "a": [
+          [
+            1,
+            [
+              {
+                "id": [1,0],
+                "len": 1,
+                "kind": "item",
+                "parent": "arr",
+                "content": {"ref":9,"value":["plain",{"$":"obj","pairs":[]}]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,1],
+                "len": 1,
+                "kind": "item",
+                "origin": [1,0],
+                "parent": "arr",
+                "content": {"ref":9,"value":["full",{"$":"obj","pairs":[["gc",false],["autoLoad",true],["meta","m"]]}]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,2],
+                "len": 1,
+                "kind": "item",
+                "origin": [1,1],
+                "parent": "arr",
+                "content": {"ref":9,"value":["lazy",{"$":"obj","pairs":[]}]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,3],
+                "len": 1,
+                "kind": "item",
+                "rightOrigin": [1,0],
+                "parent": "arr",
+                "content": {"ref":9,"value":["meta-number",{"$":"obj","pairs":[["meta",7]]}]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ],
+        "b": [
+          [
+            1,
+            [
+              {
+                "id": [1,0],
+                "len": 1,
+                "kind": "item",
+                "parent": "arr",
+                "content": {"ref":9,"value":["plain",{"$":"obj","pairs":[]}]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,1],
+                "len": 1,
+                "kind": "item",
+                "origin": [1,0],
+                "parent": "arr",
+                "content": {"ref":9,"value":["full",{"$":"obj","pairs":[["gc",false],["autoLoad",true],["meta","m"]]}]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,2],
+                "len": 1,
+                "kind": "item",
+                "origin": [1,1],
+                "parent": "arr",
+                "content": {"ref":9,"value":["lazy",{"$":"obj","pairs":[]}]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,3],
+                "len": 1,
+                "kind": "item",
+                "rightOrigin": [1,0],
+                "parent": "arr",
+                "content": {"ref":9,"value":["meta-number",{"$":"obj","pairs":[["meta",7]]}]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ]
+      }
+    }
+  }
+}

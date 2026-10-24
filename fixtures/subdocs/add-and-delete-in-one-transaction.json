@@ -1,0 +1,198 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["SUB-08","SUB-06"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":7},{"name":"b","clientId":8}],
+    "steps": [
+      {"step":"subdoc.observe","doc":"a","name":"ea"},
+      {
+        "step": "transact",
+        "doc": "a",
+        "steps": [
+          {"step":"subdoc.add","doc":"a","target":{"root":"arr","kind":"array"},"guid":"gone"},
+          {"step":"array.delete","doc":"a","target":{"root":"arr","kind":"array"},"at":0,"len":1}
+        ]
+      },
+      {"step":"subdoc.add","doc":"a","target":{"root":"arr","kind":"array"},"guid":"stays"},
+      {"step":"subdoc.inspect","doc":"a","name":"subA"},
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"sync","from":"b","to":"a"},
+      {"step":"subdoc.inspect","doc":"b","name":"subB"}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [
+            {"$":"bytes","hex":"01010700010103617272010107010001"},
+            {"$":"bytes","hex":"01010701490700057374617973760000"}
+          ],
+          "v2": [
+            {"$":"bytes","hex":"000001070000010105036172720301010001010101000107010000"},
+            {"$":"bytes","hex":"000002470000010001490705737461797305000000010101760000"}
+          ]
+        },
+        "b": {
+          "v1": [{"$":"bytes","hex":"010207000101036172720149070005737461797376000107010001"}],
+          "v2": [
+            {"$":"bytes","hex":"0000024700000100030100490b0861727273746179730305010100010101020076000107010000"}
+          ]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {
+            "full": {"$":"bytes","hex":"010207000101036172720149070005737461797376000107010001"},
+            "diff": {"b":{"$":"bytes","hex":"000107010001"}}
+          },
+          "v2": {
+            "full": {"$":"bytes","hex":"0000024700000100030100490b0861727273746179730305010100010101020076000107010000"},
+            "diff": {"b":{"$":"bytes","hex":"0000000000000100000000000107010000"}}
+          }
+        },
+        "b": {
+          "v1": {
+            "full": {"$":"bytes","hex":"010207000101036172720149070005737461797376000107010001"},
+            "diff": {"a":{"$":"bytes","hex":"000107010001"}}
+          },
+          "v2": {
+            "full": {"$":"bytes","hex":"0000024700000100030100490b0861727273746179730305010100010101020076000107010000"},
+            "diff": {"a":{"$":"bytes","hex":"0000000000000100000000000107010000"}}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {
+        "a": {"v1":{"$":"bytes","hex":"010702"},"v2":{"$":"bytes","hex":"010702"}},
+        "b": {"v1":{"$":"bytes","hex":"010702"},"v2":{"$":"bytes","hex":"010702"}}
+      }
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {
+        "a": [["arr",{"kind":"array","items":[{"kind":"subdoc","guid":"stays"}]}]],
+        "b": [["arr",{"kind":"array","items":[{"kind":"subdoc","guid":"stays"}]}]]
+      }
+    },
+    "events": {
+      "api": "AbstractType.observe",
+      "value": [
+        {"observer":"ea","type":"subdocs","added":[],"removed":[],"loaded":["gone"]},
+        {"observer":"ea","type":"subdocs","added":["stays"],"removed":[],"loaded":["stays"]}
+      ]
+    },
+    "results": {
+      "api": "Doc.subdocs, Doc.getSubdocGuids, Doc fields",
+      "value": {
+        "subA": {
+          "api": "Doc.subdocs, Doc.getSubdocGuids, Doc fields",
+          "value": {
+            "guids": ["stays"],
+            "subdocs": [
+              {
+                "guid": "stays",
+                "shouldLoad": true,
+                "autoLoad": false,
+                "isLoaded": false,
+                "gc": true,
+                "collectionid": null,
+                "meta": null,
+                "clientIdIsParents": true
+              }
+            ]
+          }
+        },
+        "subB": {
+          "api": "Doc.subdocs, Doc.getSubdocGuids, Doc fields",
+          "value": {
+            "guids": ["stays"],
+            "subdocs": [
+              {
+                "guid": "stays",
+                "shouldLoad": false,
+                "autoLoad": false,
+                "isLoaded": false,
+                "gc": true,
+                "collectionid": null,
+                "meta": null,
+                "clientIdIsParents": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    "structs": {
+      "api": "doc.store.clients",
+      "value": {
+        "a": [
+          [
+            7,
+            [
+              {
+                "id": [7,0],
+                "len": 1,
+                "kind": "item",
+                "parent": "arr",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [7,1],
+                "len": 1,
+                "kind": "item",
+                "rightOrigin": [7,0],
+                "parent": "arr",
+                "content": {"ref":9,"value":["stays",{"$":"obj","pairs":[]}]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ],
+        "b": [
+          [
+            7,
+            [
+              {
+                "id": [7,0],
+                "len": 1,
+                "kind": "item",
+                "parent": "arr",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [7,1],
+                "len": 1,
+                "kind": "item",
+                "rightOrigin": [7,0],
+                "parent": "arr",
+                "content": {"ref":9,"value":["stays",{"$":"obj","pairs":[]}]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ]
+      }
+    },
+    "ds": {"api":"Y.createDeleteSetFromStructStore","value":{"a":[[7,[[0,1]]]],"b":[[7,[[0,1]]]]}}
+  }
+}

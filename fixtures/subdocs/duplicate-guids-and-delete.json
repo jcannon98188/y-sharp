@@ -1,0 +1,343 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["SUB-07","SUB-08","DOC-16","DOC-12"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":3},{"name":"b","clientId":4}],
+    "steps": [
+      {"step":"subdoc.observe","doc":"a","name":"ea"},
+      {"step":"subdoc.observe","doc":"b","name":"eb"},
+      {"step":"subdoc.add","doc":"a","target":{"root":"m","kind":"map"},"guid":"a","key":"a"},
+      {
+        "step": "subdoc.add",
+        "doc": "a",
+        "target": {"root":"m","kind":"map"},
+        "guid": "a",
+        "key": "b",
+        "opts": {"shouldLoad":false}
+      },
+      {"step":"subdoc.add","doc":"a","target":{"root":"m","kind":"map"},"guid":"c","key":"c"},
+      {"step":"subdoc.inspect","doc":"a","name":"subA"},
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"sync","from":"b","to":"a"},
+      {"step":"subdoc.inspect","doc":"b","name":"subB"},
+      {"step":"subdoc.load","doc":"b","guid":"a","index":0},
+      {"step":"map.delete","doc":"b","target":{"root":"m","kind":"map"},"key":"a"},
+      {"step":"subdoc.inspect","doc":"b","name":"subB2"},
+      {"step":"sync","from":"b","to":"a"},
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"subdoc.inspect","doc":"a","name":"subA2"}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [
+            {"$":"bytes","hex":"010103002901016d01610161760000"},
+            {"$":"bytes","hex":"010103012901016d01620161760000"},
+            {"$":"bytes","hex":"010103022901016d01630163760000"},
+            {"$":"bytes","hex":"000103010001"}
+          ],
+          "v2": [
+            {"$":"bytes","hex":"000001030000012906036d6161410101010000010100760000"},
+            {"$":"bytes","hex":"000001030000012906036d6261410101010000010101760000"},
+            {"$":"bytes","hex":"000001030000012906036d6363410101010000010102760000"},
+            {"$":"bytes","hex":"0000000000000100000000000103010000"}
+          ]
+        },
+        "b": {
+          "v1": [
+            {"$":"bytes","hex":"010303002901016d0161016176002901016d0162016176002901016d01630163760000"},
+            {"$":"bytes","hex":"000103010001"}
+          ],
+          "v2": [
+            {"$":"bytes","hex":"00000103000001290c096d61616d62616d636341070101000001030076007600760000"},
+            {"$":"bytes","hex":"0000000000000100000000000103010000"}
+          ]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {
+            "full": {"$":"bytes","hex":"010303002101016d0161012901016d0162016176002901016d0163016376000103010001"},
+            "diff": {"b":{"$":"bytes","hex":"000103010001"}}
+          },
+          "v2": {
+            "full": {"$":"bytes","hex":"000001030000032100290b086d616d62616d636341060101000101010300760076000103010000"},
+            "diff": {"b":{"$":"bytes","hex":"0000000000000100000000000103010000"}}
+          }
+        },
+        "b": {
+          "v1": {
+            "full": {"$":"bytes","hex":"010303002101016d0161012901016d0162016176002901016d0163016376000103010001"},
+            "diff": {"a":{"$":"bytes","hex":"000103010001"}}
+          },
+          "v2": {
+            "full": {"$":"bytes","hex":"000001030000032100290b086d616d62616d636341060101000101010300760076000103010000"},
+            "diff": {"a":{"$":"bytes","hex":"0000000000000100000000000103010000"}}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {
+        "a": {"v1":{"$":"bytes","hex":"010303"},"v2":{"$":"bytes","hex":"010303"}},
+        "b": {"v1":{"$":"bytes","hex":"010303"},"v2":{"$":"bytes","hex":"010303"}}
+      }
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {
+        "a": [
+          ["m",{"kind":"map","pairs":[["b",{"kind":"subdoc","guid":"a"}],["c",{"kind":"subdoc","guid":"c"}]]}]
+        ],
+        "b": [
+          ["m",{"kind":"map","pairs":[["b",{"kind":"subdoc","guid":"a"}],["c",{"kind":"subdoc","guid":"c"}]]}]
+        ]
+      }
+    },
+    "events": {
+      "api": "AbstractType.observe",
+      "value": [
+        {"observer":"ea","type":"subdocs","added":["a"],"removed":[],"loaded":["a"]},
+        {"observer":"ea","type":"subdocs","added":["a"],"removed":[],"loaded":[]},
+        {"observer":"ea","type":"subdocs","added":["c"],"removed":[],"loaded":["c"]},
+        {"observer":"eb","type":"subdocs","added":["a","a","c"],"removed":[],"loaded":[]},
+        {"observer":"eb","type":"subdocs","added":[],"removed":[],"loaded":["a"]},
+        {"observer":"eb","type":"subdocs","added":[],"removed":["a"],"loaded":[]},
+        {"observer":"eb","type":"subdocs","added":[],"removed":["a"],"loaded":[]},
+        {"observer":"ea","type":"subdocs","added":[],"removed":["a"],"loaded":[]},
+        {"observer":"ea","type":"subdocs","added":[],"removed":["a"],"loaded":[]}
+      ]
+    },
+    "results": {
+      "api": "Doc.subdocs, Doc.getSubdocGuids, Doc fields",
+      "value": {
+        "subA": {
+          "api": "Doc.subdocs, Doc.getSubdocGuids, Doc fields",
+          "value": {
+            "guids": ["a","c"],
+            "subdocs": [
+              {
+                "guid": "a",
+                "shouldLoad": true,
+                "autoLoad": false,
+                "isLoaded": false,
+                "gc": true,
+                "collectionid": null,
+                "meta": null,
+                "clientIdIsParents": true
+              },
+              {
+                "guid": "a",
+                "shouldLoad": false,
+                "autoLoad": false,
+                "isLoaded": false,
+                "gc": true,
+                "collectionid": null,
+                "meta": null,
+                "clientIdIsParents": true
+              },
+              {
+                "guid": "c",
+                "shouldLoad": true,
+                "autoLoad": false,
+                "isLoaded": false,
+                "gc": true,
+                "collectionid": null,
+                "meta": null,
+                "clientIdIsParents": true
+              }
+            ]
+          }
+        },
+        "subB": {
+          "api": "Doc.subdocs, Doc.getSubdocGuids, Doc fields",
+          "value": {
+            "guids": ["a","c"],
+            "subdocs": [
+              {
+                "guid": "a",
+                "shouldLoad": false,
+                "autoLoad": false,
+                "isLoaded": false,
+                "gc": true,
+                "collectionid": null,
+                "meta": null,
+                "clientIdIsParents": true
+              },
+              {
+                "guid": "a",
+                "shouldLoad": false,
+                "autoLoad": false,
+                "isLoaded": false,
+                "gc": true,
+                "collectionid": null,
+                "meta": null,
+                "clientIdIsParents": true
+              },
+              {
+                "guid": "c",
+                "shouldLoad": false,
+                "autoLoad": false,
+                "isLoaded": false,
+                "gc": true,
+                "collectionid": null,
+                "meta": null,
+                "clientIdIsParents": true
+              }
+            ]
+          }
+        },
+        "subB2": {
+          "api": "Doc.subdocs, Doc.getSubdocGuids, Doc fields",
+          "value": {
+            "guids": ["a","c"],
+            "subdocs": [
+              {
+                "guid": "a",
+                "shouldLoad": false,
+                "autoLoad": false,
+                "isLoaded": false,
+                "gc": true,
+                "collectionid": null,
+                "meta": null,
+                "clientIdIsParents": true
+              },
+              {
+                "guid": "c",
+                "shouldLoad": false,
+                "autoLoad": false,
+                "isLoaded": false,
+                "gc": true,
+                "collectionid": null,
+                "meta": null,
+                "clientIdIsParents": true
+              }
+            ]
+          }
+        },
+        "subA2": {
+          "api": "Doc.subdocs, Doc.getSubdocGuids, Doc fields",
+          "value": {
+            "guids": ["a","c"],
+            "subdocs": [
+              {
+                "guid": "a",
+                "shouldLoad": false,
+                "autoLoad": false,
+                "isLoaded": false,
+                "gc": true,
+                "collectionid": null,
+                "meta": null,
+                "clientIdIsParents": true
+              },
+              {
+                "guid": "c",
+                "shouldLoad": true,
+                "autoLoad": false,
+                "isLoaded": false,
+                "gc": true,
+                "collectionid": null,
+                "meta": null,
+                "clientIdIsParents": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    "structs": {
+      "api": "doc.store.clients",
+      "value": {
+        "a": [
+          [
+            3,
+            [
+              {
+                "id": [3,0],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "a",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [3,1],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "b",
+                "content": {"ref":9,"value":["a",{"$":"obj","pairs":[]}]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [3,2],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "c",
+                "content": {"ref":9,"value":["c",{"$":"obj","pairs":[]}]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ],
+        "b": [
+          [
+            3,
+            [
+              {
+                "id": [3,0],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "a",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [3,1],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "b",
+                "content": {"ref":9,"value":["a",{"$":"obj","pairs":[]}]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [3,2],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "c",
+                "content": {"ref":9,"value":["c",{"$":"obj","pairs":[]}]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ]
+      }
+    },
+    "ds": {"api":"Y.createDeleteSetFromStructStore","value":{"a":[[3,[[0,1]]]],"b":[[3,[[0,1]]]]}}
+  }
+}

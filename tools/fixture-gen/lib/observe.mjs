@@ -7,6 +7,7 @@ import { tag } from './tagged.mjs'
 /** A value as it appears in a dump: a tagged value, or a typed dump for a shared type. */
 export const yvalueOut = v => {
   if (v instanceof Y.AbstractType) return dumpType(v)
+  if (v instanceof Y.Doc) return { kind: 'subdoc', guid: v.guid }
   if (Array.isArray(v)) return v.map(yvalueOut)
   return tag(v)
 }
@@ -139,7 +140,7 @@ export const observe = (ctx, roots, extra = []) => {
   if (ctx.results.size) {
     obs.results = {
       api: Array.from(new Set(Array.from(ctx.results.values(), r => r.api))).join(', '),
-      value: Object.fromEntries(Array.from(ctx.results, ([n, r]) => [n, { api: r.api, bytes: bytes(r.bytes) }]))
+      value: Object.fromEntries(Array.from(ctx.results, ([n, r]) => [n, r.value === undefined ? { api: r.api, bytes: bytes(r.bytes) } : { api: r.api, value: r.value }]))
     }
   }
   if (extra.includes('structs')) obs.structs = { api: 'doc.store.clients', value: perReplica(d => dumpStructs(d)) }

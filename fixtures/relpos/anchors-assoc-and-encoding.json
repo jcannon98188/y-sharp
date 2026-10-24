@@ -1,0 +1,247 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["RP-01","RP-02","RP-03","RP-04","RP-05","RP-06"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":1}],
+    "steps": [
+      {"step":"text.insert","doc":"a","target":{"root":"t","kind":"text"},"at":0,"value":"abc"},
+      {
+        "step": "relpos.create",
+        "doc": "a",
+        "target": {"root":"t","kind":"text"},
+        "name": "t0a-1",
+        "at": 0,
+        "assoc": -1
+      },
+      {"step":"relpos.resolve","doc":"a","relpos":"t0a-1","name":"r0a-1"},
+      {
+        "step": "relpos.create",
+        "doc": "a",
+        "target": {"root":"t","kind":"text"},
+        "name": "t1a-1",
+        "at": 1,
+        "assoc": -1
+      },
+      {"step":"relpos.resolve","doc":"a","relpos":"t1a-1","name":"r1a-1"},
+      {
+        "step": "relpos.create",
+        "doc": "a",
+        "target": {"root":"t","kind":"text"},
+        "name": "t3a-1",
+        "at": 3,
+        "assoc": -1
+      },
+      {"step":"relpos.resolve","doc":"a","relpos":"t3a-1","name":"r3a-1"},
+      {
+        "step": "relpos.create",
+        "doc": "a",
+        "target": {"root":"t","kind":"text"},
+        "name": "t0a0",
+        "at": 0,
+        "assoc": 0
+      },
+      {"step":"relpos.resolve","doc":"a","relpos":"t0a0","name":"r0a0"},
+      {
+        "step": "relpos.create",
+        "doc": "a",
+        "target": {"root":"t","kind":"text"},
+        "name": "t1a0",
+        "at": 1,
+        "assoc": 0
+      },
+      {"step":"relpos.resolve","doc":"a","relpos":"t1a0","name":"r1a0"},
+      {
+        "step": "relpos.create",
+        "doc": "a",
+        "target": {"root":"t","kind":"text"},
+        "name": "t3a0",
+        "at": 3,
+        "assoc": 0
+      },
+      {"step":"relpos.resolve","doc":"a","relpos":"t3a0","name":"r3a0"},
+      {
+        "step": "relpos.create",
+        "doc": "a",
+        "target": {"root":"t","kind":"text"},
+        "name": "t0a1",
+        "at": 0,
+        "assoc": 1
+      },
+      {"step":"relpos.resolve","doc":"a","relpos":"t0a1","name":"r0a1"},
+      {
+        "step": "relpos.create",
+        "doc": "a",
+        "target": {"root":"t","kind":"text"},
+        "name": "t1a1",
+        "at": 1,
+        "assoc": 1
+      },
+      {"step":"relpos.resolve","doc":"a","relpos":"t1a1","name":"r1a1"},
+      {
+        "step": "relpos.create",
+        "doc": "a",
+        "target": {"root":"t","kind":"text"},
+        "name": "t3a1",
+        "at": 3,
+        "assoc": 1
+      },
+      {"step":"relpos.resolve","doc":"a","relpos":"t3a1","name":"r3a1"},
+      {"step":"relpos.create","doc":"a","target":{"root":"empty","kind":"text"},"name":"emptyRoot","at":0},
+      {"step":"relpos.resolve","doc":"a","relpos":"emptyRoot","name":"rEmptyRoot"},
+      {"step":"array.insertType","doc":"a","target":{"root":"arr","kind":"array"},"at":0,"kind":"text"},
+      {"step":"relpos.create","doc":"a","target":[{"root":"arr","kind":"array"},0],"name":"nested","at":0},
+      {"step":"relpos.resolve","doc":"a","relpos":"nested","name":"rNested"},
+      {"step":"text.insert","doc":"a","target":[{"root":"arr","kind":"array"},0],"at":0,"value":"xy"},
+      {
+        "step": "relpos.create",
+        "doc": "a",
+        "target": [{"root":"arr","kind":"array"},0],
+        "name": "nested2",
+        "at": 1,
+        "assoc": -1
+      },
+      {"step":"relpos.resolve","doc":"a","relpos":"nested2","name":"rNested2"}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [
+            {"$":"bytes","hex":"01010100040101740361626300"},
+            {"$":"bytes","hex":"010101030701036172720200"},
+            {"$":"bytes","hex":"010101040400010302787900"}
+          ],
+          "v2": [
+            {"$":"bytes","hex":"000001010000010407047461626301030101000001010000"},
+            {"$":"bytes","hex":"0000010100000107050361727203010101020001010300"},
+            {"$":"bytes","hex":"0000024100010600010404027879020100000001010400"}
+          ]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {"full":{"$":"bytes","hex":"010301000401017403616263070103617272020400010302787900"},"diff":{}},
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "00000241000106000504000700040e09746162636172727879014300020301010001020001030000"
+            },
+            "diff": {}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {"a":{"v1":{"$":"bytes","hex":"010106"},"v2":{"$":"bytes","hex":"010106"}}}
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {
+        "a": [
+          ["arr",{"kind":"array","items":[{"kind":"text","delta":[{"insert":"xy"}]}]}],
+          ["empty",{"kind":"text","delta":[]}],
+          ["t",{"kind":"text","delta":[{"insert":"abc"}]}]
+        ]
+      }
+    },
+    "results": {
+      "api": "Y.createRelativePositionFromTypeIndex, Y.encodeRelativePosition, Y.relativePositionToJSON, Y.createAbsolutePositionFromRelativePosition",
+      "value": {
+        "t0a-1": {
+          "api": "Y.createRelativePositionFromTypeIndex, Y.encodeRelativePosition, Y.relativePositionToJSON",
+          "value": {"bytes":{"$":"bytes","hex":"01017441"},"json":"{\"tname\":\"t\",\"assoc\":-1}"}
+        },
+        "r0a-1": {"api":"Y.createAbsolutePositionFromRelativePosition","value":{"type":"t","index":0,"assoc":-1}},
+        "t1a-1": {
+          "api": "Y.createRelativePositionFromTypeIndex, Y.encodeRelativePosition, Y.relativePositionToJSON",
+          "value": {
+            "bytes": {"$":"bytes","hex":"00010041"},
+            "json": "{\"tname\":\"t\",\"item\":{\"client\":1,\"clock\":0},\"assoc\":-1}"
+          }
+        },
+        "r1a-1": {"api":"Y.createAbsolutePositionFromRelativePosition","value":{"type":"t","index":1,"assoc":-1}},
+        "t3a-1": {
+          "api": "Y.createRelativePositionFromTypeIndex, Y.encodeRelativePosition, Y.relativePositionToJSON",
+          "value": {
+            "bytes": {"$":"bytes","hex":"00010241"},
+            "json": "{\"tname\":\"t\",\"item\":{\"client\":1,\"clock\":2},\"assoc\":-1}"
+          }
+        },
+        "r3a-1": {"api":"Y.createAbsolutePositionFromRelativePosition","value":{"type":"t","index":3,"assoc":-1}},
+        "t0a0": {
+          "api": "Y.createRelativePositionFromTypeIndex, Y.encodeRelativePosition, Y.relativePositionToJSON",
+          "value": {
+            "bytes": {"$":"bytes","hex":"00010000"},
+            "json": "{\"tname\":\"t\",\"item\":{\"client\":1,\"clock\":0},\"assoc\":0}"
+          }
+        },
+        "r0a0": {"api":"Y.createAbsolutePositionFromRelativePosition","value":{"type":"t","index":0,"assoc":0}},
+        "t1a0": {
+          "api": "Y.createRelativePositionFromTypeIndex, Y.encodeRelativePosition, Y.relativePositionToJSON",
+          "value": {
+            "bytes": {"$":"bytes","hex":"00010100"},
+            "json": "{\"tname\":\"t\",\"item\":{\"client\":1,\"clock\":1},\"assoc\":0}"
+          }
+        },
+        "r1a0": {"api":"Y.createAbsolutePositionFromRelativePosition","value":{"type":"t","index":1,"assoc":0}},
+        "t3a0": {
+          "api": "Y.createRelativePositionFromTypeIndex, Y.encodeRelativePosition, Y.relativePositionToJSON",
+          "value": {"bytes":{"$":"bytes","hex":"01017400"},"json":"{\"tname\":\"t\",\"assoc\":0}"}
+        },
+        "r3a0": {"api":"Y.createAbsolutePositionFromRelativePosition","value":{"type":"t","index":3,"assoc":0}},
+        "t0a1": {
+          "api": "Y.createRelativePositionFromTypeIndex, Y.encodeRelativePosition, Y.relativePositionToJSON",
+          "value": {
+            "bytes": {"$":"bytes","hex":"00010001"},
+            "json": "{\"tname\":\"t\",\"item\":{\"client\":1,\"clock\":0},\"assoc\":1}"
+          }
+        },
+        "r0a1": {"api":"Y.createAbsolutePositionFromRelativePosition","value":{"type":"t","index":0,"assoc":1}},
+        "t1a1": {
+          "api": "Y.createRelativePositionFromTypeIndex, Y.encodeRelativePosition, Y.relativePositionToJSON",
+          "value": {
+            "bytes": {"$":"bytes","hex":"00010101"},
+            "json": "{\"tname\":\"t\",\"item\":{\"client\":1,\"clock\":1},\"assoc\":1}"
+          }
+        },
+        "r1a1": {"api":"Y.createAbsolutePositionFromRelativePosition","value":{"type":"t","index":1,"assoc":1}},
+        "t3a1": {
+          "api": "Y.createRelativePositionFromTypeIndex, Y.encodeRelativePosition, Y.relativePositionToJSON",
+          "value": {"bytes":{"$":"bytes","hex":"01017401"},"json":"{\"tname\":\"t\",\"assoc\":1}"}
+        },
+        "r3a1": {"api":"Y.createAbsolutePositionFromRelativePosition","value":{"type":"t","index":3,"assoc":1}},
+        "emptyRoot": {
+          "api": "Y.createRelativePositionFromTypeIndex, Y.encodeRelativePosition, Y.relativePositionToJSON",
+          "value": {"bytes":{"$":"bytes","hex":"0105656d70747900"},"json":"{\"tname\":\"empty\",\"assoc\":0}"}
+        },
+        "rEmptyRoot": {"api":"Y.createAbsolutePositionFromRelativePosition","value":{"type":"empty","index":0,"assoc":0}},
+        "nested": {
+          "api": "Y.createRelativePositionFromTypeIndex, Y.encodeRelativePosition, Y.relativePositionToJSON",
+          "value": {"bytes":{"$":"bytes","hex":"02010300"},"json":"{\"type\":{\"client\":1,\"clock\":3},\"assoc\":0}"}
+        },
+        "rNested": {"api":"Y.createAbsolutePositionFromRelativePosition","value":{"type":[1,3],"index":0,"assoc":0}},
+        "nested2": {
+          "api": "Y.createRelativePositionFromTypeIndex, Y.encodeRelativePosition, Y.relativePositionToJSON",
+          "value": {
+            "bytes": {"$":"bytes","hex":"00010441"},
+            "json": "{\"type\":{\"client\":1,\"clock\":3},\"item\":{\"client\":1,\"clock\":4},\"assoc\":-1}"
+          }
+        },
+        "rNested2": {"api":"Y.createAbsolutePositionFromRelativePosition","value":{"type":[1,3],"index":1,"assoc":-1}}
+      }
+    }
+  }
+}

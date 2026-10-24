@@ -297,6 +297,506 @@
           "additionalProperties": false
         },
         {
+          "title": "gc.run",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "gc.run"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "gc": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "step",
+            "doc"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "subdoc.add",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "subdoc.add"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "target": {
+              "$ref": "#/$defs/target"
+            },
+            "guid": {
+              "type": "string",
+              "minLength": 1
+            },
+            "at": {
+              "$ref": "#/$defs/index"
+            },
+            "key": {
+              "type": "string"
+            },
+            "opts": {
+              "type": "object",
+              "properties": {
+                "gc": {
+                  "type": "boolean"
+                },
+                "autoLoad": {
+                  "type": "boolean"
+                },
+                "shouldLoad": {
+                  "type": "boolean"
+                },
+                "collectionid": {
+                  "type": "string"
+                },
+                "meta": {
+                  "type": [
+                    "string",
+                    "number",
+                    "boolean"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "target",
+            "guid"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "subdoc.load",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "subdoc.load"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "guid": {
+              "type": "string",
+              "minLength": 1
+            },
+            "index": {
+              "$ref": "#/$defs/index"
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "guid"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "subdoc.destroy",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "subdoc.destroy"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "guid": {
+              "type": "string",
+              "minLength": 1
+            },
+            "index": {
+              "$ref": "#/$defs/index"
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "guid"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "subdoc.observe",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "subdoc.observe"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "name": {
+              "$ref": "#/$defs/identifier"
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "subdoc.inspect",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "subdoc.inspect"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "name": {
+              "$ref": "#/$defs/identifier"
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "snapshot.take",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "snapshot.take"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "name": {
+              "$ref": "#/$defs/identifier"
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "snapshot.restore",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "snapshot.restore"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "snapshot": {
+              "$ref": "#/$defs/identifier"
+            },
+            "as": {
+              "$ref": "#/$defs/identifier"
+            },
+            "clientId": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "snapshot",
+            "as",
+            "clientId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "snapshot.read",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "snapshot.read"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "target": {
+              "$ref": "#/$defs/target"
+            },
+            "snapshot": {
+              "$ref": "#/$defs/identifier"
+            },
+            "prev": {
+              "$ref": "#/$defs/identifier"
+            },
+            "name": {
+              "$ref": "#/$defs/identifier"
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "target",
+            "snapshot",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "relpos.create",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "relpos.create"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "target": {
+              "$ref": "#/$defs/target"
+            },
+            "name": {
+              "$ref": "#/$defs/identifier"
+            },
+            "at": {
+              "$ref": "#/$defs/index"
+            },
+            "assoc": {
+              "enum": [
+                -1,
+                0,
+                1
+              ]
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "target",
+            "name",
+            "at"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "relpos.resolve",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "relpos.resolve"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "relpos": {
+              "$ref": "#/$defs/identifier"
+            },
+            "name": {
+              "$ref": "#/$defs/identifier"
+            },
+            "followUndone": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "relpos",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "undo.create",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "undo.create"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "name": {
+              "$ref": "#/$defs/identifier"
+            },
+            "scope": {
+              "oneOf": [
+                {
+                  "const": "doc"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/target"
+                  }
+                }
+              ]
+            },
+            "captureTimeout": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000000
+            },
+            "trackedOrigins": {
+              "type": "array",
+              "items": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "ignoreRemoteMapChanges": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "name",
+            "scope"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "undo.stopCapturing",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "undo.stopCapturing"
+            },
+            "name": {
+              "$ref": "#/$defs/identifier"
+            }
+          },
+          "required": [
+            "step",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "undo.undo",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "undo.undo"
+            },
+            "name": {
+              "$ref": "#/$defs/identifier"
+            },
+            "as": {
+              "$ref": "#/$defs/identifier"
+            }
+          },
+          "required": [
+            "step",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "undo.redo",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "undo.redo"
+            },
+            "name": {
+              "$ref": "#/$defs/identifier"
+            },
+            "as": {
+              "$ref": "#/$defs/identifier"
+            }
+          },
+          "required": [
+            "step",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "pud.setUserDescription",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "pud.setUserDescription"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "clientId": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            "description": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "clientId",
+            "description"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "pud.observe",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "pud.observe"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "name": {
+              "$ref": "#/$defs/identifier"
+            },
+            "clientIds": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              }
+            },
+            "deletedIds": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                ],
+                "minItems": 2,
+                "maxItems": 2
+              }
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        {
           "title": "tick",
           "type": "object",
           "properties": {

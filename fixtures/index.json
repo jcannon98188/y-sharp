@@ -37,6 +37,22 @@
       "bytes": 6724
     },
     {
+      "path": "doc/root-type-promotion-from-update.json",
+      "area": "doc",
+      "name": "root-type-promotion-from-update",
+      "covers": ["DOC-03","DOC-04","DOC-06"],
+      "sha256": "24d4bd8701f901ba45bcde9fccb6b4f1473552541bcb4a982b1d01b6bf5c4063",
+      "bytes": 5809
+    },
+    {
+      "path": "doc/update-events-and-gc-flag.json",
+      "area": "doc",
+      "name": "update-events-and-gc-flag",
+      "covers": ["DOC-10","DOC-01","DOC-08","DOC-09"],
+      "sha256": "3a473db6cc833624f072b9ced5b4b9474be253e6f7190f15eeead71f790b1da3",
+      "bytes": 9077
+    },
+    {
       "path": "encoding/any-values.json",
       "area": "encoding",
       "name": "any-values",
@@ -210,12 +226,100 @@
       "bytes": 11204
     },
     {
+      "path": "pud/concurrent-user-creation-overwrite.json",
+      "area": "pud",
+      "name": "concurrent-user-creation-overwrite",
+      "covers": ["PUD-04","PUD-05","PUD-03","PUD-09"],
+      "sha256": "8ea6ae84a6067aa3c3dbb991abca5d227f81c5eeb74db37296cbd4f7d04bf751",
+      "bytes": 19348
+    },
+    {
+      "path": "pud/late-construction-reads-existing-data.json",
+      "area": "pud",
+      "name": "late-construction-reads-existing-data",
+      "covers": ["PUD-02","PUD-01","PUD-06","PUD-08"],
+      "sha256": "89ade3515c18a55084822819472e7f2615ebadbda4258aadbb2fb9def7526469",
+      "bytes": 10533
+    },
+    {
+      "path": "pud/users-map-layout-and-lookups.json",
+      "area": "pud",
+      "name": "users-map-layout-and-lookups",
+      "covers": ["PUD-01","PUD-03","PUD-06","PUD-08","PUD-09"],
+      "sha256": "87a9605ee4f863854a67f70c4cec704150cbdf6ecb2d72bb6e10035166166658",
+      "bytes": 18775
+    },
+    {
       "path": "random/text-three-clients-seed-1337.json",
       "area": "random",
       "name": "text-three-clients-seed-1337",
       "covers": ["T-1","T-2","A-18"],
       "sha256": "374f5b93249733229daa83775200ffa56b1cf0ce2604261a0ab0a4bed74eb618",
       "bytes": 21246
+    },
+    {
+      "path": "relpos/anchors-assoc-and-encoding.json",
+      "area": "relpos",
+      "name": "anchors-assoc-and-encoding",
+      "covers": ["RP-01","RP-02","RP-03","RP-04","RP-05","RP-06"],
+      "sha256": "0b84835ace90e21466d39c7fc0613aad9dd0f68eb62a9d79bba3b20e277a01bf",
+      "bytes": 10264
+    },
+    {
+      "path": "relpos/concurrent-edits-and-deleted-anchor.json",
+      "area": "relpos",
+      "name": "concurrent-edits-and-deleted-anchor",
+      "covers": ["RP-06","RP-08","RP-09","RP-02"],
+      "sha256": "47231d6d69938231525c7e5355f27bf26ebf289d902aea78325d5cec03edc526",
+      "bytes": 11598
+    },
+    {
+      "path": "relpos/default-name-json-quirk.json",
+      "area": "relpos",
+      "name": "default-name-json-quirk",
+      "covers": ["RP-05","RP-04"],
+      "sha256": "7a075aa024686bab655257be0d35a7b61f3ad164838614cea7f3fb9d934562a7",
+      "bytes": 2713
+    },
+    {
+      "path": "relpos/follow-undone-deletions.json",
+      "area": "relpos",
+      "name": "follow-undone-deletions",
+      "covers": ["RP-06","RP-08"],
+      "sha256": "ff20d6bcac5b6cb7fd128e22043132383d9354252ed6a310a984a3c9b2fea584",
+      "bytes": 7578
+    },
+    {
+      "path": "snapshot/array-deletions-and-empty.json",
+      "area": "snapshot",
+      "name": "array-deletions-and-empty",
+      "covers": ["SNAP-01","SNAP-02","SNAP-08","SNAP-05"],
+      "sha256": "e0517ed9608ae25fc550d6ba6c5fa011b189703d26e0f7bc548b997552065629",
+      "bytes": 8668
+    },
+    {
+      "path": "snapshot/dependent-changes-two-clients.json",
+      "area": "snapshot",
+      "name": "dependent-changes-two-clients",
+      "covers": ["SNAP-01","SNAP-08","SNAP-05"],
+      "sha256": "043da2f42886444eb49c47068d64098b9987553c73983d86966a49a4193af1cb",
+      "bytes": 14763
+    },
+    {
+      "path": "snapshot/take-restore-and-encode.json",
+      "area": "snapshot",
+      "name": "take-restore-and-encode",
+      "covers": ["SNAP-01","SNAP-02","SNAP-05","SNAP-08","SNAP-09","DOC-04"],
+      "sha256": "74ef2c99f53c14c24362434d4204598cf0a0a7f5afc974a6efc33a61e9cf55e0",
+      "bytes": 9389
+    },
+    {
+      "path": "snapshot/text-delta-between-snapshots.json",
+      "area": "snapshot",
+      "name": "text-delta-between-snapshots",
+      "covers": ["SNAP-05","SNAP-06","SNAP-07","SNAP-01"],
+      "sha256": "ded70b5b07722935232cb873499e1dc00d7756cb65da0810508d62f1699b37f8",
+      "bytes": 7031
     },
     {
       "path": "structs/client-id-collision.json",
@@ -442,6 +546,46 @@
       "bytes": 3345
     },
     {
+      "path": "subdocs/add-and-delete-in-one-transaction.json",
+      "area": "subdocs",
+      "name": "add-and-delete-in-one-transaction",
+      "covers": ["SUB-08","SUB-06"],
+      "sha256": "51355cf65becb9a8351faac29ddb2a9c17fa44d1ca1ea45a5a2df3db660fb292",
+      "bytes": 6352
+    },
+    {
+      "path": "subdocs/array-options-and-events.json",
+      "area": "subdocs",
+      "name": "array-options-and-events",
+      "covers": ["SUB-01","SUB-02","SUB-03","SUB-04","SUB-06","DOC-16","DOC-17","DOC-12"],
+      "sha256": "569b03e8811717df167555a87e90daeaeeb5e466a1e38cec62188bd5a72286bc",
+      "bytes": 14272
+    },
+    {
+      "path": "subdocs/destroy-and-reload.json",
+      "area": "subdocs",
+      "name": "destroy-and-reload",
+      "covers": ["SUB-11","SUB-12","SUB-13","DOC-15","DOC-12"],
+      "sha256": "92912d7c4c1db81c89dbefbd3127b71a00ea9b81320c7fa689a0eca54f905acc",
+      "bytes": 9771
+    },
+    {
+      "path": "subdocs/duplicate-guids-and-delete.json",
+      "area": "subdocs",
+      "name": "duplicate-guids-and-delete",
+      "covers": ["SUB-07","SUB-08","DOC-16","DOC-12"],
+      "sha256": "19da30ceea114e5592184aaf0bf4bded805c99dbea285546b48fa24b7d5a3411",
+      "bytes": 11434
+    },
+    {
+      "path": "subdocs/undo-redo-subdoc.json",
+      "area": "subdocs",
+      "name": "undo-redo-subdoc",
+      "covers": ["SUB-10","UM-19"],
+      "sha256": "b63fbb79bf259ceb1f1bae18b6586fefa4d2a6dbe4d0f6e4f624812ffd366564",
+      "bytes": 5738
+    },
+    {
       "path": "text/apply-delta.json",
       "area": "text",
       "name": "apply-delta",
@@ -488,6 +632,62 @@
       "covers": ["T-5","E-1","E-2"],
       "sha256": "dfb96cebe91ce4320a04485cf2f7794093054a26b5f743f427248c7dd8fdc32d",
       "bytes": 5675
+    },
+    {
+      "path": "undo/capture-timeout-merging.json",
+      "area": "undo",
+      "name": "capture-timeout-merging",
+      "covers": ["UM-03","UM-04","UM-05","UM-08","UM-14","UM-06"],
+      "sha256": "4fa9c6abd8bd36da1f1feecbaa623226d883cbdcb7ab97ea5cd8903871b74c03",
+      "bytes": 8164
+    },
+    {
+      "path": "undo/map-delete-and-overwrite.json",
+      "area": "undo",
+      "name": "map-delete-and-overwrite",
+      "covers": ["UM-10","UM-12"],
+      "sha256": "5baeda83c2e0841a65523bff2527b75e97d3e2a5ebe86e7556cf9cec539d0399",
+      "bytes": 14072
+    },
+    {
+      "path": "undo/nested-types-and-formatting.json",
+      "area": "undo",
+      "name": "nested-types-and-formatting",
+      "covers": ["UM-10","UM-11","UM-18"],
+      "sha256": "2f2feb2f4b583c3bbd849638d9a5d30c608e2a52a2384524b5fe3eacf8ed6513",
+      "bytes": 27280
+    },
+    {
+      "path": "undo/redo-stack-invalidation.json",
+      "area": "undo",
+      "name": "redo-stack-invalidation",
+      "covers": ["UM-05","UM-04"],
+      "sha256": "1a2a1bfc5231facde47b0daa9438c4f75fc8135f9595a16894cd4773403bb5ae",
+      "bytes": 5070
+    },
+    {
+      "path": "undo/remote-edits-and-redo.json",
+      "area": "undo",
+      "name": "remote-edits-and-redo",
+      "covers": ["UM-10","UM-20","UM-11","UM-01"],
+      "sha256": "6b2f2a484e702627437034da88b754ce6d45a04f851aa0ca4c87582e05e9f6a4",
+      "bytes": 15791
+    },
+    {
+      "path": "undo/tracked-origins-and-scope.json",
+      "area": "undo",
+      "name": "tracked-origins-and-scope",
+      "covers": ["UM-01","UM-02","UM-05"],
+      "sha256": "bcafb122daf5af7f3167c96ca11ee83bb1dffdaf0347a77bd913056a0b8b4e33",
+      "bytes": 7288
+    },
+    {
+      "path": "undo/zero-and-infinite-capture-timeout.json",
+      "area": "undo",
+      "name": "zero-and-infinite-capture-timeout",
+      "covers": ["UM-03","UM-08"],
+      "sha256": "d3e17722082c5b407774f2892458f92c39ef14e1e835395b5f47e85e9ad15028",
+      "bytes": 6319
     }
   ]
 }

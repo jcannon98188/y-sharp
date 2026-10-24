@@ -1,0 +1,378 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["UM-10","UM-12"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":5},{"name":"b","clientId":6}],
+    "steps": [
+      {"step":"undo.create","doc":"a","name":"um","scope":[{"root":"m","kind":"map"}],"captureTimeout":0},
+      {
+        "step": "undo.create",
+        "doc": "a",
+        "name": "ign",
+        "scope": [{"root":"n","kind":"map"}],
+        "captureTimeout": 0,
+        "ignoreRemoteMapChanges": true
+      },
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"a","value":"a"},
+      {"step":"map.delete","doc":"a","target":{"root":"m","kind":"map"},"key":"a"},
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"a","value":"b"},
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"a","value":"c"},
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"sync","from":"b","to":"a"},
+      {"step":"map.set","doc":"b","target":{"root":"m","kind":"map"},"key":"a","value":"remote"},
+      {"step":"sync","from":"b","to":"a"},
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"undo.undo","name":"um","as":"u1"},
+      {"step":"undo.undo","name":"um","as":"u2"},
+      {"step":"undo.redo","name":"um","as":"r1"},
+      {"step":"map.set","doc":"a","target":{"root":"n","kind":"map"},"key":"x","value":1},
+      {"step":"map.set","doc":"b","target":{"root":"n","kind":"map"},"key":"x","value":2},
+      {"step":"sync","from":"b","to":"a"},
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"map.set","doc":"a","target":{"root":"n","kind":"map"},"key":"x","value":3},
+      {"step":"map.set","doc":"b","target":{"root":"n","kind":"map"},"key":"x","value":4},
+      {"step":"sync","from":"b","to":"a"},
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"undo.undo","name":"ign","as":"ig1"},
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"sync","from":"b","to":"a"}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [
+            {"$":"bytes","hex":"010105002801016d01610177016100"},
+            {"$":"bytes","hex":"000105010001"},
+            {"$":"bytes","hex":"01010501a805000177016200"},
+            {"$":"bytes","hex":"01010502a80501017701630105010101"},
+            {"$":"bytes","hex":"01010600a8050201770672656d6f74650105010201"},
+            {"$":"bytes","hex":"010105032801016e0178017d0100"},
+            {"$":"bytes","hex":"010106012801016e0178017d020105010301"},
+            {"$":"bytes","hex":"01010504a80601017d030106010101"},
+            {"$":"bytes","hex":"01010602a80601017d040105010401"},
+            {"$":"bytes","hex":"01010505a80602017d020106010201"}
+          ],
+          "v2": [
+            {"$":"bytes","hex":"000001050000012805026d614100010100010101010077016100"},
+            {"$":"bytes","hex":"0000000000000100000000000105010000"},
+            {"$":"bytes","hex":"000002450001000001a801000000010101010177016200"},
+            {"$":"bytes","hex":"000002450001020001a80100000001010101027701630105010100"},
+            {"$":"bytes","hex":"000002060501040001a8010000000101010100770672656d6f74650105010200"},
+            {"$":"bytes","hex":"000001050000012805026e78410001010001010101037d0100"},
+            {"$":"bytes","hex":"000001060000012805026e78410001010001010101017d020105010300"},
+            {"$":"bytes","hex":"000002050601020001a80100000001010101047d030106010100"},
+            {"$":"bytes","hex":"000002460001020001a80100000001010101027d040105010400"},
+            {"$":"bytes","hex":"000002050601040001a80100000001010101057d020106010200"}
+          ]
+        },
+        "b": {
+          "v1": [
+            {"$":"bytes","hex":"010205002101016d016102a80501017701630105010002"},
+            {"$":"bytes","hex":"01010600a8050201770672656d6f74650105010201"},
+            {"$":"bytes","hex":"010106012801016e0178017d0200"},
+            {"$":"bytes","hex":"010105032101016e0178010105010301"},
+            {"$":"bytes","hex":"01010602a80601017d040106010101"},
+            {"$":"bytes","hex":"01010504a10601010105010401"},
+            {"$":"bytes","hex":"01010505a80602017d020106010201"}
+          ],
+          "v2": [
+            {"$":"bytes","hex":"0000024500010200032100a805026d6141000101000202010102007701630105010001"},
+            {"$":"bytes","hex":"000002060501040001a8010000000101010100770672656d6f74650105010200"},
+            {"$":"bytes","hex":"000001060000012805026e78410001010001010101017d0200"},
+            {"$":"bytes","hex":"000001050000012105026e78410001010001010101030105010300"},
+            {"$":"bytes","hex":"000002460001020001a80100000001010101027d040106010100"},
+            {"$":"bytes","hex":"000002050601020001a10100000001010101040105010400"},
+            {"$":"bytes","hex":"000002050601040001a80100000001010101057d020106010200"}
+          ]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "02030600a8050201770672656d6f74652801016e0178017d02a80601017d040505002801016d016102770161770162a10501012101016e017801a1060101a80602017d02020601010205010005"
+            },
+            "diff": {"b":{"$":"bytes","hex":"00020601010205010005"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "00000706050645004600050442010002000fa8002800a8002800a1002100a100a809066e786d616e784104010100054101024102020300770672656d6f74657d027d0405007701617701627d02020601010105010004"
+            },
+            "diff": {"b":{"$":"bytes","hex":"000000000000010000000000020601010105010004"}}
+          }
+        },
+        "b": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "02030600a8050201770672656d6f74652101016e017801a10601010405002101016d0161032101016e017801a1060101a80602017d02020601010205010005"
+            },
+            "diff": {"a":{"$":"bytes","hex":"00020601010205010005"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "0000060605060546000404420002000ba8002100a1002101a100a809066e786d616e784104010100054101034101020300770672656d6f746504007d02020601010105010004"
+            },
+            "diff": {"a":{"$":"bytes","hex":"000000000000010000000000020601010105010004"}}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {
+        "a": {"v1":{"$":"bytes","hex":"0206030506"},"v2":{"$":"bytes","hex":"0206030506"}},
+        "b": {"v1":{"$":"bytes","hex":"0206030506"},"v2":{"$":"bytes","hex":"0206030506"}}
+      }
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {
+        "a": [["m",{"kind":"map","pairs":[["a","remote"]]}],["n",{"kind":"map","pairs":[["x",2]]}]],
+        "b": [["m",{"kind":"map","pairs":[["a","remote"]]}],["n",{"kind":"map","pairs":[["x",2]]}]]
+      }
+    },
+    "events": {
+      "api": "AbstractType.observe",
+      "value": [
+        {"observer":"um","type":"stack-item-added","kind":"undo"},
+        {"observer":"um","type":"stack-item-added","kind":"undo"},
+        {"observer":"um","type":"stack-item-added","kind":"undo"},
+        {"observer":"um","type":"stack-item-added","kind":"undo"},
+        {"observer":"ign","type":"stack-item-added","kind":"undo"},
+        {"observer":"ign","type":"stack-item-added","kind":"undo"},
+        {"observer":"ign","type":"stack-item-added","kind":"redo"},
+        {"observer":"ign","type":"stack-item-popped","kind":"undo"}
+      ]
+    },
+    "results": {
+      "api": "UndoManager.undo, undoStack.length, redoStack.length, UndoManager.redo, undoStack.length, redoStack.length",
+      "value": {
+        "u1": {
+          "api": "UndoManager.undo, undoStack.length, redoStack.length",
+          "value": {"popped":false,"undoStack":0,"redoStack":0}
+        },
+        "u2": {
+          "api": "UndoManager.undo, undoStack.length, redoStack.length",
+          "value": {"popped":false,"undoStack":0,"redoStack":0}
+        },
+        "r1": {
+          "api": "UndoManager.redo, undoStack.length, redoStack.length",
+          "value": {"popped":false,"undoStack":0,"redoStack":0}
+        },
+        "ig1": {
+          "api": "UndoManager.undo, undoStack.length, redoStack.length",
+          "value": {"popped":true,"undoStack":1,"redoStack":1}
+        }
+      }
+    },
+    "structs": {
+      "api": "doc.store.clients",
+      "value": {
+        "a": [
+          [
+            6,
+            [
+              {
+                "id": [6,0],
+                "len": 1,
+                "kind": "item",
+                "origin": [5,2],
+                "parent": "m",
+                "parentSub": "a",
+                "content": {"ref":8,"value":["remote"]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [6,1],
+                "len": 1,
+                "kind": "item",
+                "parent": "n",
+                "parentSub": "x",
+                "content": {"ref":8,"value":[2]},
+                "deleted": true,
+                "keep": true
+              },
+              {
+                "id": [6,2],
+                "len": 1,
+                "kind": "item",
+                "origin": [6,1],
+                "parent": "n",
+                "parentSub": "x",
+                "content": {"ref":8,"value":[4]},
+                "deleted": true,
+                "keep": true
+              }
+            ]
+          ],
+          [
+            5,
+            [
+              {
+                "id": [5,0],
+                "len": 2,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "a",
+                "content": {"ref":8,"value":["a","b"]},
+                "deleted": true,
+                "keep": true
+              },
+              {
+                "id": [5,2],
+                "len": 1,
+                "kind": "item",
+                "origin": [5,1],
+                "parent": "m",
+                "parentSub": "a",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [5,3],
+                "len": 1,
+                "kind": "item",
+                "parent": "n",
+                "parentSub": "x",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [5,4],
+                "len": 1,
+                "kind": "item",
+                "origin": [6,1],
+                "parent": "n",
+                "parentSub": "x",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [5,5],
+                "len": 1,
+                "kind": "item",
+                "origin": [6,2],
+                "parent": "n",
+                "parentSub": "x",
+                "content": {"ref":8,"value":[2]},
+                "deleted": false,
+                "keep": true
+              }
+            ]
+          ]
+        ],
+        "b": [
+          [
+            6,
+            [
+              {
+                "id": [6,0],
+                "len": 1,
+                "kind": "item",
+                "origin": [5,2],
+                "parent": "m",
+                "parentSub": "a",
+                "content": {"ref":8,"value":["remote"]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [6,1],
+                "len": 1,
+                "kind": "item",
+                "parent": "n",
+                "parentSub": "x",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [6,2],
+                "len": 1,
+                "kind": "item",
+                "origin": [6,1],
+                "parent": "n",
+                "parentSub": "x",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              }
+            ]
+          ],
+          [
+            5,
+            [
+              {
+                "id": [5,0],
+                "len": 3,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "a",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [5,3],
+                "len": 1,
+                "kind": "item",
+                "parent": "n",
+                "parentSub": "x",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [5,4],
+                "len": 1,
+                "kind": "item",
+                "origin": [6,1],
+                "parent": "n",
+                "parentSub": "x",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [5,5],
+                "len": 1,
+                "kind": "item",
+                "origin": [6,2],
+                "parent": "n",
+                "parentSub": "x",
+                "content": {"ref":8,"value":[2]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ]
+      }
+    },
+    "ds": {
+      "api": "Y.createDeleteSetFromStructStore",
+      "value": {"a":[[5,[[0,5]]],[6,[[1,2]]]],"b":[[5,[[0,5]]],[6,[[1,2]]]]}
+    }
+  }
+}

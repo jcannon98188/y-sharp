@@ -1,0 +1,71 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["RP-05","RP-04"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":2}],
+    "steps": [
+      {"step":"text.insert","doc":"a","target":{"root":"","kind":"text"},"at":0,"value":"hi"},
+      {
+        "step": "relpos.create",
+        "doc": "a",
+        "target": {"root":"","kind":"text"},
+        "name": "start",
+        "at": 0,
+        "assoc": -1
+      },
+      {"step":"relpos.create","doc":"a","target":{"root":"","kind":"text"},"name":"end","at":2},
+      {"step":"relpos.resolve","doc":"a","relpos":"start","name":"rStart"},
+      {"step":"relpos.resolve","doc":"a","relpos":"end","name":"rEnd"}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [{"$":"bytes","hex":"0101020004010002686900"}],
+          "v2": [{"$":"bytes","hex":"00000102000001040502686900020101000001010000"}]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {"full":{"$":"bytes","hex":"0101020004010002686900"},"diff":{}},
+          "v2": {"full":{"$":"bytes","hex":"00000102000001040502686900020101000001010000"},"diff":{}}
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {"a":{"v1":{"$":"bytes","hex":"010202"},"v2":{"$":"bytes","hex":"010202"}}}
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {"a":[["",{"kind":"text","delta":[{"insert":"hi"}]}]]}
+    },
+    "results": {
+      "api": "Y.createRelativePositionFromTypeIndex, Y.encodeRelativePosition, Y.relativePositionToJSON, Y.createAbsolutePositionFromRelativePosition",
+      "value": {
+        "start": {
+          "api": "Y.createRelativePositionFromTypeIndex, Y.encodeRelativePosition, Y.relativePositionToJSON",
+          "value": {"bytes":{"$":"bytes","hex":"010041"},"json":"{\"assoc\":-1}"}
+        },
+        "end": {
+          "api": "Y.createRelativePositionFromTypeIndex, Y.encodeRelativePosition, Y.relativePositionToJSON",
+          "value": {"bytes":{"$":"bytes","hex":"010000"},"json":"{\"assoc\":0}"}
+        },
+        "rStart": {"api":"Y.createAbsolutePositionFromRelativePosition","value":{"type":"","index":0,"assoc":-1}},
+        "rEnd": {"api":"Y.createAbsolutePositionFromRelativePosition","value":{"type":"","index":2,"assoc":0}}
+      }
+    }
+  }
+}

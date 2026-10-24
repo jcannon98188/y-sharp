@@ -1,0 +1,179 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["DOC-03","DOC-04","DOC-06"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":3},{"name":"b","clientId":4}],
+    "steps": [
+      {"step":"text.insert","doc":"a","target":{"root":"","kind":"text"},"at":0,"value":"h"},
+      {"step":"text.insert","doc":"a","target":{"root":"","kind":"text"},"at":1,"value":"i"},
+      {"step":"text.insert","doc":"a","target":{"root":"named","kind":"text"},"at":0,"value":"n"},
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"sync","from":"b","to":"a"},
+      {"step":"text.insert","doc":"b","target":{"root":"","kind":"text"},"at":2,"value":"!"},
+      {"step":"sync","from":"b","to":"a"},
+      {"step":"sync","from":"a","to":"b"}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [
+            {"$":"bytes","hex":"01010300040100016800"},
+            {"$":"bytes","hex":"01010301840300016900"},
+            {"$":"bytes","hex":"010103020401056e616d6564016e00"},
+            {"$":"bytes","hex":"01010400840301012100"}
+          ],
+          "v2": [
+            {"$":"bytes","hex":"000001030000010404016800010101000001010000"},
+            {"$":"bytes","hex":"000002430001000001840301690100000001010100"},
+            {"$":"bytes","hex":"000001030000010409066e616d65646e05010101000001010200"},
+            {"$":"bytes","hex":"000002040301020001840301210100000001010000"}
+          ]
+        },
+        "b": {
+          "v1": [
+            {"$":"bytes","hex":"010203000401000268690401056e616d6564016e00"},
+            {"$":"bytes","hex":"01010400840301012100"}
+          ],
+          "v2": [
+            {"$":"bytes","hex":"00000103000001040d0868696e616d65646e000205010101000001020000"},
+            {"$":"bytes","hex":"000002040301020001840301210100000001010000"}
+          ]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {
+            "full": {"$":"bytes","hex":"0201040084030101210203000401000268690401056e616d6564016e00"},
+            "diff": {"b":{"$":"bytes","hex":"0000"}}
+          },
+          "v2": {
+            "full": {"$":"bytes","hex":"000003044300010200038400040f092168696e616d65646e010002050101010000020100020000"},
+            "diff": {"b":{"$":"bytes","hex":"00000000000001000000000000"}}
+          }
+        },
+        "b": {
+          "v1": {
+            "full": {"$":"bytes","hex":"0201040084030101210203000401000268690401056e616d6564016e00"},
+            "diff": {"a":{"$":"bytes","hex":"0000"}}
+          },
+          "v2": {
+            "full": {"$":"bytes","hex":"000003044300010200038400040f092168696e616d65646e010002050101010000020100020000"},
+            "diff": {"a":{"$":"bytes","hex":"00000000000001000000000000"}}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {
+        "a": {"v1":{"$":"bytes","hex":"0204010303"},"v2":{"$":"bytes","hex":"0204010303"}},
+        "b": {"v1":{"$":"bytes","hex":"0204010303"},"v2":{"$":"bytes","hex":"0204010303"}}
+      }
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {
+        "a": [["",{"kind":"text","delta":[{"insert":"hi!"}]}],["named",{"kind":"text","delta":[{"insert":"n"}]}]],
+        "b": [["",{"kind":"text","delta":[{"insert":"hi!"}]}],["named",{"kind":"text","delta":[{"insert":"n"}]}]]
+      }
+    },
+    "structs": {
+      "api": "doc.store.clients",
+      "value": {
+        "a": [
+          [
+            4,
+            [
+              {
+                "id": [4,0],
+                "len": 1,
+                "kind": "item",
+                "origin": [3,1],
+                "parent": "",
+                "content": {"ref":4,"value":"!"},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ],
+          [
+            3,
+            [
+              {
+                "id": [3,0],
+                "len": 2,
+                "kind": "item",
+                "parent": "",
+                "content": {"ref":4,"value":"hi"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [3,2],
+                "len": 1,
+                "kind": "item",
+                "parent": "named",
+                "content": {"ref":4,"value":"n"},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ],
+        "b": [
+          [
+            4,
+            [
+              {
+                "id": [4,0],
+                "len": 1,
+                "kind": "item",
+                "origin": [3,1],
+                "parent": "",
+                "content": {"ref":4,"value":"!"},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ],
+          [
+            3,
+            [
+              {
+                "id": [3,0],
+                "len": 2,
+                "kind": "item",
+                "parent": "",
+                "content": {"ref":4,"value":"hi"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [3,2],
+                "len": 1,
+                "kind": "item",
+                "parent": "named",
+                "content": {"ref":4,"value":"n"},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ]
+      }
+    }
+  }
+}

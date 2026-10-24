@@ -1,0 +1,538 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["PUD-01","PUD-03","PUD-06","PUD-08","PUD-09"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":1},{"name":"b","clientId":2}],
+    "steps": [
+      {"step":"pud.setUserDescription","doc":"a","clientId":1,"description":"user a"},
+      {"step":"pud.setUserDescription","doc":"b","clientId":2,"description":"user b"},
+      {"step":"text.insert","doc":"a","target":{"root":"t","kind":"text"},"at":0,"value":"xhi"},
+      {"step":"text.delete","doc":"a","target":{"root":"t","kind":"text"},"at":0,"len":1},
+      {"step":"text.insert","doc":"b","target":{"root":"t","kind":"text"},"at":0,"value":"hxxi"},
+      {"step":"text.delete","doc":"b","target":{"root":"t","kind":"text"},"at":1,"len":2},
+      {"step":"tick","ms":10},
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"sync","from":"b","to":"a"},
+      {"step":"tick","ms":10},
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"sync","from":"b","to":"a"},
+      {
+        "step": "pud.observe",
+        "doc": "a",
+        "name": "pudA",
+        "clientIds": [1,2,3],
+        "deletedIds": [[1,0],[1,1],[2,1],[2,2],[2,3],[9,0]]
+      },
+      {"step":"pud.observe","doc":"b","name":"pudB","clientIds":[1,2],"deletedIds":[[1,0],[2,1]]}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [
+            {"$":"bytes","hex":"0103010027010575736572730675736572206101270001000369647300270001000264730000"},
+            {"$":"bytes","hex":"0101010308000101017d0100"},
+            {"$":"bytes","hex":"01010104040101740378686900"},
+            {"$":"bytes","hex":"000101010401"},
+            {"$":"bytes","hex":"010101070300010205010101040100"},
+            {
+              "$": "bytes",
+              "hex": "0108020027010575736572730675736572206201270002000369647300270002000264730008000201017d02040101740168810204028402060169030002020501020105020102010502"
+            }
+          ],
+          "v2": [
+            {
+              "$": "bytes",
+              "hex": "00000241010201000001271510757365727375736572206169647364730506030203010000030140000001030000"
+            },
+            {"$":"bytes","hex":"00000241000102000108010001000001010101037d0100"},
+            {"$":"bytes","hex":"000001010000010407047478686901030101000001010400"},
+            {"$":"bytes","hex":"0000000000000100000000000101010400"},
+            {"$":"bytes","hex":"0000024100010400010301000100000001010705010101040100"},
+            {
+              "$": "bytes",
+              "hex": "000002420506010002060448000b27020800040081008400031a13757365727375736572206269647364737468690506030241010701000002010000030140000201020108007d020501020105020102010501"
+            }
+          ]
+        },
+        "b": {
+          "v1": [
+            {"$":"bytes","hex":"0103020027010575736572730675736572206201270002000369647300270002000264730000"},
+            {"$":"bytes","hex":"0101020308000201017d0200"},
+            {"$":"bytes","hex":"0101020404010174046878786900"},
+            {"$":"bytes","hex":"000102010502"},
+            {"$":"bytes","hex":"010102080300020205010201050200"},
+            {
+              "$": "bytes",
+              "hex": "0107010027010575736572730675736572206101270001000369647300270001000264730008000101017d010101017401840104026869030001020501010104010101010401"
+            }
+          ],
+          "v2": [
+            {
+              "$": "bytes",
+              "hex": "00000242010201000001271510757365727375736572206269647364730506030203010000030140000001030000"
+            },
+            {"$":"bytes","hex":"00000242000102000108010001000001010101037d0200"},
+            {"$":"bytes","hex":"00000102000001040805746878786901040101000001010400"},
+            {"$":"bytes","hex":"0000000000000100000000000102010501"},
+            {"$":"bytes","hex":"0000024200010400010301000100000001010805010201050200"},
+            {
+              "$": "bytes",
+              "hex": "000002410405010002064400092702080001008400031a13757365727375736572206169647364737468690506030201020701000002010000030140000241000107007d010501010104010101010400"
+            }
+          ]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "0208020027010575736572730675736572206201270002000369647300270002000264730008000201017d020401017401688102040284020601690300020205010201050207010027010575736572730675736572206101270001000369647300270001000264730008000101017d01010101740184010402686903000102050101010401020201050201010401"
+            },
+            "diff": {"b":{"$":"bytes","hex":"00020201050201010401"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "000004420541040b01000206044844000206440015270208000400810084000300270208000100840003332675736572737573657220626964736473746869757365727375736572206169647364737468690506030241010506030201020f0100000201000000010000020100000601400001400004010241000208007d0205010201050207007d01050101010401020201050101010400"
+            },
+            "diff": {"b":{"$":"bytes","hex":"000000000000010000000000020201050101010400"}}
+          }
+        },
+        "b": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "0208020027010575736572730675736572206201270002000369647300270002000264730008000201017d020401017401688102040284020601690300020205010201050207010027010575736572730675736572206101270001000369647300270001000264730008000101017d01010101740184010402686903000102050101010401020201050201010401"
+            },
+            "diff": {"a":{"$":"bytes","hex":"00020201050201010401"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "000004420541040b01000206044844000206440015270208000400810084000300270208000100840003332675736572737573657220626964736473746869757365727375736572206169647364737468690506030241010506030201020f0100000201000000010000020100000601400001400004010241000208007d0205010201050207007d01050101010401020201050101010400"
+            },
+            "diff": {"a":{"$":"bytes","hex":"000000000000010000000000020201050101010400"}}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {
+        "a": {"v1":{"$":"bytes","hex":"0202090108"},"v2":{"$":"bytes","hex":"0202090108"}},
+        "b": {"v1":{"$":"bytes","hex":"0202090108"},"v2":{"$":"bytes","hex":"0202090108"}}
+      }
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {
+        "a": [["t",{"kind":"text","delta":[{"insert":"hihi"}]}]],
+        "b": [["t",{"kind":"text","delta":[{"insert":"hihi"}]}]]
+      }
+    },
+    "results": {
+      "api": "PermanentUserData.getUserByClientId, getUserByDeletedId, doc.getMap(\"users\")",
+      "value": {
+        "pudA": {
+          "api": "PermanentUserData.getUserByClientId, getUserByDeletedId, doc.getMap(\"users\")",
+          "value": {
+            "users": {
+              "kind": "map",
+              "pairs": [
+                [
+                  "user a",
+                  {
+                    "kind": "map",
+                    "pairs": [
+                      ["ids",{"kind":"array","items":[1]}],
+                      ["ds",{"kind":"array","items":[{"$":"bytes","hex":"0101010401"}]}]
+                    ]
+                  }
+                ],
+                [
+                  "user b",
+                  {
+                    "kind": "map",
+                    "pairs": [
+                      ["ids",{"kind":"array","items":[2]}],
+                      ["ds",{"kind":"array","items":[{"$":"bytes","hex":"0102010502"}]}]
+                    ]
+                  }
+                ]
+              ]
+            },
+            "byClientId": [[1,"user a"],[2,"user b"],[3,null]],
+            "byDeletedId": [[[1,0],null],[[1,1],null],[[2,1],null],[[2,2],null],[[2,3],null],[[9,0],null]]
+          }
+        },
+        "pudB": {
+          "api": "PermanentUserData.getUserByClientId, getUserByDeletedId, doc.getMap(\"users\")",
+          "value": {
+            "users": {
+              "kind": "map",
+              "pairs": [
+                [
+                  "user b",
+                  {
+                    "kind": "map",
+                    "pairs": [
+                      ["ids",{"kind":"array","items":[2]}],
+                      ["ds",{"kind":"array","items":[{"$":"bytes","hex":"0102010502"}]}]
+                    ]
+                  }
+                ],
+                [
+                  "user a",
+                  {
+                    "kind": "map",
+                    "pairs": [
+                      ["ids",{"kind":"array","items":[1]}],
+                      ["ds",{"kind":"array","items":[{"$":"bytes","hex":"0101010401"}]}]
+                    ]
+                  }
+                ]
+              ]
+            },
+            "byClientId": [[1,"user a"],[2,"user b"]],
+            "byDeletedId": [[[1,0],null],[[2,1],null]]
+          }
+        }
+      }
+    },
+    "structs": {
+      "api": "doc.store.clients",
+      "value": {
+        "a": [
+          [
+            2,
+            [
+              {
+                "id": [2,0],
+                "len": 1,
+                "kind": "item",
+                "parent": "users",
+                "parentSub": "user b",
+                "content": {"ref":7,"value":"YMap"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,1],
+                "len": 1,
+                "kind": "item",
+                "parent": [2,0],
+                "parentSub": "ids",
+                "content": {"ref":7,"value":"YArray"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,2],
+                "len": 1,
+                "kind": "item",
+                "parent": [2,0],
+                "parentSub": "ds",
+                "content": {"ref":7,"value":"YArray"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,3],
+                "len": 1,
+                "kind": "item",
+                "parent": [2,1],
+                "content": {"ref":8,"value":[2]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,4],
+                "len": 1,
+                "kind": "item",
+                "parent": "t",
+                "content": {"ref":4,"value":"h"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,5],
+                "len": 2,
+                "kind": "item",
+                "origin": [2,4],
+                "parent": "t",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [2,7],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,6],
+                "parent": "t",
+                "content": {"ref":4,"value":"i"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,8],
+                "len": 1,
+                "kind": "item",
+                "parent": [2,2],
+                "content": {"ref":3,"value":{"$":"bytes","hex":"0102010502"}},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ],
+          [
+            1,
+            [
+              {
+                "id": [1,0],
+                "len": 1,
+                "kind": "item",
+                "parent": "users",
+                "parentSub": "user a",
+                "content": {"ref":7,"value":"YMap"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,1],
+                "len": 1,
+                "kind": "item",
+                "parent": [1,0],
+                "parentSub": "ids",
+                "content": {"ref":7,"value":"YArray"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,2],
+                "len": 1,
+                "kind": "item",
+                "parent": [1,0],
+                "parentSub": "ds",
+                "content": {"ref":7,"value":"YArray"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,3],
+                "len": 1,
+                "kind": "item",
+                "parent": [1,1],
+                "content": {"ref":8,"value":[1]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,4],
+                "len": 1,
+                "kind": "item",
+                "parent": "t",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [1,5],
+                "len": 2,
+                "kind": "item",
+                "origin": [1,4],
+                "parent": "t",
+                "content": {"ref":4,"value":"hi"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,7],
+                "len": 1,
+                "kind": "item",
+                "parent": [1,2],
+                "content": {"ref":3,"value":{"$":"bytes","hex":"0101010401"}},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ],
+        "b": [
+          [
+            2,
+            [
+              {
+                "id": [2,0],
+                "len": 1,
+                "kind": "item",
+                "parent": "users",
+                "parentSub": "user b",
+                "content": {"ref":7,"value":"YMap"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,1],
+                "len": 1,
+                "kind": "item",
+                "parent": [2,0],
+                "parentSub": "ids",
+                "content": {"ref":7,"value":"YArray"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,2],
+                "len": 1,
+                "kind": "item",
+                "parent": [2,0],
+                "parentSub": "ds",
+                "content": {"ref":7,"value":"YArray"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,3],
+                "len": 1,
+                "kind": "item",
+                "parent": [2,1],
+                "content": {"ref":8,"value":[2]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,4],
+                "len": 1,
+                "kind": "item",
+                "parent": "t",
+                "content": {"ref":4,"value":"h"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,5],
+                "len": 2,
+                "kind": "item",
+                "origin": [2,4],
+                "parent": "t",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [2,7],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,6],
+                "parent": "t",
+                "content": {"ref":4,"value":"i"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,8],
+                "len": 1,
+                "kind": "item",
+                "parent": [2,2],
+                "content": {"ref":3,"value":{"$":"bytes","hex":"0102010502"}},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ],
+          [
+            1,
+            [
+              {
+                "id": [1,0],
+                "len": 1,
+                "kind": "item",
+                "parent": "users",
+                "parentSub": "user a",
+                "content": {"ref":7,"value":"YMap"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,1],
+                "len": 1,
+                "kind": "item",
+                "parent": [1,0],
+                "parentSub": "ids",
+                "content": {"ref":7,"value":"YArray"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,2],
+                "len": 1,
+                "kind": "item",
+                "parent": [1,0],
+                "parentSub": "ds",
+                "content": {"ref":7,"value":"YArray"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,3],
+                "len": 1,
+                "kind": "item",
+                "parent": [1,1],
+                "content": {"ref":8,"value":[1]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,4],
+                "len": 1,
+                "kind": "item",
+                "parent": "t",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [1,5],
+                "len": 2,
+                "kind": "item",
+                "origin": [1,4],
+                "parent": "t",
+                "content": {"ref":4,"value":"hi"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,7],
+                "len": 1,
+                "kind": "item",
+                "parent": [1,2],
+                "content": {"ref":3,"value":{"$":"bytes","hex":"0101010401"}},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ]
+      }
+    },
+    "ds": {
+      "api": "Y.createDeleteSetFromStructStore",
+      "value": {"a":[[1,[[4,1]]],[2,[[5,2]]]],"b":[[1,[[4,1]]],[2,[[5,2]]]]}
+    }
+  }
+}
