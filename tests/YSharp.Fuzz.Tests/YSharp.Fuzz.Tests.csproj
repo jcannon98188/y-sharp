@@ -11,6 +11,7 @@
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="FsCheck.Xunit.v3" />
     <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
+    <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\YSharp.TestKit\YSharp.TestKit.csproj" />
