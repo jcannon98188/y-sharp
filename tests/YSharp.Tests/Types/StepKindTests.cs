@@ -41,7 +41,8 @@ public sealed class StepKindTests
         var fromSchema = schema.RootElement.GetProperty("$defs").GetProperty("step").GetProperty("oneOf").EnumerateArray()
             .ToDictionary(o => o.GetProperty("properties").GetProperty("step").GetProperty("const").GetString()!, o => o, StringComparer.Ordinal);
         var registry = TypeSteps.CreateRegistry();
-        Assert.Equal(fromSchema.Keys.OrderBy(k => k, StringComparer.Ordinal), registry.Kinds.OrderBy(k => k, StringComparer.Ordinal));
+        // Kinds other areas add (Spec 9 protocol, Spec 10 simulation) are in the schema and in their own registries, not in this one.
+        Assert.All(registry.Kinds, kind => Assert.True(fromSchema.ContainsKey(kind), $"{kind} is registered but not in the schema"));
         foreach (var kind in registry.Kinds)
         {
             registry.TryGet(kind, out var def);
