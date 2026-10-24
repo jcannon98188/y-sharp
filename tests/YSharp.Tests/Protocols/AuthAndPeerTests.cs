@@ -6,10 +6,12 @@ using System.Text;
 using Xunit;
 using YSharp.Tests.Codecs;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Protocols;
 
 /// <summary>auth.js (AU-1..7): one message type, a UTF-8 reason, a handler. Golden bytes are in fixtures/auth.</summary>
+[Requires(Feature.Sync)]
 public sealed class AuthTests
 {
     private static byte[] Denied(string reason)
@@ -23,7 +25,7 @@ public sealed class AuthTests
         YAuth.TryReadMessage(ref input, doc, (d, r) => calls.Add((d, r)));
 
     [Fact, Covers("AU-1", "AU-2", "AU-7")]
-    public void PermissionDenied_AnyReason_IsTypeZeroThenTheLengthPrefixedUtf8Reason() => Stub.Run(() =>
+    public void PermissionDenied_AnyReason_IsTypeZeroThenTheLengthPrefixedUtf8Reason()
     {
         Assert.Equal(new byte[] { 0, 0 }, Denied(""));
         var reason = "zugriff verweigert: ä ✓ \U0001F600";
@@ -31,10 +33,10 @@ public sealed class AuthTests
         Assert.True(utf8.Length > reason.Length);
         Assert.Equal(new byte[] { 0, (byte)utf8.Length }.Concat(utf8), Denied(reason));
         Assert.Equal(new byte[] { 0, 0xc8, 0x01 }, Denied(new string('x', 200)).Take(3));
-    });
+    }
 
     [Fact, Covers("AU-3", "AU-6", "AU-7")]
-    public void ReadAuthMessage_CallsTheHandlerWithTheDocAndReason_AndRoundTrips() => Stub.Run(() =>
+    public void ReadAuthMessage_CallsTheHandlerWithTheDocAndReason_AndRoundTrips()
     {
         var doc = new Doc();
         var calls = new List<(Doc, string)>();
@@ -45,10 +47,10 @@ public sealed class AuthTests
         var (d, reason) = Assert.Single(calls);
         Assert.Same(doc, d);
         Assert.Equal("no ✓", reason);
-    });
+    }
 
     [Fact, Covers("AU-4")]
-    public void UnknownMessageTypes_AreIgnored_AndOnlyTheTypeIsConsumed() => Stub.Run(() =>
+    public void UnknownMessageTypes_AreIgnored_AndOnlyTheTypeIsConsumed()
     {
         var calls = new List<(Doc, string)>();
         ReadOnlySpan<byte> input = new byte[] { 7, 1, 2, 3 };
@@ -56,10 +58,10 @@ public sealed class AuthTests
         Assert.True(status.Ok);
         Assert.Empty(calls);
         Assert.Equal(3, input.Length);
-    });
+    }
 
     [Fact, Diverges("AU-5", adr: "0005")]
-    public void ATruncatedReason_IsAnErrorResult_AndANullHandlerIsRefusedUpFront() => Stub.Run(() =>
+    public void ATruncatedReason_IsAnErrorResult_AndANullHandlerIsRefusedUpFront()
     {
         // JS throws a decoder error for a truncated reason and a TypeError for a missing handler. Bad bytes are a status (ADR 0005);
         // a null handler is a programming error and throws ArgumentNullException.
@@ -81,7 +83,7 @@ public sealed class AuthTests
             YAuth.TryReadMessage(ref bytes, new Doc(), null!);
         });
         Assert.Equal(4, unknown.Length);
-    });
+    }
 }
 
 /// <summary>
@@ -136,10 +138,12 @@ internal sealed class TwoPeerHarness
     }
 }
 
+[Requires(Feature.Sync)]
 public sealed class TwoPeerConvergenceTests
 {
     [Fact, Covers("SY-13", "SY-14")]
-    public void PeerToPeer_BothSendStep1_EachReplies_ThenUpdatesAreForwarded() => Stub.Run(() =>
+    [Requires(Feature.Text)]
+    public void PeerToPeer_BothSendStep1_EachReplies_ThenUpdatesAreForwarded()
     {
         var h = new TwoPeerHarness();
         h.A.GetText("t").Insert(0, "hello");
@@ -153,10 +157,11 @@ public sealed class TwoPeerConvergenceTests
         h.Flush();
         h.AssertConverged();
         Assert.Equal(h.A.GetText("t").ToString(), h.B.GetText("t").ToString());
-    });
+    }
 
     [Fact, Covers("SY-14")]
-    public void EditsBetweenStep1AndStep2_StillConverge_BecauseStep2IsComputedFromTheCurrentState() => Stub.Run(() =>
+    [Requires(Feature.Text)]
+    public void EditsBetweenStep1AndStep2_StillConverge_BecauseStep2IsComputedFromTheCurrentState()
     {
         var h = new TwoPeerHarness();
         h.A.GetText("t").Insert(0, "base");
@@ -166,10 +171,11 @@ public sealed class TwoPeerConvergenceTests
         h.Flush();
         h.AssertConverged();
         Assert.Contains("base", h.A.GetText("t").ToString());
-    });
+    }
 
     [Fact, Covers("SY-10", "SY-12", "SY-15", Layer = CoverLayer.Port)]
-    public void TheConnectorFlow_DoesNotEchoRemoteUpdates_AndOnlyStep1ProducesAReply() => Stub.Run(() =>
+    [Requires(Feature.Text)]
+    public void TheConnectorFlow_DoesNotEchoRemoteUpdates_AndOnlyStep1ProducesAReply()
     {
         var h = new TwoPeerHarness();
         h.A.GetText("t").Insert(0, "hello");
@@ -181,5 +187,5 @@ public sealed class TwoPeerConvergenceTests
         h.Flush();
         Assert.Equal(0, h.Pending);                  // B applied it with the harness as origin, so it did not echo it back
         h.AssertConverged();
-    });
+    }
 }

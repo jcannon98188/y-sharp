@@ -2,6 +2,7 @@ using System;
 using Xunit;
 using Xunit.Sdk;
 using YSharp.TestKit.Allocation;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.TestKit;
 
@@ -9,6 +10,7 @@ namespace YSharp.Tests.TestKit;
 [CollectionDefinition("Allocation", DisableParallelization = true)]
 public class AllocationCollection;
 
+[LibraryIndependent]
 [Collection("Allocation")]
 public class AllocationAssertTests
 {

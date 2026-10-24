@@ -8,6 +8,7 @@ using YSharp.Interop.Generation;
 using YSharp.TestKit.Fixtures;
 using YSharp.TestKit.Tiers;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Interop.Tests;
 
@@ -16,6 +17,7 @@ namespace YSharp.Interop.Tests;
 /// optionally tampered with or made to hang. They prove the generator's scripts run on the real oracle, that a planted difference is
 /// found, shrunk, reported and saved, and that the hang, crash and misbehaviour rules hold. Smoke tier (needs Node).
 /// </summary>
+[LibraryIndependent]
 [NeedsNode]
 [Tier(Tier.Smoke)]
 public sealed class HarnessSelfTests : IDisposable

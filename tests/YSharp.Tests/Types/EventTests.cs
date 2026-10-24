@@ -5,10 +5,12 @@ using Xunit;
 using YSharp.Tests.Codecs;
 using YSharp.TestKit.Traceability;
 using static YSharp.Tests.Types.TypeTestExtensions;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Types;
 
 /// <summary>Type events: YArrayEvent, YMapEvent, YTextEvent, the common event surface and deep paths (A-E*, M-E*, Y-*, V-*).</summary>
+[Requires(Feature.Events)]
 public sealed class EventTests
 {
     private static Doc NewDoc(ulong client = 1) => new(new DocOptions { ClientId = client });
@@ -26,7 +28,8 @@ public sealed class EventTests
     // ------------------------------------------------------------------ array events
 
     [Fact, PortOf("y-array.tests.js:testInsertAndDeleteEventsForTypes2", "A-E1", "V-8")]
-    public void Events_ArrayTypeInsertAndDelete_CountsEachEvent() => Stub.Run(() =>
+    [Requires(Feature.Map)]
+    public void Events_ArrayTypeInsertAndDelete_CountsEachEvent()
     {
         var net = Net.Init(2);
         var array0 = net.Peers[0].Array;
@@ -37,10 +40,11 @@ public sealed class EventTests
         array0.Delete(1);
         Assert.Equal(2, events); // exactly once for the deletion
         net.Compare();
-    });
+    }
 
     [Fact, PortOf("y-array.tests.js:testChangeEvent", "A-E2", "A-E3", "V-4", "V-6")]
-    public void Events_ArrayChanges_ReportAddedAndDeletedItems() => Stub.Run(() =>
+    [Requires(Feature.Array)]
+    public void Events_ArrayChanges_ReportAddedAndDeletedItems()
     {
         var net = Net.Init(2);
         var array0 = net.Peers[0].Array;
@@ -72,10 +76,10 @@ public sealed class EventTests
         array0.Insert(1, new YEntry[] { 0.1 });
         Assert.Equal("""[{"retain":1},{"insert":[0.1]}]""", delta);
         net.Compare();
-    });
+    }
 
     [Fact, PortOf("y-array.tests.js:testInsertAndDeleteEvents", "A-E1")]
-    public void Events_ArrayInsertAndDelete_FireTheObserver() => Stub.Run(() =>
+    public void Events_ArrayInsertAndDelete_FireTheObserver()
     {
         var net = Net.Init(2);
         var array0 = net.Peers[0].Array;
@@ -90,10 +94,11 @@ public sealed class EventTests
         array0.Delete(0, 2);
         Assert.True(fired);
         net.Compare();
-    });
+    }
 
     [Fact, PortOf("y-array.tests.js:testInsertAndDeleteEventsForTypes", "A-E1")]
-    public void Events_ArrayInsertAndDeleteOfTypes_FireTheObserver() => Stub.Run(() =>
+    [Requires(Feature.Array)]
+    public void Events_ArrayInsertAndDeleteOfTypes_FireTheObserver()
     {
         var net = Net.Init(2);
         var array0 = net.Peers[0].Array;
@@ -105,10 +110,11 @@ public sealed class EventTests
         array0.Delete(0);
         Assert.True(fired);
         net.Compare();
-    });
+    }
 
     [Fact, Covers("A-E4", "Y-5")]
-    public void InsertThenDelete_InOneTransaction_FiresWithAnEmptyDelta() => Stub.Run(() =>
+    [Requires(Feature.Array)]
+    public void InsertThenDelete_InOneTransaction_FiresWithAnEmptyDelta()
     {
         var doc = NewDoc();
         var array = doc.GetArray("a");
@@ -120,20 +126,21 @@ public sealed class EventTests
             array.Delete(0, 2);
         });
         Assert.Equal(new[] { "[]" }, deltas);
-    });
+    }
 
     [Fact, Covers("A-E5", "Y-1")]
-    public void ArrayEvents_AnyChange_HaveNoKeys() => Stub.Run(() =>
+    [Requires(Feature.Array)]
+    public void ArrayEvents_AnyChange_HaveNoKeys()
     {
         var array = NewDoc().GetArray("a");
         var keys = -1;
         array.Observe((e, _) => keys = e.Keys.Count);
         array.Push(new YEntry[] { 1 });
         Assert.Equal(0, keys);
-    });
+    }
 
     [Fact, PortOf("y-array.tests.js:testEventTargetIsSetCorrectlyOnLocal", "A-E6")]
-    public void Events_LocalChange_SetsTargetAndCurrentTarget() => Stub.Run(() =>
+    public void Events_LocalChange_SetsTargetAndCurrentTarget()
     {
         var net = Net.Init(3);
         var array0 = net.Peers[0].Array;
@@ -143,10 +150,10 @@ public sealed class EventTests
         Assert.Same(array0, target);
         Assert.Same(array0, current);
         net.Compare();
-    });
+    }
 
     [Fact, PortOf("y-array.tests.js:testEventTargetIsSetCorrectlyOnRemote", "A-E6", "TX-14")]
-    public void Events_RemoteChange_SetsTargetAndIsNotLocal() => Stub.Run(() =>
+    public void Events_RemoteChange_SetsTargetAndIsNotLocal()
     {
         var net = Net.Init(3);
         var (array0, array1) = (net.Peers[0].Array, net.Peers[1].Array);
@@ -158,10 +165,10 @@ public sealed class EventTests
         Assert.Same(array0, target);
         Assert.False(isLocal);
         net.Compare();
-    });
+    }
 
     [Fact, PortOf("y-array.tests.js:testNestedObserverEvents", "A-E7", "TX-6")]
-    public void Events_ObserverThatEditsTheType_RunsNestedEventsInOrder() => Stub.Run(() =>
+    public void Events_ObserverThatEditsTheType_RunsNestedEventsInOrder()
     {
         var net = Net.Init(2);
         var array0 = net.Peers[0].Array;
@@ -184,10 +191,11 @@ public sealed class EventTests
         Assert.Equal(new[] { 0, 1 }, vals);
         Assert.Equal("[0,1]", array0.Json());
         net.Compare();
-    });
+    }
 
     [Fact, PortOf("y-array.tests.js:testNewChildDoesNotEmitEventInTransaction", "A-E8", "V-8")]
-    public void Events_ChildCreatedInATransaction_DoesNotEmitItsOwnEvent() => Stub.Run(() =>
+    [Requires(Feature.Map)]
+    public void Events_ChildCreatedInATransaction_DoesNotEmitItsOwnEvent()
     {
         var net = Net.Init(2);
         var array0 = net.Peers[0].Array;
@@ -200,10 +208,11 @@ public sealed class EventTests
             newMap.Set("tst", 42);
         });
         Assert.False(fired, "Event does not trigger");
-    });
+    }
 
     [Fact, Covers("A-E9", "TX-9")]
-    public void DeletedTypes_FireNoEvents_AndDeepObserversFilterTheirChildren() => Stub.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void DeletedTypes_FireNoEvents_AndDeepObserversFilterTheirChildren()
     {
         var doc = NewDoc();
         var root = doc.GetMap("m");
@@ -223,10 +232,11 @@ public sealed class EventTests
         Assert.Equal(0, childEvents);
         Assert.Equal(1, rootEvents);
         Assert.Equal(new[] { "root" }, deepTargets);
-    });
+    }
 
     [Fact, Covers("A-E10", "TX-12", "TX-13")]
-    public void ObserveAndUnobserve_SameHandlerTwice_RegisterByIdentityAndRemoveAllCopies() => Stub.Run(() =>
+    [Requires(Feature.Array)]
+    public void ObserveAndUnobserve_SameHandlerTwice_RegisterByIdentityAndRemoveAllCopies()
     {
         var array = NewDoc().GetArray("a");
         var count = 0;
@@ -254,12 +264,13 @@ public sealed class EventTests
         sub.Dispose();
         array.Push(new YEntry[] { 6 });
         Assert.Equal(1, subscribed);
-    });
+    }
 
     // ------------------------------------------------------------------ list deltas and paths
 
     [Fact, Covers("V-6")]
-    public void ListDelta_MergesRuns_AndDropsTheTrailingRetain() => Stub.Run(() =>
+    [Requires(Feature.Array)]
+    public void ListDelta_MergesRuns_AndDropsTheTrailingRetain()
     {
         string Run(Action<YArray, Doc> body)
         {
@@ -288,10 +299,11 @@ public sealed class EventTests
             a.Insert(0, new YEntry[] { "x" });
             a.Delete(4, 1);
         })));
-    });
+    }
 
     [Fact, Covers("V-7")]
-    public void DeletedThenReinsertedValues_CountSeparately_NoUpdateForLists() => Stub.Run(() =>
+    [Requires(Feature.Array)]
+    public void DeletedThenReinsertedValues_CountSeparately_NoUpdateForLists()
     {
         var doc = NewDoc();
         var array = doc.GetArray("a");
@@ -304,10 +316,11 @@ public sealed class EventTests
             array.Insert(0, new YEntry[] { 1 });
         });
         Assert.Equal("""[{"insert":[1]},{"delete":1}]""", delta);
-    });
+    }
 
     [Fact, PortOf("y-array.tests.js:testObservedeepIndexes", "V-2", "TX-19")]
-    public void Events_DeepObserverOnNestedArray_ReportsTheIndexes() => Stub.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void Events_DeepObserverOnNestedArray_ReportsTheIndexes()
     {
         var doc = NewDoc();
         var map = doc.GetMap();
@@ -320,10 +333,11 @@ public sealed class EventTests
         // set a value on the map inside of our array
         map.ArrayOf("my-array").MapAt(3).Set("hello", "world");
         Assert.Equal("""["my-array",3]""", eventPath);
-    });
+    }
 
     [Fact, PortOf("y-array.tests.js:testObserveDeepEventOrder", "TX-10", "TX-2")]
-    public void Events_DeepObserver_ReceivesEventsInTheOraclesOrder() => Stub.Run(() =>
+    [Requires(Feature.Map)]
+    public void Events_DeepObserver_ReceivesEventsInTheOraclesOrder()
     {
         var net = Net.Init(2);
         var array0 = net.Peers[0].Array;
@@ -341,12 +355,13 @@ public sealed class EventTests
         });
         Assert.Equal(2, lengths.Count);
         for (var i = 1; i < lengths.Count; i++) Assert.True(lengths[i - 1] <= lengths[i], "path size increases, fire top-level events first");
-    });
+    }
 
     // ------------------------------------------------------------------ map events
 
     [Fact, PortOf("y-map.tests.js:testThrowsAddAndUpdateAndDeleteEvents", "M-E1", "V-1")]
-    public void Events_MapAddUpdateAndDelete_ReportTheChangedKeys() => Stub.Run(() =>
+    [Requires(Feature.Array)]
+    public void Events_MapAddUpdateAndDelete_ReportTheChangedKeys()
     {
         var net = Net.Init(2);
         var map0 = net.Peers[0].Map;
@@ -363,10 +378,11 @@ public sealed class EventTests
         Assert.All(seen, s => Assert.True(s.SameTarget));
         Assert.All(seen, s => Assert.Equal("stuff", s.Keys));
         net.Compare();
-    });
+    }
 
     [Fact, PortOf("y-map.tests.js:testThrowsDeleteEventsOnClear", "M-E1", "M-5")]
-    public void Events_MapClear_ReportsEveryDeletedKey() => Stub.Run(() =>
+    [Requires(Feature.Array)]
+    public void Events_MapClear_ReportsEveryDeletedKey()
     {
         var net = Net.Init(2);
         var map0 = net.Peers[0].Map;
@@ -387,10 +403,10 @@ public sealed class EventTests
         Assert.Equal("otherstuff,stuff", keys);
         Assert.Same(map0, target);
         net.Compare();
-    });
+    }
 
     [Fact, PortOf("y-map.tests.js:testChangeEvent", "M-E1", "M-E2", "V-5")]
-    public void Events_MapChanges_ReportKeysAndKeysChanged() => Stub.Run(() =>
+    public void Events_MapChanges_ReportKeysAndKeysChanged()
     {
         var net = Net.Init(2);
         var map0 = net.Peers[0].Map;
@@ -431,10 +447,11 @@ public sealed class EventTests
         });
         Assert.Equal("d:add:-", keys);
         net.Compare();
-    });
+    }
 
     [Fact, Covers("M-E2", "V-5", "M-E3")]
-    public void KeyChanges_AnyChange_CarryTheValueBeforeTheTransaction() => Stub.Run(() =>
+    [Requires(Feature.Map)]
+    public void KeyChanges_AnyChange_CarryTheValueBeforeTheTransaction()
     {
         var doc = NewDoc();
         var map = doc.GetMap("m");
@@ -462,10 +479,11 @@ public sealed class EventTests
         map.Observe((e, _) => oldTypeSeen = e.Keys["t"].OldValue?.Type);
         map.Delete("t");
         Assert.NotNull(oldTypeSeen);
-    });
+    }
 
     [Fact, Covers("M-E4")]
-    public void MapEvents_AnyChange_HaveAnEmptyListDelta() => Stub.Run(() =>
+    [Requires(Feature.Map, Feature.Xml)]
+    public void MapEvents_AnyChange_HaveAnEmptyListDelta()
     {
         // YMapEvent has no Delta: the sketch exposes list deltas only on YArrayEvent, YTextEvent and YXmlEvent, which is the JS behaviour
         // (the JS delta of a map event is []). Added and deleted item sets are not public either (A-E3).
@@ -475,10 +493,11 @@ public sealed class EventTests
         map.Set("a", 1);
         Assert.Equal(1, changed);
         Assert.False(typeof(YMapEvent).GetProperty("Delta") != null);
-    });
+    }
 
     [Fact, PortOf("y-map.tests.js:testMapEventError", "M-E5", "TX-17")]
-    public void Events_ChangesComputedAfterTheHandler_AreAnError() => Stub.Run(() =>
+    [Requires(Feature.Map)]
+    public void Events_ChangesComputedAfterTheHandler_AreAnError()
     {
         // JS: the observer is registered but never fires, so event is null and the two accesses trivially fail. The intended
         // behaviour (yjs#539) is that computing changes after the handler fired is an error; this port makes the event really fire.
@@ -498,10 +517,11 @@ public sealed class EventTests
         Assert.False(stored!.IsValid);
         Assert.ThrowsAny<InvalidOperationException>(() => stored.Keys.Count);
         Assert.ThrowsAny<InvalidOperationException>(() => stored.Keys.Count);
-    });
+    }
 
     [Fact, PortOf("y-map.tests.js:testYmapEventHasCorrectValueWhenSettingAPrimitive", "M-E2")]
-    public void Events_MapSetOfAPrimitive_CarriesTheNewValue() => Stub.Run(() =>
+    [Requires(Feature.Map)]
+    public void Events_MapSetOfAPrimitive_CarriesTheNewValue()
     {
         var net = Net.Init(3);
         var map0 = net.Peers[0].Map;
@@ -516,10 +536,11 @@ public sealed class EventTests
         map0.Set("stuff", 2);
         Assert.True(matches);
         net.Compare();
-    });
+    }
 
     [Fact, PortOf("y-map.tests.js:testYmapEventHasCorrectValueWhenSettingAPrimitiveFromOtherUser", "M-E7", "M-9")]
-    public void Events_MapSetOfAPrimitiveByAPeer_CarriesTheNewValue() => Stub.Run(() =>
+    [Requires(Feature.Map)]
+    public void Events_MapSetOfAPrimitiveByAPeer_CarriesTheNewValue()
     {
         var net = Net.Init(3);
         var (map0, map1) = (net.Peers[0].Map, net.Peers[1].Map);
@@ -536,12 +557,13 @@ public sealed class EventTests
         Assert.True(matches);
         Assert.Same(map0, target); // the event of a remote update carries the local type
         net.Compare();
-    });
+    }
 
     // ------------------------------------------------------------------ deep observers
 
     [Fact, PortOf("y-map.tests.js:testObserveDeepProperties", "TX-19", "V-2")]
-    public void Events_DeepObserversOnNestedMaps_SeeTheChangedProperties() => Stub.Run(() =>
+    [Requires(Feature.Map)]
+    public void Events_DeepObserversOnNestedMaps_SeeTheChangedProperties()
     {
         var net = Net.Init(4);
         var (map1, map2, map3) = (net.Peers[1].Map, net.Peers[2].Map, net.Peers[3].Map);
@@ -569,10 +591,11 @@ public sealed class EventTests
         Assert.Equal(map1Inner.Json(), map2Inner.Json());
         Assert.Equal(map1Inner.Json(), map3Inner.Json());
         net.Compare();
-    });
+    }
 
     [Fact, PortOf("y-map.tests.js:testObserversUsingObservedeep", "TX-19", "V-2")]
-    public void Events_DeepObserver_ReportsPathsOfNestedChanges() => Stub.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void Events_DeepObserver_ReportsPathsOfNestedChanges()
     {
         var net = Net.Init(2);
         var map0 = net.Peers[0].Map;
@@ -589,10 +612,11 @@ public sealed class EventTests
         Assert.Equal(3, calls);
         Assert.Equal(new[] { "[]", """["map"]""", """["map","array"]""" }, paths);
         net.Compare();
-    });
+    }
 
     [Fact, PortOf("y-map.tests.js:testPathsOfSiblingEvents", "V-2", "TX-19")]
-    public void Events_SiblingChanges_ReportTheirOwnPaths() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.Map)]
+    public void Events_SiblingChanges_ReportTheirOwnPaths()
     {
         var net = Net.Init(2);
         var map0 = net.Peers[0].Map;
@@ -614,10 +638,11 @@ public sealed class EventTests
         Assert.Equal(1, calls);
         Assert.Equal(new[] { """["map"]""", """["map","text1"]""" }, paths);
         net.Compare();
-    });
+    }
 
     [Fact, PortOf("y-map.tests.js:testDeepEventPathsWithMultipleDeepObservers", "V-3", "TX-1", "TX-2", "Q23")]
-    public void Events_MultipleDeepObservers_ReportPathsRelativeToEach() => Stub.Run(() =>
+    [Requires(Feature.Map)]
+    public void Events_MultipleDeepObservers_ReportPathsRelativeToEach()
     {
         var doc = NewDoc();
         var a = doc.GetMap("a");
@@ -655,10 +680,11 @@ public sealed class EventTests
         Assert.Single(observedC);
         Assert.Equal("[]", observedC[0].Path);
         Assert.True(observedC[0].CurrentIsC);
-    });
+    }
 
     [Fact, PortOf("y-map.tests.js:testYmapEventExceptionsShouldCompleteTransaction", "M-E6", "TX-7", "Q24"), Diverges("M-E6", "0005"), Diverges("TX-7", "0005"), Diverges("Q24", "0005")]
-    public void Events_ThrowingMapHandlers_StillCompleteTheTransaction() => Stub.Run(() =>
+    [Requires(Feature.Map)]
+    public void Events_ThrowingMapHandlers_StillCompleteTheTransaction()
     {
         // JS: both handlers run, the update event and the data commit happen, and the exception (the last one, Q24) is rethrown from
         // map.set. y-sharp (ADR 0005): the same guarantees, but handler exceptions are reported through ObserverFaulted and never unwind
@@ -700,12 +726,13 @@ public sealed class EventTests
         Assert.True(throwingDeepObserverCalled);
         Assert.Equal("3", map.Get("z").AsString());
         Assert.Equal(4, faults.Count);
-    });
+    }
 
     // ------------------------------------------------------------------ common event surface
 
     [Fact, Covers("V-1", "V-2")]
-    public void EventFields_AreSetDuringDispatch_AndPathsMixKeysAndIndices() => Stub.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void EventFields_AreSetDuringDispatch_AndPathsMixKeysAndIndices()
     {
         var doc = NewDoc();
         var root = doc.GetMap("m");
@@ -736,10 +763,11 @@ public sealed class EventTests
         Assert.NotNull(tx);
         // the path reaches the target by walking keys and indices
         Assert.Same(inner, root.ArrayOf("list").MapAt(1));
-    });
+    }
 
     [Fact, Covers("V-8", "V-9", "TX-8")]
-    public void Transaction_NestedChange_ListsChangedTypesAndTheirAncestors() => Stub.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void Transaction_NestedChange_ListsChangedTypesAndTheirAncestors()
     {
         var doc = NewDoc();
         var root = doc.GetMap("m");
@@ -770,10 +798,11 @@ public sealed class EventTests
         Assert.Contains(root, parents!);
         Assert.Contains(leaf, parents!);
         Assert.Equal(4, after - before);
-    });
+    }
 
     [Fact, Covers("Y-1", "Y-3", "Y-7", "X-1")]
-    public void TextEvents_ChildAndAttributeChanges_ReportListChangesAndAttributeKeys() => Stub.Run(() =>
+    [Requires(Feature.Text)]
+    public void TextEvents_ChildAndAttributeChanges_ReportListChangesAndAttributeKeys()
     {
         var doc = NewDoc();
         var text = doc.GetText("t");
@@ -802,10 +831,11 @@ public sealed class EventTests
                 "False|align|align:delete:\"right\"",
             },
             seen);
-    });
+    }
 
     [Fact, Covers("Y-2")]
-    public void TextEventDelta_IsQuillStyle_WithTrailingPlainRetainsDropped() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Text)]
+    public void TextEventDelta_IsQuillStyle_WithTrailingPlainRetainsDropped()
     {
         var doc = NewDoc();
         var text = doc.GetText("t");
@@ -820,10 +850,11 @@ public sealed class EventTests
         Assert.Equal("""[{"retain":1},{"retain":2,"attributes":{"i":true}}]""", delta);
         text.InsertEmbed(1, Obj(("e", 1)));
         Assert.Equal("""[{"retain":1},{"insert":{"e":1}}]""", delta);
-    });
+    }
 
     [Fact, Covers("Y-4")]
-    public void TextDelta_ReadInTheHandler_DoesNotChangeTheEncodedState() => Stub.Run(() =>
+    [Requires(Feature.TextFormat)]
+    public void TextDelta_ReadInTheHandler_DoesNotChangeTheEncodedState()
     {
         // JS computes event.delta lazily and the computation may delete redundant format items. The state a replica ends in must not
         // depend on whether an observer read the delta.
@@ -842,5 +873,5 @@ public sealed class EventTests
             return state;
         }
         Assert.Equal(Run(false), Run(true));
-    });
+    }
 }

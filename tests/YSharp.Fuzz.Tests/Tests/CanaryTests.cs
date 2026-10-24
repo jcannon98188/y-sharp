@@ -1,6 +1,7 @@
 using System;
 using Xunit;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Fuzz.Tests;
 
@@ -9,15 +10,18 @@ namespace YSharp.Fuzz.Tests;
 /// is a named failure of one test. Apply, delete, GC, traversal and encode must never recurse on document depth, and a document has no depth cap.
 /// The self-tests need no implementation: they prove the canary reports a real stack overflow by name and does not mistake a clean run for one.
 /// </summary>
+[Requires(Feature.V1)]
 public sealed class CanaryTests
 {
     // ------------------------------------------------------------------ the harness itself (runs on the stub)
 
     [Fact]
+    [LibraryIndependent]
     public void Canary_CleanRun_IsReportedAsPassed() =>
         Assert.Equal(CanaryVerdict.Passed, CanaryHost.Run("selftest-ok").Verdict);
 
     [Fact]
+    [LibraryIndependent]
     public void Canary_RealStackOverflow_IsReportedByName()
     {
         var run = CanaryHost.Run("selftest-overflow", timeout: TimeSpan.FromSeconds(60));
@@ -25,6 +29,7 @@ public sealed class CanaryTests
     }
 
     [Fact]
+    [LibraryIndependent]
     public void Canary_ReportsAFailedCaseAsFailed_AndAnUnknownCaseAsUnknown()
     {
         Assert.Equal(CanaryVerdict.Failed, CanaryHost.Run("selftest-fail").Verdict);
@@ -35,10 +40,10 @@ public sealed class CanaryTests
     [InlineData(0, "OK done", "", CanaryVerdict.Passed)]
     [InlineData(0, "", "", CanaryVerdict.Crashed)]
     [InlineData(1, "", "FAIL x", CanaryVerdict.Failed)]
-    [InlineData(3, "STUB", "", CanaryVerdict.Stub)]
     [InlineData(134, "", "Stack overflow.\n   at X", CanaryVerdict.StackOverflow)]
     [InlineData(unchecked((int)0xC00000FD), "", "", CanaryVerdict.StackOverflow)]
     [InlineData(139, "", "", CanaryVerdict.Crashed)]
+    [LibraryIndependent]
     public void Canary_ExitCodesAndOutput_AreClassified(int exit, string stdout, string stderr, CanaryVerdict expected) =>
         Assert.Equal(expected, CanaryHost.Classify(exit, stdout, stderr).Verdict);
 

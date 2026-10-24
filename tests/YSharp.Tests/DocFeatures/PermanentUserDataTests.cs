@@ -6,6 +6,7 @@ using Xunit;
 using YSharp.TestKit.Traceability;
 using static YSharp.Tests.DocFeatures.Ds;
 using YSharp.TestKit.Assertions;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.DocFeatures;
 
@@ -15,6 +16,7 @@ namespace YSharp.Tests.DocFeatures;
 /// at the point JS would have let the timers run. Expected stores and lookups come from running the same operations on the pinned Yjs; the oracle
 /// fixtures under <c>fixtures/pud</c> replay the same behaviour end to end.
 /// </summary>
+[Requires(Feature.UserData)]
 public sealed class PermanentUserDataTests
 {
     /// <summary>A manual stand-in for the timer queue: actions run in scheduling order when <see cref="Flush"/> is called.</summary>
@@ -58,7 +60,8 @@ public sealed class PermanentUserDataTests
 
     [Fact]
     [Covers("PUD-01", "PUD-03", "PUD-06")]
-    public void StorageLayout_AnyUser_IsAUsersMapOfIdsAndV1EncodedDeleteSets() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void StorageLayout_AnyUser_IsAUsersMapOfIdsAndV1EncodedDeleteSets()
     {
         var timers = new Timers();
         var a = Mk(1);
@@ -77,11 +80,12 @@ public sealed class PermanentUserDataTests
         Assert.Null(pud.GetUserByDeletedId(new ItemId(1, 3)));
         Assert.Null(pud.GetUserByDeletedId(new ItemId(1, 5)));
         Assert.Null(pud.GetUserByDeletedId(new ItemId(9, 0)));
-    });
+    }
 
     [Fact]
     [Covers("PUD-01", "PUD-03", "PUD-06", "PUD-08", "PUD-09")]
-    public void TwoUsers_AfterSync_LookUpEachOthersDeletions() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void TwoUsers_AfterSync_LookUpEachOthersDeletions()
     {
         var timers = new Timers();
         var a = Mk(1);
@@ -109,11 +113,12 @@ public sealed class PermanentUserDataTests
         Assert.Null(pa.GetUserByDeletedId(new ItemId(2, 7)));
         Assert.Equal("user a", pb.GetUserByDeletedId(new ItemId(1, 4)));    // remote delete sets merge into the lookup (PUD-08)
         Assert.Equal("user b", pb.GetUserByClientId(2));
-    });
+    }
 
     [Fact]
     [Covers("PUD-03")]
-    public void DeleteSets_LocalDeletingTransactionsPassingTheFilter_AreRecordedOnlyThen() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void DeleteSets_LocalDeletingTransactionsPassingTheFilter_AreRecordedOnlyThen()
     {
         var timers = new Timers();
         var a = Mk(1);
@@ -141,13 +146,14 @@ public sealed class PermanentUserDataTests
         c.ApplyUpdate(b.EncodeStateAsUpdate());                                // a remote transaction on c
         timers.Flush();
         Assert.Equal("{\"w\":{\"ids\":[3],\"ds\":[]},\"v\":{\"ids\":[2],\"ds\":[\"0101010501\"]},\"u\":{\"ids\":[1],\"ds\":[]}}", Dump(c));
-    });
+    }
 
     // ------------------------------------------------------------------ PUD-02
 
     [Fact]
     [Covers("PUD-02", "PUD-01", "PUD-06", "PUD-08")]
-    public void Constructing_OverExistingData_RebuildsTheLookups() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void Constructing_OverExistingData_RebuildsTheLookups()
     {
         var timers = new Timers();
         var a = Mk(3);
@@ -167,11 +173,12 @@ public sealed class PermanentUserDataTests
         Assert.Equal("user a", pc.GetUserByDeletedId(new ItemId(3, 5)));
         Assert.Equal("user a", pc.GetUserByDeletedId(new ItemId(3, 6)));
         Assert.Null(pc.GetUserByDeletedId(new ItemId(3, 7)));
-    });
+    }
 
     [Fact]
     [Covers("PUD-02")]
-    public void UsersMap_WithAnotherStore_IsUsedInPlaceOfTheDefault() => Impl.Run(() =>
+    [Requires(Feature.Map)]
+    public void UsersMap_WithAnotherStore_IsUsedInPlaceOfTheDefault()
     {
         var timers = new Timers();
         var a = Mk(1);
@@ -180,13 +187,14 @@ public sealed class PermanentUserDataTests
         pud.SetUserMapping(a, 1, "p");
         Assert.Equal("{\"p\":{\"ids\":[1],\"ds\":[]}}", Dump(a, "people"));
         Assert.DoesNotContain("users", a.Share.Keys);
-    });
+    }
 
     // ------------------------------------------------------------------ PUD-04
 
     [Fact]
     [Covers("PUD-04", "PUD-09", "PUD-03")]
-    public void ConcurrentlyCreatedUsers_OnMerge_AreMergedIntoTheWinningEntry() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void ConcurrentlyCreatedUsers_OnMerge_AreMergedIntoTheWinningEntry()
     {
         var timers = new Timers();
         var a = Mk(1);
@@ -214,13 +222,14 @@ public sealed class PermanentUserDataTests
         Assert.Equal("user a", pa.GetUserByDeletedId(new ItemId(2, 4)));
         Assert.Equal("user a", pb.GetUserByDeletedId(new ItemId(2, 4)));
         Assert.Null(pb.GetUserByDeletedId(new ItemId(1, 4)));                   // client 1's own record was lost with its overwritten entry, as upstream
-    });
+    }
 
     // ------------------------------------------------------------------ PUD-05, PUD-06, PUD-09
 
     [Fact]
     [Covers("PUD-05")]
-    public void SetUserMapping_CalledTwice_RecordsEveryDeletionTwice() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void SetUserMapping_CalledTwice_RecordsEveryDeletionTwice()
     {
         var timers = new Timers();
         var a = Mk(1);
@@ -231,11 +240,12 @@ public sealed class PermanentUserDataTests
         a.GetText("t").Delete(0, 1);
         timers.Flush();
         Assert.Equal("{\"u\":{\"ids\":[1,1],\"ds\":[\"0101010501\",\"0101010501\"]}}", Dump(a));
-    });
+    }
 
     [Fact]
     [Covers("PUD-06", "PUD-09")]
-    public void GetUserByDeletedId_ReturnsTheFirstUserInInsertionOrder_AndTheLastWriterWinsForAClientId() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void GetUserByDeletedId_ReturnsTheFirstUserInInsertionOrder_AndTheLastWriterWinsForAClientId()
     {
         var timers = new Timers();
         var a = Mk(1);
@@ -248,11 +258,12 @@ public sealed class PermanentUserDataTests
         Assert.Equal("{\"x\":{\"ids\":[1],\"ds\":[\"0101010801\"]},\"y\":{\"ids\":[1],\"ds\":[\"0101010801\"]}}", Dump(a));
         Assert.Equal("x", pud.GetUserByDeletedId(new ItemId(1, 8)));
         Assert.Equal("y", pud.GetUserByClientId(1));
-    });
+    }
 
     [Fact]
     [PortOf("encoding.tests.js:testPermanentUserData", "PUD-04", "PUD-06")]
-    public void Port_PermanentUserData_ThirdDocWithTheSameDescriptionAfterASync() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void Port_PermanentUserData_ThirdDocWithTheSameDescriptionAfterASync()
     {
         var timers = new Timers();
         var ydoc1 = new Doc();
@@ -278,13 +289,14 @@ public sealed class PermanentUserDataTests
         timers.Flush();
         Assert.Equal("user a", pd3.GetUserByClientId(ydoc3.ClientId));
         Assert.Equal("user a", pd3.GetUserByClientId(ydoc1.ClientId));
-    });
+    }
 
     // ------------------------------------------------------------------ PUD-07
 
     [Fact]
     [Diverges("PUD-07", adr: "0003")]
-    public void DeletingAUserKey_DoesNotCrash_WhereTheOracleThrowsInsideTheObserver() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Map)]
+    public void DeletingAUserKey_DoesNotCrash_WhereTheOracleThrowsInsideTheObserver()
     {
         // JS: users.delete('u') makes the store observer call initUser(undefined, 'u'), which throws "Cannot read properties of undefined (reading 'get')"
         // out of the transaction (and the pending setTimeout callbacks of setUserMapping throw later). y-sharp must stay usable (ADR 0003, ADR 0005).
@@ -302,5 +314,5 @@ public sealed class PermanentUserDataTests
         Assert.Null(Record.Exception(() => pud.GetUserByClientId(1)));
         a.GetText("t").Insert(0, "still usable");
         Assert.Equal("still usable", a.GetText("t").ToString());
-    });
+    }
 }

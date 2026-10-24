@@ -7,10 +7,12 @@ using System.Threading.Tasks;
 using Xunit;
 using YSharp.TestKit.Tiers;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Concurrency;
 
 /// <summary>CC-15..CC-17: thread-affine transactions, exception safety, Destroy. Tier: gating. No seeds.</summary>
+[Requires(Feature.Transactions)]
 [Collection(ConcurrencyCollection.Name)]
 [Tier(Tier.Gating)]
 public sealed class LifecycleTests
@@ -18,6 +20,7 @@ public sealed class LifecycleTests
     // ------------------------------------------------------------------ CC-15
 
     [Fact, Covers("CC-15")]
+    [LibraryIndependent]
     public void TheScopedForm_IsARefStruct_SoItCannotCrossAnAwaitOrBeDisposedOnAnotherThread()
     {
         // The stub picks the ref struct option TASK-1.14 left open. Thread affinity is then enforced by the compiler: the scope cannot be
@@ -29,6 +32,7 @@ public sealed class LifecycleTests
     }
 
     [Fact, Covers("CC-15")]
+    [LibraryIndependent]
     public void Contract_PublicApi_IsSyncOnlyWithNoTaskMembers()
     {
         bool IsTask(Type t)
@@ -47,16 +51,17 @@ public sealed class LifecycleTests
     }
 
     [Fact, Covers("CC-15")]
-    public void ATransactionObject_UsedAfterItsBodyEnded_IsInvalid_NotAWayToReenterFromAnotherThread() => Impl.Run(() =>
+    public void ATransactionObject_UsedAfterItsBodyEnded_IsInvalid_NotAWayToReenterFromAnotherThread()
     {
         var doc = Conc.NewDoc();
         Transaction? leaked = null;
         doc.Transact(tx => leaked = tx);
         var bg = Bg.Start(() => Assert.False(leaked!.IsValid));
         bg.Join();
-    });
+    }
 
     [Fact, Covers("CC-15")]
+    [LibraryIndependent]
     public void TheCallbackForm_CannotBeAwaitedInside_ItsDelegateReturnsVoid()
     {
         var transact = typeof(Doc).GetMethods().Where(m => m.Name is "Transact" or "ReadTransact" or "TryTransact");
@@ -72,7 +77,8 @@ public sealed class LifecycleTests
     // ------------------------------------------------------------------ CC-16
 
     [Fact, Covers("CC-16")]
-    public void WhenABodyThrows_CommitAndCleanupStillRun_TheLockIsReleased_AndTheExceptionPropagates() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Events)]
+    public void WhenABodyThrows_CommitAndCleanupStillRun_TheLockIsReleased_AndTheExceptionPropagates()
     {
         var doc = Conc.NewDoc();
         var arr = doc.GetArray("a");
@@ -94,18 +100,19 @@ public sealed class LifecycleTests
         Assert.Equal(1, updates);                               // what the body did before it threw is committed
         Assert.Equal(1, arr.Length);
         Conc.AssertDoesNotWait(() => doc.Transact(static _ => { }), "a writer after the throwing body");
-    });
+    }
 
     [Fact, Covers("CC-16")]
-    public void ReadBody_Throwing_ReleasesTheReadLock() => Impl.Run(() =>
+    public void ReadBody_Throwing_ReleasesTheReadLock()
     {
         var doc = Conc.NewDoc();
         Assert.Throws<InvalidOperationException>(() => doc.ReadTransact(_ => throw new InvalidOperationException("boom")));
         Conc.AssertDoesNotWait(() => doc.Transact(static _ => { }), "a writer after the throwing read");
-    });
+    }
 
     [Fact, Covers("CC-16")]
-    public void ANestedBodyThatThrows_AndIsCaught_DoesNotEndTheOuterTransaction() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Events)]
+    public void ANestedBodyThatThrows_AndIsCaught_DoesNotEndTheOuterTransaction()
     {
         var doc = Conc.NewDoc();
         var arr = doc.GetArray("a");
@@ -119,7 +126,7 @@ public sealed class LifecycleTests
         });
         Assert.Equal(1, updates);
         Assert.Equal(2, arr.Length);
-    });
+    }
 
     private static void ThrowInsideScope(Doc doc)
     {
@@ -129,7 +136,8 @@ public sealed class LifecycleTests
     }
 
     [Fact, Covers("CC-16")]
-    public void TheScopedForm_ReleasesOnException_AndDoubleDisposeIsIdempotent() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void TheScopedForm_ReleasesOnException_AndDoubleDisposeIsIdempotent()
     {
         var doc = Conc.NewDoc();
         Assert.Throws<InvalidOperationException>(() => ThrowInsideScope(doc));
@@ -143,7 +151,7 @@ public sealed class LifecycleTests
         readScope.Dispose();
         readScope.Dispose();
         Conc.AssertDoesNotWait(() => doc.Transact(static _ => { }), "a writer after double Dispose");
-    });
+    }
 
     private static void LeakAScope(Doc doc)
     {
@@ -153,37 +161,37 @@ public sealed class LifecycleTests
     }
 
     [Fact, Covers("CC-16")]
-    public void ATransactionThatIsNeverDisposed_LeaksTheLock_ItIsACallerErrorAndNotDetected() => Impl.Run(() =>
+    public void ATransactionThatIsNeverDisposed_LeaksTheLock_ItIsACallerErrorAndNotDetected()
     {
         var doc = Conc.NewDoc();
         Bg.Start(() => LeakAScope(doc)).Join();
         TryTransactResult result = default;
         Conc.AssertDoesNotWait(() => result = doc.TryTransact(static _ => { }), "TryTransact on a leaked lock");
         Assert.Equal(TryTransactStatus.Contended, result.Status);
-    });
+    }
 
     // ------------------------------------------------------------------ CC-17
 
     [Fact, Covers("CC-17")]
-    public void Destroy_IsAWriteTransaction_AndWaitsForAWriterToFinish() => Impl.Run(() =>
+    public void Destroy_IsAWriteTransaction_AndWaitsForAWriterToFinish()
     {
         var doc = Conc.NewDoc();
         using var holder = Holder.Write(doc);
         Conc.AssertWaitsFor(holder, doc.Destroy, "Destroy while a writer held the lock");
         Assert.True(doc.IsDestroyed);
-    });
+    }
 
     [Fact, Covers("CC-17")]
-    public void Destroy_WaitsForReaders_Too() => Impl.Run(() =>
+    public void Destroy_WaitsForReaders_Too()
     {
         var doc = Conc.NewDoc();
         using var holder = Holder.Read(doc);
         Conc.AssertWaitsFor(holder, doc.Destroy, "Destroy while a reader held the lock");
         Assert.True(doc.IsDestroyed);
-    });
+    }
 
     [Fact, Covers("CC-17")]
-    public void Destroy_OnTheOwningThread_JoinsTheTransaction_AndDoesNotDeadlock() => Impl.Run(() =>
+    public void Destroy_OnTheOwningThread_JoinsTheTransaction_AndDoesNotDeadlock()
     {
         var doc = Conc.NewDoc();
         var destroying = 0;
@@ -191,10 +199,11 @@ public sealed class LifecycleTests
         Bg.Start(() => doc.Transact(_ => doc.Destroy())).Join();
         Assert.True(doc.IsDestroyed);
         Assert.Equal(1, destroying);
-    });
+    }
 
     [Fact, Covers("CC-17")]
-    public void ADestroyedDocument_KeepsAcceptingAcquires_OnlyIsDestroyedChanges() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void ADestroyedDocument_KeepsAcceptingAcquires_OnlyIsDestroyedChanges()
     {
         var doc = Conc.NewDoc();
         doc.GetArray("a").Push(Conc.One);
@@ -206,5 +215,5 @@ public sealed class LifecycleTests
         Assert.True(doc.TryTransact(_ => ran++).Acquired);
         Assert.Equal(3, ran);
         Conc.AssertDoesNotWait(() => doc.Transact(static _ => { }), "a writer on a destroyed document");
-    });
+    }
 }

@@ -2,22 +2,8 @@ using System;
 using Xunit;
 using YSharp.TestKit.Tiers;
 using YSharp.TestKit.Assertions;
-using YSharp.TestKit.Stubs;
 
 namespace YSharp.Fuzz;
-
-/// <summary>
-/// Tests compile against the API stub and skip until the implementation exists (ADR 0019), so every body that touches
-/// y-sharp runs inside <see cref="Run(Action)"/>.
-/// </summary>
-internal static class Stub
-{
-    public const string Reason = ApiStub.Reason;
-
-    public static void Run(Action body) => ApiStub.Run(body);
-
-    public static T Run<T>(Func<T> body) => ApiStub.Run(body);
-}
 
 /// <summary>Nightly tests run only when <c>YSHARP_TIER=Nightly</c> (ADR 0013, 0015); in every other tier they skip visibly.</summary>
 internal static class NightlyGate

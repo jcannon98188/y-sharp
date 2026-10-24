@@ -9,7 +9,7 @@ namespace YSharp.Fuzz.Canary;
 /// <summary>
 /// Canary host for the HOS-DEEP document-depth cases (ADR 0013, ADR 0005 "No recursion on document depth"). Usage:
 /// <c>YSharp.Fuzz.Canary &lt;case&gt; [depth]</c>. Exit codes: 0 passed (the last stdout line starts with <c>OK</c>), 1 the case failed
-/// (stderr starts with <c>FAIL</c>), 2 unknown case, 3 the library is still the API stub. A crash (stack overflow, fatal runtime
+/// (stderr starts with <c>FAIL</c>), 2 unknown case. A crash (stack overflow, fatal runtime
 /// error) is whatever the runtime exits with; the test project classifies it.
 /// The case runs on a thread with a fixed 1 MB stack, the Windows default, so the result does not depend on the platform's main-thread size.
 /// </summary>
@@ -53,24 +53,11 @@ internal static class Program
                     return 2;
             }
         }
-        catch (NotImplementedException) when (IsStub())
-        {
-            Console.WriteLine("STUB the library is still the API stub");
-            return 3;
-        }
         catch (Exception e)
         {
             Console.Error.WriteLine($"FAIL {e.GetType().Name}: {e.Message}");
             return 1;
         }
-    }
-
-    /// <summary>True only while a known stub member throws NotImplementedException (same probe as ApiStub in TestKit).</summary>
-    private static bool IsStub()
-    {
-        try { _ = YValue.Null; return false; }
-        catch (NotImplementedException) { return true; }
-        catch (Exception) { return false; }
     }
 
     private static int Recurse(int n) => n < 0 ? 0 : Recurse(n + 1) + 1;

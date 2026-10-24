@@ -10,6 +10,7 @@ using YSharp.TestKit.Ops;
 using YSharp.TestKit.Traceability;
 using YSharp.TestKit.Values;
 using YSharp.Tests.Structs;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.DocFeatures;
 
@@ -20,6 +21,7 @@ namespace YSharp.Tests.DocFeatures;
 /// <c>results</c> and <c>events</c> that the doc-feature steps record. This is the C# interpreter side of the ADR 0016 step kinds
 /// (<c>gc.run</c>, <c>subdoc.*</c>, <c>snapshot.*</c>, <c>relpos.*</c>, <c>undo.*</c>, <c>pud.*</c>).
 /// </summary>
+[LibraryIndependent]
 public sealed class DocFeatureFixtureTests
 {
     private static readonly string Root = RepoRoot.Find();
@@ -78,17 +80,16 @@ public sealed class DocFeatureFixtureTests
     [Covers("RP-01", "RP-02", "RP-03", "RP-04", "RP-05", "RP-06", "RP-08", "RP-09")]
     [Covers("UM-01", "UM-02", "UM-03", "UM-04", "UM-05", "UM-06", "UM-08", "UM-10", "UM-11", "UM-12", "UM-14", "UM-18", "UM-19", "UM-20")]
     [Covers("PUD-01", "PUD-02", "PUD-03", "PUD-04", "PUD-05", "PUD-06", "PUD-08", "PUD-09")]
+    [Requires(Feature.DocLifecycle, Feature.Snapshots, Feature.Positions, Feature.Undo, Feature.Subdocs, Feature.UserData, Feature.Text, Feature.TextFormat, Feature.Array, Feature.Map, Feature.Events)]
     public void Fixture_EveryStoredScenario_ReplaysLikeTheOracle(string name)
     {
         var fixture = FixtureLoader.Load(Path.Combine(Root, "fixtures", name + ".json"), PinnedVersions.Read(Root));
-        Impl.Run(() =>
         {
-            Impl.RequireImplementation();
             var registry = StandardSteps.CreateRegistry();
             var script = OpsScript.Parse(fixture.Script, registry);
             var ctx = new OpsInterpreter(registry).Run(script);
             Compare(name, fixture.Observations, ctx);
-        });
+        }
     }
 
     // ------------------------------------------------------------------ comparison

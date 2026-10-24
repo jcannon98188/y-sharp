@@ -28,10 +28,6 @@ internal static class FuzzRunner
     /// <param name="candidate">The bytes to save for an input, or null when the input is not a single update.</param>
     public static void Check<T>(string hosClass, Arbitrary<T> arbitrary, Action<T> body, Func<T, (byte[] Bytes, UpdateFormat Format)?>? candidate = null, int? cases = null)
     {
-        // a stub run must skip, not fail inside FsCheck: probe the body once with a generated value first
-        var probe = Gen.Sample(arbitrary.Generator, 1, 8);
-        Stub.Run(() => body(probe[0]));
-
         T? lastFailing = default;
         var failed = false;
         var property = Prop.ForAll(arbitrary, (T x) =>

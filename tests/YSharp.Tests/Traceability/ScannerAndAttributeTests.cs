@@ -1,18 +1,20 @@
 using System.Linq;
 using System.Reflection;
 using Xunit;
+using YSharp.TestKit.Gating;
 using YSharp.TestKit.Traceability;
 
 namespace YSharp.Tests.Traceability;
 
-[TraceabilitySample]
+[TraceabilitySample, Requires(Feature.Map)]
 public class SampleTests
 {
     [Fact(Explicit = true)]
     [Covers("ZZ-1", "ZZ-2")]
+    [Requires(Feature.Array)]
     public void Covered() { }
 
-    [Fact(Explicit = true)]
+    [Fact(Explicit = true), LibraryIndependent]
     [PortOf("sample.js:testSample", "ZZ-3")]
     public void Ported() { }
 
@@ -26,6 +28,7 @@ public class SampleTests
     internal void NotATest() { }
 }
 
+[LibraryIndependent]
 public class ScannerAndAttributeTests
 {
     private static readonly TestTag[] Tags = TestScanner.Scan(new[] { typeof(SampleTests).Assembly }, includeSamples: true).ToArray();
@@ -69,5 +72,30 @@ public class ScannerAndAttributeTests
     {
         var real = TestScanner.Scan(new[] { typeof(SampleTests).Assembly });
         Assert.DoesNotContain(real, t => t.Covers.Any(c => c.StartsWith("ZZ-")));
+    }
+
+    private static TestGate Gate(string cls, string method) =>
+        TestScanner.ScanGates(new[] { typeof(SampleTests).Assembly }, includeSamples: true).Single(g => g.Test == "YSharp.Tests.Traceability." + cls + "." + method);
+
+    [Fact]
+    public void ScanGates_ReadsMethodAndClassRequirements()
+    {
+        Assert.Equal(new[] { "Map" }, Gate("SampleTests", "Untagged").Requires);                                    // the class requirement
+        Assert.Equal(new[] { "Array", "Map" }, Gate("SampleTests", "Covered").Requires.OrderBy(x => x));            // the method adds on top
+    }
+
+    [Fact]
+    public void ScanGates_ReadsTheLibraryIndependentMarker_AndSeesUnmarkedTests()
+    {
+        Assert.True(Gate("SampleTests", "Ported").LibraryIndependent);
+        Assert.Empty(Gate("SampleTests", "Ported").Requires);                                                       // the mark wins over the class requirement
+        Assert.False(Gate("SampleTests", "Untagged").LibraryIndependent);
+    }
+
+    [Fact]
+    public void ScanGates_RealScan_SkipsSamples()
+    {
+        var real = TestScanner.ScanGates(new[] { typeof(SampleTests).Assembly });
+        Assert.DoesNotContain(real, g => g.Test.Contains(".Sample"));
     }
 }

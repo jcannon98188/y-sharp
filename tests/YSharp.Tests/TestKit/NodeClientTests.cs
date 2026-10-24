@@ -7,9 +7,11 @@ using Xunit;
 using YSharp.TestKit.Fixtures;
 using YSharp.TestKit.Node;
 using YSharp.TestKit.Tiers;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.TestKit;
 
+[LibraryIndependent]
 [NeedsNode]
 [Tier(Tier.Smoke)]
 public class NodeClientTests

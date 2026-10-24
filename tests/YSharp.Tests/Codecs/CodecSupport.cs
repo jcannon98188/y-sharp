@@ -4,23 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using YSharp.TestKit.Assertions;
-using YSharp.TestKit.Stubs;
 
 namespace YSharp.Tests.Codecs;
-
-/// <summary>
-/// Shared helpers of the values-and-codecs tests (TASK-2.5). Tests compile against the API stub and skip until the
-/// implementation exists (ADR 0019), so every body that touches y-sharp runs inside <see cref="Stub.Run(Action)"/>.
-/// </summary>
-internal static class Stub
-{
-    public const string Reason = ApiStub.Reason;
-
-    /// <summary>Runs <paramref name="body"/>; a <see cref="NotImplementedException"/> from the stub skips the test.</summary>
-    public static void Run(Action body) => ApiStub.Run(body);
-
-    public static T Run<T>(Func<T> body) => ApiStub.Run(body);
-}
 
 internal static class Wire
 {

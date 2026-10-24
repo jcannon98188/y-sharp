@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text.Json;
 using Xunit;
 using YSharp.TestKit.Ops;
-using YSharp.TestKit.Stubs;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.TestKit;
 
+[LibraryIndependent]
 public class OpsScriptTests
 {
     private const string TwoReplicas =
@@ -158,22 +159,16 @@ public class OpsScriptTests
         Assert.Throws<OpsScriptException>(() => ctx.ResolveTarget(null!, el.RootElement));
     }
 
-    // ------------------------------------------------------------ end to end against the stub
+    // ------------------------------------------------------------ end to end against the implementation
 
     [Fact]
-    public void Run_TextInsertScript_ProducesDocAndUpdates_OnceImplemented()
+    [Requires(Feature.Text)]
+    public void Run_TextInsertScript_ProducesDocAndUpdates()
     {
         var reg = StandardSteps.CreateRegistry();
         var script = OpsScript.Parse(Script(TextInsert + ",{\"step\":\"sync\",\"from\":\"a\",\"to\":\"b\"}"), reg);
-        try
-        {
-            var run = new OpsInterpreter(reg).Run(script);
-            Assert.Equal("hi", run.Docs["b"].GetText("t").ToString());
-            Assert.NotEmpty(run.Updates["a"]);
-        }
-        catch (NotImplementedException) when (ApiStub.IsStub)
-        {
-            Assert.Skip(ApiStub.Reason);
-        }
+        var run = new OpsInterpreter(reg).Run(script);
+        Assert.Equal("hi", run.Docs["b"].GetText("t").ToString());
+        Assert.NotEmpty(run.Updates["a"]);
     }
 }

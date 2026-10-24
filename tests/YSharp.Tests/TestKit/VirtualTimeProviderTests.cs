@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using Xunit;
 using YSharp.TestKit.Time;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.TestKit;
 
+[LibraryIndependent]
 public class VirtualTimeProviderTests
 {
     private static readonly DateTimeOffset Start = new(2024, 1, 1, 0, 0, 0, TimeSpan.Zero);

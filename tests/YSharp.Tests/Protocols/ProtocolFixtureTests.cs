@@ -12,6 +12,7 @@ using YSharp.TestKit.Fixtures;
 using YSharp.TestKit.Ops;
 using YSharp.TestKit.Traceability;
 using YSharp.TestKit.Values;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Protocols;
 
@@ -20,6 +21,7 @@ namespace YSharp.Tests.Protocols;
 /// the bytes every writer produced, what every reader did (type, error, bytes consumed, reply), the ordered awareness event log
 /// with virtual timestamps, the final state and meta of every awareness, and the documents' update events and state.
 /// </summary>
+[Requires(Feature.Sync, Feature.Awareness)]
 public sealed class ProtocolFixtureTests
 {
     private static readonly string[] Areas = { "awareness", "sync", "auth" };
@@ -64,7 +66,7 @@ public sealed class ProtocolFixtureTests
     }
 
     [Theory, MemberData(nameof(Fixtures))]
-    public void Fixture_EveryStoredScenario_ReplaysToTheOraclesBytesResultsEventsAndState(string path) => Stub.Run(() =>
+    public void Fixture_EveryStoredScenario_ReplaysToTheOraclesBytesResultsEventsAndState(string path)
     {
         var fixture = FixtureReplay.Load(path);
         var ctx = Replay(fixture, out var updates);
@@ -73,7 +75,7 @@ public sealed class ProtocolFixtureTests
         if (obs.TryGetProperty("results", out var results)) AssertResults(fixture, ctx, results.GetProperty("value"));
         AssertEvents(fixture, ctx);
         if (obs.TryGetProperty("awareness", out var aw)) AssertAwareness(fixture, ctx, aw.GetProperty("value"));
-    });
+    }
 
     private static void AssertDocs(Fixture fixture, OpsContext ctx, Dictionary<string, List<byte[]>> updates)
     {
