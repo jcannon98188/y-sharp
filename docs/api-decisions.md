@@ -1,6 +1,6 @@
 # Open API decisions
 
-**For the project owner. Section A is decided (below); sections B to D are open (except D2, resolved) and nothing in them has been changed.** Each item is a question the test suite hit while compiling against the API stub (ADR 0008, 0019) and could not settle alone. Sources: the TASK-2 implementation notes (`backlog task view 2 --plain`), `// API gap` comments in `tests/`, and the registry (`docs/inventory/`). Where a test works around a gap, the workaround is named so it can be undone when you decide. Recommendations are the suite author's view, not decisions.
+**For the project owner. Sections A, B and C are decided (below), D1 is Keep and D2 is resolved; only D3 is open.** Each item is a question the test suite hit while compiling against the API stub (ADR 0008, 0019) and could not settle alone. Sources: the TASK-2 implementation notes (`backlog task view 2 --plain`), `// API gap` comments in `tests/`, and the registry (`docs/inventory/`). Decided items record the decision and what changed; D1 and D3 keep their original options.
 
 IDs: `Q`, `ENC`, `AW`, `CC`, `ERR`, `AU` are registry entries (ADR 0010).
 
@@ -38,51 +38,53 @@ Section A is decided; the decisions are recorded in ADR 0008 (and ADR 0003, 0018
 
 ## B. Behaviour and error semantics
 
+Section B is decided; the decisions are recorded in ADR 0003, 0005, 0006, 0008 and 0014 and applied to the API stub and the tests.
+
 ### B1. Limit semantics
-- **Question.** `YLimits` has `MaxUpdateBytes`, `MaxAnyDepth`, `MaxStructsPerUpdate`, `MaxStringBytes` (and `MaxPendingBytes`) but does not say: inclusive or exclusive; wire size or decoded size; whether the check comes before any allocation; whether limits apply to V2 columns and to merge, diff and convert as well as apply.
-- **Bites.** Spec 11 hostile tests (HOS-LEN, HOS-DEEP, HOS-AMP) and `ErrorModelTests`.
-- **Options.** Define "exceeded when value > limit", checked before allocation, on every decode path, leaving the document unchanged (ADR 0005 decode error).
-- **Recommendation.** That option, then one boundary test per limit.
+**Decided: exceeded when value > limit; checked before allocation; on every decode path; the document is unchanged on failure.**
+- **Decision.** A limit equal to the value is accepted, one more is `LimitExceeded`. The check runs on the length claim before anything is allocated. It applies to apply, merge, diff, convert, state vector and validate, for V1 and every V2 column; `YUpdate.TryMerge`, `TryDiff`, `TryConvert` and `TryStateVectorFromUpdate` take an optional `YLimits`. What each limit measures is written in ADR 0005.
+- **Tests.** `LimitsTests` states the semantics instead of assuming them, and has one boundary test per limit (limit accepted, limit+1 rejected): per decode path and format for struct count, string bytes and update bytes, plus depth and pending bytes.
 
 ### B2. CC-9: exception type for stale views
-- **Question.** ADR 0006 says live views never outlive their transaction. `HandleTests` (~211) accepts either old contents or an exception because the type is undesigned; `LifecycleTests` (~25) notes the `YConcurrencyException` the ADR describes is unreachable.
-- **Options.** `InvalidOperationException`; `YConcurrencyException`; `ObjectDisposedException`.
-- **Recommendation.** A misuse exception shared with the other lifetime errors, and make "old contents" illegal so the test tightens.
+**Decided: a new `YLifetimeException : YException`; stale-view access throws it and never returns old contents.**
+- **Decision.** No existing type fits: `YConcurrencyException` is for lock-protocol misuse, and `InvalidOperationException` and `ObjectDisposedException` sit outside the `YException` family (nothing is disposed; the objects are pooled). `IsValid` stays callable. Recorded in ADR 0005 and 0006.
+- **Tests.** `HandleTests` no longer accepts "old contents or an exception": transactions, events, change collections and enumerators taken inside an explicit transaction throw `YLifetimeException`. The `LifecycleTests` note about the unreachable `YConcurrencyException` now says why (the `ref struct` scope) and points at the reachable case.
 
 ### B3. `TryTransact` under a held read lock
-Unspecified whether it returns a failed status, waits, or throws when the calling thread holds a read transaction (an upgrade). Bites the CC tests in `LockModelTests` and `AcquireTests`. **Recommendation.** Return a failed status immediately (an upgrade cannot succeed without deadlock risk); the throwing form throws.
+**Decided: it returns a failed status immediately; the throwing form throws.** The status is a new `TryTransactStatus.UpgradeRefused` (distinct from `Contended`, which means another thread holds the lock); the body does not run and the read lock is untouched. `Transact` and `BeginTransaction` throw `YConcurrencyException` (CC-3). Recorded in ADR 0006 and the stub doc comments; `LockModelTests` has the test.
 
-### B4. `Awareness.GetStates`: snapshot or live (AW-13)
-JS returns the same live `Map` each call (AW-13, kind `match`); ADR 0008 says awareness states are returned as snapshots. **Recommendation.** Snapshot, and re-kind AW-13 as `diverge` with a `[Diverges]` test.
+### B4. `Awareness.GetStates`: snapshot (AW-13)
+**Decided: snapshot.** AW-13 is now kind `diverge` with a `[Diverges]` test (a held map never changes, the next call shows the new state); recorded in ADR 0014 and the Spec 9 matrix.
 
 ### B5. AU-5: null handler
-A null permission handler is a TypeError at read time in JS (AU-5, `diverge`). Tests assume `ArgumentNullException`. **Recommendation.** Confirm, and throw at the call that receives the null, not later.
+**Decided: confirmed.** A null permission handler throws `ArgumentNullException` at the call that receives it, before any byte is read; the AU-5 test also proves it for a message that never reaches the handler. Recorded in ADR 0014.
 
 ### B6. ERR-20: fault-injection seam
-- **Question.** ERR-20 (an internal invariant violation throws `YInternalException` and faults the document) cannot be tested without a way to break an invariant. It is `pending`.
-- **Options.** An `internal` fault hook visible to the test assemblies through the existing `InternalsVisibleTo`; corrupt the struct store through the `DumpStructs` seam's sibling; or leave it untested.
-- **Recommendation.** The internal hook, documented in ADR 0005. ERR-19 also assumes an out-of-memory error from an observer propagates; confirm that.
+**Decided: an `internal` hook, `Doc.InjectInvariantViolation()`.** It breaks a struct-store invariant; the next operation that touches the store throws `YInternalException` and faults the document, which stays readable, rejects mutation (`YInternalException`) and apply (`ApplyUpdate` throws, `TryApplyUpdate` returns `Rejected`). ERR-20 is `active` with its test and the pending high-water mark fell. ERR-19 is confirmed: an `OutOfMemoryException` from an observer propagates and is not an observer fault. Recorded in ADR 0005 and 0015.
 
 ### B7. Q22: clocks and lengths (ADR 0003)
-Q22 (`diverge`, pending): JS clocks and lengths are doubles; y-sharp proposes `long` and a plain binary search, observably identical below 2^53. Open: negative, non-integer or above-2^53 values from the wire. **Recommendation.** Reject as Malformed, say so in ADR 0003, then write the Spec 6 test.
+**Decided: negative, non-integer or above-2^53-1 clocks and lengths on the wire are Malformed.** This includes a start clock plus a length above 2^53-1. Recorded in ADR 0003; the `Q22_*` tests are in `MalformedInputTests` and Q22 is `active` (the hostile clock fixture now covers it). The negative-clock V2 case is hand-built and has not run against an implementation.
 
 ## C. Internal seams the tests require
 
-`internal` members the implementation must provide, reached by `InternalsVisibleTo` or by reflection. Decide that these are accepted, and document them in ADR 0015.
+**Decided: accept all seams.** They are declared `internal` in the stub, throwing `NotImplementedException`, and documented in ADR 0015.
 
 | Seam | Needed by | Contract |
 |---|---|---|
 | `internal string Doc.DumpStructs()` | Spec 6 (`StructsSupport.cs`) | ADR 0016 `structs` dump as JSON |
 | `internal bool Doc.HasPending` | Spec 6 | pending-struct presence |
 | `internal int YText.CleanupFormatting()` | Spec 10 | counterpart of `cleanupYTextFormatting` |
-| `internal static class YSharp.ScheduleSeam` (`Action<string>? Point`, `Action<string, Func<bool>>? Block`) | Spec 12 (CC-5, scenarios) | the lock reports its transitions; free when unset. The CC-18 lock-order checker is Debug-only |
-| `Doc.CollectGarbage/ShouldLoad/AutoLoad/CollectionId/Meta/SignalLoaded/SignalSynced`, `UndoManager.Undoing/Redoing/CurrStackItem` | Spec 8 (by reflection) | members JS exposes that the sketch hides |
+| `internal static class YSharp.ScheduleSeam` (`Action<string>? Point`, `Action<string, Func<bool>>? Block`) | Spec 12 (CC-5, scenarios) | the lock reports its transitions; a static with a null check on the hot path. The CC-18 lock-order checker is Debug-only |
+| `Doc.CollectGarbage/ShouldLoad/AutoLoad/CollectionId/Meta/SignalLoaded/SignalSynced`, `UndoManager.Undoing/Redoing/CurrStackItem` | Spec 8 | members JS exposes that the sketch hides |
+| `internal void Doc.InjectInvariantViolation()` | ERR-20 | see B6 |
 
-**Recommendation.** Accept all. Prefer `InternalsVisibleTo` to reflection once the code exists, and keep `ScheduleSeam` a static with a null check on the hot path (ADR 0009 budgets).
+`YSharp.Tests`, `YSharp.Fuzz.Tests` and `YSharp.Benchmarks` call them directly; the reflection lookups in `StructsProbe`, `TextProbe` and the test-side `DocSeams`/`UndoSeams` callers are gone. The TestKit and the interop project cannot see internals, so the TestKit keeps reflection for the ops interpreter and the schedule scenarios (`DocSeams`, `UndoSeams`, the `ScheduleSeam` adapter).
 
 ## D. Repository and process
 
 ### D1. 18 MB of simulation fixtures in git
+**Decided: Keep (a).** Revisit if the pack passes about 50 MiB, and regenerate rarely.
+
 `fixtures/sim` is 18 MB of the 20 MB `fixtures/` tree. The repository pack is 2.4 MiB compressed today, so the cost is modest, but it grows with every regeneration.
 - **Options.** (a) Keep: no generation step for gating. (b) Git LFS: smaller clones, needs LFS in CI and for contributors. (c) Generate in CI and do not commit: no history growth, but the Windows and macOS gating jobs have no Node (ADR 0015), so they would need the files from an artifact.
 - **Recommendation.** Keep (a); revisit if the pack passes about 50 MiB, and regenerate rarely.
