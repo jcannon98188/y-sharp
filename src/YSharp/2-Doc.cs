@@ -54,6 +54,22 @@ public sealed class Doc : IDisposable
     /// YInternalException and marks the document faulted. No public input can cause this by design (ERR-21).
     internal void InjectInvariantViolation() => throw Sketch.NI;
 
+    // ---- internal test seams (ADR 0015), reached through InternalsVisibleTo; the TestKit and interop projects cannot see them.
+    /// The ADR 0016 `structs` dump as JSON: an array of [client, [struct, ...]], clients descending, structs in clock order (Spec 6).
+    internal string DumpStructs() => throw Sketch.NI;
+    /// True while pending structs or a pending delete set are held (JS store.pendingStructs !== null || store.pendingDs !== null).
+    internal bool HasPending => throw Sketch.NI;
+    // Spec 8: members JS exposes that the public sketch hides.
+    internal bool ShouldLoad => throw Sketch.NI;
+    internal bool AutoLoad => throw Sketch.NI;
+    internal string? CollectionId => throw Sketch.NI;
+    internal YValue Meta => throw Sketch.NI;
+    /// Manual garbage collection of the whole store (JS Y.tryGc(createDeleteSetFromStructStore(store), store, gcFilter)).
+    internal void CollectGarbage() => throw Sketch.NI;
+    /// Provider hooks that raise the JS emit('load') and emit('sync', [isSynced]) (DOC-13, DOC-14).
+    internal void SignalLoaded() => throw Sketch.NI;
+    internal void SignalSynced(bool isSynced) => throw Sketch.NI;
+
     // ---- root types. Get(name) returns an untyped placeholder that a later typed Get upgrades.
     public YArray GetArray(string name = "") => throw Sketch.NI;
     public YMap GetMap(string name = "") => throw Sketch.NI;
@@ -96,6 +112,15 @@ public sealed class Doc : IDisposable
     public void Load() => throw Sketch.NI;
     public void Destroy() => throw Sketch.NI;                 // a write transaction (CC-17)
     public void Dispose() => Destroy();
+}
+
+/// Lock transition reporting for the schedule explorer (ADR 0006, 0015). A static with a null check on the hot path: both delegates are null in production.
+/// Point: called at every lock, observer-list and lock-order transition with a stable id such as "lock.write.acquire". Block: called instead of a raw
+/// Monitor.Wait or spin when the caller cannot proceed; the predicate turns true when it can. Both are invoked with no internal Monitor held.
+internal static class ScheduleSeam
+{
+    internal static Action<string>? Point;
+    internal static Action<string, Func<bool>>? Block;
 }
 
 /// Stateless update tools (no Doc needed). `limits` (default YLimits.Default) bounds every input update, as for Doc.TryApplyUpdate (ADR 0005).

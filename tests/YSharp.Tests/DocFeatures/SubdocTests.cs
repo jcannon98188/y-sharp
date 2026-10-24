@@ -112,10 +112,10 @@ public sealed class SubdocTests
         b.ApplyUpdate(a.EncodeStateAsUpdate());
         var plain = b.Subdocs.Single(d => d.Guid == "plain");
         var auto = b.Subdocs.Single(d => d.Guid == "auto");
-        Assert.False(DocSeams.ShouldLoad(plain));
-        Assert.False(DocSeams.AutoLoad(plain));
-        Assert.True(DocSeams.ShouldLoad(auto));
-        Assert.True(DocSeams.AutoLoad(auto));
+        Assert.False(plain.ShouldLoad);
+        Assert.False(plain.AutoLoad);
+        Assert.True(auto.ShouldLoad);
+        Assert.True(auto.AutoLoad);
         Assert.False(auto.Gc);
         Assert.True(plain.Gc);
         Assert.Equal(new[] { "plain", "auto" }, w.Added.Select(d => d.Guid).ToArray());
@@ -339,10 +339,10 @@ public sealed class SubdocTests
         var copy = parent.Subdocs.Single();
         Assert.NotSame(original, copy);
         Assert.Equal("g", copy.Guid);
-        Assert.True(DocSeams.AutoLoad(copy));
+        Assert.True(copy.AutoLoad);
         Assert.False(copy.Gc);
-        Assert.Equal(YValueKind.String, DocSeams.Meta(copy).Kind);
-        Assert.True(DocSeams.ShouldLoad(copy));                          // derived from autoLoad
+        Assert.Equal(YValueKind.String, copy.Meta.Kind);
+        Assert.True(copy.ShouldLoad);                          // derived from autoLoad
     });
 
     // ------------------------------------------------------------------ SUB-11, SUB-12
@@ -356,8 +356,8 @@ public sealed class SubdocTests
         var subdoc1 = new Doc();
         var w = new Watch(ydoc);
         yarray.Insert(0, new YEntry[] { subdoc1 });
-        Assert.True(DocSeams.ShouldLoad(subdoc1));
-        Assert.False(DocSeams.AutoLoad(subdoc1));
+        Assert.True(subdoc1.ShouldLoad);
+        Assert.False(subdoc1.AutoLoad);
         Assert.Contains(subdoc1, w.Loaded);
         Assert.Contains(subdoc1, w.Added);
         // destroy and check whether the event adds it again to added (it shouldn't load it)
@@ -375,13 +375,13 @@ public sealed class SubdocTests
         var w2 = new Watch(ydoc2);
         ydoc2.ApplyUpdate(ydoc.EncodeStateAsUpdate());
         var subdoc3 = ydoc2.GetArray()[0].Doc!;
-        Assert.False(DocSeams.ShouldLoad(subdoc3));
-        Assert.False(DocSeams.AutoLoad(subdoc3));
+        Assert.False(subdoc3.ShouldLoad);
+        Assert.False(subdoc3.AutoLoad);
         Assert.Contains(subdoc3, w2.Added);
         Assert.DoesNotContain(subdoc3, w2.Loaded);
         // load
         subdoc3.Load();
-        Assert.True(DocSeams.ShouldLoad(subdoc3));
+        Assert.True(subdoc3.ShouldLoad);
         Assert.DoesNotContain(subdoc3, w2.Added);
         Assert.Contains(subdoc3, w2.Loaded);
     });
@@ -395,8 +395,8 @@ public sealed class SubdocTests
         var subdoc1 = new Doc(new DocOptions { AutoLoad = true });
         var w = new Watch(ydoc);
         yarray.Insert(0, new YEntry[] { subdoc1 });
-        Assert.True(DocSeams.ShouldLoad(subdoc1));
-        Assert.True(DocSeams.AutoLoad(subdoc1));
+        Assert.True(subdoc1.ShouldLoad);
+        Assert.True(subdoc1.AutoLoad);
         Assert.Contains(subdoc1, w.Loaded);
         Assert.Contains(subdoc1, w.Added);
         subdoc1.Destroy();
@@ -411,8 +411,8 @@ public sealed class SubdocTests
         var w2 = new Watch(ydoc2);
         ydoc2.ApplyUpdate(ydoc.EncodeStateAsUpdate());
         var subdoc3 = ydoc2.GetArray()[0].Doc!;
-        Assert.True(DocSeams.ShouldLoad(subdoc1));
-        Assert.True(DocSeams.AutoLoad(subdoc1));
+        Assert.True(subdoc1.ShouldLoad);
+        Assert.True(subdoc1.AutoLoad);
         Assert.Contains(subdoc3, w2.Added);
         Assert.Contains(subdoc3, w2.Loaded);
     });

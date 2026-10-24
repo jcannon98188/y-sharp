@@ -149,6 +149,8 @@ public class YText : YType
     public TextDeltaOp[] ToDelta(YSnapshot? snapshot = null, YSnapshot? previous = null, Func<string, ItemId, YValue>? computeYChange = null) => throw Sketch.NI;
     public void CopyTo(Span<char> destination) => throw Sketch.NI;
     public override string ToString() => throw Sketch.NI;
+    /// Counterpart of JS cleanupYTextFormatting: the number of redundant format items removed (Spec 10, ADR 0015).
+    internal int CleanupFormatting() => throw Sketch.NI;
     // map-side attributes, shared with YXmlText
     public void SetAttribute(string name, in YValue value) => throw Sketch.NI;
     public bool TryGetAttribute(string name, out YValue value) { value = default; throw Sketch.NI; }

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json.Nodes;
@@ -129,28 +128,9 @@ internal static class SimChecks
         var keys = users.Select(u => DeltaKey(u.Doc.GetText("text"))).ToList();
         var bad = FirstDivergentReplica(keys);
         Assert.True(bad < 0, $"replica {bad} and replica 0 hold different text:{Environment.NewLine}{(bad < 0 ? "" : keys[0])}{Environment.NewLine}{(bad < 0 ? "" : keys[bad])}");
-        if (cleanup) Assert.Equal(0, TextProbe.CleanupFormatting(users[0].Doc.GetText("text")));
+        if (cleanup) Assert.Equal(0, users[0].Doc.GetText("text").CleanupFormatting());
     }
 }
-
-/// <summary>
-/// The seam for <c>Y.cleanupYTextFormatting</c> (upstream tests assert it returns 0 after convergence). The public API sketch has no
-/// counterpart, so the tests need <c>internal int YText.CleanupFormatting()</c>: the number of redundant format items it removed.
-/// </summary>
-internal static class TextProbe
-{
-    private static readonly MethodInfo? Method =
-        typeof(YText).GetMethod("CleanupFormatting", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, Type.EmptyTypes);
-
-    public static int CleanupFormatting(YText text)
-    {
-        if (Method == null)
-            throw new InvalidOperationException("YText.CleanupFormatting() is missing. Spec 10 needs `internal int CleanupFormatting()` on YText (JS cleanupYTextFormatting), see TextProbe.");
-        try { return (int)Method.Invoke(text, null)!; }
-        catch (TargetInvocationException e) when (e.InnerException != null) { throw e.InnerException; }
-    }
-}
-
 /// <summary>Turns plans into the mods <see cref="SimHarness.ApplyRandomTests{T}"/> draws from (one per generator function).</summary>
 internal static class SimDrive
 {

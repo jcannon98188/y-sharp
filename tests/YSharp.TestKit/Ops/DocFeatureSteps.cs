@@ -532,8 +532,9 @@ public sealed class DocFeatureState
 }
 
 /// <summary>
-/// Members of the implementation that the stub API of ADR 0008 does not expose but the doc-feature steps and tests need. Each is looked up by
-/// name (public or internal) so the TestKit keeps compiling against the stub; a missing member is a clear failure, not a skip.
+/// Members of the implementation that the public API of ADR 0008 does not expose but the doc-feature steps need; they are <c>internal</c> on
+/// <c>Doc</c> (ADR 0015). The TestKit cannot see internals, so the ops interpreter reaches them by name through reflection; tests in
+/// YSharp.Tests call the members directly. A missing member is a clear failure, not a skip.
 /// <list type="bullet">
 /// <item><c>Doc.CollectGarbage()</c>: manual garbage collection of the whole store (JS <c>Y.tryGc(createDeleteSetFromStructStore(store), store, gcFilter)</c>).</item>
 /// <item><c>Doc.ShouldLoad</c>, <c>Doc.AutoLoad</c>: the subdoc load flags (DOC-01, SUB-03).</item>

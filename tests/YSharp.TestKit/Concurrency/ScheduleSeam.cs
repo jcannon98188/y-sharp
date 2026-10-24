@@ -4,7 +4,9 @@ using System.Reflection;
 namespace YSharp.TestKit.Concurrency;
 
 /// <summary>
-/// The one internal seam Spec 12 needs from the implementation (ADR 0006 "Seams", docs/research/schedule-exploration.md section 2).
+/// The reflection adapter for the one internal seam Spec 12 needs. The TestKit cannot see the library's internals (ADR 0015: InternalsVisibleTo goes to
+/// YSharp.Tests, YSharp.Fuzz.Tests and YSharp.Benchmarks only), so it sets the delegates by reflection; tests in YSharp.Tests assign
+/// <c>YSharp.ScheduleSeam</c> directly (<c>SeamInstall</c>). The seam itself: from the implementation (ADR 0006 "Seams", docs/research/schedule-exploration.md section 2).
 /// <para>
 /// Contract: an <c>internal static class YSharp.ScheduleSeam</c> in the <c>YSharp</c> assembly (visible to the test assemblies) with two
 /// settable static members, each a property or field:

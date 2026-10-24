@@ -74,6 +74,11 @@ public sealed class UndoManager : IDisposable
     public event Action<StackItemEvent>? StackItemAdded, StackItemUpdated, StackItemPopped;
     public event Action<bool, bool>? StackCleared;
     public void Dispose() => throw Sketch.NI;
+
+    // internal test seams (ADR 0015): JS undoManager.undoing, redoing, currStackItem (UM-14)
+    internal bool Undoing => throw Sketch.NI;
+    internal bool Redoing => throw Sketch.NI;
+    internal StackItem? CurrStackItem => throw Sketch.NI;
 }
 
 // ---------------------------------------------------------------- permanent user data

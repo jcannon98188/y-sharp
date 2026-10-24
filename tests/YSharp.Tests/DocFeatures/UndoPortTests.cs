@@ -787,14 +787,14 @@ public sealed class UndoPortTests
         text.Observe((_, tx) =>
         {
             if (!ReferenceEquals(tx.Origin, undoManager)) return;
-            if (UndoSeams.Undoing(undoManager)) metaUndo = UndoSeams.CurrStackItem(undoManager)?.Meta["str"];
-            else if (UndoSeams.Redoing(undoManager)) metaRedo = UndoSeams.CurrStackItem(undoManager)?.Meta["str"];
+            if (undoManager.Undoing) metaUndo = undoManager.CurrStackItem?.Meta["str"];
+            else if (undoManager.Redoing) metaRedo = undoManager.CurrStackItem?.Meta["str"];
         });
         text.Insert(0, "abc");
         undoManager.Undo();
         undoManager.Redo();
         Assert.Equal("42", metaUndo);   // currStackItem is accessible while undoing
         Assert.Equal("42", metaRedo);   // and while redoing
-        Assert.Null(UndoSeams.CurrStackItem(undoManager));   // and null after the transaction
+        Assert.Null(undoManager.CurrStackItem);   // and null after the transaction
     });
 }

@@ -2,7 +2,6 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text.Json;
 using Xunit;
 using YSharp.TestKit.Stubs;
@@ -26,37 +25,20 @@ internal static class Impl
 }
 
 /// <summary>
-/// The one internal seam Spec 6 needs from the implementation (ADR 0016 <c>structs</c> dump).
-/// <para>
-/// Contract: <c>internal string Doc.DumpStructs()</c> in the <c>YSharp</c> assembly (visible to <c>YSharp.Tests</c>) returns the
+/// Reads the struct store through the internal seam of Spec 6 (ADR 0015, 0016): <c>internal string Doc.DumpStructs()</c> returns the
 /// struct store as JSON, exactly the shape of the fixture <c>structs</c> observation: an array of
 /// <c>[client, [struct, ...]]</c> with clients in descending id order and structs in clock order, each struct
 /// <c>{id:[client,clock], len, kind:"item|gc|skip", origin?, rightOrigin?, parent, parentSub?, content:{ref,value}, deleted, keep}</c>.
 /// <c>content.value</c> is the tagged value of ADR 0011 (a string for ContentString, a tagged array for ContentAny/JSON,
 /// <c>[key,value]</c> for ContentFormat, the type name for ContentType, <c>[guid,opts]</c> for ContentDoc, null for ContentDeleted).
-/// </para>
+/// The members are called directly: this project sees the library's internals.
 /// </summary>
 internal static class StructsProbe
 {
-    private static readonly MethodInfo? DumpMethod =
-        typeof(Doc).GetMethod("DumpStructs", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, Type.EmptyTypes);
+    public static string DumpJson(Doc doc) => doc.DumpStructs();
 
-    public static string DumpJson(Doc doc)
-    {
-        if (DumpMethod == null)
-            throw new InvalidOperationException(
-                "Doc.DumpStructs() is missing. Spec 6 needs `internal string DumpStructs()` on Doc returning the ADR 0016 structs dump (see StructsProbe).");
-        try { return (string)DumpMethod.Invoke(doc, null)!; }
-        catch (TargetInvocationException e) when (e.InnerException != null) { throw e.InnerException; }
-    }
-
-    private static readonly PropertyInfo? PendingProperty =
-        typeof(Doc).GetProperty("HasPending", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-
-    /// <summary>Contract: <c>internal bool Doc.HasPending</c>, true while pending structs or a pending delete set are held (JS <c>store.pendingStructs !== null || store.pendingDs !== null</c>).</summary>
-    public static bool HasPending(Doc doc) =>
-        (bool)(PendingProperty ?? throw new InvalidOperationException("Doc.HasPending is missing (see StructsProbe)."))
-            .GetValue(doc)!;
+    /// <summary><c>internal bool Doc.HasPending</c>: true while pending structs or a pending delete set are held (JS <c>store.pendingStructs !== null || store.pendingDs !== null</c>).</summary>
+    public static bool HasPending(Doc doc) => doc.HasPending;
 
     public static List<ClientStructs> Dump(Doc doc)
     {

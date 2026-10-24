@@ -40,10 +40,10 @@ public sealed class DocTests
         Assert.Null(doc.ParentDoc);
         Assert.Matches("^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$", doc.Guid);   // uuid v4
         Assert.NotEqual(new Doc().Guid, doc.Guid);
-        Assert.True(DocSeams.ShouldLoad(doc));
-        Assert.False(DocSeams.AutoLoad(doc));
-        Assert.Null(DocSeams.CollectionId(doc));
-        Assert.True(DocSeams.Meta(doc).Kind is YValueKind.Undefined or YValueKind.Null);
+        Assert.True(doc.ShouldLoad);
+        Assert.False(doc.AutoLoad);
+        Assert.Null(doc.CollectionId);
+        Assert.True(doc.Meta.Kind is YValueKind.Undefined or YValueKind.Null);
     });
 
     [Fact]
@@ -54,10 +54,10 @@ public sealed class DocTests
         Assert.Equal("g", doc.Guid);
         Assert.False(doc.Gc);
         Assert.Equal(7UL, doc.ClientId);
-        Assert.True(DocSeams.AutoLoad(doc));
-        Assert.False(DocSeams.ShouldLoad(doc));
-        Assert.Equal("col", DocSeams.CollectionId(doc));
-        Assert.Equal("\"m\"", Json(DocSeams.Meta(doc)));
+        Assert.True(doc.AutoLoad);
+        Assert.False(doc.ShouldLoad);
+        Assert.Equal("col", doc.CollectionId);
+        Assert.Equal("\"m\"", Json(doc.Meta));
     });
 
     [Fact]
@@ -395,7 +395,7 @@ public sealed class DocTests
         doc.Load();
         doc.Load();
         Assert.Equal(0, events);
-        Assert.True(DocSeams.ShouldLoad(doc));
+        Assert.True(doc.ShouldLoad);
     });
 
     [Fact]
@@ -406,7 +406,7 @@ public sealed class DocTests
         Assert.False(ydoc.IsLoaded);
         var loadedEvent = false;
         ydoc.Loaded += _ => loadedEvent = true;
-        DocSeams.SignalLoaded(ydoc);                                   // JS: ydoc.emit('load', [ydoc])
+        ydoc.SignalLoaded();                                   // JS: ydoc.emit('load', [ydoc])
         Assert.True(loadedEvent);
         Assert.True(ydoc.IsLoaded);
     });
@@ -422,13 +422,13 @@ public sealed class DocTests
         var syncedEvents = new List<bool>();
         ydoc.Loaded += _ => loadedEvents++;
         ydoc.Synced += d => syncedEvents.Add(d.IsSynced);
-        DocSeams.SignalSynced(ydoc, true);                             // JS: ydoc.emit('sync', [true, ydoc])
+        ydoc.SignalSynced(true);                             // JS: ydoc.emit('sync', [true, ydoc])
         Assert.Equal(1, loadedEvents);
         Assert.Equal(new[] { true }, syncedEvents);
         Assert.True(ydoc.IsLoaded);
         Assert.True(ydoc.IsSynced);
 
-        DocSeams.SignalSynced(ydoc, false);
+        ydoc.SignalSynced(false);
         Assert.Equal(1, loadedEvents);                                 // already loaded: no second load event
         Assert.Equal(new[] { true, false }, syncedEvents);
         Assert.True(ydoc.IsLoaded);
@@ -443,8 +443,8 @@ public sealed class DocTests
         var doc = new Doc();
         var loaded = 0;
         doc.Loaded += _ => loaded++;
-        DocSeams.SignalLoaded(doc);
-        DocSeams.SignalSynced(doc, true);
+        doc.SignalLoaded();
+        doc.SignalSynced(true);
         Assert.Equal(1, loaded);
         Assert.True(doc.IsSynced);
     });
@@ -508,8 +508,8 @@ public sealed class DocTests
         var inherits = new Doc(new DocOptions { Guid = "i" });
         var keeps = new Doc(new DocOptions { Guid = "k", CollectionId = "own" });
         parent.GetArray("arr").Push(new YEntry[] { inherits, keeps });
-        Assert.Equal("parent-col", DocSeams.CollectionId(inherits));
-        Assert.Equal("own", DocSeams.CollectionId(keeps));
+        Assert.Equal("parent-col", inherits.CollectionId);
+        Assert.Equal("own", keeps.CollectionId);
     });
 
     [Fact]
@@ -522,8 +522,8 @@ public sealed class DocTests
         var remote = Net.Mk(2);
         remote.ApplyUpdate(parent.EncodeStateAsUpdate());
         var copy = remote.Subdocs.Single();
-        Assert.Equal("\"meta-value\"", Json(DocSeams.Meta(copy)));
-        Assert.Null(DocSeams.CollectionId(copy));                      // collectionid is not serialised
+        Assert.Equal("\"meta-value\"", Json(copy.Meta));
+        Assert.Null(copy.CollectionId);                      // collectionid is not serialised
     });
 
     // ------------------------------------------------------------------ DOC-18 event contract

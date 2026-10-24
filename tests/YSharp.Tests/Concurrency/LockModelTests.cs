@@ -302,10 +302,9 @@ public sealed class LockModelTests
     public void Lock_AnyTransition_IsReportedToTheScheduleSeam() => Impl.Run(() =>
     {
         _ = new Doc().GetText("probe");
-        Assert.True(ScheduleSeam.IsPresent, "The implementation must expose YSharp.ScheduleSeam (see ScheduleSeam in the TestKit): the lock is only controllable through it.");
         var sched = new CooperativeScheduler(new SeededChoice(1), "seam-is-hooked");
         var doc = Conc.NewDoc();
-        using (ScheduleSeam.Install(sched))
+        using (new SeamInstall(sched))
         {
             sched.Spawn("A", () => doc.Transact(_ => doc.GetArray("a").Push(Conc.One)));
             sched.Spawn("B", () => doc.ReadTransact(tx => GC.KeepAlive(doc.GetArray("a").Length)));
