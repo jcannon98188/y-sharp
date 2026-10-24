@@ -11,7 +11,7 @@ namespace YSharp.TestKit.Allocation;
 /// Exact allocation assertions (ADR 0009): <see cref="GC.GetAllocatedBytesForCurrentThread"/> around a warmed-up loop.
 /// Release builds only; in Debug the calling test is skipped visibly. A failed budget reruns the operation under an
 /// <see cref="EventListener"/> on the runtime GC allocation-tick event to name the allocating types.
-/// The test project should also set <c>TieredCompilation</c> off so JIT tiering cannot move allocations between runs.
+/// The test projects set <c>System.Runtime.TieredCompilation</c> off in <c>runtimeconfig.template.json</c> (ADR 0009) so JIT tiering and escape analysis behave the same on every run.
 /// </summary>
 public static class AllocationAssert
 {

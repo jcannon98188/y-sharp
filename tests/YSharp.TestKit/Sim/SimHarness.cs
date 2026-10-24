@@ -41,7 +41,7 @@ public sealed class SimResult<T>
 /// <summary>
 /// Port of the JS <c>testHelper</c> functions <c>init</c>, <c>compare</c> and <c>applyRandomTests</c> (ADR 0015, 0017).
 /// Draw order matches upstream; the five upstream defects are fixed as SIM-01..05 (see each member).
-/// Proposed registry IDs: SIM-10 TestConnector, SIM-11 Init, SIM-12 Compare, SIM-13 ApplyRandomTests, SIM-14 V2 framing.
+/// Registered in docs/inventory/simulation.yaml: SIM-10 TestConnector, SIM-11 Init, SIM-12 Compare, SIM-13 ApplyRandomTests, SIM-14 V2 framing.
 /// </summary>
 public static class SimHarness
 {
