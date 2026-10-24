@@ -130,19 +130,19 @@
           "api": "Y.createRelativePositionFromTypeIndex, Y.encodeRelativePosition, Y.relativePositionToJSON",
           "value": {
             "bytes": {"$":"bytes","hex":"00030300"},
-            "json": "{\"tname\":\"t\",\"item\":{\"client\":3,\"clock\":3},\"assoc\":0}"
+            "json": {"tname":"t","item":{"client":3,"clock":3},"assoc":0}
           }
         },
         "midLeft": {
           "api": "Y.createRelativePositionFromTypeIndex, Y.encodeRelativePosition, Y.relativePositionToJSON",
           "value": {
             "bytes": {"$":"bytes","hex":"00030241"},
-            "json": "{\"tname\":\"t\",\"item\":{\"client\":3,\"clock\":2},\"assoc\":-1}"
+            "json": {"tname":"t","item":{"client":3,"clock":2},"assoc":-1}
           }
         },
         "end": {
           "api": "Y.createRelativePositionFromTypeIndex, Y.encodeRelativePosition, Y.relativePositionToJSON",
-          "value": {"bytes":{"$":"bytes","hex":"01017400"},"json":"{\"tname\":\"t\",\"assoc\":0}"}
+          "value": {"bytes":{"$":"bytes","hex":"01017400"},"json":{"tname":"t","assoc":0}}
         },
         "midA": {"api":"Y.createAbsolutePositionFromRelativePosition","value":{"type":"t","index":6,"assoc":0}},
         "midB": {"api":"Y.createAbsolutePositionFromRelativePosition","value":{"type":"t","index":6,"assoc":0}},

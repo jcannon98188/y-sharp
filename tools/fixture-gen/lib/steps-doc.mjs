@@ -170,7 +170,7 @@ defineStep({
     const enc = Y.encodeRelativePosition(rpos)
     state(ctx).relpos.set(s.name, enc)
     record(ctx, s.name, 'Y.createRelativePositionFromTypeIndex, Y.encodeRelativePosition, Y.relativePositionToJSON', {
-      bytes: tag(enc), json: JSON.stringify(Y.relativePositionToJSON(rpos))
+      bytes: tag(enc), json: JSON.parse(JSON.stringify(Y.relativePositionToJSON(rpos)))
     })
   }
 })

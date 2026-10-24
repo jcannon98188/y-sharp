@@ -262,32 +262,32 @@
       "area": "relpos",
       "name": "anchors-assoc-and-encoding",
       "covers": ["RP-01","RP-02","RP-03","RP-04","RP-05","RP-06"],
-      "sha256": "0b84835ace90e21466d39c7fc0613aad9dd0f68eb62a9d79bba3b20e277a01bf",
-      "bytes": 10264
+      "sha256": "41e4c3c5f6d3a220058406f07c62c4f567ea65b2edcb510d5841ef2949df9b8a",
+      "bytes": 10122
     },
     {
       "path": "relpos/concurrent-edits-and-deleted-anchor.json",
       "area": "relpos",
       "name": "concurrent-edits-and-deleted-anchor",
       "covers": ["RP-06","RP-08","RP-09","RP-02"],
-      "sha256": "47231d6d69938231525c7e5355f27bf26ebf289d902aea78325d5cec03edc526",
-      "bytes": 11598
+      "sha256": "9e717e07f542b291c405bc8166605fa8e603cad6cbd7a7150fba9d9f22be2be5",
+      "bytes": 11562
     },
     {
       "path": "relpos/default-name-json-quirk.json",
       "area": "relpos",
       "name": "default-name-json-quirk",
       "covers": ["RP-05","RP-04"],
-      "sha256": "7a075aa024686bab655257be0d35a7b61f3ad164838614cea7f3fb9d934562a7",
-      "bytes": 2713
+      "sha256": "e01b969384739128680d4a38076182067b91cd5fd1c2d3b5419598b5abcb3151",
+      "bytes": 2705
     },
     {
       "path": "relpos/follow-undone-deletions.json",
       "area": "relpos",
       "name": "follow-undone-deletions",
       "covers": ["RP-06","RP-08"],
-      "sha256": "ff20d6bcac5b6cb7fd128e22043132383d9354252ed6a310a984a3c9b2fea584",
-      "bytes": 7578
+      "sha256": "7c2dd1b10b192e88a5d5009080b579d7356c070382d4924af5fc5633a40f96b4",
+      "bytes": 7564
     },
     {
       "path": "snapshot/array-deletions-and-empty.json",
@@ -638,8 +638,8 @@
       "area": "undo",
       "name": "capture-timeout-merging",
       "covers": ["UM-03","UM-04","UM-05","UM-08","UM-14","UM-06"],
-      "sha256": "4fa9c6abd8bd36da1f1feecbaa623226d883cbdcb7ab97ea5cd8903871b74c03",
-      "bytes": 8164
+      "sha256": "3bbe622b9b936fa3e67bade00ea3feecc5c45b1cf8934d8abc5e48de305b6c2d",
+      "bytes": 8810
     },
     {
       "path": "undo/map-delete-and-overwrite.json",

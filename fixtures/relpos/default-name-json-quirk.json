@@ -57,11 +57,11 @@
       "value": {
         "start": {
           "api": "Y.createRelativePositionFromTypeIndex, Y.encodeRelativePosition, Y.relativePositionToJSON",
-          "value": {"bytes":{"$":"bytes","hex":"010041"},"json":"{\"assoc\":-1}"}
+          "value": {"bytes":{"$":"bytes","hex":"010041"},"json":{"assoc":-1}}
         },
         "end": {
           "api": "Y.createRelativePositionFromTypeIndex, Y.encodeRelativePosition, Y.relativePositionToJSON",
-          "value": {"bytes":{"$":"bytes","hex":"010000"},"json":"{\"assoc\":0}"}
+          "value": {"bytes":{"$":"bytes","hex":"010000"},"json":{"assoc":0}}
         },
         "rStart": {"api":"Y.createAbsolutePositionFromRelativePosition","value":{"type":"","index":0,"assoc":-1}},
         "rEnd": {"api":"Y.createAbsolutePositionFromRelativePosition","value":{"type":"","index":2,"assoc":0}}

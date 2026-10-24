@@ -165,7 +165,8 @@ public static class DocFeatureSteps
                 w.WriteStartObject();
                 w.WritePropertyName("bytes");
                 TaggedValue.FromBytes(bytes).Write(w);
-                w.WriteString("json", Encoding.UTF8.GetString(json.WrittenSpan));
+                w.WritePropertyName("json");
+                w.WriteRawValue(Encoding.UTF8.GetString(json.WrittenSpan));
                 w.WriteEndObject();
             }));
         });
@@ -537,7 +538,7 @@ public sealed class DocFeatureState
 /// <item><c>Doc.CollectGarbage()</c>: manual garbage collection of the whole store (JS <c>Y.tryGc(createDeleteSetFromStructStore(store), store, gcFilter)</c>).</item>
 /// <item><c>Doc.ShouldLoad</c>, <c>Doc.AutoLoad</c>: the subdoc load flags (DOC-01, SUB-03).</item>
 /// <item><c>Doc.CollectionId</c> (string?) and <c>Doc.Meta</c> (YValue): DOC-17.</item>
-/// <item><c>Doc.SignalSynced(bool)</c>: the provider hook that raises JS <c>emit('sync', [isSynced])</c> (DOC-13, DOC-14).</item>
+/// <item><c>Doc.SignalLoaded()</c> and <c>Doc.SignalSynced(bool)</c>: the provider hooks that raise JS <c>emit('load')</c> and <c>emit('sync', [isSynced])</c> (DOC-13, DOC-14).</item>
 /// </list>
 /// </summary>
 public static class DocSeams
@@ -557,10 +558,11 @@ public static class DocSeams
 
     public static void CollectGarbage(Doc doc) => Invoke(doc, "CollectGarbage", "`void CollectGarbage()`");
 
+    public static void SignalLoaded(Doc doc) => Invoke(doc, "SignalLoaded", "`void SignalLoaded()`");
+
     public static void SignalSynced(Doc doc, bool isSynced) => Invoke(doc, "SignalSynced", "`void SignalSynced(bool isSynced)`", isSynced);
 
-    private static void Invoke(Doc doc, string name, string contract, params object[] args)
-    {
+    private static void Invoke(Doc doc, string name, string contract, params object[] args)    {
         var m = typeof(Doc).GetMethod(name, Any, null, args.Select(a => a.GetType()).ToArray(), null) ?? throw Missing(name, contract);
         try { m.Invoke(doc, args); }
         catch (TargetInvocationException e) when (e.InnerException != null) { System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(e.InnerException).Throw(); }

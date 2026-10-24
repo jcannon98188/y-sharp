@@ -112,7 +112,7 @@
           "api": "Y.createRelativePositionFromTypeIndex, Y.encodeRelativePosition, Y.relativePositionToJSON",
           "value": {
             "bytes": {"$":"bytes","hex":"00050100"},
-            "json": "{\"tname\":\"t\",\"item\":{\"client\":5,\"clock\":1},\"assoc\":0}"
+            "json": {"tname":"t","item":{"client":5,"clock":1},"assoc":0}
           }
         },
         "afterDelete": {"api":"Y.createAbsolutePositionFromRelativePosition","value":{"type":"t","index":0,"assoc":0}},

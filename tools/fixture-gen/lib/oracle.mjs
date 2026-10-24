@@ -7,6 +7,12 @@ export const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)
 
 const url = (...p) => pathToFileURL(path.join(repoRoot, ...p)).href
 
+// lib0/time.js binds `getUnixTime = Date.now` when it loads, so a script's virtual clock (the `tick` step) only reaches the
+// UndoManager if Date.now is already the indirection below before the oracle is imported. Real time applies outside script runs.
+const realNow = Date.now
+export const virtualClock = { now: null }
+Date.now = () => (virtualClock.now === null ? realNow() : virtualClock.now())
+
 export const Y = await import(url('yjs', 'src', 'index.js'))
 export const { encodeStateVectorV2 } = await import(url('yjs', 'src', 'utils', 'encoding.js'))
 export const syncProtocol = await import(url('y-protocols', 'sync.js'))

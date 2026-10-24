@@ -1,6 +1,6 @@
 // The Node interpreter of ADR 0016: the only code that drives Yjs. It replays the stored (tagged) script, so what
 // the fixture records is exactly what the oracle executed. Areas add kinds with defineStep() without touching the core.
-import { Y } from './oracle.mjs'
+import { Y, virtualClock } from './oracle.mjs'
 import { tag, untag, ScriptError } from './tagged.mjs'
 import { yvalueOut, deltaOut } from './observe.mjs'
 
@@ -22,7 +22,7 @@ export class Ctx {
     this.events = []
     this.results = new Map()
     this.depth = new Map()
-    this.now = 0
+    this.now = 1704067200000 // 2024-01-01T00:00:00Z, like the C# VirtualTimeProvider; any positive epoch works (UndoManager treats 0 as "no change yet")
     this.cleanups = []
     this.afterTick = null
   }
@@ -278,13 +278,13 @@ defineStep({
 /** Replays a stored script. Date.now is virtual (advanced by `tick`) so time-dependent features are deterministic. */
 export const interpret = script => {
   const ctx = new Ctx()
-  const realNow = Date.now
-  Date.now = () => ctx.now
+  // Date.now is virtual while a script runs (lib0 reads it through the shim installed in oracle.mjs)
+  virtualClock.now = () => ctx.now
   try {
     for (const r of script.replicas ?? []) run(ctx, { step: 'replica', ...r })
     runSteps(ctx, script.steps ?? [])
   } finally {
-    Date.now = realNow
+    virtualClock.now = null
     for (const f of ctx.cleanups) f()
   }
   return ctx
