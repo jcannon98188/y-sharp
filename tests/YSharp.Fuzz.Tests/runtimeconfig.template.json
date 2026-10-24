@@ -1,0 +1,8 @@
+{
+  "configProperties": {
+    "System.GC.HeapHardLimit": 419430400,
+    "System.GC.Concurrent": false,
+    "System.Runtime.TieredCompilation": false
+  }
+}
+
