@@ -51,7 +51,7 @@ public readonly struct Subscription : IDisposable { public void Dispose() => thr
 
 public readonly record struct YPathSegment(string? Key, int Index);   // Key for map parents, Index for list parents (V-2)
 
-/// REVIEW (open question 3): event objects are pooled and valid only during dispatch (IsValid false afterwards).
+/// Event objects are pooled and valid only during dispatch (A7): IsValid is false afterwards and every other member throws YLifetimeException (CC-9).
 public abstract class YEvent
 {
     public YType Target => throw Sketch.NI;

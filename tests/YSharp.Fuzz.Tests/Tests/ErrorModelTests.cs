@@ -248,7 +248,7 @@ public sealed class ErrorModelTests
     [Fact, Covers("ERR-16", Layer = CoverLayer.Unit)]
     public void Err16_ProgrammerErrors_UseAFamilySeparateFromDecodeErrors()
     {
-        foreach (var type in new[] { typeof(YConcurrencyException), typeof(YInternalException), typeof(YTypeConflictException) })
+        foreach (var type in new[] { typeof(YConcurrencyException), typeof(YLifetimeException), typeof(YInternalException), typeof(YTypeConflictException) })
         {
             Assert.True(type.IsAssignableTo(typeof(YException)), $"{type.Name} is not a YException");
             Assert.False(type.IsAssignableTo(typeof(YDecodeException)), $"{type.Name} must not be a decode error");

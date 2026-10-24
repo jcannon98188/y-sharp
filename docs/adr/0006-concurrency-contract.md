@@ -22,7 +22,7 @@ Each guarantee has an ID. Tests carry the ID in the traceability tag (TASK-1.8).
 **Handles and options**
 
 - **CC-8** Every public member of `Doc`, the shared types and the awareness classes is safe to call from any thread. A call outside an explicit transaction takes an implicit transaction (read or write as appropriate). An explicit `Transact` batches calls.
-- **CC-9** Live views and enumerators never outlive the transaction that produced them: they snapshot or throw once it ends.
+- **CC-9** Live views and enumerators never outlive the transaction that produced them: once it ends they throw `YLifetimeException` (ADR 0005); they never return old contents. Views taken without an explicit transaction (an implicit enumerator) are snapshots and never go stale.
 - **CC-10** Options such as `ClientId`, `Guid` and `ShouldLoad` are read lock-free from an immutable snapshot.
 
 **Observers**
@@ -34,7 +34,7 @@ Each guarantee has an ID. Tests carry the ID in the traceability tag (TASK-1.8).
 
 **Transactions and lifecycle**
 
-- **CC-15** A transaction is thread-affine: disposing it on a different thread than the one that acquired it throws `YConcurrencyException`. The contract is sync-only; there is no async API. The primary form is a callback that cannot cross `await`; whether the scoped form is a class or a `ref struct` belongs to TASK-1.14.
+- **CC-15** A transaction is thread-affine: disposing it on a different thread than the one that acquired it throws `YConcurrencyException`. With the `ref struct` scope this cannot be written (the compiler forbids it), so the exception is unreachable for scopes; a `Transaction` object kept past its body throws `YLifetimeException` (CC-9). The contract is sync-only; there is no async API. The primary form is a callback that cannot cross `await`; whether the scoped form is a class or a `ref struct` belongs to TASK-1.14.
 - **CC-16** If a `Transact` body throws, commit and cleanup still run, the lock is released in a `finally` block, and the exception then propagates. Double-`Dispose` is idempotent. A transaction that is never disposed leaks the lock; this is a caller error, not detected.
 - **CC-17** `Destroy` is a write transaction and waits its turn. A destroyed document keeps accepting acquires, as in Yjs; only `IsDestroyed` changes.
 

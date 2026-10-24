@@ -22,7 +22,8 @@ public sealed class LifecycleTests
     {
         // The stub picks the ref struct option TASK-1.14 left open. Thread affinity is then enforced by the compiler: the scope cannot be
         // captured by a lambda, boxed, stored in a field or used across await, so "dispose on a different thread" cannot be written.
-        // The YConcurrencyException the ADR describes for that case is therefore unreachable and not asserted (see the Spec 12 API gaps).
+        // The YConcurrencyException ADR 0006 once described for a cross-thread Dispose is therefore unreachable by design (ADR 0006 CC-15 records this);
+        // the one reachable thread-affinity failure is a transaction object kept past its body, which throws YLifetimeException (HandleTests, CC-9).
         Assert.True(typeof(TransactionScope).IsByRefLike);
         Assert.True(typeof(TransactionScope).IsValueType);
     }

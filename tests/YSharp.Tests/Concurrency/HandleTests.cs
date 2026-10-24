@@ -137,6 +137,8 @@ public sealed class HandleTests
             Assert.True(tx.IsWrite);
         });
         Assert.False(captured!.IsValid);
+        Assert.Throws<YLifetimeException>(() => captured.Origin);
+        Assert.Throws<YLifetimeException>(() => captured.BeforeState);
         doc.ReadTransact(tx =>
         {
             captured = tx;
@@ -159,24 +161,25 @@ public sealed class HandleTests
         f.Arr.Push(Conc.One);
         Assert.NotNull(captured);
         Assert.False(captured!.IsValid);
+        Assert.Throws<YLifetimeException>(() => captured.Target);
+        Assert.Throws<YLifetimeException>(() => captured.Transaction);
     });
 
     [Fact, Covers("CC-9")]
-    public void ALiveCollection_CapturedInsideATransaction_SnapshotsOrThrowsOnceItEnded() => Impl.Run(() =>
+    public void ALiveCollection_CapturedInsideATransaction_ThrowsOnceItEnded() => Impl.Run(() =>
     {
         var doc = Conc.NewDoc();
         var arr = doc.GetArray("a");
         IReadOnlyCollection<YType>? changed = null;
-        var expected = -1;
         doc.Transact(tx =>
         {
             arr.Push(Conc.One);
             changed = tx.ChangedTypes;
-            expected = changed.Count;
+            Assert.Single(changed);
         });
         doc.GetMap("other").Set("k", 1);   // a later transaction changes other types
-        SnapshotOrThrow(() => changed!.Count, expected);
-        SnapshotOrThrow(() => changed!.Count(), expected);
+        Assert.Throws<YLifetimeException>(() => changed!.Count);
+        Assert.Throws<YLifetimeException>(() => changed!.Count());
     });
 
     [Fact, Covers("CC-9")]
@@ -194,28 +197,14 @@ public sealed class HandleTests
     });
 
     [Fact, Covers("CC-9")]
-    public void AnEnumerator_TakenInsideATransaction_SnapshotsOrThrowsAfterItEnded() => Impl.Run(() =>
+    public void AnEnumerator_TakenInsideATransaction_ThrowsAfterItEnded() => Impl.Run(() =>
     {
         var f = new Fixture();
         ListEnumerator enumerator = default;
         f.Doc.Transact(_ => enumerator = f.Arr.GetEnumerator());
         f.Arr.Push(Conc.One);
-        SnapshotOrThrow(() =>
-        {
-            var n = 0;
-            while (enumerator.MoveNext()) n++;
-            return n;
-        }, 3);
+        Assert.Throws<YLifetimeException>(() => enumerator.MoveNext());
     });
-
-    /// <summary>ADR 0006 CC-9 allows either outcome: the old contents, or an exception (which type belongs to the exception design; see the API gaps in the Spec 12 notes).</summary>
-    private static void SnapshotOrThrow(Func<int> read, int expected)
-    {
-        int got;
-        try { got = read(); }
-        catch (Exception e) when (e is InvalidOperationException or ObjectDisposedException or YException) { return; }
-        Assert.Equal(expected, got);
-    }
 
     [Fact, Covers("CC-9")]
     public void RootCollectionSnapshot_AnotherThreadAddsRoots_DoesNotChange() => Impl.Run(() =>

@@ -26,7 +26,10 @@ public readonly struct ApplyResult
 
 public class YException : Exception { }
 public sealed class YDecodeException : YException { public YError Error { get; } }
-public sealed class YConcurrencyException : YException { }
+public sealed class YConcurrencyException : YException { }   // lock-protocol misuse: read-to-write upgrade (CC-3), lock-order violation (CC-18)
+/// Use of a pooled or live view after the transaction or dispatch that produced it ended (CC-9): a Transaction, YEvent, change collection or
+/// enumerator taken inside an explicit transaction. Thrown by every member except IsValid; never returns old contents (ADR 0005, 0006).
+public sealed class YLifetimeException : YException { }
 public sealed class YInternalException : YException { }
 public sealed class YTypeConflictException : YException { }   // doc.Get(name) with a different concrete type
 
@@ -133,7 +136,7 @@ public sealed class Transaction
     public DeleteSet DeleteSet => throw Sketch.NI;
     public IReadOnlyCollection<YType> ChangedTypes => throw Sketch.NI;
     public IReadOnlyCollection<YType> ChangedParentTypes => throw Sketch.NI;
-    public bool IsValid => throw Sketch.NI;       // false once the transaction ended (CC-9): the object is pooled
+    public bool IsValid => throw Sketch.NI;       // false once the transaction ended (CC-9): the object is pooled. Every other member, and the collections it returned, throw YLifetimeException then
 }
 
 /// using-form of a transaction. ref struct so it cannot cross await; thread-affine (CC-15).
