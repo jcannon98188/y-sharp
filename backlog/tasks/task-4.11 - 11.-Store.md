@@ -4,7 +4,7 @@ title: 11. Store
 status: To Do
 assignee: []
 created_date: '2026-10-24 19:41'
-updated_date: '2026-10-24 19:42'
+updated_date: '2026-10-24 21:43'
 labels:
   - spec
   - 'model:opus'
@@ -46,3 +46,13 @@ Read first: `docs/handoff-implementation-planning.md`, ADRs 0005, 0006, 0008, 00
 - [ ] #3 Fixture drift check (`npm run check` in `tools/fixture-gen`) is clean
 - [ ] #4 ADR 0022 followed: suite changes in separate `suite:` commits, a Suite changes list in the notes, no open owner decision
 <!-- DOD:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: @orchestrator
+created: 2026-10-24 21:43
+---
+Owner decision needed: StructStoreTests.LookupOfAnUnknownClient_IsHeldAsPending_InsteadOfFailing is gated only on Store but calls Doc.TryApplyUpdate/EncodeStateAsUpdate/GetStateVector, so it now fails with NotImplementedException. Recommend adding [Requires(Feature.V1)] (spec 14). Also confirm: SpikeHarnessTests moved to [Requires(Store)] and two replaced tests; RealStoreDriverTests replaces SpikeObjectPerItemTests. Notes: search markers live in Store/ (ADR 0021 gives them to Types/, spec 21); ADR 0023 'How to rerun' still points at the deleted spike.
+---
+<!-- COMMENTS:END -->
