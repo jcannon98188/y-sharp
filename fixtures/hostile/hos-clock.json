@@ -1,7 +1,7 @@
 {
   "header": {
     "schema": 1,
-    "covers": ["HOS-CLOCK","ERR-21"],
+    "covers": ["HOS-CLOCK","Q22","ERR-21"],
     "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
     "node": "24",
     "generator": "ysharp-fixture-gen 1.0.0",

@@ -76,6 +76,32 @@ public sealed class MalformedInputTests
         Assert.Equal(1L, StateVector.Decode(Hex.Bytes("01 ff ff ff ff ff ff ff 0f 01"))[max]);
     });
 
+    // ------------------------------------------------------------------ Q22: clocks and lengths are exact integers in 0..2^53-1
+
+    [Theory, Covers("Q22", "Q12"), Diverges("Q22", adr: "0003")]
+    [InlineData("01 01 01 80 80 80 80 80 80 80 10 04 01 01 74 01 61 00")]       // struct clock 2^53
+    [InlineData("01 01 01 00 00 80 80 80 80 80 80 80 10 00")]                    // GC length 2^53
+    [InlineData("01 01 01 01 00 ff ff ff ff ff ff ff 0f 00")]                    // clock 1 + GC length 2^53-1 = 2^53
+    [InlineData("00 01 01 01 80 80 80 80 80 80 80 10 01")]                       // delete range clock 2^53
+    [InlineData("00 01 01 01 00 80 80 80 80 80 80 80 10")]                       // delete range length 2^53
+    [InlineData("00 01 01 01 ff ff ff ff ff ff ff 0f 01")]                       // delete range clock 2^53-1 + length 1
+    public void Q22_ClocksAndLengthsAtOrAbove2Pow53_AreMalformed_WhereJsRoundsThemToDoubles(string hex) => Stub.Run(() => AssertRejected(hex));
+
+    [Theory, Covers("Q22")]
+    [InlineData("01 01 01 00 00 ff ff ff ff ff ff ff 0f 00")]                    // GC length 2^53-1 at clock 0
+    [InlineData("00 01 01 01 fe ff ff ff ff ff ff 0f 01")]                       // delete range 2^53-2 + 1 = 2^53-1
+    public void Q22_ClocksAndLengthsUpTo2Pow53Minus1_AreAccepted(string hex) => Stub.Run(() => AssertAccepted(hex));
+
+    [Fact, Covers("Q22"), Diverges("Q22", adr: "0003")]
+    public void Q22_ANegativeClockFromAV2DiffColumn_IsMalformed() => Stub.Run(() =>
+    {
+        // Negative and fractional values cannot be written as a V1 varuint; V2 can produce a negative clock through an IntDiffOptRle
+        // column. The item has an origin (client 2); its clock column holds one diff: 0 is clock 0 (accepted, waits for client 2), -1 is clock -1.
+        var origin = (info: "84", client: "01 02", str: "02 68 69 02");
+        AssertAccepted(V2("01 01 00 00", origin.info, origin.str, client: origin.client, leftClock: "00"), UpdateFormat.V2);
+        AssertRejected(V2("01 01 00 00", origin.info, origin.str, client: origin.client, leftClock: "42"), UpdateFormat.V2);
+    });
+
     [Fact, Covers("ENC-38")]
     public void Enc38_ContentRef11_IsRejected() => Stub.Run(() => AssertRejected(Struct("0b", "")));
 

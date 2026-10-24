@@ -47,7 +47,12 @@ public sealed class Doc : IDisposable
     public Doc? ParentDoc => throw Sketch.NI;
     public IReadOnlyCollection<Doc> Subdocs => throw Sketch.NI;
     public IReadOnlyCollection<string> GetSubdocGuids() => throw Sketch.NI;   // new set, duplicates collapsed (DOC-16)
-    public bool IsFaulted => throw Sketch.NI;   // ADR 0005: readable, refuses changes
+    public bool IsFaulted => throw Sketch.NI;   // ADR 0005: readable, refuses changes. Mutators and ApplyUpdate throw YInternalException, TryApplyUpdate returns Rejected
+
+    /// Test-only fault hook (ADR 0005, ERR-20), reached through InternalsVisibleTo: violates a struct-store invariant (for example breaks the clock
+    /// continuity of the local client's struct list) without any public API call. The next operation that touches the store detects it, throws
+    /// YInternalException and marks the document faulted. No public input can cause this by design (ERR-21).
+    internal void InjectInvariantViolation() => throw Sketch.NI;
 
     // ---- root types. Get(name) returns an untyped placeholder that a later typed Get upgrades.
     public YArray GetArray(string name = "") => throw Sketch.NI;

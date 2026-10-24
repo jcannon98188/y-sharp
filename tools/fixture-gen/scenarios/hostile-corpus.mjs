@@ -210,7 +210,7 @@ export default [
   { area: 'hostile', name: 'hos-trunc', covers: covers('HOS-TRUNC', 'ERR-03'), malformed: truncCases },
   { area: 'hostile', name: 'hos-mut', covers: covers('HOS-MUT'), malformed: mutCases },
   { area: 'hostile', name: 'hos-len', covers: covers('HOS-LEN', 'ERR-09'), malformed: lenCases },
-  { area: 'hostile', name: 'hos-clock', covers: covers('HOS-CLOCK'), malformed: clockCases },
+  { area: 'hostile', name: 'hos-clock', covers: covers('HOS-CLOCK', 'Q22'), malformed: clockCases },
   { area: 'hostile', name: 'hos-ref', covers: covers('HOS-REF', 'ERR-06', 'ERR-07'), malformed: refCases },
   { area: 'hostile', name: 'hos-sem', covers: covers('HOS-SEM', 'ERR-04'), malformed: semCases },
   { area: 'hostile', name: 'hos-amp', covers: covers('HOS-AMP'), malformed: ampCases },

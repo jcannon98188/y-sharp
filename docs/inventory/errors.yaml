@@ -199,9 +199,8 @@
   layers: [unit]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0005 / Environment and internal faults"
-  note: "Pending (owner: spec 11, then spec 12 for the seam): a document is faulted only by an internal invariant violation, which no public API input can cause by design (ERR-21 is asserted by the corpus and fuzz layers). The faulted-document behaviour (readable, rejects mutation and apply) therefore needs an internal fault-injection seam that the API stub lacks. ErrorModelTests.Err20 covers the exception family and the fresh-document state; the seam test lands with the implementation."
 
 - id: ERR-21
   title: "No input ever faults a document (asserted by the fuzz suite)"

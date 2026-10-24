@@ -324,9 +324,9 @@
       "path": "hostile/hos-clock.json",
       "area": "hostile",
       "name": "hos-clock",
-      "covers": ["HOS-CLOCK","ERR-21"],
-      "sha256": "0f10b5da8b8c749b10114c82dcdb5d35ead68cb39afb7f91657ee549dc55a9e5",
-      "bytes": 10197
+      "covers": ["HOS-CLOCK","Q22","ERR-21"],
+      "sha256": "057ea8cf57fc7ad7d40f705b1fb9a5326a39ff278aaf7e18ee2fd976f32d0e04",
+      "bytes": 10203
     },
     {
       "path": "hostile/hos-len.json",

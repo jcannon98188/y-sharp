@@ -303,4 +303,28 @@ public sealed class ErrorModelTests
         Assert.True(typeof(YInternalException).IsAssignableTo(typeof(YException)));
         Assert.False(new Doc().IsFaulted);
     });
+
+    [Fact, Covers("ERR-20", Layer = CoverLayer.Unit)]
+    public void Err20_AViolatedInvariant_ThrowsYInternalException_AndFaultsTheDocument_ItStaysReadable() => Stub.Run(() =>
+    {
+        var doc = new Doc();
+        var text = doc.GetText("t");
+        text.Insert(0, "hi");
+        doc.InjectInvariantViolation();   // the internal fault hook: no public input can do this (ERR-21)
+        Assert.False(doc.IsFaulted);      // detected by the next operation that touches the store, not by the hook
+
+        Assert.Throws<YInternalException>(() => text.Insert(2, "!"));
+        Assert.True(doc.IsFaulted);
+
+        // readable
+        Assert.Equal("hi", text.ToString());
+        Assert.NotEmpty(doc.EncodeStateAsUpdate());
+        Assert.Equal(2, doc.GetStateVector()[doc.ClientId]);
+        // refuses further mutation and apply, and changes nothing
+        Assert.Throws<YInternalException>(() => text.Insert(0, "x"));
+        Assert.Throws<YInternalException>(() => doc.ApplyUpdate(HiV1));
+        Assert.Equal(YError.Rejected, doc.TryApplyUpdate(HiV1).Error);
+        Assert.Equal("hi", text.ToString());
+        Assert.True(doc.IsFaulted);
+    });
 }

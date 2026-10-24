@@ -32,9 +32,8 @@
   wire: true
   quirk: [Q22]
   owner: 6
-  status: pending
+  status: active
   ref: "quirks.md:274"
-  note: "Pending (owner: spec 6). Proposal in the quirk register: diverge internally, match observably. Needs a recorded decision (ADR 0003) and a [Diverges] test, so it stays pending until that ADR exists; no new test can be written first."
 
 - id: Q23
   title: "Observer and event ordering"
