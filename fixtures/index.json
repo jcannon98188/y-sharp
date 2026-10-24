@@ -297,6 +297,70 @@
       "bytes": 7807
     },
     {
+      "path": "hostile/hos-amp.json",
+      "area": "hostile",
+      "name": "hos-amp",
+      "covers": ["HOS-AMP","ERR-21"],
+      "sha256": "2996608ab88befb6d70014c2eaa28b81f58cc418bf93a6ad060d5fbbc66dc4e4",
+      "bytes": 398886
+    },
+    {
+      "path": "hostile/hos-clock.json",
+      "area": "hostile",
+      "name": "hos-clock",
+      "covers": ["HOS-CLOCK","ERR-21"],
+      "sha256": "2237245176c2206453669f90794f73ee4a4f80470f74c2c0b431cffa6bd6e509",
+      "bytes": 9764
+    },
+    {
+      "path": "hostile/hos-len.json",
+      "area": "hostile",
+      "name": "hos-len",
+      "covers": ["HOS-LEN","ERR-09","ERR-21"],
+      "sha256": "9ab1e84301e28673b69399a701b23a33ce307d32baf50b0998844aa3800720b4",
+      "bytes": 10535
+    },
+    {
+      "path": "hostile/hos-mut.json",
+      "area": "hostile",
+      "name": "hos-mut",
+      "covers": ["HOS-MUT","ERR-21"],
+      "sha256": "f8cb1abe01f96e5b91ef2c243293341e2aea691dace1320d854b9daea40bddfc",
+      "bytes": 202742
+    },
+    {
+      "path": "hostile/hos-proto.json",
+      "area": "hostile",
+      "name": "hos-proto",
+      "covers": ["HOS-PROTO","ERR-21"],
+      "sha256": "17401910f7fad4e6d903ef81f1b5cc8535cdb6ed0e04bed551fd331c0caf1e87",
+      "bytes": 17436
+    },
+    {
+      "path": "hostile/hos-ref.json",
+      "area": "hostile",
+      "name": "hos-ref",
+      "covers": ["HOS-REF","ERR-06","ERR-07","ERR-21"],
+      "sha256": "d4824fd361ebf2dacd74411a6bbe8cacc17257cb7c1a3fd18c308406277b9cbc",
+      "bytes": 9084
+    },
+    {
+      "path": "hostile/hos-sem.json",
+      "area": "hostile",
+      "name": "hos-sem",
+      "covers": ["HOS-SEM","ERR-04","ERR-21"],
+      "sha256": "c73af62b6c7737975b2e8e9ae06387e75ad5c21a086d933bb1e7989adf17b621",
+      "bytes": 8658
+    },
+    {
+      "path": "hostile/hos-trunc.json",
+      "area": "hostile",
+      "name": "hos-trunc",
+      "covers": ["HOS-TRUNC","ERR-03","ERR-21"],
+      "sha256": "99d04c44286efe90bec518f9765a7610e5ecefa1ff273391234ffec06c938c86",
+      "bytes": 15580
+    },
+    {
       "path": "hostile/malformed-codec-extras.json",
       "area": "hostile",
       "name": "malformed-codec-extras",

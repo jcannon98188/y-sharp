@@ -1,0 +1,262 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["HOS-PROTO","ERR-21"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {"schema":1,"steps":[]},
+  "observations": {
+    "malformed": {
+      "api": "Y.applyUpdate, Y.applyUpdateV2 on a fresh Doc",
+      "value": [
+        {
+          "name": "sync-unknown-type-3",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"0300"},
+          "expect": ["UnknownMessage","Malformed"],
+          "api": "sync",
+          "outcome": "not-run",
+          "reason": "the oracle has no sync entry point for this input",
+          "classification": "match"
+        },
+        {
+          "name": "sync-unknown-type-255",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"ff0100"},
+          "expect": ["UnknownMessage","Malformed"],
+          "api": "sync",
+          "outcome": "not-run",
+          "reason": "the oracle has no sync entry point for this input",
+          "classification": "match"
+        },
+        {
+          "name": "sync-type-2-pow-64-minus-1",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"ffffffffffffffffff0100"},
+          "expect": ["UnknownMessage","Malformed"],
+          "api": "sync",
+          "outcome": "not-run",
+          "reason": "the oracle has no sync entry point for this input",
+          "classification": "match"
+        },
+        {
+          "name": "sync-step2-length-overrun",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"01050102"},
+          "expect": ["Malformed"],
+          "api": "sync",
+          "outcome": "not-run",
+          "reason": "the oracle has no sync entry point for this input",
+          "classification": "match"
+        },
+        {
+          "name": "sync-step2-length-2-pow-32",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"018080808010"},
+          "expect": ["Malformed","LimitExceeded"],
+          "api": "sync",
+          "outcome": "not-run",
+          "reason": "the oracle has no sync entry point for this input",
+          "classification": "match"
+        },
+        {
+          "name": "sync-step1-truncated-state-vector",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"000501"},
+          "expect": ["Malformed"],
+          "api": "sync",
+          "outcome": "not-run",
+          "reason": "the oracle has no sync entry point for this input",
+          "classification": "match"
+        },
+        {
+          "name": "sync-update-with-empty-payload",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"0200"},
+          "expect": ["Malformed"],
+          "api": "sync",
+          "outcome": "not-run",
+          "reason": "the oracle has no sync entry point for this input",
+          "classification": "match"
+        },
+        {
+          "name": "sync-update-valid",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"020c010101000401017402686900"},
+          "expect": ["ok"],
+          "api": "sync",
+          "outcome": "not-run",
+          "reason": "the oracle has no sync entry point for this input",
+          "classification": "match"
+        },
+        {
+          "name": "sync-concatenated-two-valid-frames",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"020c010101000401017402686900020c010102000401017402796f00"},
+          "expect": ["ok"],
+          "api": "sync",
+          "outcome": "not-run",
+          "reason": "the oracle has no sync entry point for this input",
+          "classification": "match"
+        },
+        {
+          "name": "sync-valid-frame-then-unknown-type",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"020c0101010004010174026869000900"},
+          "expect": ["UnknownMessage","Malformed"],
+          "api": "sync",
+          "outcome": "not-run",
+          "reason": "the oracle has no sync entry point for this input",
+          "classification": "match"
+        },
+        {
+          "name": "sync-valid-frame-then-truncated-frame",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"020c0101010004010174026869000208"},
+          "expect": ["Malformed"],
+          "api": "sync",
+          "outcome": "not-run",
+          "reason": "the oracle has no sync entry point for this input",
+          "classification": "match"
+        },
+        {
+          "name": "sync-step2-with-hostile-update",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"0105ffffffff0f"},
+          "expect": ["Malformed","LimitExceeded"],
+          "api": "sync",
+          "outcome": "not-run",
+          "reason": "the oracle has no sync entry point for this input",
+          "classification": "match"
+        },
+        {
+          "name": "sync-step2-with-valid-update-and-trailing-byte",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"010d010101000401017402686900ff"},
+          "expect": ["ok"],
+          "api": "sync",
+          "outcome": "not-run",
+          "reason": "the oracle has no sync entry point for this input",
+          "classification": "match"
+        },
+        {
+          "name": "awareness-state-not-json",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"010701086e6f74206a736f6e"},
+          "expect": ["Malformed"],
+          "api": "awareness",
+          "outcome": "not-run",
+          "reason": "the oracle has no awareness entry point for this input",
+          "classification": "match"
+        },
+        {
+          "name": "awareness-state-null",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"010701046e756c6c"},
+          "expect": ["ok"],
+          "api": "awareness",
+          "outcome": "not-run",
+          "reason": "the oracle has no awareness entry point for this input",
+          "classification": "match"
+        },
+        {
+          "name": "awareness-state-number",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"010701023432"},
+          "expect": ["ok","Malformed"],
+          "api": "awareness",
+          "outcome": "not-run",
+          "reason": "the oracle has no awareness entry point for this input",
+          "classification": "match"
+        },
+        {
+          "name": "awareness-count-2-pow-32",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"8080808010"},
+          "expect": ["Malformed","LimitExceeded"],
+          "api": "awareness",
+          "outcome": "not-run",
+          "reason": "the oracle has no awareness entry point for this input",
+          "classification": "match"
+        },
+        {
+          "name": "awareness-string-length-overrun",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"010701ff017b"},
+          "expect": ["Malformed"],
+          "api": "awareness",
+          "outcome": "not-run",
+          "reason": "the oracle has no awareness entry point for this input",
+          "classification": "match"
+        },
+        {
+          "name": "awareness-invalid-utf8-state",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"01070102fffe"},
+          "expect": ["Malformed"],
+          "api": "awareness",
+          "outcome": "not-run",
+          "reason": "the oracle has no awareness entry point for this input",
+          "classification": "match"
+        },
+        {
+          "name": "awareness-clock-regression",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"010705077b2261223a317d"},
+          "expect": ["ok"],
+          "api": "awareness",
+          "after": [{"$":"bytes","hex":"010703077b2261223a327d"}],
+          "outcome": "not-run",
+          "reason": "the oracle has no awareness entry point for this input",
+          "classification": "match"
+        },
+        {
+          "name": "awareness-same-client-twice-in-one-update",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"020701077b2261223a317d0702077b2261223a327d"},
+          "expect": ["ok"],
+          "api": "awareness",
+          "outcome": "not-run",
+          "reason": "the oracle has no awareness entry point for this input",
+          "classification": "match"
+        },
+        {
+          "name": "awareness-client-2-pow-53",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"01808080808080801001027b7d"},
+          "expect": ["ok","Malformed","LimitExceeded"],
+          "api": "awareness",
+          "outcome": "not-run",
+          "reason": "the oracle has no awareness entry point for this input",
+          "classification": "match"
+        },
+        {
+          "name": "awareness-nested-json-2000-deep",
+          "encoding": "v1",
+          "bytes": {
+            "$": "bytes",
+            "hex": "010701a01f5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d"
+          },
+          "expect": ["ok","Malformed","LimitExceeded"],
+          "api": "awareness",
+          "outcome": "not-run",
+          "reason": "the oracle has no awareness entry point for this input",
+          "classification": "match"
+        },
+        {
+          "name": "awareness-truncated-after-first-entry",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"020701027b7d"},
+          "expect": ["Malformed"],
+          "api": "awareness",
+          "outcome": "not-run",
+          "reason": "the oracle has no awareness entry point for this input",
+          "classification": "match"
+        }
+      ]
+    }
+  }
+}

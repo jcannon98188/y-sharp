@@ -1,0 +1,58 @@
+name: sharpfuzz
+# Coverage-guided fuzzing (ADR 0013): SharpFuzz with AFL++, non-gating, nightly. A crash is minimised and then committed to the fixed
+# corpus (tools/fixture-gen/scenarios/hostile-corpus.mjs); see tools/sharpfuzz/README.md. It never blocks a merge.
+on:
+  schedule:
+    - cron: "30 3 * * *"
+  workflow_dispatch:
+    inputs:
+      seconds:
+        description: "AFL++ run time in seconds"
+        default: "1200"
+jobs:
+  fuzz:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: Install AFL++
+        run: sudo apt-get update && sudo apt-get install -y afl++
+      - name: Install the SharpFuzz instrumenter
+        run: dotnet tool install --global SharpFuzz.CommandLine
+      - name: Build the harness and instrument YSharp.dll
+        run: |
+          dotnet build tools/sharpfuzz/YSharp.SharpFuzz.csproj -c Release -o fuzz-out
+          sharpfuzz fuzz-out/YSharp.dll
+      - name: Seeds from the fixed corpus
+        run: dotnet fuzz-out/YSharp.SharpFuzz.dll --export-seeds fuzz-seeds
+      - name: Fuzz
+        env:
+          AFL_SKIP_BIN_CHECK: "1"
+          AFL_NO_AFFINITY: "1"
+          AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES: "1"
+        run: |
+          mkdir -p fuzz-findings
+          timeout --preserve-status $(( ${{ github.event.inputs.seconds || '1200' }} + 120 )) \
+            afl-fuzz -i fuzz-seeds -o fuzz-findings -t 5000 -m none -V ${{ github.event.inputs.seconds || '1200' }} -- dotnet fuzz-out/YSharp.SharpFuzz.dll
+      - name: Minimise findings
+        if: always()
+        run: |
+          mkdir -p fuzz-minimised
+          for f in fuzz-findings/default/crashes/id:* fuzz-findings/default/hangs/id:*; do
+            [ -f "$f" ] && dotnet fuzz-out/YSharp.SharpFuzz.dll --minimise "$f" "fuzz-minimised/$(basename "$f" | tr ':,' '__')" || true
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sharpfuzz-findings
+          path: |
+            fuzz-findings/default/crashes/
+            fuzz-findings/default/hangs/
+            fuzz-minimised/
+          if-no-files-found: ignore

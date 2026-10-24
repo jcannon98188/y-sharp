@@ -94,7 +94,8 @@ public sealed class GeneratedFixtureTests
             foreach (var c in m.GetProperty("value").EnumerateArray())
             {
                 seen++;
-                Assert.Contains(c.GetProperty("outcome").GetString(), new[] { "ok", "throws", "js-crash" });
+                // not-run: hostile-corpus cases for entry points the oracle lacks (sync, awareness, state-vector decode; TASK-2.11)
+                Assert.Contains(c.GetProperty("outcome").GetString(), new[] { "ok", "throws", "js-crash", "not-run" });
                 Assert.Contains(c.GetProperty("classification").GetString(), new[] { "match", "diverge", "js-crash" });
                 Assert.Equal(TaggedKind.Bytes, TaggedValue.Read(c.GetProperty("bytes")).Kind);
             }

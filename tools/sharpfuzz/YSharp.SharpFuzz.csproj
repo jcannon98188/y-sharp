@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Coverage-guided fuzz harness (ADR 0013): SharpFuzz with AFL++ or libFuzzer. Non-gating, run by .github/workflows/sharpfuzz.yml.
+       Deliberately not in YSharp.slnx, so the gating build never restores SharpFuzz. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>YSharp.SharpFuzzHarness</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="SharpFuzz" Version="2.2.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\YSharp\YSharp.csproj" />
+  </ItemGroup>
+</Project>

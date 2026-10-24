@@ -14,5 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\YSharp.TestKit\YSharp.TestKit.csproj" />
     <ProjectReference Include="..\..\src\YSharp\YSharp.csproj" />
+    <!-- built for the out-of-process canary tests; started with `dotnet`, never referenced as an assembly -->
+    <ProjectReference Include="..\YSharp.Fuzz.Canary\YSharp.Fuzz.Canary.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
 </Project>

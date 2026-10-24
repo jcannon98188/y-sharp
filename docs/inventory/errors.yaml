@@ -9,7 +9,7 @@
   layers: [unit]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0005 / Two entry points"
 
 - id: ERR-02
@@ -19,7 +19,7 @@
   layers: [unit]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0005 / Two entry points"
 
 - id: ERR-03
@@ -29,7 +29,7 @@
   layers: [unit]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0005 / Strict decoding"
 
 - id: ERR-04
@@ -39,7 +39,7 @@
   layers: [unit]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0005 / Strict decoding"
 
 - id: ERR-05
@@ -49,7 +49,7 @@
   layers: [unit]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0005 / Atomic decode"
 
 - id: ERR-06
@@ -59,7 +59,7 @@
   layers: [unit]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0005 / Atomic decode"
 
 - id: ERR-07
@@ -69,7 +69,7 @@
   layers: [unit]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0005 / Quarantined integration"
 
 - id: ERR-08
@@ -79,7 +79,7 @@
   layers: [unit]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0005 / Limits"
 
 - id: ERR-09
@@ -89,7 +89,7 @@
   layers: [unit]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0005 / Limits"
 
 - id: ERR-10
@@ -99,7 +99,7 @@
   layers: [unit]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0005 / Limits"
 
 - id: ERR-11
@@ -109,7 +109,7 @@
   layers: [unit]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0005 / No recursion on document depth"
 
 - id: ERR-12
@@ -119,7 +119,7 @@
   layers: [unit]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0005 / No recursion on document depth"
 
 - id: ERR-13
@@ -129,7 +129,7 @@
   layers: [unit]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0005 / Observer faults"
 
 - id: ERR-14
@@ -139,7 +139,7 @@
   layers: [unit]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0005 / Observer faults"
 
 - id: ERR-15
@@ -149,7 +149,7 @@
   layers: [unit]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0005 / Observer faults"
 
 - id: ERR-16
@@ -159,7 +159,7 @@
   layers: [unit]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0005 / Local API"
 
 - id: ERR-17
@@ -169,7 +169,7 @@
   layers: [unit]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0005 / Local API"
 
 - id: ERR-18
@@ -179,7 +179,7 @@
   layers: [unit]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0005 / Local API"
 
 - id: ERR-19
@@ -189,7 +189,7 @@
   layers: [unit]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0005 / Environment and internal faults"
 
 - id: ERR-20
@@ -201,6 +201,7 @@
   owner: 11
   status: pending
   ref: "adr 0005 / Environment and internal faults"
+  note: "Pending (owner: spec 11, then spec 12 for the seam): a document is faulted only by an internal invariant violation, which no public API input can cause by design (ERR-21 is asserted by the corpus and fuzz layers). The faulted-document behaviour (readable, rejects mutation and apply) therefore needs an internal fault-injection seam that the API stub lacks. ErrorModelTests.Err20 covers the exception family and the fresh-document state; the seam test lands with the implementation."
 
 - id: ERR-21
   title: "No input ever faults a document (asserted by the fuzz suite)"
@@ -209,5 +210,5 @@
   layers: [unit]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0005 / Environment and internal faults"

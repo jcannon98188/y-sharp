@@ -1,0 +1,272 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["HOS-CLOCK","ERR-21"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {"schema":1,"steps":[]},
+  "observations": {
+    "malformed": {
+      "api": "Y.applyUpdate, Y.applyUpdateV2 on a fresh Doc",
+      "value": [
+        {
+          "name": "first-clock-above-0",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"0101010504010174017800"},
+          "expect": ["ok"],
+          "outcome": "ok",
+          "pendingStructs": true,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "duplicate-client-last-wins",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"020101000401017401610101000401017402626200"},
+          "expect": ["ok"],
+          "outcome": "ok",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"010102"},
+          "doc": [["t",{"kind":"text","delta":[{"insert":"bb"}]}]],
+          "classification": "match"
+        },
+        {
+          "name": "duplicate-client-with-gap",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"0201010004010174016101010504010174016200"},
+          "expect": ["ok"],
+          "outcome": "ok",
+          "pendingStructs": true,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "overlapping-blocks",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"0201010004010174036162630101010401017402787900"},
+          "expect": ["ok","Malformed","LimitExceeded","Rejected"],
+          "outcome": "ok",
+          "pendingStructs": true,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "clock-2-pow-31-minus-1",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"010101ffffffff0704010174017800"},
+          "expect": ["ok"],
+          "outcome": "ok",
+          "pendingStructs": true,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "clock-2-pow-31",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"010101808080800804010174017800"},
+          "expect": ["ok"],
+          "outcome": "ok",
+          "pendingStructs": true,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "clock-2-pow-32",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"010101808080801004010174017800"},
+          "expect": ["ok"],
+          "outcome": "ok",
+          "pendingStructs": true,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "clock-2-pow-53-minus-1",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"010101ffffffffffffff0f04010174017800"},
+          "expect": ["ok"],
+          "outcome": "ok",
+          "pendingStructs": true,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "clock-2-pow-53",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"010101808080808080801004010174017800"},
+          "expect": ["ok","Malformed","LimitExceeded","Rejected"],
+          "outcome": "ok",
+          "pendingStructs": true,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "clock-2-pow-64-minus-1",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"010101ffffffffffffffffff0104010174017800"},
+          "expect": ["ok","Malformed","LimitExceeded","Rejected"],
+          "outcome": "throws",
+          "error": "Error",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "clock-plus-length-overflows-2-pow-53",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"010101ffffffffffffff0f0401017402616200"},
+          "expect": ["ok","Malformed","LimitExceeded","Rejected"],
+          "outcome": "ok",
+          "pendingStructs": true,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "clock-plus-gc-length-overflows",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"010101ffffffffffffff0f00808080808080801000"},
+          "expect": ["ok","Malformed","LimitExceeded","Rejected"],
+          "outcome": "ok",
+          "pendingStructs": true,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "zero-length-string",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"01010100040101740000"},
+          "expect": ["ok","Malformed","LimitExceeded","Rejected"],
+          "outcome": "ok",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"010100"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "zero-length-gc",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"01010100000000"},
+          "expect": ["ok","Malformed","LimitExceeded","Rejected"],
+          "outcome": "ok",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"010100"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "zero-length-skip",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"010101000a0000"},
+          "expect": ["ok","Malformed","LimitExceeded","Rejected"],
+          "outcome": "ok",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "zero-length-deleted",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"01010100010101740000"},
+          "expect": ["ok","Malformed","LimitExceeded","Rejected"],
+          "outcome": "throws",
+          "error": "Error",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"010100"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "client-2-pow-31",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"010180808080080004010174017800"},
+          "expect": ["ok"],
+          "outcome": "ok",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"01808080800801"},
+          "doc": [["t",{"kind":"text","delta":[{"insert":"x"}]}]],
+          "classification": "match"
+        },
+        {
+          "name": "client-2-pow-32-minus-1",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"0101ffffffff0f0004010174017800"},
+          "expect": ["ok"],
+          "outcome": "ok",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"01ffffffff0f01"},
+          "doc": [["t",{"kind":"text","delta":[{"insert":"x"}]}]],
+          "classification": "match"
+        },
+        {
+          "name": "client-2-pow-32",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"010180808080100004010174017800"},
+          "expect": ["Malformed","LimitExceeded"],
+          "outcome": "ok",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"01808080801001"},
+          "doc": [["t",{"kind":"text","delta":[{"insert":"x"}]}]],
+          "classification": "match"
+        },
+        {
+          "name": "client-2-pow-53",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"010180808080808080100004010174017800"},
+          "expect": ["Malformed","LimitExceeded"],
+          "outcome": "ok",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"01808080808080801001"},
+          "doc": [["t",{"kind":"text","delta":[{"insert":"x"}]}]],
+          "classification": "match"
+        },
+        {
+          "name": "skip-then-string-gap",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"010201000a0304010174017800"},
+          "expect": ["ok","Malformed","LimitExceeded","Rejected"],
+          "outcome": "ok",
+          "pendingStructs": true,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        }
+      ]
+    }
+  }
+}
