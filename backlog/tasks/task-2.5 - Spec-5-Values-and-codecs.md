@@ -1,9 +1,11 @@
 ---
 id: TASK-2.5
 title: 'Spec 5: Values and codecs'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-10-23 22:01'
+updated_date: '2026-10-24 00:50'
 labels: []
 dependencies:
   - TASK-2.2
