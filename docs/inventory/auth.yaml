@@ -9,7 +9,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:186"
 
 - id: AU-2
@@ -19,7 +19,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:187"
 
 - id: AU-3
@@ -29,7 +29,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:188"
 
 - id: AU-4
@@ -39,17 +39,17 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:189"
 
 - id: AU-5
   title: "A null/undefined handler throws a TypeError when type 0 is read"
   source: "docs/research/y-protocols.md:190"
-  kind: match
+  kind: diverge
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:190"
 
 - id: AU-6
@@ -59,7 +59,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:191"
 
 - id: AU-7
@@ -69,5 +69,5 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:192"
