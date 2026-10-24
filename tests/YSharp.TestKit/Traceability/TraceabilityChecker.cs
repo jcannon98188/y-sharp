@@ -71,9 +71,10 @@ public sealed class TraceabilityInput
     public List<FixtureTag> Fixtures { get; set; } = new();
     /// <summary>Ledger keys of the tests found in the pinned upstream sources; null skips the gap check.</summary>
     public HashSet<string>? UpstreamKeys { get; set; }
+    /// <summary>The committed pending high-water mark. Null (file missing) fails the gate.</summary>
     public PendingMark? PendingMark { get; set; }
     public bool ReleaseGate { get; set; }
-    /// <summary>Every ID ever frozen; none may disappear (retire instead).</summary>
+    /// <summary>Every ID ever frozen; none may disappear (retire instead) and every registry ID must be in it. Null (file missing) fails the gate.</summary>
     public HashSet<string>? LockedIds { get; set; }
     /// <summary>Lines in a repo-relative file, or -1 when missing; null skips the submodule source check.</summary>
     public Func<string, int>? LineCount { get; set; }
@@ -115,9 +116,17 @@ public static class TraceabilityChecker
             ValidateEntry(e, input.LineCount, Fail);
         }
 
-        if (input.LockedIds != null)
+        if (input.LockedIds == null)
+            Fail("TR-LOCK-MISSING", "docs/inventory/id-lock.txt is missing; the frozen-ID check cannot be skipped.");
+        else
+        {
             foreach (var id in input.LockedIds.Where(id => !byId.ContainsKey(id)).OrderBy(x => x, StringComparer.Ordinal))
                 Fail("TR-ID-REMOVED", $"Frozen ID {id} is gone from the registry; IDs are never removed or renumbered, set status: retired instead.");
+            foreach (var id in byId.Keys.Where(id => !input.LockedIds.Contains(id)).OrderBy(x => x, StringComparer.Ordinal))
+                Fail("TR-ID-UNLOCKED", $"Registry ID {id} is not in id-lock.txt; every ID must be frozen when it is assigned.");
+        }
+        if (input.PendingMark == null)
+            Fail("TR-LOCK-MISSING", "docs/inventory/pending-high-water.json is missing; the pending ratchet cannot be skipped.");
 
         // Tags: every ID must be a live registry ID.
         bool Live(string id) => byId.TryGetValue(id, out var e) && e.Status != "retired";
@@ -170,6 +179,13 @@ public static class TraceabilityChecker
                 if (e.Kind == "diverge" && !tests.Any(t => t.Diverges.Contains(e.Id)))
                     Fail("TR-NO-DIVERGES", $"Active diverge entry {e.Id} has no [Diverges] test.");
             }
+            // ADR 0010: an excluded entry leaves the differential layers, but "if y-sharp defines its own behaviour
+            // they still need a [Diverges] test". Whether y-sharp defines its own behaviour is not a registry field, so
+            // it is derived from the exclusion reason: js-undefined, js-crash and upstream-defect mean JS has no usable
+            // behaviour and y-sharp must define one; not-applicable means the concept does not exist in y-sharp.
+            else if (e.Status == "excluded" && e.Exclusion is "js-undefined" or "js-crash" or "upstream-defect"
+                     && !tests.Any(t => t.Diverges.Contains(e.Id)))
+                Fail("TR-NO-DIVERGES", $"Excluded entry {e.Id} ({e.Exclusion}) needs a [Diverges] test for y-sharp's own behaviour.");
 
             r.Matrix.Add(new MatrixRow
             {
@@ -205,6 +221,8 @@ public static class TraceabilityChecker
         if (!Kinds.Contains(e.Kind)) Bad($"kind '{e.Kind}' is not one of {string.Join(", ", Kinds)}.");
         if (!Statuses.Contains(e.Status)) Bad($"status '{e.Status}' is not one of {string.Join(", ", Statuses)}.");
         if (e.Owner is < 1 or > 14) Bad($"owner {e.Owner} is not a spec number 1..14.");
+        if (e.Status == "pending" && string.IsNullOrWhiteSpace(e.Note) && string.IsNullOrWhiteSpace(e.Ref))
+            fail("TR-PENDING-UNEXPLAINED", $"Pending entry '{e.Id}' needs a written reason (note or ref) and an owner (ADR 0019).");
         foreach (var l in e.Layers.Where(l => !LayerNames.Contains(l))) Bad($"layer '{l}' is unknown.");
         if (e.Layers.Count == 0) Bad("no layers declared.");
         if (e.Status == "excluded" && (e.Exclusion == null || !Exclusions.Contains(e.Exclusion)))

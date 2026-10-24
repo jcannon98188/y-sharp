@@ -9,7 +9,7 @@ namespace YSharp.Tests.Traceability;
 public class CheckerRuleTests
 {
     private static RegistryEntry E(string id, string status = "active", string kind = "match", string[]? layers = null, bool wire = false, int owner = 5) =>
-        new() { Id = id, Title = "t " + id, Source = "docs/x.md:1", Kind = kind, Layers = (layers ?? new[] { "unit" }).ToList(), Wire = wire, Owner = owner, Status = status };
+        new() { Id = id, Title = "t " + id, Source = "docs/x.md:1", Kind = kind, Layers = (layers ?? new[] { "unit" }).ToList(), Wire = wire, Owner = owner, Status = status, Note = "reason" };
 
     private static TestTag T(string name, CoverLayer layer, params string[] covers) => new(name, layer, covers, new string[0], new string[0]);
 
@@ -17,7 +17,9 @@ public class CheckerRuleTests
         new() { Key = key, File = "yjs/tests/" + key.Split(':')[0], Line = 1, Module = "m", Randomized = randomized, Owner = owner, Outcome = outcome };
 
     private static TraceabilityInput Input(IEnumerable<RegistryEntry> entries, IEnumerable<TestTag>? tests = null, IEnumerable<LedgerRow>? ledger = null) =>
-        new() { Entries = entries.ToList(), Tests = (tests ?? new TestTag[0]).ToList(), Ledger = (ledger ?? new LedgerRow[0]).ToList(), Fixtures = new List<FixtureTag>() };
+        new() { Entries = entries.ToList(), Tests = (tests ?? new TestTag[0]).ToList(), Ledger = (ledger ?? new LedgerRow[0]).ToList(), Fixtures = new List<FixtureTag>(),
+            // The lock and the high-water mark are mandatory (a missing file fails the gate); default to permissive values.
+            LockedIds = entries.Select(e => e.Id).ToHashSet(), PendingMark = new PendingMark(int.MaxValue, int.MaxValue) };
 
     private static string[] Codes(TraceabilityInput i) => TraceabilityChecker.Check(i).Violations.Select(v => v.Code).Distinct().ToArray();
 
@@ -168,10 +170,58 @@ public class CheckerRuleTests
     {
         var bad = E("A-1", "excluded");
         Assert.Contains("TR-INVALID-ENTRY", Codes(Input(new[] { bad })));
-        var good = E("A-1", "excluded"); good.Exclusion = "js-crash";
+        var good = E("A-1", "excluded"); good.Exclusion = "not-applicable";
         Assert.Empty(Codes(Input(new[] { good })));
         Assert.Contains("TR-INVALID-ENTRY", Codes(Input(new[] { E("nonsense id") })));
         Assert.Contains("TR-INVALID-ENTRY", Codes(Input(new[] { E("A-1", kind: "wat") })));
+    }
+
+    [Fact]
+    public void Pending_NeedsReasonAndOwner()
+    {
+        var noReason = E("A-1", "pending"); noReason.Note = null; noReason.Ref = null;
+        Assert.Contains("TR-PENDING-UNEXPLAINED", Codes(Input(new[] { noReason })));
+        var blank = E("A-1", "pending"); blank.Note = "  "; blank.Ref = "";
+        Assert.Contains("TR-PENDING-UNEXPLAINED", Codes(Input(new[] { blank })));
+        var viaRef = E("A-1", "pending"); viaRef.Note = null; viaRef.Ref = "adr 0018";
+        Assert.Empty(Codes(Input(new[] { viaRef })));
+        var noOwner = E("A-1", "pending", owner: 0);
+        Assert.Contains("TR-INVALID-ENTRY", Codes(Input(new[] { noOwner })));
+    }
+
+    [Fact]
+    public void MissingIdLock_Fails()
+    {
+        var i = Input(new[] { E("A-1", "pending") });
+        i.LockedIds = null;
+        Assert.Contains("TR-LOCK-MISSING", Codes(i));
+    }
+
+    [Fact]
+    public void MissingHighWaterMark_Fails()
+    {
+        var i = Input(new[] { E("A-1", "pending") });
+        i.PendingMark = null;
+        Assert.Contains("TR-LOCK-MISSING", Codes(i));
+    }
+
+    [Fact]
+    public void RegistryIdNotInLock_Fails()
+    {
+        var i = Input(new[] { E("A-1", "pending"), E("A-2", "pending") });
+        i.LockedIds = new HashSet<string> { "A-1" };
+        Assert.Contains("TR-ID-UNLOCKED", Codes(i));
+    }
+
+    [Fact]
+    public void Excluded_WhereYSharpDefinesOwnBehaviour_NeedsDivergesTest()
+    {
+        var crash = E("A-1", "excluded"); crash.Exclusion = "js-crash";
+        Assert.Contains("TR-NO-DIVERGES", Codes(Input(new[] { crash })));
+        var withTest = new TestTag("Ns.C.M", CoverLayer.Unit, new string[0], new[] { "A-1" }, new string[0]);
+        Assert.Empty(Codes(Input(new[] { crash }, new[] { withTest })));
+        var na = E("A-1", "excluded"); na.Exclusion = "not-applicable";
+        Assert.Empty(Codes(Input(new[] { na })));
     }
 
     [Fact]
