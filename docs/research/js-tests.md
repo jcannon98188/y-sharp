@@ -366,7 +366,8 @@ Method: grep of test files for every exported symbol in `yjs/src/index.js:3-110`
 6. `testRepeatGeneratingYmapTests10` runs 3 iterations (`y-map.tests.js:708-710`).
 7. `compare()` mutates the caller's `users` array (pushes merged docs, then destroys everything).
 8. `testInsertAndDeleteAtRandomPositions` (`y-text.tests.js:2023`), `testIterators`, `testCustomTypings`, `testBestCase`, `testPermanentUserData` and the two big-document perf tests assert (almost) nothing.
-9. Module-level counters (`_uniqueNumber`, `charCounter`) leak between tests: reproducibility by seed is of structure, not payload text.
+9. Module-level counters (`_uniqueNumber`, `charCounter`) leak between tests. `charCounter` is prepended to inserted text, so its digit count changes the text length, and the lengths feed later draws: a seed reproduces neither payload nor structure unless the counters start equal (SIM-05).
+11. The Quill generator shares its three `marks` objects across a run and `insertText` writes null for every active attribute missing from the object it is given (`yjs/src/types/YText.js:254`), so later uses of a mark carry stale nulls (ADR 0017 implementation notes).
 10. Relative-position helper never tests index == length (`relativePositions.tests.js:9`).
 
 ## 7. Implications for the C# test-suite design (inputs for later tickets)

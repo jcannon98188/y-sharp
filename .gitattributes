@@ -1,1 +1,2 @@
 fixtures/** text eol=lf
+tests/YSharp.Tests/Simulation/plan-goldens.json text eol=lf

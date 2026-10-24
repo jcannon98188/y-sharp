@@ -298,7 +298,8 @@
   module: y-map
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
+  note: "Upstream names it 10 but runs 3 iterations (y-map.tests.js:708); the port keeps the actual 3 (ADR 0017)."
 
 - key: y-map.tests.js:testRepeatGeneratingYmapTests40
   file: yjs/tests/y-map.tests.js
@@ -306,7 +307,7 @@
   module: y-map
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testRepeatGeneratingYmapTests42
   file: yjs/tests/y-map.tests.js
@@ -314,7 +315,7 @@
   module: y-map
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testRepeatGeneratingYmapTests43
   file: yjs/tests/y-map.tests.js
@@ -322,7 +323,7 @@
   module: y-map
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testRepeatGeneratingYmapTests44
   file: yjs/tests/y-map.tests.js
@@ -330,7 +331,7 @@
   module: y-map
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testRepeatGeneratingYmapTests45
   file: yjs/tests/y-map.tests.js
@@ -338,7 +339,7 @@
   module: y-map
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testRepeatGeneratingYmapTests46
   file: yjs/tests/y-map.tests.js
@@ -346,7 +347,7 @@
   module: y-map
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testRepeatGeneratingYmapTests300
   file: yjs/tests/y-map.tests.js
@@ -354,7 +355,7 @@
   module: y-map
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testRepeatGeneratingYmapTests400
   file: yjs/tests/y-map.tests.js
@@ -362,7 +363,7 @@
   module: y-map
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testRepeatGeneratingYmapTests500
   file: yjs/tests/y-map.tests.js
@@ -370,7 +371,7 @@
   module: y-map
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testRepeatGeneratingYmapTests600
   file: yjs/tests/y-map.tests.js
@@ -378,7 +379,7 @@
   module: y-map
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testRepeatGeneratingYmapTests1000
   file: yjs/tests/y-map.tests.js
@@ -386,7 +387,7 @@
   module: y-map
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testRepeatGeneratingYmapTests1800
   file: yjs/tests/y-map.tests.js
@@ -394,7 +395,7 @@
   module: y-map
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testRepeatGeneratingYmapTests5000
   file: yjs/tests/y-map.tests.js
@@ -402,7 +403,8 @@
   module: y-map
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
+  note: "Upstream runs this size only with --production; the port runs it as its own Nightly test with the same time box (ADR 0017)."
 
 - key: y-map.tests.js:testRepeatGeneratingYmapTests10000
   file: yjs/tests/y-map.tests.js
@@ -410,7 +412,8 @@
   module: y-map
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
+  note: "Upstream runs this size only with --production; the port runs it as its own Nightly test with the same time box (ADR 0017)."
 
 - key: y-map.tests.js:testRepeatGeneratingYmapTests100000
   file: yjs/tests/y-map.tests.js
@@ -418,7 +421,8 @@
   module: y-map
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
+  note: "Upstream runs this size only with --production; the port runs it as its own Nightly test with the same time box (ADR 0017)."
 
 - key: y-array.tests.js:testBasicUpdate
   file: yjs/tests/y-array.tests.js
@@ -634,7 +638,7 @@
   module: y-array
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testRepeatGeneratingYarrayTests40
   file: yjs/tests/y-array.tests.js
@@ -642,7 +646,7 @@
   module: y-array
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testRepeatGeneratingYarrayTests42
   file: yjs/tests/y-array.tests.js
@@ -650,7 +654,7 @@
   module: y-array
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testRepeatGeneratingYarrayTests43
   file: yjs/tests/y-array.tests.js
@@ -658,7 +662,7 @@
   module: y-array
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testRepeatGeneratingYarrayTests44
   file: yjs/tests/y-array.tests.js
@@ -666,7 +670,7 @@
   module: y-array
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testRepeatGeneratingYarrayTests45
   file: yjs/tests/y-array.tests.js
@@ -674,7 +678,7 @@
   module: y-array
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testRepeatGeneratingYarrayTests46
   file: yjs/tests/y-array.tests.js
@@ -682,7 +686,7 @@
   module: y-array
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testRepeatGeneratingYarrayTests300
   file: yjs/tests/y-array.tests.js
@@ -690,7 +694,7 @@
   module: y-array
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testRepeatGeneratingYarrayTests400
   file: yjs/tests/y-array.tests.js
@@ -698,7 +702,7 @@
   module: y-array
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testRepeatGeneratingYarrayTests500
   file: yjs/tests/y-array.tests.js
@@ -706,7 +710,7 @@
   module: y-array
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testRepeatGeneratingYarrayTests600
   file: yjs/tests/y-array.tests.js
@@ -714,7 +718,7 @@
   module: y-array
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testRepeatGeneratingYarrayTests1000
   file: yjs/tests/y-array.tests.js
@@ -722,7 +726,7 @@
   module: y-array
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testRepeatGeneratingYarrayTests1800
   file: yjs/tests/y-array.tests.js
@@ -730,7 +734,7 @@
   module: y-array
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testRepeatGeneratingYarrayTests3000
   file: yjs/tests/y-array.tests.js
@@ -738,7 +742,8 @@
   module: y-array
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
+  note: "Upstream runs this size only with --production; the port runs it as its own Nightly test with the same time box (ADR 0017)."
 
 - key: y-array.tests.js:testRepeatGeneratingYarrayTests5000
   file: yjs/tests/y-array.tests.js
@@ -746,7 +751,8 @@
   module: y-array
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
+  note: "Upstream runs this size only with --production; the port runs it as its own Nightly test with the same time box (ADR 0017)."
 
 - key: y-array.tests.js:testRepeatGeneratingYarrayTests30000
   file: yjs/tests/y-array.tests.js
@@ -754,7 +760,8 @@
   module: y-array
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
+  note: "Upstream runs this size only with --production; the port runs it as its own Nightly test with the same time box (ADR 0017)."
 
 - key: y-text.tests.js:testDeltaBug
   file: yjs/tests/y-text.tests.js
@@ -914,7 +921,8 @@
   module: y-text
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
+  note: "Upstream asserts nothing (the mirror string is commented out); the port restores the mirror check. Gating: 2000 operations over 10 seeds; nightly: the upstream 100000 operations."
 
 - key: y-text.tests.js:testAppendChars
   file: yjs/tests/y-text.tests.js
@@ -989,7 +997,7 @@
   module: y-text
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testRepeatGenerateTextChanges30
   file: yjs/tests/y-text.tests.js
@@ -997,7 +1005,7 @@
   module: y-text
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testRepeatGenerateTextChanges40
   file: yjs/tests/y-text.tests.js
@@ -1005,7 +1013,7 @@
   module: y-text
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testRepeatGenerateTextChanges50
   file: yjs/tests/y-text.tests.js
@@ -1013,7 +1021,7 @@
   module: y-text
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testRepeatGenerateTextChanges70
   file: yjs/tests/y-text.tests.js
@@ -1021,7 +1029,7 @@
   module: y-text
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testRepeatGenerateTextChanges90
   file: yjs/tests/y-text.tests.js
@@ -1029,7 +1037,7 @@
   module: y-text
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testRepeatGenerateTextChanges300
   file: yjs/tests/y-text.tests.js
@@ -1037,7 +1045,7 @@
   module: y-text
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testRepeatGenerateQuillChanges1
   file: yjs/tests/y-text.tests.js
@@ -1045,7 +1053,7 @@
   module: y-text
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testRepeatGenerateQuillChanges2
   file: yjs/tests/y-text.tests.js
@@ -1053,7 +1061,7 @@
   module: y-text
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testRepeatGenerateQuillChanges2Repeat
   file: yjs/tests/y-text.tests.js
@@ -1061,8 +1069,10 @@
   module: y-text
   randomized: true
   owner: 10
-  outcome: pending
-  note: "ADR 0017 plans outcome merged-into testRepeatGenerateQuillChanges2"
+  outcome: merged-into
+  target: y-text.tests.js:testRepeatGenerateQuillChanges2
+  note: "The 1000 inner iterations are just more seeds of the Quill-2 test: they are subsumed by its 200 gating seeds and the nightly time box (ADR 0017)."
+
 
 - key: y-text.tests.js:testRepeatGenerateQuillChanges3
   file: yjs/tests/y-text.tests.js
@@ -1070,7 +1080,7 @@
   module: y-text
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testRepeatGenerateQuillChanges30
   file: yjs/tests/y-text.tests.js
@@ -1078,7 +1088,7 @@
   module: y-text
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testRepeatGenerateQuillChanges40
   file: yjs/tests/y-text.tests.js
@@ -1086,7 +1096,7 @@
   module: y-text
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testRepeatGenerateQuillChanges70
   file: yjs/tests/y-text.tests.js
@@ -1094,7 +1104,7 @@
   module: y-text
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testRepeatGenerateQuillChanges100
   file: yjs/tests/y-text.tests.js
@@ -1102,7 +1112,7 @@
   module: y-text
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testRepeatGenerateQuillChanges300
   file: yjs/tests/y-text.tests.js
@@ -1110,7 +1120,7 @@
   module: y-text
   randomized: true
   owner: 10
-  outcome: pending
+  outcome: ported
 
 - key: y-xml.tests.js:testCustomTypings
   file: yjs/tests/y-xml.tests.js

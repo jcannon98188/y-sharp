@@ -3,7 +3,7 @@
 // One entry = which generator function ran (`mod`), the payload counters before it, the raw draws it consumed, the answers the
 // document view gave it, and the ops steps it produced (stored form). The C# plans (tests/YSharp.Tests/Simulation/SimPlans.cs)
 // replay an entry on scripted draws with no document, so the generators are checked bit for bit without an implementation.
-//   npm run gen:plans     writes the file        npm run check:plans    fails if the file differs
+//   npm run gen writes the file (with the fixtures); npm run check fails if it differs
 import { register } from 'node:module'
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -34,9 +34,9 @@ const text = '{\n' + Object.entries(out).map(([kind, list]) =>
   `  ${JSON.stringify(kind)}: [\n` + list.map(e => '    ' + JSON.stringify(e)).join(',\n') + '\n  ]').join(',\n') + '\n}\n'
 
 if (process.argv.includes('--check')) {
-  const current = existsSync(target) ? readFileSync(target, 'utf8') : null
+  const current = existsSync(target) ? readFileSync(target, 'utf8').replaceAll('\r\n', '\n') : null
   if (current !== text) {
-    console.error('plan goldens drift: run npm run gen:plans')
+    console.error('plan goldens drift: run npm run gen')
     process.exit(1)
   }
   console.log('plan goldens up to date')

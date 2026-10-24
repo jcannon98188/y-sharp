@@ -66,10 +66,10 @@
   layers: [unit, fixture, differential]
   wire: true
   quirk: [Q25]
-  owner: 6
-  status: pending
+  owner: 10
+  status: active
   ref: "quirks.md:304"
-  note: "Pending (owner: spec 6). The only observable effect is the order of deep-observer events with equal path lengths (JS sorts by path length, stably), which needs the observeDeep tests of spec 7 (types); struct integration and the delete-set sort have no ties to assert."
+  note: "Active (spec 10, took the orphaned entry from specs 6 and 7). The only observable effect is the order of deep-observer events with equal path lengths (JS sorts by path length, stably). Unit test TransactionTests.DeepEvents_OfEqualPathLength_KeepTheOrderTheTypesChanged; fixture fixtures/observers/deep-event-order.json through the observeDeep recorder step, replayed by DeepObserverFixtureTests."
 
 - id: Q26
   title: "Map iteration and for...in order"

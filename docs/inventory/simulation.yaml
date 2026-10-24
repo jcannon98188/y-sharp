@@ -1,4 +1,4 @@
-# Randomized-test simulation (ADR 0017): SIM-01..05 divergences (spec 10), SIM-10.. harness (spec 2)
+# Randomized-test simulation (ADR 0017): SIM-01..05 divergences (spec 10, active), SIM-10.. harness (spec 2)
 # Behaviour registry (ADR 0010). IDs are assigned once and never reused or renumbered; a withdrawn entry stays as status: retired.
 # Initial population (TASK-2.3): every entry starts pending with an owning spec (ADR 0019). Fields are best-effort; the owning spec refines them.
 
@@ -9,9 +9,10 @@
   layers: [unit]
   wire: false
   owner: 10
-  status: pending
+  adr: ["0017"]
+  status: active
   ref: "adr 0017"
-  note: "ADR 0017 simulation divergence; needs a [Diverges] test or comment naming the upstream behaviour."
+  note: "Active (spec 10). checkResult in the text tests compared each replica with itself and could never fail; SimChecks.FirstDivergentReplica compares each with replica 0. [Diverges] test in SimDivergenceTests."
 
 - id: SIM-02
   title: "compare asserts equalDeleteSets; upstream discards the result"
@@ -20,9 +21,10 @@
   layers: [unit]
   wire: false
   owner: 10
-  status: pending
+  adr: ["0017"]
+  status: active
   ref: "adr 0017"
-  note: "ADR 0017 simulation divergence; needs a [Diverges] test or comment naming the upstream behaviour."
+  note: "Active (spec 10). compare discarded the result of Y.equalDeleteSets; the port asks ISimInternals.AssertStoresEqual (StructsSimInternals asserts store and delete set) for every consecutive pair. [Diverges] test in SimDivergenceTests."
 
 - id: SIM-03
   title: "The quill code-block operation uses the key attributes; upstream passes format, which applyDelta ignores"
@@ -31,9 +33,10 @@
   layers: [unit]
   wire: false
   owner: 10
-  status: pending
+  adr: ["0017"]
+  status: active
   ref: "adr 0017"
-  note: "ADR 0017 simulation divergence; needs a [Diverges] test or comment naming the upstream behaviour."
+  note: "Active (spec 10). The Quill code-block operation passes the key format, which applyDelta ignores; SimPlans.CodeBlockDelta (C#) and lib/sim.mjs (Node) use attributes. [Diverges] test in SimDivergenceTests."
 
 - id: SIM-04
   title: "The coin-flip draw in init selects V1 or V2 for the whole run and the run really uses it; upstream falls back to V1 in both branches"
@@ -42,9 +45,10 @@
   layers: [unit]
   wire: false
   owner: 10
-  status: pending
+  adr: ["0017"]
+  status: active
   ref: "adr 0017"
-  note: "ADR 0017 simulation divergence; needs a [Diverges] test or comment naming the upstream behaviour."
+  note: "Active (spec 10). The init coin flip really selects V1 or V2 for the run (TestConnector.Format, deliver encoding); V2 uses the test-only framing of SIM-14. [Diverges] test in SimDivergenceTests."
 
 - id: SIM-05
   title: "Payload counters (_uniqueNumber, charCounter) reset for every run so a seed alone reproduces payload text"
@@ -53,9 +57,10 @@
   layers: [unit]
   wire: false
   owner: 10
-  status: pending
+  adr: ["0017"]
+  status: active
   ref: "adr 0017"
-  note: "ADR 0017 simulation divergence; needs a [Diverges] test or comment naming the upstream behaviour."
+  note: "Active (spec 10). PayloadCounters belong to one connector, start at zero and the Node generator does the same (lib/sim.mjs newCounters). [Diverges] test in SimDivergenceTests."
 
 - id: SIM-10
   title: "TestConnector: synchronous per-pair FIFO message simulation with disconnect, reconnect and random flush"
