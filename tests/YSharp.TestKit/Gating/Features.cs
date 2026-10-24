@@ -51,6 +51,8 @@ public static class Features
     public static readonly IReadOnlyList<Feature> Landed = new Feature[]
     {
         Feature.Encoding,
+        Feature.Values,
+        Feature.Values,
     };
 }
 

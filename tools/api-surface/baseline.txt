@@ -277,10 +277,10 @@ YSharp.StackItem|property YSharp.DeleteSet Deletions {get;}
 YSharp.StackItem|property YSharp.DeleteSet Insertions {get;}
 YSharp.StackItem|sealed class
 YSharp.StateVector|base System.Object
-YSharp.StateVector|ctor()
 YSharp.StateVector|method System.Void Encode(System.Buffers.IBufferWriter<System.Byte> writer)
 YSharp.StateVector|method static YSharp.StateVector Decode(System.ReadOnlySpan<System.Byte> v1)
 YSharp.StateVector|method static YSharp.StateVector Of(YSharp.Doc doc)
+YSharp.StateVector|method static YSharp.YStatus TryDecode(System.ReadOnlySpan<System.Byte> v1, out YSharp.StateVector stateVector)
 YSharp.StateVector|property System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<System.UInt64, System.Int64>> Clients {get;}
 YSharp.StateVector|property System.Int64 Item {get;}
 YSharp.StateVector|sealed class
@@ -431,11 +431,9 @@ YSharp.YAuth|method static System.Void WritePermissionDenied(System.Buffers.IBuf
 YSharp.YAuth|method static YSharp.YStatus TryReadMessage(ref System.ReadOnlySpan<System.Byte> input, YSharp.Doc doc, System.Action<YSharp.Doc, System.String> permissionDeniedHandler)
 YSharp.YAuth|static class
 YSharp.YConcurrencyException|base YSharp.YException
-YSharp.YConcurrencyException|ctor()
 YSharp.YConcurrencyException|implements System.Runtime.Serialization.ISerializable
 YSharp.YConcurrencyException|sealed class
 YSharp.YDecodeException|base YSharp.YException
-YSharp.YDecodeException|ctor()
 YSharp.YDecodeException|implements System.Runtime.Serialization.ISerializable
 YSharp.YDecodeException|property YSharp.YError Error {get;}
 YSharp.YDecodeException|sealed class
@@ -499,13 +497,13 @@ YSharp.YEvent|property YSharp.YType Target {get;}
 YSharp.YException|base System.Exception
 YSharp.YException|class
 YSharp.YException|ctor()
+YSharp.YException|ctor(System.String message)
+YSharp.YException|ctor(System.String message, System.Exception innerException)
 YSharp.YException|implements System.Runtime.Serialization.ISerializable
 YSharp.YInternalException|base YSharp.YException
-YSharp.YInternalException|ctor()
 YSharp.YInternalException|implements System.Runtime.Serialization.ISerializable
 YSharp.YInternalException|sealed class
 YSharp.YLifetimeException|base YSharp.YException
-YSharp.YLifetimeException|ctor()
 YSharp.YLifetimeException|implements System.Runtime.Serialization.ISerializable
 YSharp.YLifetimeException|sealed class
 YSharp.YLimits|base System.Object
@@ -576,6 +574,7 @@ YSharp.YSnapshot|property YSharp.StateVector StateVector {get;}
 YSharp.YSnapshot|property static YSharp.YSnapshot Empty {get;}
 YSharp.YSnapshot|sealed class
 YSharp.YStatus|base System.ValueType
+YSharp.YStatus|method override System.String ToString()
 YSharp.YStatus|property System.Boolean Ok {get;}
 YSharp.YStatus|property YSharp.YError Error {get;}
 YSharp.YStatus|struct readonly
@@ -611,7 +610,6 @@ YSharp.YText|method override YSharp.YType Clone()
 YSharp.YText|method override YSharp.YValue ToJson()
 YSharp.YText|property System.Int32 Length {get;}
 YSharp.YTypeConflictException|base YSharp.YException
-YSharp.YTypeConflictException|ctor()
 YSharp.YTypeConflictException|implements System.Runtime.Serialization.ISerializable
 YSharp.YTypeConflictException|sealed class
 YSharp.YType|abstract class
@@ -668,6 +666,7 @@ YSharp.YValue|method System.String AsString()
 YSharp.YValue|method YSharp.YStatus TryWriteJson(System.Buffers.IBufferWriter<System.Byte> writer)
 YSharp.YValue|method override System.Boolean Equals(System.Object o)
 YSharp.YValue|method override System.Int32 GetHashCode()
+YSharp.YValue|method override System.String ToString()
 YSharp.YValue|method sealed-override System.Boolean Equals(YSharp.YValue other)
 YSharp.YValue|method static System.Boolean op_Equality(YSharp.YValue a, YSharp.YValue b)
 YSharp.YValue|method static System.Boolean op_Inequality(YSharp.YValue a, YSharp.YValue b)
