@@ -393,11 +393,4 @@ public sealed class UpstreamPortTests
 
         Assert.Equal("nenor", yDoc5.GetText("textBlock").ToString());
     });
-
-    [Fact(Skip = "obfuscateUpdate is a Yjs debugging utility; the y-sharp API (ADR 0008) has no equivalent (ENC-26 is excluded, not-applicable)")]
-    [PortOf("updates.tests.js:testObfuscateUpdates")]
-    public void TestObfuscateUpdates()
-    {
-        // intentionally empty: the ledger row is `skipped` with this reason, and the tag keeps the row traceable
-    }
 }

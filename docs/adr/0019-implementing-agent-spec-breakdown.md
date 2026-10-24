@@ -43,3 +43,14 @@ Extends ADR 0010 and 0015. This says how the decided suite is cut into pieces an
 ## Not decided here
 
 Writing the 14 specs as Backlog tasks (acceptance criteria and links per spec) is the first step of the handoff and needs the user's go-ahead. The spike store choice and its follow-up ADR belong to the implementation effort (ADR 0018).
+
+## Deviations during execution
+
+Spec 1 owns `src/`, and the plan was that later specs would only compile against the stub. In practice Specs 7 and 9 had to edit the Spec 1 stub in `src/` because the sketch could not express what the ADR 0016 steps and the awareness and sync tests need. None of these changed behaviour (every member still throws `NotImplementedException`); each is a signature the implementer inherits and may revise under ADR 0008:
+
+- **`TextDeltaOp` constructor** (Spec 7, TASK-2.7, `src/YSharp/3-Types.cs`). The struct had only getters, so `ApplyDelta` (T-6) tests could not build ops. It gained `TextDeltaOp(DeltaKind kind, int length, string? text = null, YEntry embed = default, YValue attributes = default)` and get-only properties.
+- **`YText.GetAttributes`** (Spec 7, TASK-2.7, `3-Types.cs`). Added `IReadOnlyDictionary<string, YValue> GetAttributes()` for the live attributes (X-2), the same shape `YXmlElement` already had.
+- **`Awareness.TryEncodeUpdate`** (Spec 9, TASK-2.9, `src/YSharp/5-Protocols.cs`). Added `YStatus TryEncodeUpdate(IBufferWriter<byte> writer, ReadOnlySpan<uint> clients, IReadOnlyDictionary<uint, YValue>? states = null)` for AW-31..33 (order kept, duplicates written twice, an id with no meta fails). `Awareness.EncodeUpdate` lost its `clients` parameter and now encodes every client with a live state.
+- **`YSync.TryReadMessage` `errorHandler`** (Spec 9, TASK-2.9, `5-Protocols.cs`). Added a trailing `Action<YError>? errorHandler = null` parameter.
+
+Open questions these raise are collected in `docs/api-decisions.md`.
