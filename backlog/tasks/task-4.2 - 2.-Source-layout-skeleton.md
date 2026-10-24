@@ -1,10 +1,10 @@
 ---
 id: TASK-4.2
 title: 2. Source layout skeleton
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-10-24 19:41'
-updated_date: '2026-10-24 21:10'
+updated_date: '2026-10-24 21:20'
 labels:
   - spec
   - 'model:haiku'
@@ -27,19 +27,19 @@ Read first: `docs/handoff-implementation-planning.md`, ADRs 0005, 0006, 0008, 00
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 The five stub files are split into the ADR 0021 module folders, with public types that span owners as partial classes (one file per owning module); public types stay in `YSharp`, internals in `YSharp.<Module>`
-- [ ] #2 The M2 lifecycle hook points (before observers, observers, after transaction, subdocs, GC) are declared as `partial` methods on the transaction cleanup path
-- [ ] #3 Every member still throws `NotImplementedException`; an API-diff check (public surface before and after) shows no change and is committed as a reusable script
-- [ ] #4 Build has 0 warnings and the suite result is unchanged
-- [ ] #5 The traceability gate passes and no pending registry entry is added
+- [x] #1 The five stub files are split into the ADR 0021 module folders, with public types that span owners as partial classes (one file per owning module); public types stay in `YSharp`, internals in `YSharp.<Module>`
+- [x] #2 The M2 lifecycle hook points (before observers, observers, after transaction, subdocs, GC) are declared as `partial` methods on the transaction cleanup path
+- [x] #3 Every member still throws `NotImplementedException`; an API-diff check (public surface before and after) shows no change and is committed as a reusable script
+- [x] #4 Build has 0 warnings and the suite result is unchanged
+- [x] #5 The traceability gate passes and no pending registry entry is added
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `dotnet build YSharp.slnx` has 0 warnings
-- [ ] #2 `dotnet test --solution YSharp.slnx` is green in Debug and in Release
-- [ ] #3 Fixture drift check (`npm run check` in `tools/fixture-gen`) is clean
-- [ ] #4 ADR 0022 followed: suite changes in separate `suite:` commits, a Suite changes list in the notes, no open owner decision
+- [x] #1 `dotnet build YSharp.slnx` has 0 warnings
+- [x] #2 `dotnet test --solution YSharp.slnx` is green in Debug and in Release
+- [x] #3 Fixture drift check (`npm run check` in `tools/fixture-gen`) is clean
+- [x] #4 ADR 0022 followed: suite changes in separate `suite:` commits, a Suite changes list in the notes, no open owner decision
 <!-- DOD:END -->
 
 ## Comments
@@ -57,3 +57,9 @@ created: 2026-10-24 21:10
 Owner accepted: move ScheduleSeam to YSharp.Transactions when TASK-4.12 lands.
 ---
 <!-- COMMENTS:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Implemented on the impl/task-4 integration branch and merged; verified by the implementer with a 0-warning build, green Debug and Release test runs, clean fixture drift check and the traceability gate (see PR #1 and the task comments).
+<!-- SECTION:FINAL_SUMMARY:END -->
