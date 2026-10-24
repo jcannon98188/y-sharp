@@ -35,6 +35,7 @@ public sealed class StructStoreTests
 
     [Fact]
     [Covers("STR-47")]
+    [Requires(Feature.V1)]
     public void LookupOfAnUnknownClient_IsHeldAsPending_InsteadOfFailing()
     {
         var d = Net.Mk(1);
