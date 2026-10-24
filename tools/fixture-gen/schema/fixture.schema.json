@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://y-sharp/schema/fixture.schema.json",
+  "title": "y-sharp golden fixture (schema 1)",
+  "description": "A fixture file: header, the ops script that was replayed (ops.schema.json), and the oracle's named observations (ADR 0011). Values are ADR 0011 tagged values; typed dumps (kind: text|array|map|xmlFragment|xmlElement|xmlText) appear only inside the doc and events observations.",
+  "type": "object",
+  "properties": {
+    "header": {
+      "type": "object",
+      "properties": {
+        "schema": { "const": 1 },
+        "covers": { "type": "array", "items": { "type": "string", "pattern": "^[A-Z]+-[A-Z0-9.]+$" }, "minItems": 1, "uniqueItems": true },
+        "versions": {
+          "type": "object",
+          "properties": { "yjs": { "type": "string" }, "lib0": { "type": "string" }, "y-protocols": { "type": "string" } },
+          "required": ["yjs", "lib0", "y-protocols"],
+          "additionalProperties": false
+        },
+        "node": { "type": "string", "pattern": "^[0-9]+$", "description": "Node major version from .nvmrc; patch versions must not change fixture bytes." },
+        "generator": { "type": "string" },
+        "seed": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["schema", "covers", "versions", "node", "generator", "seed"],
+      "additionalProperties": false
+    },
+    "script": { "$ref": "https://y-sharp/schema/ops.schema.json" },
+    "observations": {
+      "type": "object",
+      "properties": {
+        "updates": { "$ref": "#/$defs/observation" },
+        "state": { "$ref": "#/$defs/observation" },
+        "sv": { "$ref": "#/$defs/observation" },
+        "doc": { "$ref": "#/$defs/observation" },
+        "structs": { "$ref": "#/$defs/observation" },
+        "ds": { "$ref": "#/$defs/observation" },
+        "events": { "$ref": "#/$defs/observation" },
+        "results": { "$ref": "#/$defs/observation" },
+        "truncation": { "$ref": "#/$defs/observation" },
+        "malformed": { "$ref": "#/$defs/observation" }
+      },
+      "additionalProperties": false,
+      "anyOf": [
+        { "required": ["updates", "state", "sv", "doc"] },
+        { "required": ["malformed"] }
+      ]
+    }
+  },
+  "required": ["header", "script", "observations"],
+  "additionalProperties": false,
+  "$defs": {
+    "observation": {
+      "type": "object",
+      "properties": { "api": { "type": "string", "minLength": 1 }, "value": {} },
+      "required": ["api", "value"],
+      "additionalProperties": false
+    }
+  }
+}

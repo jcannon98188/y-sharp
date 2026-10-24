@@ -1,0 +1,896 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://y-sharp/schema/ops.schema.json",
+  "title": "y-sharp ops script (schema 1)",
+  "description": "Normative step vocabulary of ADR 0011/0016. Both interpreters (tools/fixture-gen and tests/YSharp.TestKit) replay exactly these kinds and fields. Adding a kind needs a change here, an interpreter on each side and a [Covers] entry.",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": 1
+    },
+    "replicas": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/replicaDecl"
+      }
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/step"
+      }
+    }
+  },
+  "required": [
+    "schema"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+    },
+    "replicaName": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+      "description": "A replica declared in replicas (checked by the interpreters, not by this schema)."
+    },
+    "index": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "replicaDecl": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/replicaName"
+        },
+        "clientId": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "gc": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "clientId"
+      ],
+      "additionalProperties": false
+    },
+    "root": {
+      "type": "object",
+      "properties": {
+        "root": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "text",
+            "array",
+            "map",
+            "xmlFragment"
+          ]
+        }
+      },
+      "required": [
+        "root",
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "target": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/root"
+        },
+        {
+          "type": "array",
+          "minItems": 1,
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/root"
+            }
+          ],
+          "items": {
+            "type": [
+              "string",
+              "integer"
+            ]
+          }
+        }
+      ]
+    },
+    "bytes": {
+      "type": "object",
+      "properties": {
+        "$": {
+          "const": "bytes"
+        },
+        "hex": {
+          "type": "string",
+          "pattern": "^([0-9a-f]{2})*$"
+        }
+      },
+      "required": [
+        "$",
+        "hex"
+      ],
+      "additionalProperties": false
+    },
+    "value": {
+      "description": "ADR 0011 tagged value. Plain: null, booleans, finite numbers other than -0, strings without lone surrogates, arrays. Tagged objects carry \"$\".",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/value"
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "$"
+          ],
+          "oneOf": [
+            {
+              "properties": {
+                "$": {
+                  "enum": [
+                    "undefined",
+                    "nan",
+                    "inf",
+                    "-inf",
+                    "-0"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "properties": {
+                "$": {
+                  "const": "bigint"
+                },
+                "v": {
+                  "type": "string",
+                  "pattern": "^-?[0-9]+$"
+                }
+              },
+              "required": [
+                "v"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "properties": {
+                "$": {
+                  "const": "bytes"
+                },
+                "hex": {
+                  "type": "string",
+                  "pattern": "^([0-9a-f]{2})*$"
+                }
+              },
+              "required": [
+                "hex"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "properties": {
+                "$": {
+                  "const": "str"
+                },
+                "units": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 65535
+                  }
+                }
+              },
+              "required": [
+                "units"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "properties": {
+                "$": {
+                  "const": "obj"
+                },
+                "pairs": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "prefixItems": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "$ref": "#/$defs/value"
+                      }
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "pairs"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      ]
+    },
+    "step": {
+      "oneOf": [
+        {
+          "title": "replica",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "replica"
+            },
+            "name": {
+              "$ref": "#/$defs/identifier"
+            },
+            "clientId": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            "gc": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "step",
+            "name",
+            "clientId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "transact",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "transact"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "origin": {
+              "type": "string"
+            },
+            "steps": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/step"
+              }
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "steps"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "tick",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "tick"
+            },
+            "ms": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "step",
+            "ms"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "sync",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "sync"
+            },
+            "from": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "to": {
+              "$ref": "#/$defs/replicaName"
+            }
+          },
+          "required": [
+            "step",
+            "from",
+            "to"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "applyUpdate",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "applyUpdate"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "bytes": {
+              "$ref": "#/$defs/bytes"
+            },
+            "encoding": {
+              "enum": [
+                "v1",
+                "v2"
+              ]
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "bytes"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "observe",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "observe"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "target": {
+              "$ref": "#/$defs/target"
+            },
+            "name": {
+              "$ref": "#/$defs/identifier"
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "target",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "text.insert",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "text.insert"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "target": {
+              "$ref": "#/$defs/target"
+            },
+            "at": {
+              "$ref": "#/$defs/index"
+            },
+            "value": {
+              "$ref": "#/$defs/value"
+            },
+            "attributes": {
+              "$ref": "#/$defs/value"
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "target",
+            "at",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "text.insertEmbed",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "text.insertEmbed"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "target": {
+              "$ref": "#/$defs/target"
+            },
+            "at": {
+              "$ref": "#/$defs/index"
+            },
+            "value": {
+              "$ref": "#/$defs/value"
+            },
+            "attributes": {
+              "$ref": "#/$defs/value"
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "target",
+            "at",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "text.delete",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "text.delete"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "target": {
+              "$ref": "#/$defs/target"
+            },
+            "at": {
+              "$ref": "#/$defs/index"
+            },
+            "len": {
+              "$ref": "#/$defs/index"
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "target",
+            "at",
+            "len"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "text.format",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "text.format"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "target": {
+              "$ref": "#/$defs/target"
+            },
+            "at": {
+              "$ref": "#/$defs/index"
+            },
+            "len": {
+              "$ref": "#/$defs/index"
+            },
+            "attributes": {
+              "$ref": "#/$defs/value"
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "target",
+            "at",
+            "len",
+            "attributes"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "text.applyDelta",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "text.applyDelta"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "target": {
+              "$ref": "#/$defs/target"
+            },
+            "delta": {
+              "$ref": "#/$defs/value"
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "target",
+            "delta"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "array.insert",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "array.insert"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "target": {
+              "$ref": "#/$defs/target"
+            },
+            "at": {
+              "$ref": "#/$defs/index"
+            },
+            "values": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/value"
+              }
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "target",
+            "at",
+            "values"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "array.push",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "array.push"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "target": {
+              "$ref": "#/$defs/target"
+            },
+            "values": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/value"
+              }
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "target",
+            "values"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "array.unshift",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "array.unshift"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "target": {
+              "$ref": "#/$defs/target"
+            },
+            "values": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/value"
+              }
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "target",
+            "values"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "array.delete",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "array.delete"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "target": {
+              "$ref": "#/$defs/target"
+            },
+            "at": {
+              "$ref": "#/$defs/index"
+            },
+            "len": {
+              "$ref": "#/$defs/index"
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "target",
+            "at"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "array.insertType",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "array.insertType"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "target": {
+              "$ref": "#/$defs/target"
+            },
+            "at": {
+              "$ref": "#/$defs/index"
+            },
+            "kind": {
+              "enum": [
+                "text",
+                "array",
+                "map"
+              ]
+            },
+            "init": {
+              "$ref": "#/$defs/value"
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "target",
+            "at",
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "map.set",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "map.set"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "target": {
+              "$ref": "#/$defs/target"
+            },
+            "key": {
+              "type": "string"
+            },
+            "value": {
+              "$ref": "#/$defs/value"
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "target",
+            "key",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "map.delete",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "map.delete"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "target": {
+              "$ref": "#/$defs/target"
+            },
+            "key": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "target",
+            "key"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "map.clear",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "map.clear"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "target": {
+              "$ref": "#/$defs/target"
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "target"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "map.insertType",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "map.insertType"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "target": {
+              "$ref": "#/$defs/target"
+            },
+            "key": {
+              "type": "string"
+            },
+            "kind": {
+              "enum": [
+                "text",
+                "array",
+                "map"
+              ]
+            },
+            "init": {
+              "$ref": "#/$defs/value"
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "target",
+            "key",
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "mergeUpdates",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "mergeUpdates"
+            },
+            "name": {
+              "$ref": "#/$defs/identifier"
+            },
+            "updates": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/bytes"
+              }
+            },
+            "encoding": {
+              "enum": [
+                "v1",
+                "v2"
+              ]
+            }
+          },
+          "required": [
+            "step",
+            "name",
+            "updates"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "diffUpdate",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "diffUpdate"
+            },
+            "name": {
+              "$ref": "#/$defs/identifier"
+            },
+            "update": {
+              "$ref": "#/$defs/bytes"
+            },
+            "sv": {
+              "$ref": "#/$defs/bytes"
+            },
+            "encoding": {
+              "enum": [
+                "v1",
+                "v2"
+              ]
+            }
+          },
+          "required": [
+            "step",
+            "name",
+            "update",
+            "sv"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "convertUpdate",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "convertUpdate"
+            },
+            "name": {
+              "$ref": "#/$defs/identifier"
+            },
+            "update": {
+              "$ref": "#/$defs/bytes"
+            },
+            "from": {
+              "enum": [
+                "v1",
+                "v2"
+              ]
+            }
+          },
+          "required": [
+            "step",
+            "name",
+            "update",
+            "from"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

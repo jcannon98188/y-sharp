@@ -1,9 +1,14 @@
 {
   "name": "ysharp-fixture-gen",
   "private": true,
-  "version": "0.0.0",
-  "description": "Node fixture generator shell; Spec 4 (TASK-2.4) implements it.",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Node fixture generator: replays ops scripts on the pinned Yjs/lib0/y-protocols submodules and writes fixtures/ (ADR 0011).",
   "scripts": {
-    "gen": "node generate.mjs"
+    "gen": "node --import ./lib/register.mjs generate.mjs",
+    "check": "node --import ./lib/register.mjs generate.mjs --check"
+  },
+  "dependencies": {
+    "ajv": "8.18.0"
   }
 }
