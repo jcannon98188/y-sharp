@@ -20,12 +20,6 @@ public class ScaffoldSmokeTests
     }
 
     [Fact]
-    public void ApiStub_Members_Throw_NotImplemented()
-    {
-        Assert.Throws<NotImplementedException>(() => YValue.Null);
-    }
-
-    [Fact]
     public void InternalsVisibleTo_IsLimited_ToSpecifiedAssemblies()
     {
         var friends = typeof(YException).Assembly
