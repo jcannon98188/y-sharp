@@ -4,7 +4,7 @@ title: 6. Spike selection and storage ADR
 status: To Do
 assignee: []
 created_date: '2026-10-24 19:41'
-updated_date: '2026-10-24 19:42'
+updated_date: '2026-10-24 21:10'
 labels:
   - spec
   - 'model:opus'
@@ -43,3 +43,13 @@ Read first: `docs/handoff-implementation-planning.md`, ADRs 0005, 0006, 0008, 00
 - [ ] #3 Fixture drift check (`npm run check` in `tools/fixture-gen`) is clean
 - [ ] #4 ADR 0022 followed: suite changes in separate `suite:` commits, a Suite changes list in the notes, no open owner decision
 <!-- DOD:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: @orchestrator
+created: 2026-10-24 21:10
+---
+Owner decision: fix candidate A's push path to use the search marker (Yjs typeListPushGenerics), remeasure both candidates, then select. Gen2 gate covers only the steady-state check; the 20% headroom rule cannot hold for either candidate (shared value column ~8.07 B/op).
+---
+<!-- COMMENTS:END -->

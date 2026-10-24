@@ -4,7 +4,7 @@ title: '9. YValue, StateVector, ids, errors and limits'
 status: To Do
 assignee: []
 created_date: '2026-10-24 19:41'
-updated_date: '2026-10-24 20:59'
+updated_date: '2026-10-24 21:10'
 labels:
   - spec
   - 'model:sonnet'
@@ -53,5 +53,11 @@ author: @orchestrator
 created: 2026-10-24 20:59
 ---
 Owner decision needed: confirm two feature-gate edits (ADR 0022 'gate changes'). (1) ValueQuirkTests class gate Values -> Values,V1,Map (it builds values through Doc/Map/V1; Values-only went red with 36 failures). (2) BUD-03 test moved from HotPathBudgetTests (Transactions gate) to new ValueBudgetTests (Values gate), body identical. Doc-free YValueAnyTests cover the same bytes meanwhile.
+---
+
+author: @orchestrator
+created: 2026-10-24 21:10
+---
+Owner confirmed both feature-gate edits (ValueQuirkTests gate; BUD-03 test move).
 ---
 <!-- COMMENTS:END -->
