@@ -171,7 +171,12 @@ public sealed record ScriptPlan(int Replicas, IReadOnlyList<Edit> Edits, Exchang
                     var at = Snap(l.Text, Math.Min(l.Text.Length - 1, e.Permille * l.Text.Length / 1000));
                     var end = Math.Min(l.Text.Length, at + e.Amount);
                     if (end < l.Text.Length && char.IsLowSurrogate(l.Text[end]) && end > at) end++;
-                    var attrs = new JsonObject { [e.Pick % 2 == 0 ? "bold" : "italic"] = e.Pick % 3 == 0 ? null : JsonValue.Create(true) };
+                    // objects are ADR 0011 tagged values; a null attribute value removes the format
+                    var attrs = new JsonObject
+                    {
+                        ["$"] = "obj",
+                        ["pairs"] = new JsonArray(new JsonArray(Plain(e.Pick % 2 == 0 ? "bold" : "italic"), e.Pick % 3 == 0 ? null : JsonValue.Create(true))),
+                    };
                     Emit(r, Step("text.format", doc, Target(TextRoot, "text"), ("at", at), ("len", end - at), ("attributes", attrs)), e.JoinPrev);
                     break;
                 }

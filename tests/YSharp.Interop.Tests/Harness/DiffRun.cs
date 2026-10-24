@@ -61,6 +61,8 @@ public sealed class DiffRun
 
     public int Discarded { get; private set; }
 
+    public string? LastDiscard { get; private set; }
+
     public List<Saved> MisbehavedSaved { get; } = new();
 
     public int Misbehaved => MisbehavedSaved.Count;
@@ -88,7 +90,7 @@ public sealed class DiffRun
         {
             if (sharp.Status == SharpStatus.ScriptError)
             {
-                Discarded++; // both sides call it invalid: the generator made a bad script, which is not a y-sharp failure
+                Discarded++; LastDiscard = oracle.Message; // both sides call it invalid: the generator made a bad script, which is not a y-sharp failure
                 return null;
             }
             throw Fail(FailureReason.Mismatch, scriptJson, null, sharp.Observations, null, $"The oracle rejects the script ({oracle.Message}) but y-sharp ran it.");
@@ -148,6 +150,11 @@ public sealed class DiffRun
     private static IEnumerable<(string Root, string Kind)> GeneratedRoots() =>
         new[] { (Generation.ScriptPlan.TextRoot, "text"), (Generation.ScriptPlan.ArrayRoot, "array"), (Generation.ScriptPlan.MapRoot, "map") };
 
+    /// <summary>The roots (name, kind) the source observation's dump covers, so a receiving replica is dumped over exactly the same roots.</summary>
+    private static IEnumerable<(string Root, string Kind)> RootsFrom(JsonObject observations) =>
+        observations["doc"]!["value"]!.AsObject().First().Value!.AsArray()
+            .Select(p => (p![0]!.GetValue<string>(), p[1]!["kind"]!.GetValue<string>()));
+
     /// <summary>
     /// <c>applyForeign</c> both ways (ADR 0012): the state each implementation encoded for the finished plan is applied, as foreign bytes in V1
     /// and V2, to fresh replicas of the <em>other</em> side. y-sharp's bytes go to Node, Node's bytes go to y-sharp (the script is the same
@@ -167,7 +174,7 @@ public sealed class DiffRun
                 {
                     var r = $"{n}_{enc}";
                     replicas.Add(Replica(r, clientId++));
-                    foreach (var (root, kind) in GeneratedRoots()) steps.Add(ObserveStep(r, root, kind));
+                    foreach (var (root, kind) in RootsFrom(source)) steps.Add(ObserveStep(r, root, kind));
                     var step = new JsonObject { ["step"] = "applyForeign", ["doc"] = r, ["bytes"] = Tagged(source["state"]!["value"]![n]![enc]!["full"]!) };
                     if (enc == "v2") step["encoding"] = "v2";
                     steps.Add(step);
@@ -208,7 +215,7 @@ public sealed class DiffRun
         var b = names[^1];
 
         var steps = new JsonArray();
-        foreach (var (root, kind) in GeneratedRoots()) steps.Add(ObserveStep("r", root, kind));
+        foreach (var (root, kind) in RootsFrom(obs)) steps.Add(ObserveStep("r", root, kind));
         steps.Add(new JsonObject { ["step"] = "mergeUpdates", ["name"] = "merge-v1", ["updates"] = new JsonArray(v1.Select(x => x!.DeepClone()).ToArray()) });
         steps.Add(new JsonObject { ["step"] = "mergeUpdates", ["name"] = "merge-v1-reversed", ["updates"] = new JsonArray(Enumerable.Reverse(v1).Select(x => x!.DeepClone()).ToArray()) });
         steps.Add(new JsonObject { ["step"] = "mergeUpdates", ["name"] = "merge-v2", ["encoding"] = "v2", ["updates"] = new JsonArray(v2.Select(x => x!.DeepClone()).ToArray()) });

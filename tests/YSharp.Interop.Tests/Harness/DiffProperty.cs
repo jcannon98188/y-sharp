@@ -41,7 +41,7 @@ public static class DiffProperty
         var probe = runFactory?.Invoke() ?? new DiffRun(host, property, directory);
         try { body(probe, Gen.Sample(arbitrary.Generator, 1, 8)[0]); }
         catch (NotImplementedException) { Assert.Skip("YSharp is still the API stub"); }
-        catch (DifferentialFailure f) { Assert.Fail(f.Persist(probe.Directory)); }
+        catch (DifferentialFailure) { /* reported with its seed and shrunk by the real run below */ }
 
         var run = runFactory?.Invoke() ?? new DiffRun(host, property, directory);
         var seeds = new List<string>();
