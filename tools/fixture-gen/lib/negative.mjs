@@ -3,8 +3,9 @@ import { Y } from './oracle.mjs'
 import { tag, hex, unhex } from './tagged.mjs'
 import { dumpDoc, hashOf } from './observe.mjs'
 
-const apply = (bytes, encoding) => {
+const apply = (bytes, encoding, before = []) => {
   const doc = new Y.Doc()
+  for (const b of before) (encoding === 'v2' ? Y.applyUpdateV2 : Y.applyUpdate)(doc, typeof b === 'string' ? unhex(b) : b)
   try {
     (encoding === 'v2' ? Y.applyUpdateV2 : Y.applyUpdate)(doc, bytes)
     return { doc }
@@ -50,11 +51,17 @@ export const malformedCases = cases => {
     const bytes = typeof c.bytes === 'string' ? unhex(c.bytes) : c.bytes
     const out = { name: c.name, encoding, bytes: tag(bytes) }
     if (c.note) out.note = c.note
-    if (c.jsCrash) {
+    // Hostile-corpus contract (ADR 0013): which y-sharp outcomes are allowed, which API the bytes go through, inputs applied
+    // before and after, and the limits profile. Stored as written; the oracle is still only recorded, never asserted.
+    for (const k of ['expect', 'api', 'limits', 'discovered']) if (c[k] !== undefined) out[k] = c[k]
+    for (const k of ['before', 'after']) if (c[k] !== undefined) out[k] = c[k].map(b => tag(typeof b === 'string' ? unhex(b) : b))
+    if (c.api && c.api !== 'update') {
+      Object.assign(out, { outcome: 'not-run', reason: `the oracle has no ${c.api} entry point for this input`, classification: 'match' })
+    } else if (c.jsCrash) {
       Object.assign(out, { outcome: 'js-crash', reason: c.jsCrash, classification: 'js-crash' })
     } else {
       const roots = c.roots ?? []
-      const r = apply(bytes, encoding)
+      const r = apply(bytes, encoding, c.before)
       out.outcome = r.error ? 'throws' : 'ok'
       if (r.error) out.error = r.error
       out.pendingStructs = r.doc.store.pendingStructs !== null

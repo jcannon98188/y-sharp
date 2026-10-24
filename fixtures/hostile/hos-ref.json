@@ -1,0 +1,198 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["HOS-REF","ERR-06","ERR-07","ERR-21"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {"schema":1,"steps":[]},
+  "observations": {
+    "malformed": {
+      "api": "Y.applyUpdate, Y.applyUpdateV2 on a fresh Doc",
+      "value": [
+        {
+          "name": "origin-missing-client",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"01010100846300017800"},
+          "expect": ["ok","Rejected"],
+          "outcome": "ok",
+          "pendingStructs": true,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "origin-self",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"01010100840100017800"},
+          "expect": ["ok","Rejected","Malformed"],
+          "outcome": "throws",
+          "error": "TypeError",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "origin-future-same-client",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"01010100840105017800"},
+          "expect": ["ok","Rejected","Malformed"],
+          "outcome": "throws",
+          "error": "TypeError",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "origin-cycle-two-clients",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"020101008402000161010200840100016200"},
+          "expect": ["ok","Rejected"],
+          "outcome": "ok",
+          "pendingStructs": true,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "origin-cycle-three-clients",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"0301010084020001610102008403000162010300840100016300"},
+          "expect": ["ok","Rejected"],
+          "outcome": "ok",
+          "pendingStructs": true,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "right-origin-self",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"01010100440100017800"},
+          "expect": ["ok","Malformed","LimitExceeded","Rejected"],
+          "outcome": "throws",
+          "error": "TypeError",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "parent-id-missing",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"0101010004000700017800"},
+          "expect": ["ok","Rejected"],
+          "outcome": "ok",
+          "pendingStructs": true,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "parent-is-self",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"01010100070001000000"},
+          "expect": ["ok","Rejected"],
+          "outcome": "throws",
+          "error": "TypeError",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "parent-cycle-two-type-items",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"020101000700020000010200070001000000"},
+          "expect": ["ok","Rejected"],
+          "outcome": "ok",
+          "pendingStructs": true,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "parent-is-a-string-item",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"0101020004000100017800"},
+          "expect": ["Rejected"],
+          "before": [{"$":"bytes","hex":"010101000401017402686900"}],
+          "outcome": "ok",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"0202010102"},
+          "doc": [["t",{"kind":"text","delta":[{"insert":"hi"}]}]],
+          "classification": "match"
+        },
+        {
+          "name": "parent-is-a-gc-struct",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"0101020004000100017800"},
+          "expect": ["ok","Rejected"],
+          "before": [{"$":"bytes","hex":"01010100000100"}],
+          "outcome": "ok",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"0202010101"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "parent-is-a-skip-struct",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"0101020004000100017800"},
+          "expect": ["ok","Rejected"],
+          "before": [{"$":"bytes","hex":"010101000a0100"}],
+          "outcome": "ok",
+          "pendingStructs": true,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "forward-reference-chain-200",
+          "encoding": "v1",
+          "bytes": {
+            "$": "bytes",
+            "hex": "01c801010084010101788401020178840103017884010401788401050178840106017884010701788401080178840109017884010a017884010b017884010c017884010d017884010e017884010f0178840110017884011101788401120178840113017884011401788401150178840116017884011701788401180178840119017884011a017884011b017884011c017884011d017884011e017884011f0178840120017884012101788401220178840123017884012401788401250178840126017884012701788401280178840129017884012a017884012b017884012c017884012d017884012e017884012f0178840130017884013101788401320178840133017884013401788401350178840136017884013701788401380178840139017884013a017884013b017884013c017884013d017884013e017884013f0178840140017884014101788401420178840143017884014401788401450178840146017884014701788401480178840149017884014a017884014b017884014c017884014d017884014e017884014f0178840150017884015101788401520178840153017884015401788401550178840156017884015701788401580178840159017884015a017884015b017884015c017884015d017884015e017884015f0178840160017884016101788401620178840163017884016401788401650178840166017884016701788401680178840169017884016a017884016b017884016c017884016d017884016e017884016f0178840170017884017101788401720178840173017884017401788401750178840176017884017701788401780178840179017884017a017884017b017884017c017884017d017884017e017884017f017884018001017884018101017884018201017884018301017884018401017884018501017884018601017884018701017884018801017884018901017884018a01017884018b01017884018c01017884018d01017884018e01017884018f01017884019001017884019101017884019201017884019301017884019401017884019501017884019601017884019701017884019801017884019901017884019a01017884019b01017884019c01017884019d01017884019e01017884019f0101788401a00101788401a10101788401a20101788401a30101788401a40101788401a50101788401a60101788401a70101788401a80101788401a90101788401aa0101788401ab0101788401ac0101788401ad0101788401ae0101788401af0101788401b00101788401b10101788401b20101788401b30101788401b40101788401b50101788401b60101788401b70101788401b80101788401b90101788401ba0101788401bb0101788401bc0101788401bd0101788401be0101788401bf0101788401c00101788401c10101788401c20101788401c30101788401c40101788401c50101788401c60101788401c70101788401c801017800"
+          },
+          "expect": ["ok","Rejected"],
+          "outcome": "throws",
+          "error": "TypeError",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "dependents-of-a-rejected-struct",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"02020200040001000178840200017901030004010174026f6b00"},
+          "expect": ["Rejected"],
+          "before": [{"$":"bytes","hex":"010101000401017402686900"}],
+          "outcome": "ok",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"03030202020102"},
+          "doc": [["t",{"kind":"text","delta":[{"insert":"hiok"}]}]],
+          "classification": "match"
+        }
+      ]
+    }
+  }
+}
