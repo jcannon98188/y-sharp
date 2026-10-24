@@ -16,10 +16,12 @@ namespace YSharp.Fuzz.Tests;
 /// tier (tens of MB), the boundary is shown with a length claim against a short body instead: a claim one over the limit is a limit
 /// rejection, a claim at the limit is not (the body is short, so it is an EOF error).
 /// <para>
-/// Reading of the limits used here: <c>MaxAnyDepth</c> counts nested containers (an array holding an array is depth 2; the leaf scalar
-/// adds none); <c>MaxStructsPerUpdate</c> counts every struct including GC and Skip; <c>MaxStringBytes</c> is the UTF-8 length of one string;
-/// <c>MaxUpdateBytes</c> is the whole buffer (trailing bytes count). Spec 12 decides these in the implementation; a different reading
-/// changes the constants here, not the structure.
+/// Semantics (ADR 0005, decided): a limit is exceeded when the value is greater than the limit; the value is the decoded quantity and the
+/// check runs on the length claim before anything is sized from it; it applies on every decode path (apply, merge, diff, convert, state
+/// vector, validate; V1 and V2 columns); a rejection leaves the document unchanged. <c>MaxAnyDepth</c> counts nested containers (an array
+/// holding an array is depth 2; the leaf scalar adds none); <c>MaxStructsPerUpdate</c> counts every struct including GC and Skip;
+/// <c>MaxStringBytes</c> is the UTF-8 length of one string; <c>MaxUpdateBytes</c> is the whole buffer of one input update (trailing bytes
+/// count); <c>MaxPendingBytes</c> is the V1 encoding of the retained pending state after the update.
 /// </para>
 /// </summary>
 public sealed class LimitsTests
@@ -165,7 +167,72 @@ public sealed class LimitsTests
         AssertLimit(Hostile.Tiny, Padded(Hostile.Tiny.MaxUpdateBytes + 1), "update of MaxUpdateBytes + 1");
     });
 
+    // ------------------------------------------------------------------ every decode path, V1 and V2 (B1)
+
+    public static TheoryData<string, UpdateFormat> Paths()
+    {
+        var data = new TheoryData<string, UpdateFormat>();
+        foreach (var path in new[] { "apply", "merge", "diff", "convert", "stateVector", "validate" })
+            foreach (var format in new[] { UpdateFormat.V1, UpdateFormat.V2 })
+                data.Add(path, format);
+        return data;
+    }
+
+    private static YError ErrorOf(string path, byte[] update, UpdateFormat format, YLimits limits)
+    {
+        var sink = new ArrayBufferWriter<byte>();
+        var other = format == UpdateFormat.V1 ? UpdateFormat.V2 : UpdateFormat.V1;
+        var run = InputGuard.Run($"limits on {path} ({format})", () => path switch
+        {
+            "apply" => Hostile.NewDoc(limits).TryApplyUpdate(update, null, format).Error,
+            "merge" => YUpdate.TryMerge(new[] { (ReadOnlyMemory<byte>)update }, sink, format, limits).Error,
+            "diff" => YUpdate.TryDiff(update, new byte[] { 0 }, sink, format, limits).Error,
+            "convert" => YUpdate.TryConvert(update, format, other, sink, limits).Error,
+            "stateVector" => YUpdate.TryStateVectorFromUpdate(update, sink, format, limits).Error,
+            "validate" => YUpdate.TryValidate(update, format, limits).Error,
+            _ => throw new ArgumentException(path),
+        });
+        return run.Value;
+    }
+
+    private static byte[] Encode(UpdateModel model, UpdateFormat format) => format == UpdateFormat.V1 ? UpdateBuilder.V1(model) : UpdateBuilder.V2(model);
+
+    [Theory, MemberData(nameof(Paths)), Covers("HOS-AMP", "HOS-LEN", "ERR-08", Layer = CoverLayer.Unit)]
+    public void StructCount_OnEveryDecodePath_LimitIsAccepted_LimitPlusOneIsRejected(string path, UpdateFormat format) => Stub.Run(() =>
+    {
+        var max = Hostile.Tiny.MaxStructsPerUpdate;
+        Assert.Equal(YError.None, ErrorOf(path, Encode(UpdateModel.Single(1, 0, Enumerable.Range(0, max).Select(_ => Struct.Gc(1)).ToArray()), format), format, Hostile.Tiny));
+        Assert.Equal(YError.LimitExceeded, ErrorOf(path, Encode(UpdateModel.Single(1, 0, Enumerable.Range(0, max + 1).Select(_ => Struct.Gc(1)).ToArray()), format), format, Hostile.Tiny));
+    });
+
+    [Theory, MemberData(nameof(Paths)), Covers("HOS-LEN", "ERR-08", Layer = CoverLayer.Unit)]
+    public void StringBytes_OnEveryDecodePath_LimitIsAccepted_LimitPlusOneIsRejected(string path, UpdateFormat format) => Stub.Run(() =>
+    {
+        var max = Hostile.Tiny.MaxStringBytes;   // V2 keeps strings in one column: the limit is checked on the claimed length of each string
+        Assert.Equal(YError.None, ErrorOf(path, Encode(UpdateBuilder.TextInsert(1, "t", new string('a', max)), format), format, Hostile.Tiny));
+        Assert.Equal(YError.LimitExceeded, ErrorOf(path, Encode(UpdateBuilder.TextInsert(1, "t", new string('a', max + 1)), format), format, Hostile.Tiny));
+    });
+
+    [Theory, MemberData(nameof(Paths)), Covers("HOS-LEN", "ERR-08", Layer = CoverLayer.Unit)]
+    public void UpdateBytes_OnEveryDecodePath_LimitIsAccepted_LimitPlusOneIsRejected(string path, UpdateFormat format) => Stub.Run(() =>
+    {
+        var valid = Encode(UpdateBuilder.TextInsert(1, "t", "hi"), format);
+        byte[] Padded(int total) => valid.Concat(new byte[total - valid.Length]).ToArray();
+        Assert.Equal(YError.None, ErrorOf(path, Padded(Hostile.Tiny.MaxUpdateBytes), format, Hostile.Tiny));
+        Assert.Equal(YError.LimitExceeded, ErrorOf(path, Padded(Hostile.Tiny.MaxUpdateBytes + 1), format, Hostile.Tiny));
+    });
+
     // ------------------------------------------------------------------ pending bytes (ERR-10)
+
+    [Fact, Covers("HOS-AMP", "ERR-10", Layer = CoverLayer.Unit)]
+    public void PendingBytes_RetainedStateAtTheLimitIsAccepted_OneOverIsRejected() => Stub.Run(() =>
+    {
+        // one update whose only struct waits for a missing client: the retained pending state is that update's own V1 encoding
+        var waiting = UpdateBuilder.V1(UpdateModel.Single(1000, 0, Struct.InRoot("t", Content.Str("x"), origin: new Id(999_999, 0))));
+        var accepted = Hostile.ApplyAndCheck("pending at the limit", waiting, UpdateFormat.V1, new[] { "ok" }, Hostile.Tiny with { MaxPendingBytes = waiting.Length });
+        Assert.Equal("ok", accepted.Outcome);
+        Hostile.ApplyAndCheck("pending one over the limit", waiting, UpdateFormat.V1, new[] { "LimitExceeded" }, Hostile.Tiny with { MaxPendingBytes = waiting.Length - 1 });
+    });
 
     [Fact, Covers("HOS-AMP", "HOS-REF", "ERR-06", "ERR-10", Layer = CoverLayer.Unit)]
     public void PendingBytes_Tiny_TheLimitRejectsNewUpdates_AndKeepsWhatWasPending() => Stub.Run(() =>

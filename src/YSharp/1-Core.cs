@@ -30,6 +30,9 @@ public sealed class YConcurrencyException : YException { }
 public sealed class YInternalException : YException { }
 public sealed class YTypeConflictException : YException { }   // doc.Get(name) with a different concrete type
 
+/// Decode limits (ADR 0005). A limit is exceeded when the value is greater than the limit: a value equal to the limit is accepted, one more is
+/// LimitExceeded. Each is checked against the length claim before anything is allocated, on every decode path (apply, merge, diff, convert,
+/// state vector, validate; V1 and every V2 column), and a rejection leaves the document unchanged.
 public sealed record YLimits
 {
     public static YLimits Default { get; } = new();

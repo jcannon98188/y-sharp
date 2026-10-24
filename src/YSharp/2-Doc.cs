@@ -92,12 +92,12 @@ public sealed class Doc : IDisposable
     public void Dispose() => Destroy();
 }
 
-/// Stateless update tools (no Doc needed).
+/// Stateless update tools (no Doc needed). `limits` (default YLimits.Default) bounds every input update, as for Doc.TryApplyUpdate (ADR 0005).
 public static class YUpdate
 {
-    public static YStatus TryMerge(IReadOnlyList<ReadOnlyMemory<byte>> updates, IBufferWriter<byte> output, UpdateFormat format = UpdateFormat.V1) => throw Sketch.NI;
-    public static YStatus TryDiff(ReadOnlySpan<byte> update, ReadOnlySpan<byte> stateVector, IBufferWriter<byte> output, UpdateFormat format = UpdateFormat.V1) => throw Sketch.NI;
-    public static YStatus TryStateVectorFromUpdate(ReadOnlySpan<byte> update, IBufferWriter<byte> output, UpdateFormat format = UpdateFormat.V1) => throw Sketch.NI;
-    public static YStatus TryConvert(ReadOnlySpan<byte> update, UpdateFormat from, UpdateFormat to, IBufferWriter<byte> output) => throw Sketch.NI;
+    public static YStatus TryMerge(IReadOnlyList<ReadOnlyMemory<byte>> updates, IBufferWriter<byte> output, UpdateFormat format = UpdateFormat.V1, YLimits? limits = null) => throw Sketch.NI;
+    public static YStatus TryDiff(ReadOnlySpan<byte> update, ReadOnlySpan<byte> stateVector, IBufferWriter<byte> output, UpdateFormat format = UpdateFormat.V1, YLimits? limits = null) => throw Sketch.NI;
+    public static YStatus TryStateVectorFromUpdate(ReadOnlySpan<byte> update, IBufferWriter<byte> output, UpdateFormat format = UpdateFormat.V1, YLimits? limits = null) => throw Sketch.NI;
+    public static YStatus TryConvert(ReadOnlySpan<byte> update, UpdateFormat from, UpdateFormat to, IBufferWriter<byte> output, YLimits? limits = null) => throw Sketch.NI;
     public static YStatus TryValidate(ReadOnlySpan<byte> update, UpdateFormat format = UpdateFormat.V1, YLimits? limits = null) => throw Sketch.NI;
 }
