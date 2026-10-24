@@ -1,0 +1,223 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["A-9","T-0.8","M-12"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":5},{"name":"b","clientId":6}],
+    "steps": [
+      {"step":"array.insertType","doc":"a","target":{"root":"arr","kind":"array"},"at":0,"kind":"map"},
+      {
+        "step": "array.insertType",
+        "doc": "a",
+        "target": {"root":"arr","kind":"array"},
+        "at": 1,
+        "kind": "text",
+        "init": "inner"
+      },
+      {"step":"map.set","doc":"a","target":[{"root":"arr","kind":"array"},0],"key":"n","value":7},
+      {
+        "step": "map.insertType",
+        "doc": "a",
+        "target": [{"root":"arr","kind":"array"},0],
+        "key": "list",
+        "kind": "array"
+      },
+      {"step":"array.push","doc":"a","target":[{"root":"arr","kind":"array"},0,"list"],"values":["deep"]},
+      {"step":"text.insert","doc":"a","target":[{"root":"arr","kind":"array"},1],"at":5,"value":"!"},
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"array.delete","doc":"b","target":{"root":"arr","kind":"array"},"at":0},
+      {"step":"sync","from":"b","to":"a"}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [
+            {"$":"bytes","hex":"010105000701036172720100"},
+            {"$":"bytes","hex":"01020501870500020400050105696e6e657200"},
+            {"$":"bytes","hex":"0101050728000500016e017d0700"},
+            {"$":"bytes","hex":"0101050827000500046c6973740000"},
+            {"$":"bytes","hex":"01010509080005080177046465657000"},
+            {"$":"bytes","hex":"0101050a840506012100"},
+            {"$":"bytes","hex":"0001050200010703"}
+          ],
+          "v2": [
+            {"$":"bytes","hex":"0000010500000107050361727203010101010001010000"},
+            {"$":"bytes","hex":"000002450102000200038700040705696e6e657205010001020001020100"},
+            {"$":"bytes","hex":"0000024500010000012803016e0101000001010101077d0700"},
+            {"$":"bytes","hex":"0000024500010000012706046c69737404010001000001010800"},
+            {"$":"bytes","hex":"000002450001100001080100010000010101010977046465657000"},
+            {"$":"bytes","hex":"0000024500010c0001840301210100000001010a00"},
+            {"$":"bytes","hex":"00000000000001000000000001050200000602"}
+          ]
+        },
+        "b": {
+          "v1": [
+            {
+              "$": "bytes",
+              "hex": "0107050007010361727201870500020400050105696e6e657228000500016e017d0727000500046c697374000800050801770464656570840506012100"
+            },
+            {"$":"bytes","hex":"0001050200010703"}
+          ],
+          "v2": [
+            {
+              "$": "bytes",
+              "hex": "000002450506000242001044000d07008700040028002700080084140e617272696e6e65726e6c69737421030501040103010000030102000241000107007d0777046465657000"
+            },
+            {"$":"bytes","hex":"00000000000001000000000001050200000602"}
+          ]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {
+            "full": {"$":"bytes","hex":"0105050001010361727201870500020400050105696e6e65720003840506012101050200010703"},
+            "diff": {"b":{"$":"bytes","hex":"0001050200010703"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "00000245020300020a00090100870004000000840d09617272696e6e65722103050103010000010202010301050001050200000602"
+            },
+            "diff": {"b":{"$":"bytes","hex":"00000000000001000000000001050200000602"}}
+          }
+        },
+        "b": {
+          "v1": {
+            "full": {"$":"bytes","hex":"0105050001010361727201870500020400050105696e6e65720003840506012101050200010703"},
+            "diff": {"a":{"$":"bytes","hex":"0001050200010703"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "00000245020300020a00090100870004000000840d09617272696e6e65722103050103010000010202010301050001050200000602"
+            },
+            "diff": {"a":{"$":"bytes","hex":"00000000000001000000000001050200000602"}}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {
+        "a": {"v1":{"$":"bytes","hex":"01050b"},"v2":{"$":"bytes","hex":"01050b"}},
+        "b": {"v1":{"$":"bytes","hex":"01050b"},"v2":{"$":"bytes","hex":"01050b"}}
+      }
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {
+        "a": [["arr",{"kind":"array","items":[{"kind":"text","delta":[{"insert":"inner!"}]}]}]],
+        "b": [["arr",{"kind":"array","items":[{"kind":"text","delta":[{"insert":"inner!"}]}]}]]
+      }
+    },
+    "structs": {
+      "api": "doc.store.clients",
+      "value": {
+        "a": [
+          [
+            5,
+            [
+              {
+                "id": [5,0],
+                "len": 1,
+                "kind": "item",
+                "parent": "arr",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [5,1],
+                "len": 1,
+                "kind": "item",
+                "origin": [5,0],
+                "parent": "arr",
+                "content": {"ref":7,"value":"YText"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [5,2],
+                "len": 5,
+                "kind": "item",
+                "parent": [5,1],
+                "content": {"ref":4,"value":"inner"},
+                "deleted": false,
+                "keep": false
+              },
+              {"id":[5,7],"len":3,"kind":"gc"},
+              {
+                "id": [5,10],
+                "len": 1,
+                "kind": "item",
+                "origin": [5,6],
+                "parent": [5,1],
+                "content": {"ref":4,"value":"!"},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ],
+        "b": [
+          [
+            5,
+            [
+              {
+                "id": [5,0],
+                "len": 1,
+                "kind": "item",
+                "parent": "arr",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [5,1],
+                "len": 1,
+                "kind": "item",
+                "origin": [5,0],
+                "parent": "arr",
+                "content": {"ref":7,"value":"YText"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [5,2],
+                "len": 5,
+                "kind": "item",
+                "parent": [5,1],
+                "content": {"ref":4,"value":"inner"},
+                "deleted": false,
+                "keep": false
+              },
+              {"id":[5,7],"len":3,"kind":"gc"},
+              {
+                "id": [5,10],
+                "len": 1,
+                "kind": "item",
+                "origin": [5,6],
+                "parent": [5,1],
+                "content": {"ref":4,"value":"!"},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ]
+      }
+    }
+  }
+}

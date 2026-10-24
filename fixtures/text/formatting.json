@@ -1,0 +1,720 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["F-1","F-4","F-6","D-1"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":10},{"name":"b","clientId":11}],
+    "steps": [
+      {
+        "step": "text.insert",
+        "doc": "a",
+        "target": {"root":"t","kind":"text"},
+        "at": 0,
+        "value": "bold plain",
+        "attributes": {"$":"obj","pairs":[["bold",true]]}
+      },
+      {
+        "step": "text.format",
+        "doc": "a",
+        "target": {"root":"t","kind":"text"},
+        "at": 5,
+        "len": 5,
+        "attributes": {"$":"obj","pairs":[["bold",null]]}
+      },
+      {
+        "step": "text.format",
+        "doc": "a",
+        "target": {"root":"t","kind":"text"},
+        "at": 0,
+        "len": 2,
+        "attributes": {"$":"obj","pairs":[["italic",true],["size",0],["flag",false],["empty",""]]}
+      },
+      {
+        "step": "text.insertEmbed",
+        "doc": "a",
+        "target": {"root":"t","kind":"text"},
+        "at": 4,
+        "value": {"$":"obj","pairs":[["image","x.png"]]}
+      },
+      {"step":"sync","from":"a","to":"b"},
+      {
+        "step": "text.format",
+        "doc": "b",
+        "target": {"root":"t","kind":"text"},
+        "at": 1,
+        "len": 6,
+        "attributes": {"$":"obj","pairs":[["color","red"]]}
+      },
+      {"step":"sync","from":"b","to":"a"}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [
+            {
+              "$": "bytes",
+              "hex": "01030a000601017404626f6c640474727565840a000a626f6c6420706c61696e860a0a04626f6c64046e756c6c00"
+            },
+            {"$":"bytes","hex":"01010a0cc60a050a0604626f6c64046e756c6c010a010b01"},
+            {
+              "$": "bytes",
+              "hex": "01080a0d460a00066974616c69630474727565c60a0d0a000473697a650130c60a0e0a0004666c61670566616c7365c60a0f0a0005656d707479022222c60a020a03066974616c6963046e756c6cc60a110a030473697a65046e756c6cc60a120a0304666c6167046e756c6cc60a130a0305656d707479046e756c6c00"
+            },
+            {
+              "$": "bytes",
+              "hex": "01030a15c60a040a0504626f6c64046e756c6cc50a150a05117b22696d616765223a22782e706e67227dc60a160a0504626f6c64047472756500"
+            },
+            {"$":"bytes","hex":"01020b00c60a010a0205636f6c6f72052272656422c60a060a0705636f6c6f72046e756c6c00"}
+          ],
+          "v2": [
+            {
+              "$": "bytes",
+              "hex": "00020002024a0102001400050600840086181374626f6c64626f6c6420706c61696e626f6c6401040a0401010000010300787e00"
+            },
+            {"$":"bytes","hex":"000100024a01010a010c01c60604626f6c640400000001010c7e010a010b00"},
+            {
+              "$": "bytes",
+              "hex": "0003000305024a0e071a03005a1e0300050102060101034600c62f266974616c696373697a65666c6167656d7074796974616c696373697a65666c6167656d707479064400050644000500000001080d787d007977007e7e7e7e00"
+            },
+            {
+              "$": "bytes",
+              "hex": "00020002024a0503082202030a010005c600c500c60b08626f6c64626f6c6444000000000103157e760105696d6167657705782e706e677800"
+            },
+            {
+              "$": "bytes",
+              "hex": "00020002030b4a0202020a02040a01c60d0a636f6c6f72636f6c6f72450000000001020077037265647e00"
+            }
+          ]
+        },
+        "b": {
+          "v1": [
+            {
+              "$": "bytes",
+              "hex": "01120a000601017404626f6c640474727565840a0002626f840a02026c64840a040120840a0505706c61696e810a0a01c60a050a0604626f6c64046e756c6c460a00066974616c69630474727565c60a0d0a000473697a650130c60a0e0a0004666c61670566616c7365c60a0f0a0005656d707479022222c60a020a03066974616c6963046e756c6cc60a110a030473697a65046e756c6cc60a120a0304666c6167046e756c6cc60a130a0305656d707479046e756c6cc60a040a0504626f6c64046e756c6cc50a150a05117b22696d616765223a22782e706e67227dc60a160a0504626f6c640474727565010a010b01"
+            },
+            {"$":"bytes","hex":"01020b00c60a010a0205636f6c6f72052272656422c60a060a0705636f6c6f72046e756c6c00"}
+          ],
+          "v2": [
+            {
+              "$": "bytes",
+              "hex": "0003000309024a1b10000500020a4a1003005a1e03005e22020a0c4c01010601010401000f060084038100c6004600c607c500c6534174626f6c64626f6c6420706c61696e626f6c646974616c696373697a65666c6167656d7074796974616c696373697a65666c6167656d707479626f6c64626f6c6401044200010504064400050644000544000101000101011200787e787d007977007e7e7e7e7e760105696d6167657705782e706e6778010a010b00"
+            },
+            {
+              "$": "bytes",
+              "hex": "00020002030b4a0202020a02040a01c60d0a636f6c6f72636f6c6f72450000000001020077037265647e00"
+            }
+          ]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "02020b00c60a010a0205636f6c6f72052272656422c60a060a0705636f6c6f72046e756c6c140a000601017404626f6c640474727565840a000162840a01016f840a02026c64840a040120840a050170840a06046c61696e810a0a01c60a050a0604626f6c64046e756c6c460a00066974616c69630474727565c60a0d0a000473697a650130c60a0e0a0004666c61670566616c7365c60a0f0a0005656d707479022222c60a020a03066974616c6963046e756c6cc60a110a030473697a65046e756c6cc60a120a0304666c6167046e756c6cc60a130a0305656d707479046e756c6cc60a040a0504626f6c64046e756c6cc50a150a05117b22696d616765223a22782e706e67227dc60a160a0504626f6c640474727565010a010b01"
+            },
+            "diff": {"b":{"$":"bytes","hex":"00010a010b01"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "000300030b030b4a2114020a4c0300040300084a1003005a1e03005e22020c040a424c010106010104010011c601060084058100c6004600c607c500c6614b636f6c6f72636f6c6f7274626f6c64626f6c6420706c61696e626f6c646974616c696373697a65666c6167656d7074796974616c696373697a65666c6167656d707479626f6c64626f6c64450001044100024100440006440005064400054400010100010102020077037265647e1400787e787d007977007e7e7e7e7e760105696d6167657705782e706e6778010a010b00"
+            },
+            "diff": {"b":{"$":"bytes","hex":"000000000000010000000000010a010b00"}}
+          }
+        },
+        "b": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "02020b00c60a010a0205636f6c6f72052272656422c60a060a0705636f6c6f72046e756c6c140a000601017404626f6c640474727565840a000162840a01016f840a02026c64840a040120840a050170840a06046c61696e810a0a01c60a050a0604626f6c64046e756c6c460a00066974616c69630474727565c60a0d0a000473697a650130c60a0e0a0004666c61670566616c7365c60a0f0a0005656d707479022222c60a020a03066974616c6963046e756c6cc60a110a030473697a65046e756c6cc60a120a0304666c6167046e756c6cc60a130a0305656d707479046e756c6cc60a040a0504626f6c64046e756c6cc50a150a05117b22696d616765223a22782e706e67227dc60a160a0504626f6c640474727565010a010b01"
+            },
+            "diff": {"a":{"$":"bytes","hex":"00010a010b01"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "000300030b030b4a2114020a4c0300040300084a1003005a1e03005e22020c040a424c010106010104010011c601060084058100c6004600c607c500c6614b636f6c6f72636f6c6f7274626f6c64626f6c6420706c61696e626f6c646974616c696373697a65666c6167656d7074796974616c696373697a65666c6167656d707479626f6c64626f6c64450001044100024100440006440005064400054400010100010102020077037265647e1400787e787d007977007e7e7e7e7e760105696d6167657705782e706e6778010a010b00"
+            },
+            "diff": {"a":{"$":"bytes","hex":"000000000000010000000000010a010b00"}}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {
+        "a": {"v1":{"$":"bytes","hex":"020b020a18"},"v2":{"$":"bytes","hex":"020b020a18"}},
+        "b": {"v1":{"$":"bytes","hex":"020b020a18"},"v2":{"$":"bytes","hex":"020b020a18"}}
+      }
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {
+        "a": [
+          [
+            "t",
+            {
+              "kind": "text",
+              "delta": [
+                {
+                  "insert": "b",
+                  "attributes": {"$":"obj","pairs":[["italic",true],["size",0],["flag",false],["empty",""],["bold",true]]}
+                },
+                {
+                  "insert": "o",
+                  "attributes": {
+                    "$": "obj",
+                    "pairs": [["italic",true],["size",0],["flag",false],["empty",""],["bold",true],["color","red"]]
+                  }
+                },
+                {"insert":"ld","attributes":{"$":"obj","pairs":[["bold",true],["color","red"]]}},
+                {
+                  "insert": {"$":"obj","pairs":[["image","x.png"]]},
+                  "attributes": {"$":"obj","pairs":[["color","red"]]}
+                },
+                {"insert":" ","attributes":{"$":"obj","pairs":[["color","red"],["bold",true]]}},
+                {"insert":"p","attributes":{"$":"obj","pairs":[["color","red"]]}},
+                {"insert":"lain"}
+              ]
+            }
+          ]
+        ],
+        "b": [
+          [
+            "t",
+            {
+              "kind": "text",
+              "delta": [
+                {
+                  "insert": "b",
+                  "attributes": {"$":"obj","pairs":[["italic",true],["size",0],["flag",false],["empty",""],["bold",true]]}
+                },
+                {
+                  "insert": "o",
+                  "attributes": {
+                    "$": "obj",
+                    "pairs": [["italic",true],["size",0],["flag",false],["empty",""],["bold",true],["color","red"]]
+                  }
+                },
+                {"insert":"ld","attributes":{"$":"obj","pairs":[["bold",true],["color","red"]]}},
+                {
+                  "insert": {"$":"obj","pairs":[["image","x.png"]]},
+                  "attributes": {"$":"obj","pairs":[["color","red"]]}
+                },
+                {"insert":" ","attributes":{"$":"obj","pairs":[["color","red"],["bold",true]]}},
+                {"insert":"p","attributes":{"$":"obj","pairs":[["color","red"]]}},
+                {"insert":"lain"}
+              ]
+            }
+          ]
+        ]
+      }
+    },
+    "structs": {
+      "api": "doc.store.clients",
+      "value": {
+        "a": [
+          [
+            11,
+            [
+              {
+                "id": [11,0],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,1],
+                "rightOrigin": [10,2],
+                "parent": "t",
+                "content": {"ref":6,"value":["color","red"]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [11,1],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,6],
+                "rightOrigin": [10,7],
+                "parent": "t",
+                "content": {"ref":6,"value":["color",null]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ],
+          [
+            10,
+            [
+              {
+                "id": [10,0],
+                "len": 1,
+                "kind": "item",
+                "parent": "t",
+                "content": {"ref":6,"value":["bold",true]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,1],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,0],
+                "parent": "t",
+                "content": {"ref":4,"value":"b"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,2],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,1],
+                "parent": "t",
+                "content": {"ref":4,"value":"o"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,3],
+                "len": 2,
+                "kind": "item",
+                "origin": [10,2],
+                "parent": "t",
+                "content": {"ref":4,"value":"ld"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,5],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,4],
+                "parent": "t",
+                "content": {"ref":4,"value":" "},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,6],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,5],
+                "parent": "t",
+                "content": {"ref":4,"value":"p"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,7],
+                "len": 4,
+                "kind": "item",
+                "origin": [10,6],
+                "parent": "t",
+                "content": {"ref":4,"value":"lain"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,11],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,10],
+                "parent": "t",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [10,12],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,5],
+                "rightOrigin": [10,6],
+                "parent": "t",
+                "content": {"ref":6,"value":["bold",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,13],
+                "len": 1,
+                "kind": "item",
+                "rightOrigin": [10,0],
+                "parent": "t",
+                "content": {"ref":6,"value":["italic",true]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,14],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,13],
+                "rightOrigin": [10,0],
+                "parent": "t",
+                "content": {"ref":6,"value":["size",0]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,15],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,14],
+                "rightOrigin": [10,0],
+                "parent": "t",
+                "content": {"ref":6,"value":["flag",false]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,16],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,15],
+                "rightOrigin": [10,0],
+                "parent": "t",
+                "content": {"ref":6,"value":["empty",""]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,17],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,2],
+                "rightOrigin": [10,3],
+                "parent": "t",
+                "content": {"ref":6,"value":["italic",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,18],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,17],
+                "rightOrigin": [10,3],
+                "parent": "t",
+                "content": {"ref":6,"value":["size",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,19],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,18],
+                "rightOrigin": [10,3],
+                "parent": "t",
+                "content": {"ref":6,"value":["flag",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,20],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,19],
+                "rightOrigin": [10,3],
+                "parent": "t",
+                "content": {"ref":6,"value":["empty",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,21],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,4],
+                "rightOrigin": [10,5],
+                "parent": "t",
+                "content": {"ref":6,"value":["bold",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,22],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,21],
+                "rightOrigin": [10,5],
+                "parent": "t",
+                "content": {"ref":5,"value":{"$":"obj","pairs":[["image","x.png"]]}},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,23],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,22],
+                "rightOrigin": [10,5],
+                "parent": "t",
+                "content": {"ref":6,"value":["bold",true]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ],
+        "b": [
+          [
+            11,
+            [
+              {
+                "id": [11,0],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,1],
+                "rightOrigin": [10,2],
+                "parent": "t",
+                "content": {"ref":6,"value":["color","red"]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [11,1],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,6],
+                "rightOrigin": [10,7],
+                "parent": "t",
+                "content": {"ref":6,"value":["color",null]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ],
+          [
+            10,
+            [
+              {
+                "id": [10,0],
+                "len": 1,
+                "kind": "item",
+                "parent": "t",
+                "content": {"ref":6,"value":["bold",true]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,1],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,0],
+                "parent": "t",
+                "content": {"ref":4,"value":"b"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,2],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,1],
+                "parent": "t",
+                "content": {"ref":4,"value":"o"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,3],
+                "len": 2,
+                "kind": "item",
+                "origin": [10,2],
+                "parent": "t",
+                "content": {"ref":4,"value":"ld"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,5],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,4],
+                "parent": "t",
+                "content": {"ref":4,"value":" "},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,6],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,5],
+                "parent": "t",
+                "content": {"ref":4,"value":"p"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,7],
+                "len": 4,
+                "kind": "item",
+                "origin": [10,6],
+                "parent": "t",
+                "content": {"ref":4,"value":"lain"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,11],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,10],
+                "parent": "t",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [10,12],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,5],
+                "rightOrigin": [10,6],
+                "parent": "t",
+                "content": {"ref":6,"value":["bold",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,13],
+                "len": 1,
+                "kind": "item",
+                "rightOrigin": [10,0],
+                "parent": "t",
+                "content": {"ref":6,"value":["italic",true]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,14],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,13],
+                "rightOrigin": [10,0],
+                "parent": "t",
+                "content": {"ref":6,"value":["size",0]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,15],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,14],
+                "rightOrigin": [10,0],
+                "parent": "t",
+                "content": {"ref":6,"value":["flag",false]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,16],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,15],
+                "rightOrigin": [10,0],
+                "parent": "t",
+                "content": {"ref":6,"value":["empty",""]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,17],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,2],
+                "rightOrigin": [10,3],
+                "parent": "t",
+                "content": {"ref":6,"value":["italic",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,18],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,17],
+                "rightOrigin": [10,3],
+                "parent": "t",
+                "content": {"ref":6,"value":["size",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,19],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,18],
+                "rightOrigin": [10,3],
+                "parent": "t",
+                "content": {"ref":6,"value":["flag",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,20],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,19],
+                "rightOrigin": [10,3],
+                "parent": "t",
+                "content": {"ref":6,"value":["empty",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,21],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,4],
+                "rightOrigin": [10,5],
+                "parent": "t",
+                "content": {"ref":6,"value":["bold",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,22],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,21],
+                "rightOrigin": [10,5],
+                "parent": "t",
+                "content": {"ref":5,"value":{"$":"obj","pairs":[["image","x.png"]]}},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [10,23],
+                "len": 1,
+                "kind": "item",
+                "origin": [10,22],
+                "rightOrigin": [10,5],
+                "parent": "t",
+                "content": {"ref":6,"value":["bold",true]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ]
+      }
+    }
+  }
+}

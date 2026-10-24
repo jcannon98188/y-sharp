@@ -1,0 +1,88 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["ENC-54","ENC-55","ENC-56"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {"schema":1,"steps":[]},
+  "observations": {
+    "malformed": {
+      "api": "Y.applyUpdate, Y.applyUpdateV2 on a fresh Doc",
+      "value": [
+        {
+          "name": "valid-reference",
+          "encoding": "v2",
+          "bytes": {"$":"bytes","hex":"0000010100000104060374686901020101000001010000"},
+          "outcome": "ok",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"010102"},
+          "doc": [["t",{"kind":"text","delta":[{"insert":"hi"}]}]],
+          "classification": "match"
+        },
+        {
+          "name": "v1-bytes-through-v2-applier",
+          "encoding": "v2",
+          "bytes": {"$":"bytes","hex":"010101000401017402686900"},
+          "outcome": "throws",
+          "error": "RangeError",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "empty-bytes",
+          "encoding": "v2",
+          "bytes": {"$":"bytes","hex":""},
+          "outcome": "throws",
+          "error": "Error",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "column-length-beyond-buffer",
+          "encoding": "v2",
+          "bytes": {"$":"bytes","hex":"00ff01"},
+          "outcome": "throws",
+          "error": "RangeError",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "feature-flag-set",
+          "encoding": "v2",
+          "bytes": {"$":"bytes","hex":"0100010100000104060374686901020101000001010000"},
+          "outcome": "ok",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"010102"},
+          "doc": [["t",{"kind":"text","delta":[{"insert":"hi"}]}]],
+          "classification": "match"
+        },
+        {
+          "name": "truncated-in-columns",
+          "encoding": "v2",
+          "bytes": {"$":"bytes","hex":"0000010100000104"},
+          "outcome": "throws",
+          "error": "Error",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        }
+      ]
+    }
+  }
+}

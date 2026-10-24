@@ -1,0 +1,98 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["T-6","T-8"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":40}],
+    "steps": [
+      {
+        "step": "text.applyDelta",
+        "doc": "a",
+        "target": {"root":"t","kind":"text"},
+        "delta": [
+          {"$":"obj","pairs":[["insert","hello"]]},
+          {"$":"obj","pairs":[["insert",""],["attributes",{"$":"obj","pairs":[["x",1]]}]]},
+          {"$":"obj","pairs":[["insert"," there"],["attributes",{"$":"obj","pairs":[["bold",true]]}]]}
+        ]
+      },
+      {
+        "step": "text.applyDelta",
+        "doc": "a",
+        "target": {"root":"t","kind":"text"},
+        "delta": [
+          {"$":"obj","pairs":[["retain",2]]},
+          {"$":"obj","pairs":[["delete",2]]},
+          {"$":"obj","pairs":[["retain",3],["attributes",{"$":"obj","pairs":[["bold",null]]}]]}
+        ]
+      }
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [
+            {
+              "$": "bytes",
+              "hex": "01042800040101740568656c6c6f86280404626f6c6404747275658428050620746865726586280b04626f6c64046e756c6c00"
+            },
+            {"$":"bytes","hex":"0101280dc62807280804626f6c64047472756501280202020501"}
+          ],
+          "v2": [
+            {
+              "$": "bytes",
+              "hex": "000200020268020308020c0007040086008400861a147468656c6c6f626f6c64207468657265626f6c64010504060401010000010400787e00"
+            },
+            {"$":"bytes","hex":"000100026801010e011001c60604626f6c640400000001010d7801280202010100"}
+          ]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "010828000401017402686581280102842803016f81280401842805022074842807046865726586280b04626f6c64046e756c6cc62807280804626f6c64047472756501280202020501"
+            },
+            "diff": {}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "00020002026807070204030004084801100d040081008400810084018600c619127468656f207468657265626f6c64626f6c640102010244010101000202010108007e7801280202010100"
+            },
+            "diff": {}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {"a":{"v1":{"$":"bytes","hex":"01280e"},"v2":{"$":"bytes","hex":"01280e"}}}
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {
+        "a": [
+          [
+            "t",
+            {
+              "kind": "text",
+              "delta": [{"insert":"heo t"},{"insert":"here","attributes":{"$":"obj","pairs":[["bold",true]]}}]
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

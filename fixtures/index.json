@@ -1,0 +1,155 @@
+{
+  "schema": 1,
+  "generator": "ysharp-fixture-gen 1.0.0",
+  "node": "24",
+  "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+  "fixtures": [
+    {
+      "path": "array/concurrent-insert-order.json",
+      "area": "array",
+      "name": "concurrent-insert-order",
+      "covers": ["A-18"],
+      "sha256": "e01ea83df5b66aeec944a3c143618d5a69b6adbc4250ff05e0855c865ad98f4e",
+      "bytes": 12830
+    },
+    {
+      "path": "array/insert-push-delete.json",
+      "area": "array",
+      "name": "insert-push-delete",
+      "covers": ["A-1","A-4","A-5","A-16"],
+      "sha256": "cfc58ce8f0d21527ac5197a48ed7e7e9bbf4330b18e040e968c7840340800fad",
+      "bytes": 9495
+    },
+    {
+      "path": "array/nested-types.json",
+      "area": "array",
+      "name": "nested-types",
+      "covers": ["A-9","T-0.8","M-12"],
+      "sha256": "89ea1e8a70719cf054ce3caf3d94014342a36147366a928bc8c168f5f9b0e6e6",
+      "bytes": 7683
+    },
+    {
+      "path": "codecs/merge-diff-convert.json",
+      "area": "codecs",
+      "name": "merge-diff-convert",
+      "covers": ["ENC-23","ENC-24","ENC-25","ENC-21"],
+      "sha256": "3cc26fe6c40df8f3d3aadaf7294c1c5f9c9ced704b9ddbd9de611ec3bc69d3c7",
+      "bytes": 6724
+    },
+    {
+      "path": "hostile/malformed-v1-updates.json",
+      "area": "hostile",
+      "name": "malformed-v1-updates",
+      "covers": [
+        "ENC-29",
+        "ENC-30",
+        "ENC-31",
+        "ENC-32",
+        "ENC-33",
+        "ENC-34",
+        "ENC-35",
+        "ENC-37",
+        "ENC-38",
+        "ENC-39",
+        "ENC-40",
+        "ENC-41",
+        "ENC-42",
+        "ENC-43",
+        "ENC-45",
+        "ENC-52",
+        "ENC-53",
+        "ENC-54"
+      ],
+      "sha256": "ec4f70ca1b2c4d41f8337470f2d214ba02bc9124bced41b51eb9ba7c8c0211f0",
+      "bytes": 10398
+    },
+    {
+      "path": "hostile/malformed-v2-updates.json",
+      "area": "hostile",
+      "name": "malformed-v2-updates",
+      "covers": ["ENC-54","ENC-55","ENC-56"],
+      "sha256": "4a31c0780943f43a3068df36a80693c3f7fb8f7ce5489333ea3eb0d2bf1cda23",
+      "bytes": 2858
+    },
+    {
+      "path": "map/concurrent-set.json",
+      "area": "map",
+      "name": "concurrent-set",
+      "covers": ["M-9"],
+      "sha256": "6158c780b9b2d74c9d42bfe90b571206957b837334324cee5c62b766b410955a",
+      "bytes": 7500
+    },
+    {
+      "path": "map/set-delete-clear.json",
+      "area": "map",
+      "name": "set-delete-clear",
+      "covers": ["M-1","M-4","M-5"],
+      "sha256": "4db739c961e94fda9af0a9cc4cd8ea9ab6b847f1150b393e52ccd304556141c4",
+      "bytes": 7230
+    },
+    {
+      "path": "map/value-kinds.json",
+      "area": "map",
+      "name": "value-kinds",
+      "covers": ["M-8","M-11","ENC-07"],
+      "sha256": "f6a6cce5e4f54547c2bb47fcefd09669d3dcdff48db78e6934162e2b70282d0a",
+      "bytes": 11204
+    },
+    {
+      "path": "random/text-three-clients-seed-1337.json",
+      "area": "random",
+      "name": "text-three-clients-seed-1337",
+      "covers": ["T-1","T-2","A-18"],
+      "sha256": "374f5b93249733229daa83775200ffa56b1cf0ce2604261a0ab0a4bed74eb618",
+      "bytes": 21246
+    },
+    {
+      "path": "text/apply-delta.json",
+      "area": "text",
+      "name": "apply-delta",
+      "covers": ["T-6","T-8"],
+      "sha256": "064e6c909ed585381638fef6270d0945143923c3be8452a79a23920902663fcf",
+      "bytes": 3120
+    },
+    {
+      "path": "text/concurrent-same-position.json",
+      "area": "text",
+      "name": "concurrent-same-position",
+      "covers": ["T-1","A-18"],
+      "sha256": "e2aab54a2b7111ca4349b7d3bb3701886601f115cab77499ba2f6d35814b528d",
+      "bytes": 13605
+    },
+    {
+      "path": "text/formatting.json",
+      "area": "text",
+      "name": "formatting",
+      "covers": ["F-1","F-4","F-6","D-1"],
+      "sha256": "63a7f6cbdc373238f428cc7adbd3ab6056b5afcbb76b446d88d709165140f00a",
+      "bytes": 25474
+    },
+    {
+      "path": "text/insert-delete-sync.json",
+      "area": "text",
+      "name": "insert-delete-sync",
+      "covers": ["T-1","T-2","ENC-21","ENC-28"],
+      "sha256": "d1305427bf1f9a3091eedc89477d9aaa74360c1f5f2646d43f34eb1574536f06",
+      "bytes": 8674
+    },
+    {
+      "path": "text/observe-events.json",
+      "area": "text",
+      "name": "observe-events",
+      "covers": ["Y-2","TX-1"],
+      "sha256": "430491283ebbe6e6e22bbc78c2171520a1b0e703da9e588be799d42ed0402a04",
+      "bytes": 6971
+    },
+    {
+      "path": "text/surrogates-and-embeds.json",
+      "area": "text",
+      "name": "surrogates-and-embeds",
+      "covers": ["T-5","E-1","E-2"],
+      "sha256": "dfb96cebe91ce4320a04485cf2f7794093054a26b5f743f427248c7dd8fdc32d",
+      "bytes": 5675
+    }
+  ]
+}
