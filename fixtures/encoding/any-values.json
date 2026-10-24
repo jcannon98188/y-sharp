@@ -1,7 +1,7 @@
 {
   "header": {
     "schema": 1,
-    "covers": ["ENC-06","ENC-07","ENC-72","Q01","Q02","Q03","Q04","Q05","Q06","Q08","Q14"],
+    "covers": ["ENC-06","ENC-07","ENC-72","Q01","Q02","Q03","Q04","Q05","Q06","Q08"],
     "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
     "node": "24",
     "generator": "ysharp-fixture-gen 1.0.0",

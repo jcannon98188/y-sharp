@@ -1,7 +1,20 @@
 {
   "header": {
     "schema": 1,
-    "covers": ["ENC-01","ENC-10","ENC-11","ENC-13","ENC-14","ENC-15","ENC-27","ENC-28","ENC-76","ENC-81","ENC-85"],
+    "covers": [
+      "ENC-01",
+      "ENC-10",
+      "ENC-11",
+      "ENC-13",
+      "ENC-14",
+      "ENC-15",
+      "ENC-27",
+      "ENC-28",
+      "ENC-76",
+      "ENC-81",
+      "ENC-85",
+      "Q14"
+    ],
     "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
     "node": "24",
     "generator": "ysharp-fixture-gen 1.0.0",

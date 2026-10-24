@@ -40,9 +40,9 @@
       "path": "encoding/any-values.json",
       "area": "encoding",
       "name": "any-values",
-      "covers": ["ENC-06","ENC-07","ENC-72","Q01","Q02","Q03","Q04","Q05","Q06","Q08","Q14"],
-      "sha256": "b3284004bb477ace692bc26646b80b5081b3b9d0f375ca1133d30398b603a5a3",
-      "bytes": 19852
+      "covers": ["ENC-06","ENC-07","ENC-72","Q01","Q02","Q03","Q04","Q05","Q06","Q08"],
+      "sha256": "affc0c75588d906ec40006f3a1414ac86b26cf82239603136aee6e16787ee8d4",
+      "bytes": 19846
     },
     {
       "path": "encoding/delete-sets.json",
@@ -77,10 +77,11 @@
         "ENC-78",
         "ENC-79",
         "Q12",
-        "Q13"
+        "Q13",
+        "Q14"
       ],
-      "sha256": "c3c592ef972ce45430a9163ad76dcf4257675d0317d8c990d11cef56497a5eb1",
-      "bytes": 54690
+      "sha256": "bb3bd51d0d822cd47231672b7c3b6d77b22a7b963d5996f272a5ff0bc3da1dfd",
+      "bytes": 54703
     },
     {
       "path": "encoding/merge-diff-convert-edges.json",
@@ -102,9 +103,22 @@
       "path": "encoding/struct-layouts.json",
       "area": "encoding",
       "name": "struct-layouts",
-      "covers": ["ENC-01","ENC-10","ENC-11","ENC-13","ENC-14","ENC-15","ENC-27","ENC-28","ENC-76","ENC-81","ENC-85"],
-      "sha256": "c2b33e476a74f11ccb5a93c156b3906163166d3db8db625b1ca281c617dbac26",
-      "bytes": 37995
+      "covers": [
+        "ENC-01",
+        "ENC-10",
+        "ENC-11",
+        "ENC-13",
+        "ENC-14",
+        "ENC-15",
+        "ENC-27",
+        "ENC-28",
+        "ENC-76",
+        "ENC-81",
+        "ENC-85",
+        "Q14"
+      ],
+      "sha256": "80bf29e0f98f565d3f8fbb0422a655488633443d7f61bd8df15352463338e368",
+      "bytes": 38090
     },
     {
       "path": "hostile/malformed-codec-extras.json",

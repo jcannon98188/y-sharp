@@ -262,6 +262,7 @@ const v2 = (cols, rest) => {
 }
 const v2case = (name, cols, rest, extra = {}) => c(name, v2(cols, rest), { encoding: 'v2', ...extra })
 
+
 // JS accepts or partially applies where y-sharp rejects atomically (ADR 0005 strict decoding; Q15).
 const lenient = { classification: 'diverge', divergence: 'Q15' }
 const hostileExtra = [
@@ -297,7 +298,7 @@ export default () => [
   {
     area: 'encoding',
     name: 'any-values',
-    covers: ['ENC-06', 'ENC-07', 'ENC-72', 'Q01', 'Q02', 'Q03', 'Q04', 'Q05', 'Q06', 'Q08', 'Q14'],
+    covers: ['ENC-06', 'ENC-07', 'ENC-72', 'Q01', 'Q02', 'Q03', 'Q04', 'Q05', 'Q06', 'Q08'],
     script: anyValues
   },
   {
@@ -316,7 +317,7 @@ export default () => [
   {
     area: 'encoding',
     name: 'ids-clocks-lengths',
-    covers: ['ENC-02', 'ENC-03', 'ENC-04', 'ENC-08', 'ENC-09', 'ENC-70', 'ENC-71', 'ENC-74', 'ENC-77', 'ENC-78', 'ENC-79', 'Q12', 'Q13'],
+    covers: ['ENC-02', 'ENC-03', 'ENC-04', 'ENC-08', 'ENC-09', 'ENC-70', 'ENC-71', 'ENC-74', 'ENC-77', 'ENC-78', 'ENC-79', 'Q12', 'Q13', 'Q14'],
     script: idsAndLengths
   },
   {
@@ -329,7 +330,7 @@ export default () => [
   {
     area: 'encoding',
     name: 'struct-layouts',
-    covers: ['ENC-01', 'ENC-10', 'ENC-11', 'ENC-13', 'ENC-14', 'ENC-15', 'ENC-27', 'ENC-28', 'ENC-76', 'ENC-81', 'ENC-85'],
+    covers: ['ENC-01', 'ENC-10', 'ENC-11', 'ENC-13', 'ENC-14', 'ENC-15', 'ENC-27', 'ENC-28', 'ENC-76', 'ENC-81', 'ENC-85', 'Q14'],
     script: structLayouts,
     observe: ['structs', 'ds'],
     truncation: [{ replica: 'a', encoding: 'v1' }, { replica: 'a', encoding: 'v2' }]

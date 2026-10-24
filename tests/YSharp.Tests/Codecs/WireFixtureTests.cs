@@ -35,7 +35,7 @@ public sealed class WireFixtureTests
     [Fact, Covers("ENC-16", "ENC-17", "ENC-18", "ENC-19", "ENC-20", "ENC-80")]
     public void DeleteSets_ReplayMatchesTheOracleBytes() => RunWire("encoding/delete-sets.json");
 
-    [Fact, Covers("ENC-01", "ENC-10", "ENC-11", "ENC-13", "ENC-14", "ENC-15", "ENC-27", "ENC-28", "ENC-76", "ENC-81", "ENC-85")]
+    [Fact, Covers("ENC-01", "ENC-10", "ENC-11", "ENC-13", "ENC-14", "ENC-15", "ENC-27", "ENC-28", "ENC-76", "ENC-81", "ENC-85", "Q14")]
     public void StructLayouts_ReplayMatchesTheOracleBytes_AndEveryTruncationFails() => RunWire("encoding/struct-layouts.json", truncation: true);
 
     [Fact, Covers("ENC-23", "ENC-24", "ENC-25", "ENC-81", "ENC-82", "ENC-83", "ENC-84")]
