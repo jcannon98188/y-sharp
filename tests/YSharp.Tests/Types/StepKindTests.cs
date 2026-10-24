@@ -39,7 +39,9 @@ public sealed class StepKindTests
         var path = Path.Combine(RepoRoot.Find(), "tools", "fixture-gen", "schema", "ops.schema.json");
         using var schema = JsonDocument.Parse(File.ReadAllText(path));
         var fromSchema = schema.RootElement.GetProperty("$defs").GetProperty("step").GetProperty("oneOf").EnumerateArray()
-            .ToDictionary(o => o.GetProperty("properties").GetProperty("step").GetProperty("const").GetString()!, o => o, StringComparer.Ordinal);
+            .ToDictionary(o => o.GetProperty("properties").GetProperty("step").GetProperty("const").GetString()!, o => o, StringComparer.Ordinal)
+            .Where(kv => !kv.Key.StartsWith("awareness.", StringComparison.Ordinal) && !kv.Key.StartsWith("sync.", StringComparison.Ordinal) && !kv.Key.StartsWith("auth.", StringComparison.Ordinal)) // Spec 9 kinds: ProtocolStepKindTests
+            .ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.Ordinal);
         var registry = TypeSteps.CreateRegistry();
         // Kinds other areas add (Spec 9 protocol, Spec 10 simulation) are in the schema and in their own registries, not in this one.
         Assert.All(registry.Kinds, kind => Assert.True(fromSchema.ContainsKey(kind), $"{kind} is registered but not in the schema"));

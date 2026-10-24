@@ -9,7 +9,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:149"
 
 - id: SY-2
@@ -19,7 +19,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:150"
 
 - id: SY-3
@@ -29,7 +29,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:154"
 
 - id: SY-4
@@ -39,7 +39,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:155"
 
 - id: SY-5
@@ -49,7 +49,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:156"
 
 - id: SY-6
@@ -59,7 +59,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:157"
 
 - id: SY-7
@@ -69,7 +69,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:161"
 
 - id: SY-8
@@ -79,7 +79,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:162"
 
 - id: SY-9
@@ -89,7 +89,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:163"
 
 - id: SY-10
@@ -99,7 +99,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:164"
 
 - id: SY-11
@@ -109,7 +109,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:165"
 
 - id: SY-12
@@ -119,7 +119,7 @@
   layers: [unit, fixture, port, differential]
   wire: true
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:166"
 
 - id: SY-13
@@ -129,7 +129,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:170"
 
 - id: SY-14
@@ -139,7 +139,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:171"
 
 - id: SY-15
@@ -149,7 +149,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:172"
 
 - id: SY-16
@@ -159,7 +159,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:176"
 
 - id: SY-17
@@ -169,7 +169,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:177"
 
 - id: SY-18
@@ -179,7 +179,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:178"
 
 - id: SY-19
@@ -189,7 +189,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:179"
 
 - id: SY-20
@@ -199,5 +199,5 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:180"

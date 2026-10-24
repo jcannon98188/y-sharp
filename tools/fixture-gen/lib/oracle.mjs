@@ -17,6 +17,7 @@ export const Y = await import(url('yjs', 'src', 'index.js'))
 export const { encodeStateVectorV2 } = await import(url('yjs', 'src', 'utils', 'encoding.js'))
 export const syncProtocol = await import(url('y-protocols', 'sync.js'))
 export const awarenessProtocol = await import(url('y-protocols', 'awareness.js'))
+export const authProtocol = await import(url('y-protocols', 'auth.js'))
 export const lib0 = {
   prng: await import(url('lib0', 'prng.js')),
   encoding: await import(url('lib0', 'encoding.js')),

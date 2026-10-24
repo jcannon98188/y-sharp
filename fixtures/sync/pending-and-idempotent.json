@@ -1,0 +1,103 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["SY-17","SY-18","SY-8"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":1},{"name":"b","clientId":2}],
+    "steps": [
+      {"step":"sync.update","name":"m-second","update":{"$":"bytes","hex":"010101038401020374776f00"}},
+      {"step":"sync.update","name":"m-first","update":{"$":"bytes","hex":"0101010004010174036f6e6500"}},
+      {"step":"sync.read","name":"second-first","doc":"b","from":"m-second","origin":"o"},
+      {"step":"sync.read","name":"first-second","doc":"b","from":"m-first","origin":"o"},
+      {"step":"sync.read","name":"first-again","doc":"b","from":"m-first","origin":"o"},
+      {"step":"sync.read","name":"second-again","doc":"b","from":"m-second","origin":"o"}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {"v1":[],"v2":[]},
+        "b": {
+          "v1": [{"$":"bytes","hex":"0101010004010174066f6e6574776f00"}],
+          "v2": [{"$":"bytes","hex":"00000101000001040a07746f6e6574776f01060101000001010000"}]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {"full":{"$":"bytes","hex":"0000"},"diff":{"b":{"$":"bytes","hex":"0000"}}},
+          "v2": {
+            "full": {"$":"bytes","hex":"00000000000001000000000000"},
+            "diff": {"b":{"$":"bytes","hex":"00000000000001000000000000"}}
+          }
+        },
+        "b": {
+          "v1": {
+            "full": {"$":"bytes","hex":"0101010004010174066f6e6574776f00"},
+            "diff": {"a":{"$":"bytes","hex":"0101010004010174066f6e6574776f00"}}
+          },
+          "v2": {
+            "full": {"$":"bytes","hex":"00000101000001040a07746f6e6574776f01060101000001010000"},
+            "diff": {"a":{"$":"bytes","hex":"00000101000001040a07746f6e6574776f01060101000001010000"}}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {
+        "a": {"v1":{"$":"bytes","hex":"00"},"v2":{"$":"bytes","hex":"00"}},
+        "b": {"v1":{"$":"bytes","hex":"010106"},"v2":{"$":"bytes","hex":"010106"}}
+      }
+    },
+    "doc": {"api":"toDelta, toArray, entries, getAttributes walk of every root","value":{"a":[],"b":[]}},
+    "results": {
+      "api": "writeUpdate, readSyncMessage",
+      "value": {
+        "m-second": {"api":"writeUpdate","bytes":{"$":"bytes","hex":"020c010101038401020374776f00"}},
+        "m-first": {"api":"writeUpdate","bytes":{"$":"bytes","hex":"020d0101010004010174036f6e6500"}},
+        "second-first": {
+          "api": "readSyncMessage",
+          "bytes": {"$":"bytes","hex":""},
+          "type": 2,
+          "threw": false,
+          "handlerCalled": false,
+          "consumed": 14
+        },
+        "first-second": {
+          "api": "readSyncMessage",
+          "bytes": {"$":"bytes","hex":""},
+          "type": 2,
+          "threw": false,
+          "handlerCalled": false,
+          "consumed": 15
+        },
+        "first-again": {
+          "api": "readSyncMessage",
+          "bytes": {"$":"bytes","hex":""},
+          "type": 2,
+          "threw": false,
+          "handlerCalled": false,
+          "consumed": 15
+        },
+        "second-again": {
+          "api": "readSyncMessage",
+          "bytes": {"$":"bytes","hex":""},
+          "type": 2,
+          "threw": false,
+          "handlerCalled": false,
+          "consumed": 14
+        }
+      }
+    }
+  }
+}

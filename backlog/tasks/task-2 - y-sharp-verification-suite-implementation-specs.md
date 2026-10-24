@@ -4,7 +4,7 @@ title: 'y-sharp verification suite: implementation specs'
 status: To Do
 assignee: []
 created_date: '2026-10-23 22:01'
-updated_date: '2026-10-24 05:33'
+updated_date: '2026-10-24 05:44'
 labels: []
 dependencies: []
 references:
@@ -28,4 +28,6 @@ Implementation seams (from Spec 6): internal string Doc.DumpStructs() (ADR 0016 
 Orphan: Q25 had no real owner (Specs 6/7 each pointed at the other); assigned to Spec 10 via AC. API gaps from Spec 7: no root YXmlText for Doc.Get; no YArray.Slice/ForEach/Map; Transact returns nothing; AfterAllTransactions has no transaction list; item identity not public (compareIDs, getTypeChildren approximated); YEvent invalid after dispatch (JS shared-event semantics not reproducible). Need ADR 0008 decisions.
 
 Spec 8 API gaps: seams by reflection (Doc.CollectGarbage/ShouldLoad/AutoLoad/CollectionId/Meta/SignalLoaded/SignalSynced; UndoManager.Undoing/Redoing/CurrStackItem). Stub gaps: no root XmlText getter, no UndoManagerOptions.Doc, ItemView exposes only id, XmlFragment can't hold a subdoc, no whenLoaded/whenSynced, no GetSubdocGuids. Open: RP-05, PUD-05 follow JS for now.
+
+Spec 9 API changes/gaps: added Awareness.TryEncodeUpdate and optional YSync.TryReadMessage errorHandler to the stub (AW-31/32, SY-8/19/20); client ids uint vs 53-bit (AW-34); GetStates snapshot vs live semantics unspecified (AW-13); AU-5 assumes ArgumentNullException. Needs ADR 0008 decisions.
 <!-- SECTION:NOTES:END -->

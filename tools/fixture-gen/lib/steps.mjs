@@ -25,6 +25,30 @@ export class Ctx {
     this.now = 1704067200000 // 2024-01-01T00:00:00Z, like the C# VirtualTimeProvider; any positive epoch works (UndoManager treats 0 as "no change yet")
     this.cleanups = []
     this.afterTick = null
+    this.timers = []
+    this.timerSeq = 0
+  }
+
+  /** Virtual setInterval: fires from advance(), in due order, never from real time. */
+  addTimer (fn, ms) {
+    const t = { fn, ms, due: this.now + ms, seq: ++this.timerSeq }
+    this.timers.push(t)
+    return t
+  }
+
+  clearTimer (t) { this.timers = this.timers.filter(x => x !== t) }
+
+  advance (ms) {
+    const target = this.now + ms
+    for (;;) {
+      const next = this.timers.filter(t => t.due <= target).sort((a, b) => a.due - b.due || a.seq - b.seq)[0]
+      if (!next) break
+      this.now = next.due
+      next.due += next.ms
+      next.seq = ++this.timerSeq
+      next.fn()
+    }
+    this.now = target
   }
 
   doc (name) {
@@ -129,7 +153,7 @@ defineStep({
   children: true,
   run: (ctx, s) => inTransaction(ctx, s.doc, s.origin, () => runSteps(ctx, s.steps))
 })
-defineStep({ kind: 'tick', required: ['ms'], run: (ctx, s) => { ctx.now += s.ms; ctx.afterTick?.() } })
+defineStep({ kind: 'tick', required: ['ms'], run: (ctx, s) => { ctx.advance(s.ms); ctx.afterTick?.() } })
 defineStep({
   kind: 'sync',
   required: ['from', 'to'],

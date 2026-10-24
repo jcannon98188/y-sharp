@@ -1,0 +1,100 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["AW-25","AW-26","AW-27","AW-28","AW-29"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"rb","clientId":9}],
+    "steps": [
+      {"step":"awareness.new","awareness":"b","doc":"rb"},
+      {"step":"awareness.setLocal","awareness":"b","state":{"$":"obj","pairs":[["me",1]]}},
+      {
+        "step": "awareness.applyUpdate",
+        "awareness": "b",
+        "bytes": {"$":"bytes","hex":"030101077b2261223a317d0204077b2261223a327d0302077b2261223a337d"},
+        "origin": "r"
+      },
+      {"step":"tick","ms":100},
+      {"step":"awareness.removeStates","awareness":"b","clients":[],"origin":"none"},
+      {"step":"awareness.removeStates","awareness":"b","clients":[99],"origin":"unknown"},
+      {"step":"awareness.removeStates","awareness":"b","clients":[2,2,99,3],"origin":"dup"},
+      {"step":"awareness.removeStates","awareness":"b","clients":[9,9,1]},
+      {"step":"awareness.removeStates","awareness":"b","clients":[9]},
+      {"step":"awareness.encode","name":"tomb","awareness":"b","clients":[1,2,3,9]},
+      {
+        "step": "awareness.applyUpdate",
+        "awareness": "b",
+        "bytes": {"$":"bytes","hex":"010204127b2261223a2273616d652d636c6f636b227d"},
+        "origin": "r"
+      },
+      {
+        "step": "awareness.applyUpdate",
+        "awareness": "b",
+        "bytes": {"$":"bytes","hex":"0102050d7b2261223a226e65776572227d"},
+        "origin": "r"
+      }
+    ]
+  },
+  "observations": {
+    "updates": {"api":"Doc.on('update'), Doc.on('updateV2')","value":{"rb":{"v1":[],"v2":[]}}},
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "rb": {
+          "v1": {"full":{"$":"bytes","hex":"0000"},"diff":{}},
+          "v2": {"full":{"$":"bytes","hex":"00000000000001000000000000"},"diff":{}}
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {"rb":{"v1":{"$":"bytes","hex":"00"},"v2":{"$":"bytes","hex":"00"}}}
+    },
+    "doc": {"api":"toDelta, toArray, entries, getAttributes walk of every root","value":{"rb":[]}},
+    "events": {
+      "api": "AbstractType.observe",
+      "value": [
+        {"observer":"b","event":"change","at":0,"added":[],"updated":[9],"removed":[],"origin":"local"},
+        {"observer":"b","event":"update","at":0,"added":[],"updated":[9],"removed":[],"origin":"local"},
+        {"observer":"b","event":"change","at":0,"added":[1,2,3],"updated":[],"removed":[],"origin":"r"},
+        {"observer":"b","event":"update","at":0,"added":[1,2,3],"updated":[],"removed":[],"origin":"r"},
+        {"observer":"b","event":"change","at":100,"added":[],"updated":[],"removed":[2,3],"origin":"dup"},
+        {"observer":"b","event":"update","at":100,"added":[],"updated":[],"removed":[2,3],"origin":"dup"},
+        {"observer":"b","event":"change","at":100,"added":[],"updated":[],"removed":[9,1],"origin":null},
+        {"observer":"b","event":"update","at":100,"added":[],"updated":[],"removed":[9,1],"origin":null},
+        {"observer":"b","event":"change","at":100,"added":[],"updated":[2],"removed":[],"origin":"r"},
+        {"observer":"b","event":"update","at":100,"added":[],"updated":[2],"removed":[],"origin":"r"}
+      ]
+    },
+    "results": {
+      "api": "encodeAwarenessUpdate",
+      "value": {
+        "tomb": {
+          "api": "encodeAwarenessUpdate",
+          "bytes": {"$":"bytes","hex":"040101046e756c6c0204046e756c6c0302046e756c6c0902046e756c6c"},
+          "threw": false
+        }
+      }
+    },
+    "awareness": {
+      "api": "Awareness.clientID, getStates, meta (lastUpdated is ms since the first awareness was created)",
+      "value": {
+        "b": {
+          "clientId": 9,
+          "states": [[2,{"$":"obj","pairs":[["a","newer"]]}]],
+          "meta": [
+            [1,{"clock":1,"lastUpdated":0}],
+            [2,{"clock":5,"lastUpdated":100}],
+            [3,{"clock":2,"lastUpdated":0}],
+            [9,{"clock":2,"lastUpdated":100}]
+          ]
+        }
+      }
+    }
+  }
+}

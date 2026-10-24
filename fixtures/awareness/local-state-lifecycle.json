@@ -1,0 +1,78 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["AW-7","AW-8","AW-9","AW-10","AW-12","AW-26"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"ra","clientId":1}],
+    "steps": [
+      {"step":"awareness.new","awareness":"a","doc":"ra"},
+      {"step":"awareness.setLocalField","awareness":"a","field":"early","value":1},
+      {"step":"awareness.setLocal","awareness":"a","state":{"$":"obj","pairs":[["x",1]]}},
+      {"step":"awareness.setLocal","awareness":"a","state":{"$":"obj","pairs":[["x",1]]}},
+      {
+        "step": "awareness.setLocal",
+        "awareness": "a",
+        "state": {"$":"obj","pairs":[["x",2],["nested",{"$":"obj","pairs":[["k",[1,2]]]}]]}
+      },
+      {"step":"awareness.setLocalField","awareness":"a","field":"y","value":"two"},
+      {"step":"awareness.setLocal","awareness":"a","state":null},
+      {"step":"awareness.setLocalField","awareness":"a","field":"ignored","value":true},
+      {"step":"awareness.setLocal","awareness":"a","state":null},
+      {"step":"awareness.setLocal","awareness":"a","state":{"$":"obj","pairs":[]}},
+      {"step":"awareness.encode","name":"afterRemoval","awareness":"a","clients":[1]}
+    ]
+  },
+  "observations": {
+    "updates": {"api":"Doc.on('update'), Doc.on('updateV2')","value":{"ra":{"v1":[],"v2":[]}}},
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "ra": {
+          "v1": {"full":{"$":"bytes","hex":"0000"},"diff":{}},
+          "v2": {"full":{"$":"bytes","hex":"00000000000001000000000000"},"diff":{}}
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {"ra":{"v1":{"$":"bytes","hex":"00"},"v2":{"$":"bytes","hex":"00"}}}
+    },
+    "doc": {"api":"toDelta, toArray, entries, getAttributes walk of every root","value":{"ra":[]}},
+    "events": {
+      "api": "AbstractType.observe",
+      "value": [
+        {"observer":"a","event":"change","at":0,"added":[],"updated":[1],"removed":[],"origin":"local"},
+        {"observer":"a","event":"update","at":0,"added":[],"updated":[1],"removed":[],"origin":"local"},
+        {"observer":"a","event":"change","at":0,"added":[],"updated":[1],"removed":[],"origin":"local"},
+        {"observer":"a","event":"update","at":0,"added":[],"updated":[1],"removed":[],"origin":"local"},
+        {"observer":"a","event":"update","at":0,"added":[],"updated":[1],"removed":[],"origin":"local"},
+        {"observer":"a","event":"change","at":0,"added":[],"updated":[1],"removed":[],"origin":"local"},
+        {"observer":"a","event":"update","at":0,"added":[],"updated":[1],"removed":[],"origin":"local"},
+        {"observer":"a","event":"change","at":0,"added":[],"updated":[1],"removed":[],"origin":"local"},
+        {"observer":"a","event":"update","at":0,"added":[],"updated":[1],"removed":[],"origin":"local"},
+        {"observer":"a","event":"change","at":0,"added":[],"updated":[],"removed":[1],"origin":"local"},
+        {"observer":"a","event":"update","at":0,"added":[],"updated":[],"removed":[1],"origin":"local"},
+        {"observer":"a","event":"change","at":0,"added":[],"updated":[],"removed":[1],"origin":"local"},
+        {"observer":"a","event":"update","at":0,"added":[],"updated":[],"removed":[1],"origin":"local"},
+        {"observer":"a","event":"change","at":0,"added":[1],"updated":[],"removed":[],"origin":"local"},
+        {"observer":"a","event":"update","at":0,"added":[1],"updated":[],"removed":[],"origin":"local"}
+      ]
+    },
+    "results": {
+      "api": "encodeAwarenessUpdate",
+      "value": {
+        "afterRemoval": {"api":"encodeAwarenessUpdate","bytes":{"$":"bytes","hex":"010108027b7d"},"threw":false}
+      }
+    },
+    "awareness": {
+      "api": "Awareness.clientID, getStates, meta (lastUpdated is ms since the first awareness was created)",
+      "value": {"a":{"clientId":1,"states":[[1,{"$":"obj","pairs":[]}]],"meta":[[1,{"clock":8,"lastUpdated":0}]]}}
+    }
+  }
+}

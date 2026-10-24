@@ -32,6 +32,6 @@
   wire: false
   quirk: [Q32]
   owner: 9
-  status: pending
+  status: active
   ref: "quirks.md:378"
-  note: "Proposal in the quirk register: diverge for ergonomics. Needs a recorded decision (ADR 0003) and a [Diverges] test."
+  note: "Decided in ADR 0014: Awareness takes a TimeProvider; timeout values are matched. UndoManager and PermanentUserData time is Spec 8."

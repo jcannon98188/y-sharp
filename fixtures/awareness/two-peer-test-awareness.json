@@ -1,0 +1,105 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["AW-6","AW-8","AW-9","AW-30","AW-42","AW-43","AW-48","AW-50"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"ra","clientId":0},{"name":"rb","clientId":1}],
+    "steps": [
+      {"step":"awareness.new","awareness":"a","doc":"ra"},
+      {"step":"awareness.new","awareness":"b","doc":"rb"},
+      {"step":"awareness.encode","name":"e0","awareness":"a","clients":[0]},
+      {"step":"awareness.applyUpdate","awareness":"b","from":"e0","origin":"custom"},
+      {"step":"awareness.setLocal","awareness":"a","state":{"$":"obj","pairs":[["x",3]]}},
+      {"step":"awareness.encode","name":"e1","awareness":"a","clients":[0]},
+      {"step":"awareness.applyUpdate","awareness":"b","from":"e1","origin":"custom"},
+      {"step":"awareness.setLocal","awareness":"a","state":{"$":"obj","pairs":[["x",4]]}},
+      {"step":"awareness.encode","name":"e2","awareness":"a","clients":[0]},
+      {"step":"awareness.applyUpdate","awareness":"b","from":"e2","origin":"custom"},
+      {"step":"awareness.setLocal","awareness":"a","state":{"$":"obj","pairs":[["x",4]]}},
+      {"step":"awareness.encode","name":"e3","awareness":"a","clients":[0]},
+      {"step":"awareness.applyUpdate","awareness":"b","from":"e3","origin":"custom"},
+      {"step":"awareness.setLocal","awareness":"a","state":null},
+      {"step":"awareness.encode","name":"e4","awareness":"a","clients":[0]},
+      {"step":"awareness.applyUpdate","awareness":"b","from":"e4","origin":"custom"}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {"ra":{"v1":[],"v2":[]},"rb":{"v1":[],"v2":[]}}
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "ra": {
+          "v1": {"full":{"$":"bytes","hex":"0000"},"diff":{"rb":{"$":"bytes","hex":"0000"}}},
+          "v2": {
+            "full": {"$":"bytes","hex":"00000000000001000000000000"},
+            "diff": {"rb":{"$":"bytes","hex":"00000000000001000000000000"}}
+          }
+        },
+        "rb": {
+          "v1": {"full":{"$":"bytes","hex":"0000"},"diff":{"ra":{"$":"bytes","hex":"0000"}}},
+          "v2": {
+            "full": {"$":"bytes","hex":"00000000000001000000000000"},
+            "diff": {"ra":{"$":"bytes","hex":"00000000000001000000000000"}}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {
+        "ra": {"v1":{"$":"bytes","hex":"00"},"v2":{"$":"bytes","hex":"00"}},
+        "rb": {"v1":{"$":"bytes","hex":"00"},"v2":{"$":"bytes","hex":"00"}}
+      }
+    },
+    "doc": {"api":"toDelta, toArray, entries, getAttributes walk of every root","value":{"ra":[],"rb":[]}},
+    "events": {
+      "api": "AbstractType.observe",
+      "value": [
+        {"observer":"a","event":"change","at":0,"added":[],"updated":[0],"removed":[],"origin":"local"},
+        {"observer":"a","event":"update","at":0,"added":[],"updated":[0],"removed":[],"origin":"local"},
+        {"observer":"b","event":"change","at":0,"added":[0],"updated":[],"removed":[],"origin":"custom"},
+        {"observer":"b","event":"update","at":0,"added":[0],"updated":[],"removed":[],"origin":"custom"},
+        {"observer":"a","event":"change","at":0,"added":[],"updated":[0],"removed":[],"origin":"local"},
+        {"observer":"a","event":"update","at":0,"added":[],"updated":[0],"removed":[],"origin":"local"},
+        {"observer":"b","event":"change","at":0,"added":[],"updated":[0],"removed":[],"origin":"custom"},
+        {"observer":"b","event":"update","at":0,"added":[],"updated":[0],"removed":[],"origin":"custom"},
+        {"observer":"a","event":"update","at":0,"added":[],"updated":[0],"removed":[],"origin":"local"},
+        {"observer":"b","event":"update","at":0,"added":[],"updated":[0],"removed":[],"origin":"custom"},
+        {"observer":"a","event":"change","at":0,"added":[],"updated":[],"removed":[0],"origin":"local"},
+        {"observer":"a","event":"update","at":0,"added":[],"updated":[],"removed":[0],"origin":"local"},
+        {"observer":"b","event":"change","at":0,"added":[],"updated":[],"removed":[0],"origin":"custom"},
+        {"observer":"b","event":"update","at":0,"added":[],"updated":[],"removed":[0],"origin":"custom"}
+      ]
+    },
+    "results": {
+      "api": "encodeAwarenessUpdate",
+      "value": {
+        "e0": {"api":"encodeAwarenessUpdate","bytes":{"$":"bytes","hex":"010000027b7d"},"threw":false},
+        "e1": {"api":"encodeAwarenessUpdate","bytes":{"$":"bytes","hex":"010001077b2278223a337d"},"threw":false},
+        "e2": {"api":"encodeAwarenessUpdate","bytes":{"$":"bytes","hex":"010002077b2278223a347d"},"threw":false},
+        "e3": {"api":"encodeAwarenessUpdate","bytes":{"$":"bytes","hex":"010003077b2278223a347d"},"threw":false},
+        "e4": {"api":"encodeAwarenessUpdate","bytes":{"$":"bytes","hex":"010004046e756c6c"},"threw":false}
+      }
+    },
+    "awareness": {
+      "api": "Awareness.clientID, getStates, meta (lastUpdated is ms since the first awareness was created)",
+      "value": {
+        "a": {"clientId":0,"states":[],"meta":[[0,{"clock":4,"lastUpdated":0}]]},
+        "b": {
+          "clientId": 1,
+          "states": [[1,{"$":"obj","pairs":[]}]],
+          "meta": [[0,{"clock":4,"lastUpdated":0}],[1,{"clock":0,"lastUpdated":0}]]
+        }
+      }
+    }
+  }
+}

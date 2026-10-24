@@ -1,0 +1,59 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["AU-1","AU-2"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":1}],
+    "steps": [
+      {"step":"auth.permissionDenied","name":"no","reason":"no"},
+      {"step":"auth.permissionDenied","name":"empty","reason":""},
+      {"step":"auth.permissionDenied","name":"utf8","reason":"zugriff verweigert: ä ✓ 😀"},
+      {
+        "step": "auth.permissionDenied",
+        "name": "long",
+        "reason": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    ]
+  },
+  "observations": {
+    "updates": {"api":"Doc.on('update'), Doc.on('updateV2')","value":{"a":{"v1":[],"v2":[]}}},
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {"full":{"$":"bytes","hex":"0000"},"diff":{}},
+          "v2": {"full":{"$":"bytes","hex":"00000000000001000000000000"},"diff":{}}
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {"a":{"v1":{"$":"bytes","hex":"00"},"v2":{"$":"bytes","hex":"00"}}}
+    },
+    "doc": {"api":"toDelta, toArray, entries, getAttributes walk of every root","value":{"a":[]}},
+    "results": {
+      "api": "writePermissionDenied",
+      "value": {
+        "no": {"api":"writePermissionDenied","bytes":{"$":"bytes","hex":"00026e6f"}},
+        "empty": {"api":"writePermissionDenied","bytes":{"$":"bytes","hex":"0000"}},
+        "utf8": {
+          "api": "writePermissionDenied",
+          "bytes": {"$":"bytes","hex":"001f7a75677269666620766572776569676572743a20c3a420e29c9320f09f9880"}
+        },
+        "long": {
+          "api": "writePermissionDenied",
+          "bytes": {
+            "$": "bytes",
+            "hex": "00c8017878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,183 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["SY-4","SY-7","SY-8","SY-9","SY-11","SY-12","SY-14","SY-16"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":1},{"name":"b","clientId":2}],
+    "steps": [
+      {"step":"text.insert","doc":"a","target":{"root":"t","kind":"text"},"at":0,"value":"hello"},
+      {"step":"text.insert","doc":"b","target":{"root":"t","kind":"text"},"at":0,"value":"xy"},
+      {"step":"sync.step1","name":"b-step1","doc":"b"},
+      {"step":"sync.read","name":"a-reads-b-step1","doc":"a","from":"b-step1"},
+      {"step":"sync.read","name":"b-reads-reply","doc":"b","from":"a-reads-b-step1","origin":"peer"},
+      {"step":"sync.step1","name":"a-step1","doc":"a"},
+      {"step":"sync.read","name":"b-reads-a-step1","doc":"b","from":"a-step1"},
+      {"step":"sync.read","name":"a-reads-reply","doc":"a","from":"b-reads-a-step1"},
+      {"step":"sync.step2","name":"full","doc":"a"},
+      {"step":"sync.read","name":"step2-again","doc":"b","from":"full"},
+      {"step":"text.insert","doc":"a","target":{"root":"t","kind":"text"},"at":0,"value":"more"},
+      {"step":"sync.step2","name":"diff","doc":"a","sv":{"$":"bytes","hex":"010202"}},
+      {"step":"sync.read","name":"update-msg","doc":"b","from":"diff"},
+      {
+        "step": "sync.update",
+        "name": "as-update",
+        "update": {"$":"bytes","hex":"01010100040101740568656c6c6f00"}
+      },
+      {"step":"sync.read","name":"read-update","doc":"b","from":"as-update"}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [
+            {"$":"bytes","hex":"01010100040101740568656c6c6f00"},
+            {"$":"bytes","hex":"010102000401017402787900"},
+            {"$":"bytes","hex":"01010105440100046d6f726500"}
+          ],
+          "v2": [
+            {"$":"bytes","hex":"000001010000010409067468656c6c6f01050101000001010000"},
+            {"$":"bytes","hex":"0000010200000104060374787901020101000001010000"},
+            {"$":"bytes","hex":"0000024100000100014406046d6f72650400000001010500"}
+          ]
+        },
+        "b": {
+          "v1": [
+            {"$":"bytes","hex":"010102000401017402787900"},
+            {"$":"bytes","hex":"01010100040101740568656c6c6f00"},
+            {"$":"bytes","hex":"01010105440100046d6f726500"}
+          ],
+          "v2": [
+            {"$":"bytes","hex":"0000010200000104060374787901020101000001010000"},
+            {"$":"bytes","hex":"000001010000010409067468656c6c6f01050101000001010000"},
+            {"$":"bytes","hex":"0000024100000100014406046d6f72650400000001010500"}
+          ]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {
+            "full": {"$":"bytes","hex":"0201020004010174027879020100040101740568656c6c6f440100046d6f726500"},
+            "diff": {"b":{"$":"bytes","hex":"0000"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "00000302410000010003040144130d7478797468656c6c6f6d6f7265010201050401010000020100020000"
+            },
+            "diff": {"b":{"$":"bytes","hex":"00000000000001000000000000"}}
+          }
+        },
+        "b": {
+          "v1": {
+            "full": {"$":"bytes","hex":"0201020004010174027879020100040101740568656c6c6f440100046d6f726500"},
+            "diff": {"a":{"$":"bytes","hex":"0000"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "00000302410000010003040144130d7478797468656c6c6f6d6f7265010201050401010000020100020000"
+            },
+            "diff": {"a":{"$":"bytes","hex":"00000000000001000000000000"}}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {
+        "a": {"v1":{"$":"bytes","hex":"0202020109"},"v2":{"$":"bytes","hex":"0202020109"}},
+        "b": {"v1":{"$":"bytes","hex":"0202020109"},"v2":{"$":"bytes","hex":"0202020109"}}
+      }
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {
+        "a": [["t",{"kind":"text","delta":[{"insert":"morehelloxy"}]}]],
+        "b": [["t",{"kind":"text","delta":[{"insert":"morehelloxy"}]}]]
+      }
+    },
+    "results": {
+      "api": "writeSyncStep1, readSyncMessage, writeSyncStep2, writeUpdate",
+      "value": {
+        "b-step1": {"api":"writeSyncStep1","bytes":{"$":"bytes","hex":"0003010202"}},
+        "a-reads-b-step1": {
+          "api": "readSyncMessage",
+          "bytes": {"$":"bytes","hex":"010f01010100040101740568656c6c6f00"},
+          "type": 0,
+          "threw": false,
+          "handlerCalled": false,
+          "consumed": 5
+        },
+        "b-reads-reply": {
+          "api": "readSyncMessage",
+          "bytes": {"$":"bytes","hex":""},
+          "type": 1,
+          "threw": false,
+          "handlerCalled": false,
+          "consumed": 17
+        },
+        "a-step1": {"api":"writeSyncStep1","bytes":{"$":"bytes","hex":"0003010105"}},
+        "b-reads-a-step1": {
+          "api": "readSyncMessage",
+          "bytes": {"$":"bytes","hex":"010c010102000401017402787900"},
+          "type": 0,
+          "threw": false,
+          "handlerCalled": false,
+          "consumed": 5
+        },
+        "a-reads-reply": {
+          "api": "readSyncMessage",
+          "bytes": {"$":"bytes","hex":""},
+          "type": 1,
+          "threw": false,
+          "handlerCalled": false,
+          "consumed": 14
+        },
+        "full": {
+          "api": "writeSyncStep2",
+          "bytes": {"$":"bytes","hex":"01190201020004010174027879010100040101740568656c6c6f00"}
+        },
+        "step2-again": {
+          "api": "readSyncMessage",
+          "bytes": {"$":"bytes","hex":""},
+          "type": 1,
+          "threw": false,
+          "handlerCalled": false,
+          "consumed": 27
+        },
+        "diff": {
+          "api": "writeSyncStep2",
+          "bytes": {"$":"bytes","hex":"011701020100040101740568656c6c6f440100046d6f726500"}
+        },
+        "update-msg": {
+          "api": "readSyncMessage",
+          "bytes": {"$":"bytes","hex":""},
+          "type": 1,
+          "threw": false,
+          "handlerCalled": false,
+          "consumed": 25
+        },
+        "as-update": {"api":"writeUpdate","bytes":{"$":"bytes","hex":"020f01010100040101740568656c6c6f00"}},
+        "read-update": {
+          "api": "readSyncMessage",
+          "bytes": {"$":"bytes","hex":""},
+          "type": 2,
+          "threw": false,
+          "handlerCalled": false,
+          "consumed": 17
+        }
+      }
+    }
+  }
+}

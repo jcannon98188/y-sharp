@@ -1,0 +1,150 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["AW-14","AW-16","AW-17","AW-18","AW-19","AW-49"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"rb","clientId":9}],
+    "steps": [
+      {"step":"awareness.new","awareness":"b","doc":"rb"},
+      {
+        "step": "awareness.applyUpdate",
+        "awareness": "b",
+        "bytes": {"$":"bytes","hex":"0105010e7b2277686f223a2266697665227d"},
+        "origin": "r"
+      },
+      {"step":"tick","ms":1},
+      {
+        "step": "awareness.applyUpdate",
+        "awareness": "b",
+        "bytes": {"$":"bytes","hex":"0106010d7b2277686f223a22736978227d"},
+        "origin": "r"
+      },
+      {"step":"tick","ms":26999},
+      {"step":"tick","ms":3000},
+      {"step":"tick","ms":2999},
+      {"step":"tick","ms":1},
+      {"step":"tick","ms":30000},
+      {
+        "step": "awareness.applyUpdate",
+        "awareness": "b",
+        "bytes": {"$":"bytes","hex":"0105010f7b2277686f223a227374616c65227d"},
+        "origin": "r"
+      },
+      {
+        "step": "awareness.applyUpdate",
+        "awareness": "b",
+        "bytes": {"$":"bytes","hex":"0105020e7b2277686f223a226261636b227d"},
+        "origin": "r"
+      },
+      {"step":"tick","ms":33000}
+    ]
+  },
+  "observations": {
+    "updates": {"api":"Doc.on('update'), Doc.on('updateV2')","value":{"rb":{"v1":[],"v2":[]}}},
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "rb": {
+          "v1": {"full":{"$":"bytes","hex":"0000"},"diff":{}},
+          "v2": {"full":{"$":"bytes","hex":"00000000000001000000000000"},"diff":{}}
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {"rb":{"v1":{"$":"bytes","hex":"00"},"v2":{"$":"bytes","hex":"00"}}}
+    },
+    "doc": {"api":"toDelta, toArray, entries, getAttributes walk of every root","value":{"rb":[]}},
+    "events": {
+      "api": "AbstractType.observe",
+      "value": [
+        {"observer":"b","event":"change","at":0,"added":[5],"updated":[],"removed":[],"origin":"r"},
+        {"observer":"b","event":"update","at":0,"added":[5],"updated":[],"removed":[],"origin":"r"},
+        {"observer":"b","event":"change","at":1,"added":[6],"updated":[],"removed":[],"origin":"r"},
+        {"observer":"b","event":"update","at":1,"added":[6],"updated":[],"removed":[],"origin":"r"},
+        {"observer":"b","event":"update","at":15000,"added":[],"updated":[9],"removed":[],"origin":"local"},
+        {"observer":"b","event":"update","at":30000,"added":[],"updated":[9],"removed":[],"origin":"local"},
+        {
+          "observer": "b",
+          "event": "change",
+          "at": 30000,
+          "added": [],
+          "updated": [],
+          "removed": [5],
+          "origin": "timeout"
+        },
+        {
+          "observer": "b",
+          "event": "update",
+          "at": 30000,
+          "added": [],
+          "updated": [],
+          "removed": [5],
+          "origin": "timeout"
+        },
+        {
+          "observer": "b",
+          "event": "change",
+          "at": 33000,
+          "added": [],
+          "updated": [],
+          "removed": [6],
+          "origin": "timeout"
+        },
+        {
+          "observer": "b",
+          "event": "update",
+          "at": 33000,
+          "added": [],
+          "updated": [],
+          "removed": [6],
+          "origin": "timeout"
+        },
+        {"observer":"b","event":"update","at":45000,"added":[],"updated":[9],"removed":[],"origin":"local"},
+        {"observer":"b","event":"update","at":60000,"added":[],"updated":[9],"removed":[],"origin":"local"},
+        {"observer":"b","event":"change","at":63000,"added":[],"updated":[5],"removed":[],"origin":"r"},
+        {"observer":"b","event":"update","at":63000,"added":[],"updated":[5],"removed":[],"origin":"r"},
+        {"observer":"b","event":"update","at":75000,"added":[],"updated":[9],"removed":[],"origin":"local"},
+        {"observer":"b","event":"update","at":90000,"added":[],"updated":[9],"removed":[],"origin":"local"},
+        {
+          "observer": "b",
+          "event": "change",
+          "at": 93000,
+          "added": [],
+          "updated": [],
+          "removed": [5],
+          "origin": "timeout"
+        },
+        {
+          "observer": "b",
+          "event": "update",
+          "at": 93000,
+          "added": [],
+          "updated": [],
+          "removed": [5],
+          "origin": "timeout"
+        }
+      ]
+    },
+    "awareness": {
+      "api": "Awareness.clientID, getStates, meta (lastUpdated is ms since the first awareness was created)",
+      "value": {
+        "b": {
+          "clientId": 9,
+          "states": [[9,{"$":"obj","pairs":[]}]],
+          "meta": [
+            [5,{"clock":2,"lastUpdated":63000}],
+            [6,{"clock":1,"lastUpdated":1}],
+            [9,{"clock":6,"lastUpdated":90000}]
+          ]
+        }
+      }
+    }
+  }
+}

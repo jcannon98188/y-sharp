@@ -9,7 +9,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:28"
 
 - id: AW-2
@@ -19,7 +19,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:29"
 
 - id: AW-3
@@ -29,7 +29,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:30"
 
 - id: AW-4
@@ -39,7 +39,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:31"
 
 - id: AW-5
@@ -49,7 +49,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:32"
 
 - id: AW-6
@@ -59,7 +59,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:36"
 
 - id: AW-7
@@ -69,7 +69,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:37"
 
 - id: AW-8
@@ -79,7 +79,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:38"
 
 - id: AW-9
@@ -89,7 +89,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:44"
 
 - id: AW-10
@@ -99,17 +99,17 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:45"
 
 - id: AW-11
   title: "Quirk: setLocalState stores the caller's object by reference, and getStates() returns the live internal map...."
   source: "y-protocols/awareness.js:154"
-  kind: match
+  kind: diverge
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:46"
 
 - id: AW-12
@@ -119,7 +119,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:47"
 
 - id: AW-13
@@ -129,7 +129,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:48"
 
 - id: AW-14
@@ -139,7 +139,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:52"
 
 - id: AW-15
@@ -149,7 +149,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:53"
 
 - id: AW-16
@@ -159,7 +159,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:54"
 
 - id: AW-17
@@ -169,7 +169,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:55"
 
 - id: AW-18
@@ -179,7 +179,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:56"
 
 - id: AW-19
@@ -189,7 +189,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:57"
 
 - id: AW-20
@@ -199,17 +199,17 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:58"
 
 - id: AW-21
   title: "The interval keeps a Node process alive (no unref)"
   source: "docs/research/y-protocols.md:59"
-  kind: match
+  kind: diverge
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:59"
 
 - id: AW-22
@@ -219,7 +219,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:63"
 
 - id: AW-23
@@ -229,17 +229,17 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:69"
 
 - id: AW-24
   title: "Quirk: destroy is not idempotent. A second call emits the removal path again (see AW-10), with no listeners"
   source: "docs/research/y-protocols.md:70"
-  kind: match
+  kind: diverge
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:70"
 
 - id: AW-25
@@ -249,7 +249,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:74"
 
 - id: AW-26
@@ -259,7 +259,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:75"
 
 - id: AW-27
@@ -269,7 +269,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:76"
 
 - id: AW-28
@@ -279,7 +279,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:77"
 
 - id: AW-29
@@ -289,7 +289,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:78"
 
 - id: AW-30
@@ -299,7 +299,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:82"
 
 - id: AW-31
@@ -309,17 +309,17 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:87"
 
 - id: AW-32
   title: "A client id absent from meta throws a TypeError (:201, unguarded .clock)"
   source: "y-protocols/awareness.js:201"
-  kind: match
+  kind: diverge
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:88"
 
 - id: AW-33
@@ -329,7 +329,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:89"
 
 - id: AW-34
@@ -339,7 +339,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:90"
 
 - id: AW-35
@@ -349,7 +349,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:91"
 
 - id: AW-36
@@ -359,7 +359,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:95"
 
 - id: AW-37
@@ -369,17 +369,17 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:96"
 
 - id: AW-38
   title: "If modify returns undefined, JSON.stringify yields undefined and writeVarString fails"
   source: "docs/research/y-protocols.md:97"
-  kind: match
+  kind: diverge
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:97"
 
 - id: AW-39
@@ -389,7 +389,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:98"
 
 - id: AW-40
@@ -399,7 +399,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:99"
 
 - id: AW-41
@@ -409,7 +409,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:105"
 
 - id: AW-42
@@ -419,7 +419,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:106"
 
 - id: AW-43
@@ -429,7 +429,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:107"
 
 - id: AW-44
@@ -439,7 +439,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:108"
 
 - id: AW-45
@@ -449,7 +449,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:109"
 
 - id: AW-46
@@ -459,7 +459,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:112"
 
 - id: AW-47
@@ -469,7 +469,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:113"
 
 - id: AW-48
@@ -479,7 +479,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:114"
 
 - id: AW-49
@@ -489,7 +489,7 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:119"
 
 - id: AW-50
@@ -499,17 +499,17 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:124"
 
 - id: AW-51
   title: "Error behaviour"
   source: "docs/research/y-protocols.md:125"
-  kind: match
+  kind: diverge
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:125"
 
 - id: AW-52
@@ -519,5 +519,5 @@
   layers: [unit, differential]
   wire: false
   owner: 9
-  status: pending
+  status: active
   ref: "y-protocols.md:126"
