@@ -72,6 +72,15 @@ public sealed class AuthTests
             ReadOnlySpan<byte> bytes = Denied("x");
             YAuth.TryReadMessage(ref bytes, new Doc(), null!);
         });
+        // thrown at the call that receives the null, not when the handler would first be needed: a message that never reaches the handler (unknown type 7)
+        // throws too, and the input is left unread
+        ReadOnlySpan<byte> unknown = new byte[] { 7, 1, 2, 3 };
+        Assert.Throws<ArgumentNullException>(() =>
+        {
+            ReadOnlySpan<byte> bytes = new byte[] { 7, 1, 2, 3 };
+            YAuth.TryReadMessage(ref bytes, new Doc(), null!);
+        });
+        Assert.Equal(4, unknown.Length);
     });
 }
 

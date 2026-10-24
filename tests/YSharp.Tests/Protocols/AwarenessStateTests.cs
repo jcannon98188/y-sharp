@@ -161,15 +161,23 @@ public sealed class AwarenessStateTests
         Assert.Equal(clock + 2, rig.ClockOf(1));
     });
 
-    [Fact, Covers("AW-13")]
-    public void GetStates_CalledRepeatedly_ReturnsTheSameContent() => Stub.Run(() =>
+    [Fact, Diverges("AW-13", adr: "0008")]
+    public void GetStates_ReturnsASnapshot_NotTheLiveMap() => Stub.Run(() =>
     {
+        // JS returns the same live Map every call, so a map kept from before a change shows the change. y-sharp returns a snapshot:
+        // a map in hand never changes, and the next call reflects the new state.
         using var rig = new AwRig(1);
         rig.Apply(AwBytes.Update((5, 1, """{"a":1}""")));
-        var first = rig.Awareness.GetStates().OrderBy(k => k.Key).Select(k => k.Key + Js.Json(k.Value)).ToArray();
-        var second = rig.Awareness.GetStates().OrderBy(k => k.Key).Select(k => k.Key + Js.Json(k.Value)).ToArray();
-        Assert.Equal(first, second);
-        Assert.Equal(2, first.Length);
+        var held = rig.Awareness.GetStates();
+        var heldJson = held.OrderBy(k => k.Key).Select(k => k.Key + Js.Json(k.Value)).ToArray();
+        Assert.Equal(2, heldJson.Length);
+
+        rig.Apply(AwBytes.Update((5, 2, """{"a":2}"""), (6, 1, """{"b":1}""")));
+        Assert.Equal(heldJson, held.OrderBy(k => k.Key).Select(k => k.Key + Js.Json(k.Value)).ToArray());
+        Assert.False(held.ContainsKey(6));
+        var fresh = rig.Awareness.GetStates();
+        Assert.True(fresh.ContainsKey(6));
+        Assert.Equal("""{"a":2}""", Js.Json(fresh[5]));
     });
 
     // ------------------------------------------------------------------ destroy

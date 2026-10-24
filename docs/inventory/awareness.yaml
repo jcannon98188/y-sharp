@@ -123,9 +123,9 @@
   ref: "y-protocols.md:47"
 
 - id: AW-13
-  title: "getStates() returns the same Map instance each time"
+  title: "getStates() returns the same live Map instance each time; y-sharp returns a snapshot"
   source: "y-protocols/awareness.js:154"
-  kind: match
+  kind: diverge
   layers: [unit, differential]
   wire: false
   owner: 9

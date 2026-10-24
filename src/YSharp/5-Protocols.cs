@@ -26,7 +26,7 @@ public sealed class Awareness : IDisposable
     public YValue LocalState => throw Sketch.NI;                     // YValue.Null when removed (AW-7)
     public void SetLocalState(in YValue state) => throw Sketch.NI;   // Null removes (AW-8)
     public void SetLocalStateField(string field, in YValue value) => throw Sketch.NI;
-    public IReadOnlyDictionary<ulong, YValue> GetStates() => throw Sketch.NI;     // REVIEW: snapshot, not the live map (AW-11, AW-13)
+    public IReadOnlyDictionary<ulong, YValue> GetStates() => throw Sketch.NI;     // a snapshot, not the live map JS returns (AW-11, AW-13; ADR 0008)
     public IReadOnlyDictionary<ulong, AwarenessMeta> Meta => throw Sketch.NI;
     public event AwarenessHandler? Change, Update;
     public event Action? Destroyed;
@@ -64,5 +64,6 @@ public static class YSync
 public static class YAuth
 {
     public static void WritePermissionDenied(IBufferWriter<byte> writer, string reason) => throw Sketch.NI;
+    /// A null permissionDeniedHandler throws ArgumentNullException at this call, before any byte is read (AU-5; JS fails with a TypeError only when type 0 is read).
     public static YStatus TryReadMessage(ref ReadOnlySpan<byte> input, Doc doc, Action<Doc, string> permissionDeniedHandler) => throw Sketch.NI;
 }
