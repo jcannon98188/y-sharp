@@ -3,6 +3,7 @@ using System.Text;
 using Xunit;
 using YSharp.StoreSpike.Content;
 using YSharp.StoreSpike.Harness;
+using YSharp.TestKit.Gating;
 using YSharp.TestKit.Tiers;
 using YSharp.StoreSpike.ObjectPerItem;
 
@@ -12,7 +13,9 @@ namespace YSharp.Tests.Allocation;
 /// Behaviour of spike candidate A, object per item (TASK-4.4, ADR 0018 spike amendment). Tests go through the driver interface, and through
 /// <see cref="ItemRef"/> for the struct layout the merge rules produce. Expected layouts are worked by hand from Yjs v13.6.33
 /// (<c>Item.mergeWith</c>, <c>tryToMergeWithLefts</c>, <c>findNextPosition</c>), not recomputed by the store's own code.
+/// The spike never touches the library, so the class is library independent (ADR 0020), like SpikeHarnessTests.
 /// </summary>
+[LibraryIndependent]
 public sealed class SpikeObjectPerItemTests
 {
     [Fact]
