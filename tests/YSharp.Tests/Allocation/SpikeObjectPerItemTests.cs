@@ -150,6 +150,23 @@ public sealed class SpikeObjectPerItemTests
     }
 
     [Fact]
+    public void PushValue_AfterAMergeAndInALongTransaction_AlwaysAppendsAtTheEnd()
+    {
+        // The first commit merges five pushes into one struct, so the last item changes identity; the long transaction then appends to
+        // a chain of 20,000 unmerged items.
+        var store = new ObjectPerItemStore();
+        for (var i = 0; i < 5; i++) store.PushValue(i);
+        store.Commit();
+        for (var i = 5; i < 20_005; i++) store.PushValue(i);
+        store.Commit();
+
+        var values = store.ArrayValues();
+        Assert.Equal(20_005, values.Length);
+        for (var i = 0; i < values.Length; i++) Assert.Equal(i, values[i]);
+        Assert.Equal(1, store.StructCountOf(store.LocalClient));
+    }
+
+    [Fact]
     public void RandomEdits_WithRandomCommits_MatchAStringModel()
     {
         var random = new Random(2024);
