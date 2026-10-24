@@ -278,6 +278,8 @@ const hostileExtra = [
   c('delete-set-zero-deletes-for-client', '00 01 05 00'),
   c('delete-set-len-0', '00 01 05 01 00 00'),
   c('delete-set-two-clients-one-truncated', '00 02 05 01 00 01 06'),
+  // Q07: Date, Map and ArrayBuffer reach the wire as the empty object; the bytes decode as an empty object
+  c('any-empty-object-from-flattened-date', '01 01 01 00 28 01 01 6d 01 6b 01 76 00 00', { roots: [['m', 'map']] }),
   c('eof-after-struct-header', '01 01 01 00'),
   c('eof-in-num-structs', '01'),
   c('content-ref-0-gc-with-length', '01 01 01 00 00 03 00'),
@@ -344,7 +346,7 @@ export default () => [
   {
     area: 'hostile',
     name: 'malformed-codec-extras',
-    covers: ['ENC-36', 'ENC-44', 'ENC-46', 'ENC-47', 'ENC-48', 'ENC-49', 'ENC-50', 'ENC-51', 'ENC-60', 'ENC-61', 'ENC-62', 'ENC-63', 'ENC-64', 'ENC-65', 'ENC-66', 'ENC-67', 'ENC-68', 'ENC-69', 'ENC-22', 'ENC-56'],
+    covers: ['ENC-36', 'ENC-44', 'ENC-46', 'ENC-47', 'ENC-48', 'ENC-49', 'ENC-50', 'ENC-51', 'ENC-60', 'ENC-61', 'ENC-62', 'ENC-63', 'ENC-64', 'ENC-65', 'ENC-66', 'ENC-67', 'ENC-68', 'ENC-69', 'ENC-22', 'ENC-56', 'Q07'],
     malformed: hostileExtra
   }
 ]

@@ -10,7 +10,7 @@
   wire: true
   quirk: [Q16, Q17, Q19]
   owner: 5
-  status: pending
+  status: active
   ref: "quirks.md:210"
 
 - id: Q17
@@ -21,7 +21,7 @@
   wire: true
   quirk: [Q17]
   owner: 5
-  status: pending
+  status: active
   ref: "quirks.md:220"
 
 - id: Q18
@@ -32,7 +32,7 @@
   wire: true
   quirk: [Q18]
   owner: 5
-  status: pending
+  status: active
   ref: "quirks.md:230"
 
 - id: Q19
@@ -43,5 +43,5 @@
   wire: true
   quirk: [Q13, Q17, Q19]
   owner: 5
-  status: pending
+  status: active
   ref: "quirks.md:240"

@@ -21,7 +21,8 @@
       "ENC-68",
       "ENC-69",
       "ENC-22",
-      "ENC-56"
+      "ENC-56",
+      "Q07"
     ],
     "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
     "node": "24",
@@ -173,6 +174,17 @@
           "pendingDs": false,
           "sv": {"$":"bytes","hex":"00"},
           "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
+        },
+        {
+          "name": "any-empty-object-from-flattened-date",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"010101002801016d016b01760000"},
+          "outcome": "ok",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"010101"},
+          "doc": [["m",{"kind":"map","pairs":[["k",{"$":"obj","pairs":[]}]]}]],
           "classification": "match"
         },
         {

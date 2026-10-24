@@ -100,7 +100,7 @@
   wire: true
   quirk: [Q11, Q28, Q30]
   owner: 5
-  status: pending
+  status: active
   ref: "quirks.md:334"
 
 - id: Q29

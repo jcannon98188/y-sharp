@@ -101,7 +101,7 @@ public sealed class MalformedInputTests
     [InlineData("10")] [InlineData("73")] [InlineData("80")] [InlineData("00")] [InlineData("ff")]
     public void Enc45_AnyTagsOutsideTheTable_AreRejected(string tag) => Stub.Run(() => AssertRejected(Struct("08", $"01 {tag}")));
 
-    [Fact, Covers("ENC-46", "ENC-62"), Diverges("ENC-46", adr: "0005")]
+    [Fact, Diverges("ENC-46", adr: "0005"), Diverges("ENC-62", adr: "0005")]
     public void Enc46_AnyIntTagAtTheEnd_IsRejectedAtomically_WhereJsReadsZeroAndKeepsTheStruct() => Stub.Run(() =>
         AssertRejected("01 01 01 00 08 01 01 74 01 7d"));
 

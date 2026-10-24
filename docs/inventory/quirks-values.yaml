@@ -11,7 +11,7 @@
   quirk: [Q01]
   adr: ["0002"]
   owner: 5
-  status: pending
+  status: active
   ref: "quirks.md:52"
 
 - id: Q02
@@ -22,7 +22,7 @@
   wire: true
   quirk: [Q02]
   owner: 5
-  status: pending
+  status: active
   ref: "quirks.md:62"
 
 - id: Q03
@@ -33,7 +33,7 @@
   wire: true
   quirk: [Q03, Q13]
   owner: 5
-  status: pending
+  status: active
   ref: "quirks.md:72"
 
 - id: Q04
@@ -44,7 +44,7 @@
   wire: true
   quirk: [Q01, Q04]
   owner: 5
-  status: pending
+  status: active
   ref: "quirks.md:82"
 
 - id: Q05
@@ -55,7 +55,7 @@
   wire: true
   quirk: [Q05, Q10]
   owner: 5
-  status: pending
+  status: active
   ref: "quirks.md:92"
 
 - id: Q06
@@ -66,7 +66,7 @@
   wire: true
   quirk: [Q06]
   owner: 5
-  status: pending
+  status: active
   ref: "quirks.md:102"
 
 - id: Q07
@@ -78,9 +78,8 @@
   quirk: [Q07, Q10]
   adr: ["0002"]
   owner: 5
-  status: pending
+  status: active
   ref: "quirks.md:112"
-  note: "Proposal in the quirk register: diverge, narrow. Needs a recorded decision (ADR 0003) and a [Diverges] test."
 
 - id: Q08
   title: "Object key order on encode"
@@ -90,7 +89,7 @@
   wire: true
   quirk: [Q08, Q26]
   owner: 5
-  status: pending
+  status: active
   ref: "quirks.md:122"
 
 - id: Q09
@@ -101,9 +100,8 @@
   wire: false
   quirk: [Q09]
   owner: 5
-  status: pending
+  status: active
   ref: "quirks.md:132"
-  note: "Proposal in the quirk register: diverge. Needs a recorded decision (ADR 0003) and a [Diverges] test."
 
 - id: Q10
   title: "Which JS types Yjs accepts for insertion"
@@ -125,5 +123,5 @@
   wire: true
   quirk: [Q08, Q11, Q28, Q30]
   owner: 5
-  status: pending
+  status: active
   ref: "quirks.md:152"
