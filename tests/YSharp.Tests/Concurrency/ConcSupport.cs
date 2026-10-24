@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Xunit;
+using YSharp.TestKit.Stubs;
 
 namespace YSharp.Tests.Concurrency;
 
@@ -23,13 +24,9 @@ internal static class Impl
 {
     public static void Run(Action body)
     {
-        try
-        {
-            // Probe first: tests that run work on other threads would otherwise see the stub's exception only there.
-            _ = new Doc().GetText("probe");
-            body();
-        }
-        catch (NotImplementedException) { Assert.Skip("YSharp is still the API stub (ADR 0019)."); }
+        // Probe first: work on other threads would otherwise see the stub's exception only there.
+        ApiStub.SkipIfStub();
+        ApiStub.Run(body);
     }
 }
 

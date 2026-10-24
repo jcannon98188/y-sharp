@@ -2,6 +2,7 @@ using System;
 using Xunit;
 using YSharp.TestKit.Tiers;
 using YSharp.TestKit.Assertions;
+using YSharp.TestKit.Stubs;
 
 namespace YSharp.Fuzz;
 
@@ -11,19 +12,11 @@ namespace YSharp.Fuzz;
 /// </summary>
 internal static class Stub
 {
-    public const string Reason = "YSharp is still the API stub";
+    public const string Reason = ApiStub.Reason;
 
-    public static void Run(Action body)
-    {
-        try { body(); }
-        catch (NotImplementedException) { Assert.Skip(Reason); }
-    }
+    public static void Run(Action body) => ApiStub.Run(body);
 
-    public static T Run<T>(Func<T> body)
-    {
-        try { return body(); }
-        catch (NotImplementedException) { Assert.Skip(Reason); throw; }
-    }
+    public static T Run<T>(Func<T> body) => ApiStub.Run(body);
 }
 
 /// <summary>Nightly tests run only when <c>YSHARP_TIER=Nightly</c> (ADR 0013, 0015); in every other tier they skip visibly.</summary>

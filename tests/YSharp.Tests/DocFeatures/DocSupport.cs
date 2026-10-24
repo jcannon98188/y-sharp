@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using YSharp.TestKit.Sim;
+using YSharp.TestKit.Stubs;
 
 namespace YSharp.Tests.DocFeatures;
 
@@ -16,12 +17,11 @@ internal static class Impl
 {
     public static void Run(Action body)
     {
-        try { body(); }
-        catch (NotImplementedException) { Assert.Skip("YSharp is still the API stub (ADR 0019)."); }
+        ApiStub.Run(body);
     }
 
     /// <summary>For tests whose first calls would work on the stub (plain properties, event subscriptions): fails over to a skip until the implementation exists.</summary>
-    public static void RequireImplementation() => Run(() => new Doc().GetText("probe"));
+    public static void RequireImplementation() => ApiStub.SkipIfStub();
 }
 
 /// <summary>Small helpers for building replicas and moving updates between them.</summary>

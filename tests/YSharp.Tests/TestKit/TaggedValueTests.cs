@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using Xunit;
 using YSharp.TestKit.Values;
+using YSharp.TestKit.Stubs;
 
 namespace YSharp.Tests.TestKit;
 
@@ -109,9 +110,9 @@ public class TaggedValueTests
             var v = Read("[1,\"a\",null]").ToYValue();
             Assert.Equal(YValueKind.Array, v.Kind);
         }
-        catch (NotImplementedException)
+        catch (NotImplementedException) when (ApiStub.IsStub)
         {
-            Assert.Skip("YValue is still the API stub");
+            Assert.Skip(ApiStub.Reason);
         }
     }
 }

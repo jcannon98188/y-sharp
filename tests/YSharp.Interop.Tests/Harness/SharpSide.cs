@@ -9,6 +9,7 @@ using YSharp.Tests.Simulation;
 using YSharp.Tests.Types;
 using YSharp.TestKit.Ops;
 using YSharp.TestKit.Values;
+using YSharp.TestKit.Stubs;
 
 namespace YSharp.Interop;
 
@@ -61,7 +62,7 @@ public static class SharpSide
         {
             try { result = new SharpReply(SharpStatus.Ok, work(), null); }
             catch (OpsScriptException ex) { result = new SharpReply(SharpStatus.ScriptError, null, ex.Message, ex); }
-            catch (NotImplementedException ex) { result = new SharpReply(SharpStatus.Stub, null, ex.Message, ex); }
+            catch (NotImplementedException ex) when (ApiStub.IsStub) { result = new SharpReply(SharpStatus.Stub, null, ex.Message, ex); }
             catch (Exception ex) { result = new SharpReply(SharpStatus.Fault, null, $"{ex.GetType().Name}: {ex.Message}", ex); }
         }, 16 * 1024 * 1024) { IsBackground = true, Name = "y-sharp differential case" };
         thread.Start();

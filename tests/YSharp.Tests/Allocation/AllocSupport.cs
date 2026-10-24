@@ -2,6 +2,7 @@ using System;
 using System.Buffers;
 using System.Threading;
 using Xunit;
+using YSharp.TestKit.Stubs;
 
 namespace YSharp.Tests.Allocation;
 
@@ -13,12 +14,9 @@ internal static class Stub
 {
     public static void Run(Action body)
     {
-        try
-        {
-            _ = new Doc().GetText("probe");
-            body();
-        }
-        catch (NotImplementedException) { Assert.Skip("YSharp is still the API stub (ADR 0019)."); }
+        // Probe first: work on other threads would otherwise see the stub's exception only there.
+        ApiStub.SkipIfStub();
+        ApiStub.Run(body);
     }
 }
 

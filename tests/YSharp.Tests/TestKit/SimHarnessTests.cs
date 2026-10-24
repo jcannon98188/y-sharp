@@ -6,6 +6,7 @@ using Xunit;
 using YSharp.TestKit.Rng;
 using YSharp.TestKit.Sim;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Stubs;
 
 namespace YSharp.Tests.TestKit;
 
@@ -119,7 +120,7 @@ public class SimHarnessTests
     private static void RunOrSkip(Action body)
     {
         try { body(); }
-        catch (NotImplementedException) { Assert.Skip("YSharp is still the API stub"); }
+        catch (NotImplementedException) when (ApiStub.IsStub) { Assert.Skip(ApiStub.Reason); }
     }
 
     [Theory]

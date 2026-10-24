@@ -53,7 +53,7 @@ internal static class Program
                     return 2;
             }
         }
-        catch (NotImplementedException)
+        catch (NotImplementedException) when (IsStub())
         {
             Console.WriteLine("STUB the library is still the API stub");
             return 3;
@@ -63,6 +63,14 @@ internal static class Program
             Console.Error.WriteLine($"FAIL {e.GetType().Name}: {e.Message}");
             return 1;
         }
+    }
+
+    /// <summary>True only while a known stub member throws NotImplementedException (same probe as ApiStub in TestKit).</summary>
+    private static bool IsStub()
+    {
+        try { _ = YValue.Null; return false; }
+        catch (NotImplementedException) { return true; }
+        catch (Exception) { return false; }
     }
 
     private static int Recurse(int n) => n < 0 ? 0 : Recurse(n + 1) + 1;

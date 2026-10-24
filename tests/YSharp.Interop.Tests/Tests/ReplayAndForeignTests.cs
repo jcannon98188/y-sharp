@@ -7,6 +7,7 @@ using YSharp.TestKit.Fixtures;
 using YSharp.TestKit.Ops;
 using YSharp.TestKit.Tiers;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Stubs;
 
 namespace YSharp.Interop.Tests;
 
@@ -27,7 +28,7 @@ public sealed class ReplayTests(OracleHost host)
         var script = Reporting.LoadScript(path);
         var run = new DiffRun(host, "replay") { Label = "replay of " + path };
         try { run.Run(script); }
-        catch (NotImplementedException) { Assert.Skip("YSharp is still the API stub"); }
+        catch (NotImplementedException) when (ApiStub.IsStub) { Assert.Skip(ApiStub.Reason); }
         catch (DifferentialFailure f) { Assert.Fail(f.Persist(run.Directory)); }
     }
 }

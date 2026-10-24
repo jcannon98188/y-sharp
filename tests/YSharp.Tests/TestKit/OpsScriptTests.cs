@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using Xunit;
 using YSharp.TestKit.Ops;
+using YSharp.TestKit.Stubs;
 
 namespace YSharp.Tests.TestKit;
 
@@ -170,9 +171,9 @@ public class OpsScriptTests
             Assert.Equal("hi", run.Docs["b"].GetText("t").ToString());
             Assert.NotEmpty(run.Updates["a"]);
         }
-        catch (NotImplementedException)
+        catch (NotImplementedException) when (ApiStub.IsStub)
         {
-            Assert.Skip("YSharp is still the API stub");
+            Assert.Skip(ApiStub.Reason);
         }
     }
 }

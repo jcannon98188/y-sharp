@@ -12,6 +12,7 @@ using YSharp.TestKit.Fixtures;
 using YSharp.TestKit.Rng;
 using YSharp.TestKit.Sim;
 using YSharp.TestKit.Tiers;
+using YSharp.TestKit.Stubs;
 
 namespace YSharp.Tests.Simulation;
 
@@ -111,7 +112,7 @@ internal static class SimCases
     public static void RunChecked(SimCase c, uint seed, bool nightly = false)
     {
         try { Run(c, seed, nightly: nightly); }
-        catch (Exception e) when (e is not NotImplementedException)
+        catch (Exception e) when (e is not NotImplementedException || !ApiStub.IsStub)
         {
             var saved = SaveRepro(c, seed, nightly, e);
             throw new XunitException($"{c.Key} failed for seed {seed}{(nightly ? " (nightly)" : "")}: {e.GetType().Name}: {e.Message}{Environment.NewLine}repro: {saved ?? "none"}", e);

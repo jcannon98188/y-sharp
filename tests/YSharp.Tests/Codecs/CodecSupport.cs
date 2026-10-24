@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using YSharp.TestKit.Assertions;
+using YSharp.TestKit.Stubs;
 
 namespace YSharp.Tests.Codecs;
 
@@ -13,20 +14,12 @@ namespace YSharp.Tests.Codecs;
 /// </summary>
 internal static class Stub
 {
-    public const string Reason = "YSharp is still the API stub";
+    public const string Reason = ApiStub.Reason;
 
     /// <summary>Runs <paramref name="body"/>; a <see cref="NotImplementedException"/> from the stub skips the test.</summary>
-    public static void Run(Action body)
-    {
-        try { body(); }
-        catch (NotImplementedException) { Assert.Skip(Reason); }
-    }
+    public static void Run(Action body) => ApiStub.Run(body);
 
-    public static T Run<T>(Func<T> body)
-    {
-        try { return body(); }
-        catch (NotImplementedException) { Assert.Skip(Reason); throw; }
-    }
+    public static T Run<T>(Func<T> body) => ApiStub.Run(body);
 }
 
 internal static class Wire

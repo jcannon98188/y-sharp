@@ -4,6 +4,7 @@ using System.Linq;
 using Xunit;
 using YSharp.TestKit.Time;
 using YSharp.TestKit.Tiers;
+using YSharp.TestKit.Stubs;
 
 namespace YSharp.TestKit.Concurrency;
 
@@ -74,8 +75,8 @@ public static class Explorer
 
     public static void RunOne(Scenario scenario, IChoiceStrategy choice)
     {
-        // The stub throws NotImplementedException here, which the caller turns into a visible skip.
-        _ = new Doc().GetText("probe");
+        // While the library is the stub, skip visibly.
+        ApiStub.SkipIfStub();
 
         var sched = new CooperativeScheduler(choice, scenario.Name);
         Action<ScheduleResult>? check;
@@ -87,7 +88,7 @@ public static class Explorer
         }
         result.AssertClean();
         try { check?.Invoke(result); }
-        catch (Exception e) when (e is not NotImplementedException)
+        catch (Exception e) when (e is not NotImplementedException || !ApiStub.IsStub)
         {
             Assert.Fail(e.Message + Environment.NewLine + result.Describe());
         }

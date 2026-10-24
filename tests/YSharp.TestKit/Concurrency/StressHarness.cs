@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using Xunit;
 using YSharp.TestKit.Rng;
+using YSharp.TestKit.Stubs;
 
 namespace YSharp.TestKit.Concurrency;
 
@@ -76,8 +77,8 @@ public static class StressHarness
 
     private static int Pick(IPrng g, int max) => (int)Prng.Int32(g, 0, max);
 
-    /// <summary>Probe on the calling thread so the stub's NotImplementedException surfaces as a skip, not as a worker-thread error.</summary>
-    private static void Probe() => _ = new Doc().GetText("probe");
+    /// <summary>Skips on the calling thread while the library is the stub, so it is not a worker-thread error.</summary>
+    private static void Probe() => ApiStub.SkipIfStub();
 
     // ------------------------------------------------------------------ workload 1: one document, many threads
 
