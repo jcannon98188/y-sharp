@@ -16,10 +16,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
+      - name: Install the oracle server packages
+        working-directory: tools/fixture-gen
+        run: npm ci --no-audit --no-fund
       - run: dotnet build YSharp.slnx -c Release
       - name: Test (Nightly tier: slow differential, fuzz, soak, slow memory)
         env:
           YSHARP_TIER: Nightly
+          YSHARP_REQUIRE_NODE: "1"
         run: dotnet test --solution YSharp.slnx -c Release --no-build --report-trx --results-directory TestResults
       # The SharpFuzz job is sharpfuzz.yml (TASK-2.11, non-gating). Benchmarks and their comparison are non-gating too (ADR 0009, TASK-2.14).
       - name: Restore last stored benchmark run

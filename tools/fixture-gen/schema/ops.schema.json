@@ -978,6 +978,37 @@
           "additionalProperties": false
         },
         {
+          "title": "applyForeign",
+          "description": "Apply bytes another implementation produced to a replica (ADR 0012). Origin is the string \"foreign\". Without name a rejected update is a script error; with name the outcome is recorded under results as {accepted}.",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "applyForeign"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "bytes": {
+              "$ref": "#/$defs/bytes"
+            },
+            "encoding": {
+              "enum": [
+                "v1",
+                "v2"
+              ]
+            },
+            "name": {
+              "$ref": "#/$defs/identifier"
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "bytes"
+          ],
+          "additionalProperties": false
+        },
+        {
           "title": "observe",
           "type": "object",
           "properties": {

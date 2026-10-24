@@ -1,0 +1,126 @@
+# Live differential harness (ADR 0012): DIFF-01..11, owned by spec 13. These are y-sharp-own guarantees of the test infrastructure itself;
+# the per-behaviour differential coverage of the other areas is declared on their entries (layers: [.., differential]) and reported, not gated.
+
+- id: DIFF-01
+  title: "A stateless ops script replayed on a fresh Node doc and on y-sharp gives equal observations: update events, full and diff state in V1 and V2, state vectors (bytes exact) and the typed doc dump (structural)"
+  source: "docs/adr/0012-live-differential-harness.md:5"
+  kind: y-sharp-own
+  layers: [differential]
+  wire: false
+  owner: 13
+  adr: ["0012", "0016"]
+  status: active
+  ref: "adr 0012 / TASK-2.13"
+  note: "FsCheck generates and shrinks the script (ScriptPlan); Node only executes (tools/fixture-gen/serve.mjs). The default generator avoids known divergences, so a mismatch is always a bug."
+
+- id: DIFF-02
+  title: "applyForeign: bytes one implementation produced are applied to a fresh replica of the other (y-sharp to Node, Node to y-sharp), V1 and V2, with an optional named outcome"
+  source: "docs/adr/0012-live-differential-harness.md:5"
+  kind: y-sharp-own
+  layers: [differential, fixture]
+  wire: false
+  owner: 13
+  adr: ["0012", "0016"]
+  status: active
+  ref: "adr 0012 / TASK-2.13"
+  note: "Step kind in ops.schema.json, tools/fixture-gen/lib/steps-foreign.mjs and TestKit StandardSteps. Origin is the string 'foreign'. Fixture fixtures/differential/apply-foreign.json."
+
+- id: DIFF-03
+  title: "Delivery schedules (order, duplicate, drop) are part of the script (deliver) and both sides replay the same one; after a final exchange all replicas of each side hold the same state, and the two sides agree"
+  source: "docs/adr/0012-live-differential-harness.md:8"
+  kind: y-sharp-own
+  layers: [differential]
+  wire: false
+  owner: 13
+  adr: ["0012"]
+  status: active
+  ref: "adr 0012 / TASK-2.13"
+
+- id: DIFF-04
+  title: "Mutated valid updates fall into a known outcome class: both accept with equal state, both reject (y-sharp unchanged), or y-sharp rejects where the oracle is lenient and a recorded divergence covers it"
+  source: "docs/adr/0012-live-differential-harness.md:8"
+  kind: y-sharp-own
+  layers: [differential]
+  wire: false
+  owner: 13
+  adr: ["0012", "0005"]
+  status: active
+  ref: "adr 0012 / TASK-2.13"
+
+- id: DIFF-05
+  title: "A divergence-targeting generator applies a per-divergence-ID normaliser and asserts the documented difference exactly; a divergence no normaliser claims is a bug"
+  source: "docs/adr/0012-live-differential-harness.md:9"
+  kind: y-sharp-own
+  layers: [differential]
+  wire: false
+  owner: 13
+  adr: ["0012", "0003"]
+  status: active
+  ref: "adr 0012 / TASK-2.13"
+  note: "Normalisers: LenientTruncationNormaliser (ENC-60, 62, 64, 65, 67, 68)."
+
+- id: DIFF-06
+  title: "A failure prints the seed, the shrunk script, both observation sets and the first difference (byte offset or doc path), writes a fixture candidate with a repro header, and YSHARP_REPLAY re-runs one saved script"
+  source: "docs/adr/0012-live-differential-harness.md:12"
+  kind: y-sharp-own
+  layers: [differential]
+  wire: false
+  owner: 13
+  adr: ["0012"]
+  status: active
+  ref: "adr 0012 / TASK-2.13"
+
+- id: DIFF-07
+  title: "Hangs and crashes: a Node request timeout kills and restarts the child; a y-sharp case timeout is y-sharp's fault; an oracle crash or hang on a generated script is oracle-misbehaved (counted, saved, surfaced, not a failure); a wall-clock cap reports the seeds covered"
+  source: "docs/adr/0012-live-differential-harness.md:11"
+  kind: y-sharp-own
+  layers: [differential]
+  wire: false
+  owner: 13
+  adr: ["0012"]
+  status: active
+  ref: "adr 0012 / TASK-2.13"
+
+- id: DIFF-08
+  title: "Availability: missing or wrong Node skips locally with a visible reason; in the differential CI jobs (YSHARP_REQUIRE_NODE=1) it is a hard failure; Node and the oracle submodule versions are verified at startup"
+  source: "docs/adr/0012-live-differential-harness.md:13"
+  kind: y-sharp-own
+  layers: [differential]
+  wire: false
+  owner: 13
+  adr: ["0012"]
+  status: active
+  ref: "adr 0012 / TASK-2.13"
+
+- id: DIFF-09
+  title: "Protocol: newline-delimited JSON, schema handshake, request ids, a closed message catalogue (ping, run, shutdown) with ok, script-error and oracle-error results; console is redirected to stderr"
+  source: "docs/adr/0012-live-differential-harness.md:7"
+  kind: y-sharp-own
+  layers: [differential]
+  wire: false
+  owner: 13
+  adr: ["0012"]
+  status: active
+  ref: "adr 0012 / TASK-2.13"
+
+- id: DIFF-10
+  title: "Time is virtual in the oracle: the clock is installed before any pinned code is imported and tick drives it, so a response never depends on real time"
+  source: "docs/adr/0012-live-differential-harness.md:10"
+  kind: y-sharp-own
+  layers: [differential]
+  wire: false
+  owner: 13
+  adr: ["0012"]
+  status: active
+  ref: "adr 0012 / TASK-2.13"
+
+- id: DIFF-11
+  title: "Tiers: the smoke tier runs fixed seeds, the nightly tier random seeds within a time box and uploads failing scripts; the gating suite stays fixtures only"
+  source: "docs/adr/0012-live-differential-harness.md:14"
+  kind: y-sharp-own
+  layers: [differential]
+  wire: false
+  owner: 13
+  adr: ["0012", "0015"]
+  status: active
+  ref: "adr 0012 / TASK-2.13"

@@ -1,0 +1,166 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["DIFF-02","ENC-21"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"f","clientId":9},{"name":"g","clientId":10}],
+    "steps": [
+      {"step":"applyForeign","doc":"f","bytes":{"$":"bytes","hex":"01010100040101740568656c6c6f00"}},
+      {
+        "step": "applyForeign",
+        "doc": "f",
+        "bytes": {"$":"bytes","hex":"0102010546010004626f6c640474727565c60102010304626f6c64046e756c6c00"}
+      },
+      {
+        "step": "applyForeign",
+        "doc": "f",
+        "bytes": {"$":"bytes","hex":"010101072801016d016b0175037d01770374776f7e00"}
+      },
+      {"step":"applyForeign","doc":"f","bytes":{"$":"bytes","hex":"000101010101"}},
+      {"step":"applyForeign","doc":"f","bytes":{"$":"bytes","hex":"01010100040101740568656c6c6f00"}},
+      {"step":"applyForeign","doc":"f","bytes":{"$":"bytes","hex":"010102008401040620776f726c6400"}},
+      {"step":"applyForeign","doc":"f","bytes":{"$":"bytes","hex":"0101020608010161027701787d0200"}},
+      {
+        "step": "applyForeign",
+        "doc": "f",
+        "bytes": {
+          "$": "bytes",
+          "hex": "0107010004010174016881010001840101016c840102026c6f46010004626f6c640474727565c60102010304626f6c64046e756c6c2801016d016b0175037d01770374776f7e0101010101"
+        },
+        "name": "duplicate-v1"
+      },
+      {
+        "step": "applyForeign",
+        "doc": "g",
+        "bytes": {
+          "$": "bytes",
+          "hex": "000003024100010800058400080004120d20776f726c64617468656c6c6f0641000501010001020202007701787d02010000"
+        },
+        "encoding": "v2",
+        "name": "full-v2"
+      },
+      {"step":"applyForeign","doc":"g","bytes":{"$":"bytes","hex":""},"name":"empty"},
+      {"step":"text.insert","doc":"f","target":{"root":"t","kind":"text"},"at":0,"value":">"}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "f": {
+          "v1": [
+            {"$":"bytes","hex":"01010100040101740568656c6c6f00"},
+            {"$":"bytes","hex":"0102010546010004626f6c640474727565c60102010304626f6c64046e756c6c00"},
+            {"$":"bytes","hex":"010101072801016d016b0175037d01770374776f7e00"},
+            {"$":"bytes","hex":"000101010101"},
+            {"$":"bytes","hex":"010102008401040620776f726c6400"},
+            {"$":"bytes","hex":"0101020608010161027701787d0200"},
+            {"$":"bytes","hex":"01010900440105013e00"}
+          ],
+          "v2": [
+            {"$":"bytes","hex":"000001010000010409067468656c6c6f01050101000001010000"},
+            {"$":"bytes","hex":"000200020241020104020006034600c60b08626f6c64626f6c644400000000010205787e00"},
+            {"$":"bytes","hex":"000001010000012805026d6b4100010100010101010775037d01770374776f7e00"},
+            {"$":"bytes","hex":"0000000000000100000000000101010100"},
+            {"$":"bytes","hex":"00000202010108000184080620776f726c640600000001010000"},
+            {"$":"bytes","hex":"00000102000001080301610101010001020101067701787d0200"},
+            {"$":"bytes","hex":"000002090100010a014403013e0100000001010000"}
+          ]
+        },
+        "g": {
+          "v1": [{"$":"bytes","hex":"020202008401040620776f726c6408010161027701787d02010100040101740568656c6c6f00"}],
+          "v2": [
+            {
+              "$": "bytes",
+              "hex": "000003024100010800058400080004120d20776f726c64617468656c6c6f0641000501010001020202007701787d02010000"
+            }
+          ]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "f": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "03010900440105013e0202008401040620776f726c6408010161027701787d0207010004010174016881010001840101016c840102026c6f46010004626f6c640474727565c60102010304626f6c64046e756c6c2801016d016b0175037d01770374776f7e0101010101"
+            },
+            "diff": {
+              "g": {
+                "$": "bytes",
+                "hex": "02010900440105013e03010546010004626f6c640474727565c60102010304626f6c64046e756c6c2801016d016b0175037d01770374776f7e0101010101"
+              }
+            }
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "00020002050901024106050848030000030a4a06114400840008000400810084014600c6002821173e20776f726c646174686c6c6f626f6c64626f6c646d6b0106410202440041000101000302410003010002007701787d020700787e75037d01770374776f7e0101010100"
+            },
+            "diff": {
+              "g": {
+                "$": "bytes",
+                "hex": "00020002030941030104030a4a060744004600c60028110b3e626f6c64626f6c646d6b014400410001010001010201000305787e75037d01770374776f7e0101010100"
+              }
+            }
+          }
+        },
+        "g": {
+          "v1": {
+            "full": {"$":"bytes","hex":"020202008401040620776f726c6408010161027701787d02010100040101740568656c6c6f00"},
+            "diff": {"f":{"$":"bytes","hex":"0000"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "000003024100010800058400080004120d20776f726c64617468656c6c6f0641000501010001020202007701787d02010000"
+            },
+            "diff": {"f":{"$":"bytes","hex":"00000000000001000000000000"}}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {
+        "f": {"v1":{"$":"bytes","hex":"03090102080108"},"v2":{"$":"bytes","hex":"03090102080108"}},
+        "g": {"v1":{"$":"bytes","hex":"0202080105"},"v2":{"$":"bytes","hex":"0202080105"}}
+      }
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {
+        "f": [
+          [
+            "t",
+            {
+              "kind": "text",
+              "delta": [
+                {"insert":">"},
+                {"insert":"hl","attributes":{"$":"obj","pairs":[["bold",true]]}},
+                {"insert":"lo world"}
+              ]
+            }
+          ]
+        ],
+        "g": [["t",{"kind":"text","delta":[{"insert":"hello world"}]}]]
+      }
+    },
+    "results": {
+      "api": "Y.applyUpdate (foreign bytes), Y.applyUpdateV2 (foreign bytes)",
+      "value": {
+        "duplicate-v1": {"api":"Y.applyUpdate (foreign bytes)","value":{"accepted":true}},
+        "full-v2": {"api":"Y.applyUpdateV2 (foreign bytes)","value":{"accepted":true}},
+        "empty": {"api":"Y.applyUpdate (foreign bytes)","value":{"accepted":false}}
+      }
+    }
+  }
+}

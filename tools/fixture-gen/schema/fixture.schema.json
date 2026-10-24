@@ -18,7 +18,20 @@
         },
         "node": { "type": "string", "pattern": "^[0-9]+$", "description": "Node major version from .nvmrc; patch versions must not change fixture bytes." },
         "generator": { "type": "string" },
-        "seed": { "type": "integer", "minimum": 0 }
+        "seed": { "type": "integer", "minimum": 0 },
+        "repro": {
+          "type": "object",
+          "description": "Present on a fixture candidate the live differential harness saved from a failing or oracle-misbehaved script (ADR 0012): how to reproduce it.",
+          "properties": {
+            "reason": { "enum": ["mismatch", "ysharp-fault", "oracle-misbehaved", "outcome-class"] },
+            "tier": { "enum": ["Gating", "Smoke", "Nightly"] },
+            "property": { "type": "string" },
+            "seed": { "type": "string", "description": "FsCheck replay seed and gamma, 'seed,gamma'." },
+            "message": { "type": "string" }
+          },
+          "required": ["reason"],
+          "additionalProperties": false
+        }
       },
       "required": ["schema", "covers", "versions", "node", "generator", "seed"],
       "additionalProperties": false
