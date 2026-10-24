@@ -3,14 +3,16 @@ using System.Text;
 using Xunit;
 using YSharp.StoreSpike.Arenas;
 using YSharp.StoreSpike.Harness;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Allocation;
 
 /// <summary>
 /// Spike candidate B, structs in chunked arenas (TASK-4.5). The tests drive the store through <see cref="IStoreDriver"/>, as the workloads do,
 /// and observe it through the <see cref="ItemRef"/> accessors the store exposes. They check behaviour, not budgets: the budgets are measured
-/// by the harness in the Nightly tier.
+/// by the harness in the Nightly tier. The spike never touches the library, so the class is library independent (ADR 0020).
 /// </summary>
+[LibraryIndependent]
 public sealed class ArenaStoreTests
 {
     [Fact]
