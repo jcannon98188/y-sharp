@@ -222,6 +222,7 @@ public static class StandardSteps
             YMp(ctx, s).Delete(s.String("key"))));
         r.Register(new StepDefinition("map.clear", new[] { "doc", "target" }, System.Array.Empty<string>(), (ctx, s) =>
             YMp(ctx, s).Clear()));
+        DocFeatureSteps.Register(r);
         return r;
     }
 
