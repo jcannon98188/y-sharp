@@ -185,7 +185,7 @@ public sealed class SubdocTests
 
     [Fact]
     [PortOf("doc.tests.js:testSubdoc", "SUB-03", "SUB-04", "SUB-06", "SUB-07", "SUB-08", "DOC-12", "DOC-16")]
-    public void Subdoc_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
+    public void Subdoc_AddLoadAndDestroy_RaisesTheDocumentedSubdocsEvents() => Impl.Run(() =>
     {
         var doc = new Doc();
         doc.Load();                                                      // doesn't do anything
@@ -349,7 +349,7 @@ public sealed class SubdocTests
 
     [Fact]
     [PortOf("doc.tests.js:testSubdocLoadEdgeCases", "SUB-03", "SUB-04", "SUB-11", "DOC-12")]
-    public void SubdocLoadEdgeCases_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
+    public void Subdoc_LoadEdgeCases_FollowTheLoadRules() => Impl.Run(() =>
     {
         var ydoc = new Doc();
         var yarray = ydoc.GetArray();
@@ -388,7 +388,7 @@ public sealed class SubdocTests
 
     [Fact]
     [PortOf("doc.tests.js:testSubdocLoadEdgeCasesAutoload", "SUB-03", "SUB-11")]
-    public void SubdocLoadEdgeCasesAutoload_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
+    public void Subdoc_AutoloadLoadEdgeCases_FollowTheLoadRules() => Impl.Run(() =>
     {
         var ydoc = new Doc();
         var yarray = ydoc.GetArray();

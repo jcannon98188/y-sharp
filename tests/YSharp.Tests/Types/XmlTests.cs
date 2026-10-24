@@ -83,7 +83,7 @@ public sealed class XmlTests
     });
 
     [Fact, PortOf("y-xml.tests.js:testSetProperty", "X-E2", "X-E5")]
-    public void SetProperty_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Xml_SetAttribute_IsReadBackLocallyAndOnThePeer() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var (xml0, xml1) = (net.Peers[0].Xml, net.Peers[1].Xml);
@@ -95,7 +95,7 @@ public sealed class XmlTests
     });
 
     [Fact, PortOf("y-xml.tests.js:testHasProperty", "X-E2")]
-    public void HasProperty_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Xml_HasAttribute_TrueAfterSetAndFalseAfterRemove() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var (xml0, xml1) = (net.Peers[0].Xml, net.Peers[1].Xml);
@@ -111,7 +111,7 @@ public sealed class XmlTests
     });
 
     [Fact, PortOf("y-xml.tests.js:testEvents", "X-E5", "Y-1")]
-    public void Events_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Xml_AttributeAndChildChanges_RaiseEventsLocallyAndRemotely() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var (xml0, xml1) = (net.Peers[0].Xml, net.Peers[1].Xml);
@@ -142,7 +142,7 @@ public sealed class XmlTests
     });
 
     [Fact, PortOf("y-xml.tests.js:testTreewalker", "X-E4")]
-    public void Treewalker_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Xml_TreeWalker_VisitsNodesInDocumentOrder() => Stub.Run(() =>
     {
         var net = Net.Init(3);
         var xml0 = net.Peers[0].Xml;
@@ -166,7 +166,7 @@ public sealed class XmlTests
     });
 
     [Fact, PortOf("y-xml.tests.js:testSiblings", "X-E4")]
-    public void Siblings_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Xml_Siblings_LinkNeighboursParentAndFirstChild() => Stub.Run(() =>
     {
         var ydoc = NewDoc();
         var yxml = ydoc.GetXmlFragment();
@@ -190,7 +190,7 @@ public sealed class XmlTests
     });
 
     [Fact, PortOf("y-xml.tests.js:testInsertafter", "X-E4")]
-    public void Insertafter_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Xml_InsertAfterNestedNodes_KeepsTheOrderAndRejectsInvalidUse() => Stub.Run(() =>
     {
         var ydoc = NewDoc();
         var yxml = ydoc.GetXmlFragment();
@@ -222,7 +222,7 @@ public sealed class XmlTests
     });
 
     [Fact, PortOf("y-xml.tests.js:testClone", "X-E6")]
-    public void Clone_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Xml_CloneOfAFragment_HasTheSameJsonAndLength() => Stub.Run(() =>
     {
         var ydoc = NewDoc();
         var yxml = ydoc.GetXmlFragment();
@@ -239,7 +239,7 @@ public sealed class XmlTests
     });
 
     [Fact, PortOf("y-xml.tests.js:testElement", "X-E8")]
-    public void Element_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Xml_ElementWithTwoTextChildren_KeepsTheirOrder() => Stub.Run(() =>
     {
         var ydoc = NewDoc();
         var yxmlel = ydoc.GetXmlElement();

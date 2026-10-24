@@ -177,7 +177,7 @@ public sealed class MapTests
     // ------------------------------------------------------------------ ports
 
     [Fact, PortOf("y-map.tests.js:testBasicMapTests", "M-1", "M-6", "M-8")]
-    public void BasicMapTests_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Map_EveryValueKind_RoundTripsBetweenPeers() => Stub.Run(() =>
     {
         var net = Net.Init(3);
         var (map0, map1, map2) = (net.Peers[0].Map, net.Peers[1].Map, net.Peers[2].Map);
@@ -217,7 +217,7 @@ public sealed class MapTests
     });
 
     [Fact, PortOf("y-map.tests.js:testGetAndSetOfMapProperty", "M-3", "M-2")]
-    public void GetAndSetOfMapProperty_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Map_GetAndSetOfProperty_ReturnsTheStoredValues() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var map0 = net.Peers[0].Map;
@@ -238,7 +238,7 @@ public sealed class MapTests
     });
 
     [Fact, PortOf("y-map.tests.js:testGetAndSetOfMapPropertySyncs", "M-1")]
-    public void GetAndSetOfMapPropertySyncs_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Map_GetAndSetOfProperty_SyncsToThePeer() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var map0 = net.Peers[0].Map;
@@ -250,7 +250,7 @@ public sealed class MapTests
     });
 
     [Fact, PortOf("y-map.tests.js:testGetAndSetOfMapPropertyWithConflict", "M-9")]
-    public void GetAndSetOfMapPropertyWithConflict_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Map_ConcurrentSetOfTheSameKey_ConvergesOnOneValue() => Stub.Run(() =>
     {
         var net = Net.Init(3);
         net.Peers[0].Map.Set("stuff", "c0");
@@ -261,7 +261,7 @@ public sealed class MapTests
     });
 
     [Fact, PortOf("y-map.tests.js:testSizeAndDeleteOfMapProperty", "M-6")]
-    public void SizeAndDeleteOfMapProperty_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Map_DeleteOfAProperty_UpdatesTheSize() => Stub.Run(() =>
     {
         var map0 = Net.Init(1).Peers[0].Map;
         map0.Set("stuff", "c0");
@@ -274,7 +274,7 @@ public sealed class MapTests
     });
 
     [Fact, PortOf("y-map.tests.js:testGetAndSetAndDeleteOfMapProperty", "M-4")]
-    public void GetAndSetAndDeleteOfMapProperty_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Map_ConcurrentSetAndDelete_ConvergesOnTheDelete() => Stub.Run(() =>
     {
         var net = Net.Init(3);
         net.Peers[0].Map.Set("stuff", "c0");
@@ -286,7 +286,7 @@ public sealed class MapTests
     });
 
     [Fact, PortOf("y-map.tests.js:testSetAndClearOfMapProperties", "M-5")]
-    public void SetAndClearOfMapProperties_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Map_Clear_RemovesEveryProperty() => Stub.Run(() =>
     {
         var net = Net.Init(1);
         var map0 = net.Peers[0].Map;
@@ -305,7 +305,7 @@ public sealed class MapTests
     });
 
     [Fact, PortOf("y-map.tests.js:testSetAndClearOfMapPropertiesWithConflicts", "M-5", "M-9")]
-    public void SetAndClearOfMapPropertiesWithConflicts_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Map_ConcurrentSetAndClear_Converges() => Stub.Run(() =>
     {
         var net = Net.Init(4);
         var (map0, map1, map2, map3) = (net.Peers[0].Map, net.Peers[1].Map, net.Peers[2].Map, net.Peers[3].Map);
@@ -331,7 +331,7 @@ public sealed class MapTests
     });
 
     [Fact, PortOf("y-map.tests.js:testGetAndSetOfMapPropertyWithThreeConflicts", "M-9")]
-    public void GetAndSetOfMapPropertyWithThreeConflicts_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Map_ThreeConcurrentSetsOfTheSameKey_ConvergeOnOneValue() => Stub.Run(() =>
     {
         var net = Net.Init(3);
         net.Peers[0].Map.Set("stuff", "c0");
@@ -344,7 +344,7 @@ public sealed class MapTests
     });
 
     [Fact, PortOf("y-map.tests.js:testGetAndSetAndDeleteOfMapPropertyWithThreeConflicts", "M-9", "M-4")]
-    public void GetAndSetAndDeleteOfMapPropertyWithThreeConflicts_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Map_ThreeConcurrentSetsAndDeletes_Converge() => Stub.Run(() =>
     {
         var net = Net.Init(4);
         var (map0, map1, map2, map3) = (net.Peers[0].Map, net.Peers[1].Map, net.Peers[2].Map, net.Peers[3].Map);

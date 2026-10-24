@@ -102,7 +102,7 @@ Q22 (`diverge`, pending): JS clocks and lengths are doubles; y-sharp proposes `l
 - **Recommendation.** Keep (a); revisit if the pack passes about 50 MiB, and regenerate rarely.
 
 ### D2. Test method naming rule (resolved)
-Decided: rename all. Every test method now follows `Subject_Condition_Outcome` (ADR 0015); upstream names live only in `[PortOf]`. The ported oracle tests are named `<Scenario>_OracleScenario_BehavesLikeTheOracle`.
+Decided: rename all. Every test method now follows `Subject_Condition_Outcome` (ADR 0015); upstream names live only in `[PortOf]`. The ported oracle tests are named for the behaviour they check, for example `Undo_Map_UndoesAndRedoesKeyChanges`.
 
 ### D3. Open, no decision needed yet
 The randomized gating budget (~60 s) and the 2-minute gating budget are unmeasured until an implementation exists; the AFL++ job is untested; Spec 13's live differential properties are unrun and will probably need normalisers; Q25 is active under Spec 10.

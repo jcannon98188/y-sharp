@@ -72,31 +72,31 @@ public sealed class RelativePositionTests
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionCase1", "RP-02", "RP-06")]
-    public void Case1_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() => CheckRelativePositions(Seq((0, "1"), (0, "abc"), (0, "z"), (0, "y"), (0, "x"))));
+    public void RelativePosition_FiveInsertsAtZero_ResolveAtEveryIndex() => Impl.Run(() => CheckRelativePositions(Seq((0, "1"), (0, "abc"), (0, "z"), (0, "y"), (0, "x"))));
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionCase2", "RP-02", "RP-06")]
-    public void Case2_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() => CheckRelativePositions(Seq((0, "abc"))));
+    public void RelativePosition_SingleInsert_ResolveAtEveryIndex() => Impl.Run(() => CheckRelativePositions(Seq((0, "abc"))));
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionCase3", "RP-02", "RP-06")]
-    public void Case3_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() => CheckRelativePositions(Seq((0, "abc"), (0, "1"), (0, "xyz"))));
+    public void RelativePosition_ThreeInsertsAtZero_ResolveAtEveryIndex() => Impl.Run(() => CheckRelativePositions(Seq((0, "abc"), (0, "1"), (0, "xyz"))));
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionCase4", "RP-02", "RP-06")]
-    public void Case4_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() => CheckRelativePositions(Seq((0, "1"))));
+    public void RelativePosition_OneCharacter_ResolveAtEveryIndex() => Impl.Run(() => CheckRelativePositions(Seq((0, "1"))));
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionCase5", "RP-02", "RP-06")]
-    public void Case5_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() => CheckRelativePositions(Seq((0, "2"), (0, "1"))));
+    public void RelativePosition_TwoInsertsAtZero_ResolveAtEveryIndex() => Impl.Run(() => CheckRelativePositions(Seq((0, "2"), (0, "1"))));
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionCase6", "RP-02", "RP-06")]
-    public void Case6_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() => CheckRelativePositions(Seq()));
+    public void RelativePosition_EmptyText_ResolveAtIndexZero() => Impl.Run(() => CheckRelativePositions(Seq()));
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionCase7", "RP-06", "RP-08")]
-    public void Case7_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
+    public void RelativePosition_FollowAndNoFollow_ResolveToTheSameIndex() => Impl.Run(() =>
     {
         var docA = new Doc();
         var textA = docA.GetText("text");
@@ -112,7 +112,7 @@ public sealed class RelativePositionTests
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionAssociationDifference", "RP-02", "RP-06", "RP-09")]
-    public void AssociationDifference_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
+    public void RelativePosition_InsertAtTheAnchor_RespectsTheAssociationSide() => Impl.Run(() =>
     {
         var ydoc = new Doc();
         var ytext = ydoc.GetText();
@@ -131,7 +131,7 @@ public sealed class RelativePositionTests
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionWithUndo", "RP-06", "RP-08")]
-    public void RelativePositionWithUndo_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
+    public void RelativePosition_DeleteThenUndo_FollowsTheRestoredContent() => Impl.Run(() =>
     {
         var ydoc = new Doc();
         var ytext = ydoc.GetText();

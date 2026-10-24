@@ -143,7 +143,7 @@ public sealed class DocTests
 
     [Fact]
     [PortOf("doc.tests.js:testGetTypeEmptyId", "DOC-03", "DOC-06")]
-    public void GetTypeEmptyId_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
+    public void GetText_EmptyRootName_IsTheSameTypeAsTheDefaultRoot() => Impl.Run(() =>
     {
         var doc1 = new Doc();
         doc1.GetText("").Insert(0, "h");

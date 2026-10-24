@@ -393,7 +393,7 @@ public sealed class ArrayTests
     // ------------------------------------------------------------------ ports
 
     [Fact, PortOf("y-array.tests.js:testBasicUpdate", "A-1")]
-    public void BasicUpdate_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Array_InsertThenApplyUpdate_TransfersTheArray() => Stub.Run(() =>
     {
         var doc1 = NewDoc(1);
         var doc2 = NewDoc(2);
@@ -404,7 +404,7 @@ public sealed class ArrayTests
     });
 
     [Fact, PortOf("y-array.tests.js:testDeleteInsert", "A-5", "A-6")]
-    public void DeleteInsert_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Array_DeleteOutOfRangeThenInsert_ThrowsAndStaysUsable() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var array0 = net.Peers[0].Array;
@@ -416,7 +416,7 @@ public sealed class ArrayTests
     });
 
     [Fact, PortOf("y-array.tests.js:testInsertThreeElementsTryRegetProperty", "A-10")]
-    public void InsertThreeElementsTryRegetProperty_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Array_InsertThreeValues_ReadBackLocallyAndOnTheRemote() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         net.Peers[0].Array.Insert(0, new YEntry[] { 1, true, false });
@@ -427,7 +427,7 @@ public sealed class ArrayTests
     });
 
     [Fact, PortOf("y-array.tests.js:testConcurrentInsertWithThreeConflicts", "A-18")]
-    public void ConcurrentInsertWithThreeConflicts_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Array_ThreeConcurrentInserts_ConvergeToTheSameOrder() => Stub.Run(() =>
     {
         var net = Net.Init(3);
         net.Peers[0].Array.Insert(0, new YEntry[] { 0 });
@@ -437,7 +437,7 @@ public sealed class ArrayTests
     });
 
     [Fact, PortOf("y-array.tests.js:testConcurrentInsertDeleteWithThreeConflicts", "A-18")]
-    public void ConcurrentInsertDeleteWithThreeConflicts_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Array_ThreeConcurrentInsertsAndDeletes_Converge() => Stub.Run(() =>
     {
         var net = Net.Init(3);
         var (array0, array1, array2) = (net.Peers[0].Array, net.Peers[1].Array, net.Peers[2].Array);
@@ -451,7 +451,7 @@ public sealed class ArrayTests
     });
 
     [Fact, PortOf("y-array.tests.js:testInsertionsInLateSync", "A-18")]
-    public void InsertionsInLateSync_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Array_InsertionsMadeWhileDisconnected_ConvergeOnLateSync() => Stub.Run(() =>
     {
         var net = Net.Init(3);
         var (array0, array1, array2) = (net.Peers[0].Array, net.Peers[1].Array, net.Peers[2].Array);
@@ -469,7 +469,7 @@ public sealed class ArrayTests
     });
 
     [Fact, PortOf("y-array.tests.js:testDisconnectReallyPreventsSendingMessages", "A-13")]
-    public void DisconnectReallyPreventsSendingMessages_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Array_DisconnectedPeer_ReceivesNothingUntilReconnected() => Stub.Run(() =>
     {
         var net = Net.Init(3);
         var (array0, array1) = (net.Peers[0].Array, net.Peers[1].Array);
@@ -487,7 +487,7 @@ public sealed class ArrayTests
     });
 
     [Fact, PortOf("y-array.tests.js:testDeletionsInLateSync", "A-13")]
-    public void DeletionsInLateSync_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Array_DeletionsMadeWhileDisconnected_ConvergeOnLateSync() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var (array0, array1) = (net.Peers[0].Array, net.Peers[1].Array);
@@ -501,7 +501,7 @@ public sealed class ArrayTests
     });
 
     [Fact, PortOf("y-array.tests.js:testInsertThenMergeDeleteOnSync", "A-13")]
-    public void InsertThenMergeDeleteOnSync_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Array_InsertThenDeleteWhileDisconnected_MergeOnSync() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var (array0, array1) = (net.Peers[0].Array, net.Peers[1].Array);
@@ -514,7 +514,7 @@ public sealed class ArrayTests
     });
 
     [Fact, PortOf("y-array.tests.js:testGarbageCollector", "A-13")]
-    public void GarbageCollector_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Array_DeletedItemsWithGc_AreCollectedAndStillConverge() => Stub.Run(() =>
     {
         var net = Net.Init(3);
         var array0 = net.Peers[0].Array;
@@ -528,7 +528,7 @@ public sealed class ArrayTests
     });
 
     [Fact, PortOf("y-array.tests.js:testIteratingArrayContainingTypes", "A-12")]
-    public void IteratingArrayContainingTypes_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Array_IteratingNestedTypes_VisitsEveryElementInOrder() => Stub.Run(() =>
     {
         var y = NewDoc();
         var arr = y.GetArray("arr");

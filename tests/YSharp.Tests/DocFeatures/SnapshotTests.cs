@@ -151,7 +151,7 @@ public sealed class SnapshotTests
 
     [Fact]
     [PortOf("snapshot.tests.js:testBasicXmlAttributes", "SNAP-05")]
-    public void BasicXmlAttributes_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
+    public void Snapshot_XmlAttributeChanges_ReadAsOfEachSnapshot() => Impl.Run(() =>
     {
         var ydoc = NoGc(0);
         var yxml = ydoc.GetMap().Set("el", new YXmlElement("div"));
@@ -209,7 +209,7 @@ public sealed class SnapshotTests
 
     [Fact]
     [PortOf("snapshot.tests.js:testBasic", "SNAP-08", "SNAP-01")]
-    public void Basic_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
+    public void Snapshot_TextInsertedAfterwards_RestoresTheEarlierText() => Impl.Run(() =>
     {
         var ydoc = new Doc(new DocOptions { Gc = false });
         ydoc.GetText().Insert(0, "world!");
@@ -221,7 +221,7 @@ public sealed class SnapshotTests
 
     [Fact]
     [PortOf("snapshot.tests.js:testBasicRestoreSnapshot", "SNAP-08")]
-    public void BasicRestoreSnapshot_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
+    public void Snapshot_ArrayInsertedAfterwards_RestoresTheEarlierArray() => Impl.Run(() =>
     {
         var doc = new Doc(new DocOptions { Gc = false });
         doc.GetArray("array").Insert(0, new YEntry[] { "hello" });
@@ -236,7 +236,7 @@ public sealed class SnapshotTests
 
     [Fact]
     [PortOf("snapshot.tests.js:testEmptyRestoreSnapshot", "SNAP-08", "SNAP-04")]
-    public void EmptyRestoreSnapshot_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
+    public void Snapshot_UnknownClientStateVector_RestoresAnEmptyArray() => Impl.Run(() =>
     {
         var doc = new Doc(new DocOptions { Gc = false });
         // upstream: snap.sv.set(9999, 0). The snapshot API is read-only, so the same snapshot is decoded from its bytes: ds empty, sv {9999: 0}.
@@ -257,7 +257,7 @@ public sealed class SnapshotTests
 
     [Fact]
     [PortOf("snapshot.tests.js:testRestoreSnapshotWithSubType", "SNAP-08")]
-    public void RestoreSnapshotWithSubType_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
+    public void Snapshot_NestedMapEditedAfterwards_RestoresTheEarlierMap() => Impl.Run(() =>
     {
         var doc = new Doc(new DocOptions { Gc = false });
         doc.GetArray("array").Insert(0, new YEntry[] { new YMap() });
@@ -275,7 +275,7 @@ public sealed class SnapshotTests
 
     [Fact]
     [PortOf("snapshot.tests.js:testRestoreDeletedItem1", "SNAP-08", "SNAP-05")]
-    public void RestoreDeletedItem1_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
+    public void Snapshot_ItemDeletedAfterwards_RestoresTheDeletedItem() => Impl.Run(() =>
     {
         var doc = new Doc(new DocOptions { Gc = false });
         doc.GetArray("array").Insert(0, new YEntry[] { "item1", "item2" });
@@ -291,7 +291,7 @@ public sealed class SnapshotTests
 
     [Fact]
     [PortOf("snapshot.tests.js:testRestoreLeftItem", "SNAP-08")]
-    public void RestoreLeftItem_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
+    public void Snapshot_LeftNeighbourDeletedAfterwards_RestoresTheLeftItem() => Impl.Run(() =>
     {
         var doc = new Doc(new DocOptions { Gc = false });
         doc.GetArray("array").Insert(0, new YEntry[] { "item1" });
@@ -309,7 +309,7 @@ public sealed class SnapshotTests
 
     [Fact]
     [PortOf("snapshot.tests.js:testDeletedItemsBase", "SNAP-08")]
-    public void DeletedItemsBase_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
+    public void Snapshot_ItemDeletedBeforeAndInsertAfter_RestoresAnEmptyArray() => Impl.Run(() =>
     {
         var doc = new Doc(new DocOptions { Gc = false });
         doc.GetArray("array").Insert(0, new YEntry[] { "item1" });
@@ -325,7 +325,7 @@ public sealed class SnapshotTests
 
     [Fact]
     [PortOf("snapshot.tests.js:testDeletedItems2", "SNAP-08")]
-    public void DeletedItems2_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
+    public void Snapshot_MiddleItemDeletedBeforeAndInsertAfter_RestoresTheRemainingItems() => Impl.Run(() =>
     {
         var doc = new Doc(new DocOptions { Gc = false });
         doc.GetArray("array").Insert(0, new YEntry[] { "item1", "item2", "item3" });
@@ -341,7 +341,7 @@ public sealed class SnapshotTests
 
     [Fact]
     [PortOf("snapshot.tests.js:testDependentChanges", "SNAP-08", "SNAP-05")]
-    public void DependentChanges_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
+    public void Snapshot_DependentChangesFromTwoClients_RestoreConsistently() => Impl.Run(() =>
     {
         var u = Users.Init(2);
         var array0 = u.Array(0);
@@ -415,7 +415,7 @@ public sealed class SnapshotTests
 
     [Fact]
     [PortOf("snapshot.tests.js:testContainsUpdate", "SNAP-10")]
-    public void ContainsUpdate_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
+    public void ContainsUpdate_SuccessiveSnapshots_ReportsWhichUpdatesAreContained() => Impl.Run(() =>
     {
         var ydoc = new Doc();
         var updates = new List<byte[]>();
@@ -435,7 +435,7 @@ public sealed class SnapshotTests
 
     [Fact]
     [PortOf("snapshot.tests.js:testContainsUpdate2", "SNAP-10")]
-    public void ContainsUpdate2_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
+    public void ContainsUpdate_DeletesAppliedToARemote_ReportsTheContainedDeletes() => Impl.Run(() =>
     {
         var local = new Doc();
         var remote = new Doc();

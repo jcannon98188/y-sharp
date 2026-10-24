@@ -89,7 +89,7 @@ public sealed class TextTests
     });
 
     [Fact, PortOf("y-text.tests.js:testSplitSurrogateCharacter", "T-5")]
-    public void SplitSurrogateCharacter_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Text_SplitSurrogatePair_SurvivesDisconnectAndSync() => Stub.Run(() =>
     {
         {
             var net = Net.Init(2);
@@ -188,7 +188,7 @@ public sealed class TextTests
     // ------------------------------------------------------------------ formats
 
     [Fact, PortOf("y-text.tests.js:testBasicFormat", "F-1", "F-3", "F-2")]
-    public void BasicFormat_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Text_FormatRanges_ReportDeltasForEachChange() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var text0 = net.Peers[0].Text;
@@ -237,7 +237,7 @@ public sealed class TextTests
     });
 
     [Fact, PortOf("y-text.tests.js:testFalsyFormats", "F-4")]
-    public void FalsyFormats_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Text_FalsyFormatValues_AreKeptInTheDelta() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var text0 = net.Peers[0].Text;
@@ -256,7 +256,7 @@ public sealed class TextTests
     });
 
     [Fact, PortOf("y-xml.tests.js:testFormattingBug", "F-5", "Q27")]
-    public void FormattingBugXml_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void XmlText_FormattingRegression_RendersTheExpectedDelta() => Stub.Run(() =>
     {
         // JS creates the root with ydoc.get('', Y.XmlText); the sketch has no root XmlText (API gap), so the text sits in a fragment.
         var ydoc = NewDoc();
@@ -326,7 +326,7 @@ public sealed class TextTests
     });
 
     [Fact, PortOf("y-text.tests.js:testFormattingRemoved", "F-7")]
-    public void FormattingRemoved_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Text_FormattedTextDeleted_LeavesNothingBehind() => Stub.Run(() =>
     {
         var text0 = Net.Init(1).Peers[0].Text;
         text0.Insert(0, "ab", Bold);
@@ -337,7 +337,7 @@ public sealed class TextTests
     });
 
     [Fact, PortOf("y-text.tests.js:testFormattingRemovedInMidText", "F-7")]
-    public void FormattingRemovedInMidText_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Text_FormattedMiddleDeleted_LeavesNoFormattingMarkers() => Stub.Run(() =>
     {
         var text0 = Net.Init(1).Peers[0].Text;
         text0.Insert(0, "1234");
@@ -348,7 +348,7 @@ public sealed class TextTests
     });
 
     [Fact, PortOf("y-text.tests.js:testFormattingBug", "F-8", "F-7")]
-    public void FormattingBug_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Text_FormattingOnNewlines_ConvergesAcrossTwoDocs() => Stub.Run(() =>
     {
         var ydoc1 = NewDoc(1);
         var ydoc2 = NewDoc(2);
@@ -366,7 +366,7 @@ public sealed class TextTests
     });
 
     [Fact, PortOf("y-text.tests.js:testDeleteFormatting", "F-7", "F-8")]
-    public void DeleteFormatting_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Text_DeletedFormattedRange_SyncsToThePeer() => Stub.Run(() =>
     {
         var doc = NewDoc(1);
         var text = doc.GetText();
@@ -385,7 +385,7 @@ public sealed class TextTests
     });
 
     [Fact, PortOf("y-text.tests.js:testDeltaAfterConcurrentFormatting", "F-9", "Y-6")]
-    public void DeltaAfterConcurrentFormatting_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Text_ConcurrentFormatting_ProducesTheExpectedDelta() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var (text0, text1) = (net.Peers[0].Text, net.Peers[1].Text);
@@ -404,7 +404,7 @@ public sealed class TextTests
     });
 
     [Fact, PortOf("y-text.tests.js:testFormattingDeltaUnnecessaryAttributeChange", "Y-6", "F-9")]
-    public void FormattingDeltaUnnecessaryAttributeChange_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Text_ReappliedSameFormat_ProducesNoUnnecessaryAttributeChange() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var (text0, text1) = (net.Peers[0].Text, net.Peers[1].Text);
@@ -445,7 +445,7 @@ public sealed class TextTests
     });
 
     [Fact, PortOf("y-text.tests.js:testToDeltaEmbedAttributes", "E-3", "D-1", "D-2")]
-    public void ToDeltaEmbedAttributes_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void ToDelta_EmbedWithAttributes_IncludesTheAttributes() => Stub.Run(() =>
     {
         var text0 = Net.Init(1).Peers[0].Text;
         text0.Insert(0, "ab", Bold);
@@ -456,7 +456,7 @@ public sealed class TextTests
     });
 
     [Fact, PortOf("y-text.tests.js:testToDeltaEmbedNoAttributes", "E-3", "D-2", "E-6")]
-    public void ToDeltaEmbedNoAttributes_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void ToDelta_EmbedWithoutAttributes_OmitsTheAttributesKey() => Stub.Run(() =>
     {
         var text0 = Net.Init(1).Peers[0].Text;
         text0.Insert(0, "ab", Bold);
@@ -468,7 +468,7 @@ public sealed class TextTests
     });
 
     [Fact, PortOf("y-text.tests.js:testGetDeltaWithEmbeds", "E-4")]
-    public void GetDeltaWithEmbeds_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void ToDelta_ApplyDeltaEmbed_ReturnsTheEmbed() => Stub.Run(() =>
     {
         var text0 = Net.Init(1).Peers[0].Text;
         text0.ApplyDelta(new[] { new TextDeltaOp(DeltaKind.Insert, 1, null, (YEntry)Obj(("linebreak", "s"))) });
@@ -476,7 +476,7 @@ public sealed class TextTests
     });
 
     [Fact, PortOf("y-text.tests.js:testTypesAsEmbed", "E-4", "E-3")]
-    public void TypesAsEmbed_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Text_TypeInsertedAsEmbed_SyncsAndReadsBack() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var (text0, text1) = (net.Peers[0].Text, net.Peers[1].Text);
@@ -540,7 +540,7 @@ public sealed class TextTests
     });
 
     [Fact, PortOf("y-text.tests.js:testSnapshot", "D-3")]
-    public void Snapshot_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Text_SnapshotsOfEdits_ProduceTheDeltaOfEachVersion() => Stub.Run(() =>
     {
         var net = Net.Init(1);
         var text0 = net.Peers[0].Text;
@@ -561,7 +561,7 @@ public sealed class TextTests
     });
 
     [Fact, PortOf("y-text.tests.js:testSnapshotDeleteAfter", "D-3")]
-    public void SnapshotDeleteAfter_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Text_DeleteAfterSnapshot_SnapshotStillShowsTheDeletedText() => Stub.Run(() =>
     {
         var text0 = Net.Init(1).Peers[0].Text;
         var doc0 = text0.Doc!;
@@ -601,7 +601,7 @@ public sealed class TextTests
     // ------------------------------------------------------------------ remaining ports
 
     [Fact, PortOf("y-text.tests.js:testBasicInsertAndDelete", "Y-2", "Y-5", "A-E4", "TX-5", "T-1", "T-2")]
-    public void BasicInsertAndDelete_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Text_InsertAndDelete_ReportDeltasForEachChange() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var text0 = net.Peers[0].Text;
@@ -633,7 +633,7 @@ public sealed class TextTests
     });
 
     [Fact, PortOf("y-text.tests.js:testMultilineFormat", "F-6", "T-6")]
-    public void MultilineFormat_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Text_FormatAcrossLines_KeepsTheLineBreaksUnformatted() => Stub.Run(() =>
     {
         var testText = NewDoc().GetText("test");
         testText.Insert(0, "Test\nMulti-line\nFormatting");
@@ -644,7 +644,7 @@ public sealed class TextTests
     });
 
     [Fact, PortOf("y-text.tests.js:testNotMergeEmptyLinesFormat", "D-1", "T-6")]
-    public void NotMergeEmptyLinesFormat_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Text_EmptyLinesWithTheSameFormat_AreNotMerged() => Stub.Run(() =>
     {
         var testText = NewDoc().GetText("test");
         var title = Obj(("title", true));
@@ -654,7 +654,7 @@ public sealed class TextTests
     });
 
     [Fact, PortOf("y-text.tests.js:testPreserveAttributesThroughDelete", "F-7", "T-6")]
-    public void PreserveAttributesThroughDelete_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Text_DeleteBetweenFormattedLines_PreservesTheAttributes() => Stub.Run(() =>
     {
         var testText = NewDoc().GetText("test");
         var title = Obj(("title", true));
@@ -664,7 +664,7 @@ public sealed class TextTests
     });
 
     [Fact, PortOf("y-text.tests.js:testToJson", "T-3")]
-    public void ToJson_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void ToJson_FormattedText_ReturnsTheUnformattedText() => Stub.Run(() =>
     {
         var text0 = Net.Init(1).Peers[0].Text;
         text0.Insert(0, "abc", Bold);
@@ -672,7 +672,7 @@ public sealed class TextTests
     });
 
     [Fact, PortOf("y-text.tests.js:testAppendChars", "T-1")]
-    public void AppendChars_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Text_TenThousandAppends_KeepTheLengthCorrect() => Stub.Run(() =>
     {
         const int n = 10000;
         var text0 = Net.Init(1).Peers[0].Text;
@@ -681,7 +681,7 @@ public sealed class TextTests
     });
 
     [Fact, PortOf("y-text.tests.js:testSearchMarkerBug1", "A-14")]
-    public void SearchMarkerBug1_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Text_SearchMarkerRegression_ConvergesAcrossPeers() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var (text0, text1) = (net.Peers[0].Text, net.Peers[1].Text);
@@ -717,7 +717,7 @@ public sealed class TextTests
     });
 
     [Fact, PortOf("y-text.tests.js:testDeltaBug", "D-1", "F-2")]
-    public void DeltaBug_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Text_DeltaRegression_AppliesTheStoredDeltaCleanly() => Stub.Run(() =>
     {
         const string file = "y-text.tests.js";
         string Literal(string name) => JsSource.ConstAsJson(file, "testDeltaBug", name);
@@ -731,7 +731,7 @@ public sealed class TextTests
     });
 
     [Fact, PortOf("y-text.tests.js:testDeltaBug2", "D-1", "F-2")]
-    public void DeltaBug2_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
+    public void Text_SecondDeltaRegression_AppliesTheStoredDeltaCleanly() => Stub.Run(() =>
     {
         const string file = "y-text.tests.js";
         string Literal(string name) => JsSource.ConstAsJson(file, "testDeltaBug2", name);
