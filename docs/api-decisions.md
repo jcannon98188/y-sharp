@@ -101,8 +101,8 @@ Q22 (`diverge`, pending): JS clocks and lengths are doubles; y-sharp proposes `l
 - **Options.** (a) Keep: no generation step for gating. (b) Git LFS: smaller clones, needs LFS in CI and for contributors. (c) Generate in CI and do not commit: no history growth, but the Windows and macOS gating jobs have no Node (ADR 0015), so they would need the files from an artifact.
 - **Recommendation.** Keep (a); revisit if the pack passes about 50 MiB, and regenerate rarely.
 
-### D2. Test method naming rule
-ADR 0015 says methods are `Subject_Condition_Outcome` and ported JS tests keep the upstream name in `[PortOf]`, not in the method name. About 88 methods in the suite are named `TestXxx` after the upstream test. **Options.** Rename them; or amend the ADR to allow upstream names for `[PortOf]` tests. **Recommendation.** Amend the ADR: the upstream name in the method keeps failures searchable against the JS source, and the attribute already carries the mapping.
+### D2. Test method naming rule (resolved)
+Decided: rename all. Every test method now follows `Subject_Condition_Outcome` (ADR 0015); upstream names live only in `[PortOf]`. The ported oracle tests are named `<Scenario>_OracleScenario_BehavesLikeTheOracle`.
 
 ### D3. Open, no decision needed yet
 The randomized gating budget (~60 s) and the 2-minute gating budget are unmeasured until an implementation exists; the AFL++ job is untested; Spec 13's live differential properties are unrun and will probably need normalisers; Q25 is active under Spec 10.
