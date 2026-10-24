@@ -21,7 +21,7 @@ jobs:
         env:
           YSHARP_TIER: Nightly
         run: dotnet test --solution YSharp.slnx -c Release --no-build --report-trx --results-directory TestResults
-      # Placeholders: SharpFuzz harness (TASK-2.11) and benchmark comparison (TASK-2.14).
+      # The SharpFuzz job is sharpfuzz.yml (TASK-2.11, non-gating). Placeholder: benchmark comparison (TASK-2.14).
       - name: Benchmarks (shell)
         run: dotnet run -c Release --project bench/YSharp.Benchmarks -- --list flat
         continue-on-error: true
