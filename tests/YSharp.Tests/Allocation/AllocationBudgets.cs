@@ -1,0 +1,123 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Xunit;
+using YSharp.TestKit.Allocation;
+
+namespace YSharp.Tests.Allocation;
+
+public enum BudgetKind
+{
+    /// <summary>Allocates exactly zero bytes per operation. Fixed by ADR 0009; never moves.</summary>
+    Zero,
+
+    /// <summary>Bounded bytes per operation, one limit per named part. Measured on the first implementation, then recorded plus 25%.</summary>
+    Bounded,
+
+    /// <summary>Hostile input of N bytes allocates at most K*N plus a fixed amount (limits <c>k</c> and <c>fixed</c>).</summary>
+    Hostile,
+
+    /// <summary>Slow memory tier: managed heap per item must not exceed the Yjs figure (bench/yjs-memory/yjs-bytes-per-item.json).</summary>
+    BytesPerItem,
+
+    /// <summary>Slow memory tier: zero gen2 collections and no large-object-heap growth beyond the declared allowance.</summary>
+    SteadyState,
+}
+
+/// <summary>One row of the table. <see cref="Parts"/> lists the measured parts of the path; a bounded budget has one limit per part.</summary>
+public sealed record Budget(string Id, string Path, BudgetKind Kind, params string[] Parts)
+{
+    /// <summary>The recorded limit of a part in bytes, or null while it is pending (<see cref="AllocationBudgets.Limits"/>).</summary>
+    public long? LimitOf(string part = "") => AllocationBudgets.Limits.TryGetValue(Key(Id, part), out var v) ? v : null;
+
+    /// <summary>The parts to check; a path with no named parts has the single unnamed part.</summary>
+    public IReadOnlyList<string> PartNames => Parts.Length == 0 ? new[] { "" } : Parts;
+
+    public static string Key(string id, string part) => part.Length == 0 ? id : id + ":" + part;
+}
+
+/// <summary>
+/// The one table of allocation and memory budgets (ADR 0009, 0018). IDs are the registry's <c>BUD-*</c> entries and are stable: tests
+/// reference them, <c>BudgetTableTests</c> cross-checks the table against <c>docs/inventory/budgets.yaml</c>.
+/// <para>
+/// Rules. Zero paths stay at 0. A bounded limit is the value measured on the first implementation plus 25% (<see cref="WithHeadroom"/>),
+/// recorded in <see cref="Limits"/>, and only moves down afterwards; raising one is a reviewed change with a reason in the commit.
+/// A bounded budget with no recorded limit is pending: its test measures and reports the value to record, then skips.
+/// </para>
+/// </summary>
+public static class AllocationBudgets
+{
+    public const double Headroom = 1.25;
+
+    /// <summary>
+    /// The recorded limits, keyed <c>BUD-nn</c> or <c>BUD-nn:part</c>. Empty until the implementation exists (ADR 0018 milestone gate);
+    /// every bounded budget is therefore pending. Fill in <c>WithHeadroom(measured)</c> values as each milestone closes.
+    /// </summary>
+    public static readonly IReadOnlyDictionary<string, long> Limits = new Dictionary<string, long>();
+
+    /// <summary>The one-off large-object-heap growth BUD-14 tolerates: a single caller-supplied payload larger than a chunk (ADR 0018). The workload has none, so one chunk is slack.</summary>
+    public const long LohAllowanceBytes = 128 * 1024;
+
+    public const string TextInsert = "text-insert";
+    public const string ArrayPush = "array-push";
+    public const string MapSet = "map-set";
+
+    public static readonly IReadOnlyList<Budget> All = new Budget[]
+    {
+        new("BUD-01", "Transact/ReadTransact with a static lambda, uncontended", BudgetKind.Zero, "Transact", "ReadTransact"),
+        new("BUD-02", "TryTransact, uncontended and contended", BudgetKind.Zero, "Uncontended", "Contended"),
+        new("BUD-03", "Scalar YValue reads and AttributeEquals", BudgetKind.Zero),
+        new("BUD-04", "Event dispatch with no handlers for the changed type", BudgetKind.Zero),
+        new("BUD-05", "Commit with no Update subscriber", BudgetKind.Zero),
+        new("BUD-06", "EncodeStateAsUpdate into a pre-sized writer", BudgetKind.Zero),
+        new("BUD-07", "One-character YText.Insert at the end", BudgetKind.Zero),
+        new("BUD-08", "TryApplyUpdate", BudgetKind.Bounded, "V1", "V2"),
+        new("BUD-09", "Push and Set of scalars", BudgetKind.Bounded, "Push", "Set"),
+        new("BUD-10", "Sync Step1/Step2 round trip", BudgetKind.Bounded),
+        new("BUD-11", "Awareness encode and apply", BudgetKind.Bounded, "Encode", "Apply"),
+        new("BUD-12", "Hostile input of N bytes", BudgetKind.Hostile, "k", "fixed"),
+        new("BUD-13", "Managed heap per item after forced collection", BudgetKind.BytesPerItem, TextInsert, ArrayPush, MapSet),
+        new("BUD-14", "Gen2 collections and LOH growth over 100k steady-state edits", BudgetKind.SteadyState),
+    };
+
+    /// <summary>The eleven named hot paths of ADR 0009 (BUD-01..11).</summary>
+    public static IEnumerable<Budget> HotPaths => All.Where(b => b.Kind is BudgetKind.Zero or BudgetKind.Bounded);
+
+    public static Budget Get(string id) => All.Single(b => b.Id == id);
+
+    public static long WithHeadroom(long measured) => (long)Math.Ceiling(measured * Headroom);
+
+    /// <summary>A bounded or hostile budget with a part that has no recorded limit.</summary>
+    public static bool IsPending(Budget b) =>
+        b.Kind switch
+        {
+            BudgetKind.Bounded or BudgetKind.Hostile => b.PartNames.Any(p => b.LimitOf(p) is null),
+            _ => false,
+        };
+
+    public static int PendingCount => All.Count(IsPending);
+
+    /// <summary>
+    /// Asserts one part of a hot path against its budget: zero paths use 0, a recorded limit is enforced, and a pending bounded path
+    /// measures and skips with the value to record.
+    /// </summary>
+    public static void Check(string id, string part, Action operation, int iterations = 200, int warmup = 50)
+    {
+        var b = Get(id);
+        var key = Budget.Key(id, part);
+        if (b.Kind == BudgetKind.Zero)
+        {
+            AllocationAssert.AtMost(key, 0, operation, iterations, warmup);
+            return;
+        }
+
+        if (b.LimitOf(part) is { } limit)
+        {
+            AllocationAssert.AtMost(key, limit, operation, iterations, warmup);
+            return;
+        }
+
+        var measured = AllocationAssert.Measure(operation, iterations, warmup);
+        Assert.Skip($"{key} is pending: measured {measured} bytes per operation, record {WithHeadroom(measured)} in AllocationBudgets.Limits once the milestone closes (ADR 0018).");
+    }
+}

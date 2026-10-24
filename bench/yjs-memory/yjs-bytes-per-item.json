@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "yjs": "13.6.33",
+  "node": "v24.21.0",
+  "unit": "bytes per item",
+  "workloads": {
+    "text-insert": {
+      "items": 1000000,
+      "bytesPerItem": 194.77
+    },
+    "array-push": {
+      "items": 1000000,
+      "bytesPerItem": 8.31
+    },
+    "map-set": {
+      "items": 100000,
+      "bytesPerItem": 312.26
+    }
+  }
+}
