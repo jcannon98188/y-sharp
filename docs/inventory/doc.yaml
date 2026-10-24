@@ -131,6 +131,7 @@
   owner: 8
   status: active
   ref: "doc-features.md:21"
+  note: "whenLoaded and whenSynced are not provided (no async APIs, ADR 0008); Doc.Loaded and Doc.Synced events carry the same information (A8)."
 
 - id: DOC-14
   title: "sync event"
@@ -161,6 +162,7 @@
   owner: 8
   status: active
   ref: "doc-features.md:24"
+  note: "Doc.GetSubdocGuids() returns a new set; Doc.Subdocs is the live collection (ADR 0008, A8)."
 
 - id: DOC-17
   title: "meta, collectionid"

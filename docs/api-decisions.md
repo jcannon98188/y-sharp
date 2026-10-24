@@ -1,54 +1,40 @@
 # Open API decisions
 
-**For the project owner. Nothing here has been decided or changed.** Each item is a question the test suite hit while compiling against the API stub (ADR 0008, 0019) and could not settle alone. Sources: the TASK-2 implementation notes (`backlog task view 2 --plain`), `// API gap` comments in `tests/`, and the registry (`docs/inventory/`). Where a test works around a gap, the workaround is named so it can be undone when you decide. Recommendations are the suite author's view, not decisions.
+**For the project owner. Section A is decided (below); sections B to D are open (except D2, resolved) and nothing in them has been changed.** Each item is a question the test suite hit while compiling against the API stub (ADR 0008, 0019) and could not settle alone. Sources: the TASK-2 implementation notes (`backlog task view 2 --plain`), `// API gap` comments in `tests/`, and the registry (`docs/inventory/`). Where a test works around a gap, the workaround is named so it can be undone when you decide. Recommendations are the suite author's view, not decisions.
 
 IDs: `Q`, `ENC`, `AW`, `CC`, `ERR`, `AU` are registry entries (ADR 0010).
 
 ## A. Public API shape (ADR 0008)
 
+Section A is decided; the decisions are recorded in ADR 0008 (and ADR 0003, 0018 where noted) and applied to the API stub and the tests. Each item keeps its question and the places that were affected.
+
 ### A1. Client ids: `uint` or 53-bit
-- **Question.** `StateVector`, `ItemId` and `DocOptions.ClientId` use `uint`. The wire (varuint) and Yjs accept client ids up to 2^53-1 (Q12, ENC-37, AW-34); Yjs itself generates 32-bit ids only.
-- **Bites.** `MalformedInputTests` ENC-37/Q12 (acceptance is asserted through `TryApplyUpdate` only), `AwarenessWireTests` AW-34, fixtures with client ids above 2^32. Registry entries excluded as not-applicable because the stub has no such members: ENC-26 (`obfuscateUpdate`), ENC-57/58/59 (`parseUpdateMeta`, `logUpdate`, JS-typed arguments).
-- **Options.** (a) Keep `uint` and reject larger ids as Malformed (a recorded divergence, ADR 0003). (b) Change the public type to `ulong` everywhere, matching the wire. (c) Keep `uint` for generated ids, decode into `ulong` internally, and expose `ulong` only on read APIs.
-- **Recommendation.** (b), unless interop with Yjs peers using large ids is out of scope, in which case (a) with an explicit `[Diverges]`. (c) leaks two types into the API. Decide before implementation: the type is in every signature. Keep ENC-26 and ENC-57..59 excluded (no `parseUpdateMeta`/`logUpdate`/`obfuscateUpdate` equivalents).
+**Decided: `ulong` everywhere.**
+- **Question.** `StateVector`, `ItemId` and `DocOptions.ClientId` used `uint`, but the wire (varuint) and Yjs accept client ids up to 2^53-1 (Q12, ENC-37, AW-34); Yjs itself generates 32-bit ids only.
+- **Decision.** The public type is `ulong` in every signature: `ItemId`, `StateVector`, `DocOptions.ClientId`, `Doc.ClientId`, `IClientIdGenerator`, awareness client ids and events, `PermanentUserData`. Ids up to 2^53-1 are accepted and round-trip. A wire id of 2^53 or more stays Malformed (a recorded divergence, ADR 0003). Clocks stay `long`. Generated ids stay 32-bit as in Yjs.
+- **Tests.** The Q12/ENC-37/AW-34 tests assert that a 2^53-1 id round-trips through the document, state vector, update and awareness encoding instead of only being accepted by `TryApplyUpdate`; the Malformed test for 2^53 and above is kept. New fixtures cover 53-bit client ids in the structs and awareness areas, and the hostile corpus accepts client ids below 2^53.
+- **Still excluded** as not-applicable: ENC-26 (`obfuscateUpdate`) and ENC-57/58/59 (`parseUpdateMeta`, `logUpdate`, JS-typed arguments).
 
 ### A2. Root `YXmlText`
-- **Question.** `Doc.Get` cannot create a root `YXmlText`; JS has `ydoc.get('', Y.XmlText)`.
-- **Bites.** `SharedTypeTests` (line ~77) and `TextTests` (~261) put the XmlText inside a fragment instead. Spec 8 hit the same gap.
-- **Options.** Add `Doc.GetXmlText(name)`; or leave it out as rare.
-- **Recommendation.** Add it (cheap, removes the workaround).
+**Decided: add `Doc.GetXmlText(name)`.** It creates a root `YXmlText`, as JS `ydoc.get(name, Y.XmlText)` does; `YText` and `YXmlText` are different constructors, so asking for the other one on the same name throws `YTypeConflictException`. The SharedTypeTests, TextTests and UndoPortTests ports that put the XmlText in a fragment or an embed now use a root XmlText.
 
 ### A3. `YArray.Slice`, `ForEach`, `Map`
-- **Question.** JS `slice(start, end)`, `forEach` and `map` have no counterpart; the sketch has the enumerator, `ToArray` and `CopyTo(start, destination)`.
-- **Bites.** `ArrayTests` lines ~114 and ~167 port them with `ToArray` and enumeration.
-- **Options.** Add `Slice` only; add all three; add none (LINQ over the enumerator).
-- **Recommendation.** `Slice` only. `ForEach`/`Map` add nothing over `foreach` and LINQ.
+**Decided: add `YArray.Slice(start, end)` only.** Negative indexes count from the end, as in JS; `end` defaults to the length. `ForEach` and `Map` are not added: `foreach` and LINQ over the enumerator cover them. The ArrayTests slice port uses `Slice`.
 
 ### A4. `Transact` return value
-- **Question.** JS `transact` returns the callback's value; C# `Transact` returns nothing.
-- **Bites.** `TransactionTests` (~86) reads state from inside the body.
-- **Options.** Add `Transact<TResult>(Func<Transaction, TResult>)` (and a state-passing form); or keep void.
-- **Recommendation.** Add the generic overload. Related trap (Spec 12): `Transact(body, origin, timeout)` with a `null` origin binds to the generic overload, so tests use named arguments; consider renaming one overload.
+**Decided: add `Transact<TResult>(Func<Transaction, TResult>, origin)` and the state-passing `Transact<TState, TResult>`; rename the timeout overload to `TransactWithTimeout(body, origin, timeout, ct)`.** The rename removes the trap where `Transact(body, null, timeout)` bound to the state-passing generic overload; the tests no longer need named arguments. See ADR 0008.
 
-### A5. `AfterAllTransactions` has no transaction list
-- **Question.** JS `afterAllTransactions` passes the list of transactions of the cleanup round; the stub exposes none.
-- **Bites.** Spec 7 event and observer ordering tests.
-- **Options.** Expose a pooled read-only list valid during dispatch (ADR 0008); or only a count.
-- **Recommendation.** Expose the list, consistent with the "valid only during dispatch" rule.
+### A5. `AfterAllTransactions` transaction list
+**Decided: expose the list.** `AfterAllTransactions` handlers receive `IReadOnlyList<Transaction>`, the transactions of the cleanup round in order. The list is pooled and valid only during dispatch, like events.
 
 ### A6. Item identity is not public
-- **Question.** `ItemId` is public, items and structs are not, so `compareIDs` and `getTypeChildren` are approximated in tests. Spec 8: `ItemView` exposes only the id.
-- **Options.** Keep hidden and test through the `structs` dump seam (section C); or expose a read-only `ItemView` (origin, deleted flag, content kind).
-- **Recommendation.** Keep hidden. Public struct identity commits the layout (ADR 0018) for little user value.
+**Decided: keep hidden; no API change.** Items and structs stay internal and there is no `ItemView` beyond the id and deleted flag, because public struct identity would commit the layout (ADR 0018). Tests use the `structs` dump seam (section C). Recorded in ADR 0008.
 
 ### A7. `YEvent` lifetime
-- **Question.** Events are pooled and valid only during dispatch (ADR 0008); JS shares one event object across observers and it stays usable afterwards.
-- **Bites.** Spec 7 observer tests cannot reproduce shared-event semantics. The Q25 fixture assumes `YEvent.GetPath()` is relative to `CurrentTarget`.
-- **Options.** Keep pooled and document; or add an explicit owned copy (`YEvent.Snapshot()`).
-- **Recommendation.** Keep pooled; add the copy only if users ask. State the `GetPath()` base in the API docs.
+**Decided: keep events pooled and valid only during dispatch; no `Snapshot()` copy unless users ask.** `YEvent.GetPath()` is relative to `CurrentTarget` (the Q25 fixture already assumes this). Recorded in ADR 0008.
 
-### A8. Other stub gaps from Spec 8
-`UndoManagerOptions.Doc` is missing, `YXmlFragment` cannot hold a subdoc, there is no `whenLoaded`/`whenSynced` and no `GetSubdocGuids`. `SubdocTests` (~315) and `UndoPortTests` (~73) work around the first two. **Recommendation.** Add `UndoManagerOptions.Doc` and `GetSubdocGuids`; allow subdocs in fragments (Yjs does); expose loaded/synced as events, since ADR 0008 puts async APIs out of scope. RP-05 and PUD-05 follow JS for now.
+### A8. Other stub gaps
+**Decided: add `UndoManagerOptions.Doc` and `Doc.GetSubdocGuids()`; allow a subdoc inside a `YXmlFragment` (`InsertSubdoc(index, doc)`); expose loaded and synced as the existing `Loaded` and `Synced` events.** There are no `whenLoaded`/`whenSynced` tasks, because ADR 0008 puts async APIs out of scope. The SubdocTests undo port now uses a fragment, and the UndoPortTests empty-scope port uses `UndoManagerOptions.Doc`. RP-05 and PUD-05 still follow JS.
 
 ## B. Behaviour and error semantics
 

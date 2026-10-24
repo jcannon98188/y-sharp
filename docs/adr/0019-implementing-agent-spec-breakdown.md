@@ -50,7 +50,7 @@ Spec 1 owns `src/`, and the plan was that later specs would only compile against
 
 - **`TextDeltaOp` constructor** (Spec 7, TASK-2.7, `src/YSharp/3-Types.cs`). The struct had only getters, so `ApplyDelta` (T-6) tests could not build ops. It gained `TextDeltaOp(DeltaKind kind, int length, string? text = null, YEntry embed = default, YValue attributes = default)` and get-only properties.
 - **`YText.GetAttributes`** (Spec 7, TASK-2.7, `3-Types.cs`). Added `IReadOnlyDictionary<string, YValue> GetAttributes()` for the live attributes (X-2), the same shape `YXmlElement` already had.
-- **`Awareness.TryEncodeUpdate`** (Spec 9, TASK-2.9, `src/YSharp/5-Protocols.cs`). Added `YStatus TryEncodeUpdate(IBufferWriter<byte> writer, ReadOnlySpan<uint> clients, IReadOnlyDictionary<uint, YValue>? states = null)` for AW-31..33 (order kept, duplicates written twice, an id with no meta fails). `Awareness.EncodeUpdate` lost its `clients` parameter and now encodes every client with a live state.
+- **`Awareness.TryEncodeUpdate`** (Spec 9, TASK-2.9, `src/YSharp/5-Protocols.cs`). Added `YStatus TryEncodeUpdate(IBufferWriter<byte> writer, ReadOnlySpan<ulong> clients, IReadOnlyDictionary<ulong, YValue>? states = null)` for AW-31..33 (order kept, duplicates written twice, an id with no meta fails). `Awareness.EncodeUpdate` lost its `clients` parameter and now encodes every client with a live state.
 - **`YSync.TryReadMessage` `errorHandler`** (Spec 9, TASK-2.9, `5-Protocols.cs`). Added a trailing `Action<YError>? errorHandler = null` parameter.
 
 Open questions these raise are collected in `docs/api-decisions.md`.

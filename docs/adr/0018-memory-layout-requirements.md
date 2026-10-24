@@ -6,6 +6,7 @@ ADR 0004 makes GC pressure the main risk of a pure C# implementation and ADR 000
 
 The implementation chooses how items are represented (an object per item, or structs addressed by index in arenas). It must satisfy these invariants either way:
 
+- **Client ids are 53-bit.** Internal tables hold client ids up to 2^53-1 (the public type is `ulong`, ADR 0008), not 32-bit ones; how they are keyed stays internal.
 - **Chunked storage.** No growing structure the document owns, such as a client's struct list, a content pool or the delete set, is one contiguous allocation larger than about 64 KB. It grows by adding chunks, so steady-state edits never grow the large object heap.
 - **No per-item machinery.** An item carries no finalizer, lock, event object, delegate or closure. Neighbour and parent links, origin ids and the parent sub-key do not require a separate heap object per link.
 - **Document-owned memory.** All memory held for a document is reachable only from that document. There are no finalizers, no static or global caches keyed by document, and no timer or handler that roots a document after it is destroyed. Destroying a document releases every chunk and unsubscribes everything it subscribed (the JS leak in PUD-05 is not reproduced).

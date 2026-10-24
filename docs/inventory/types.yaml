@@ -214,6 +214,7 @@
   owner: 7
   status: active
   ref: "types.md:104"
+  note: "Doc API: YArray.Slice(start, end) (ADR 0008, A3); forEach and map are not provided (foreach and LINQ)."
 
 - id: A-9
   title: "Nested types are returned by reference"
@@ -917,6 +918,7 @@
   owner: 7
   status: active
   ref: "types.md:311"
+  note: "Doc.GetXmlText(name) creates a root XmlText as ydoc.get(name, Y.XmlText) does (ADR 0008, A2)."
 
 - id: X-2
   title: "getAttributes() returns only live attributes (AT:902-914)"

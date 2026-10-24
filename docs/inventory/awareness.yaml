@@ -341,6 +341,7 @@
   owner: 9
   status: active
   ref: "y-protocols.md:90"
+  note: "Awareness client ids are ulong (ADR 0008, A1): ids up to 2^53-1 round-trip."
 
 - id: AW-35
   title: "Strings are UTF-8 with a varUint byte-length prefix (not a char count), so non-ASCII state content needs a..."

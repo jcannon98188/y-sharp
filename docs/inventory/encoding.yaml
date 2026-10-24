@@ -374,7 +374,7 @@
   owner: 5
   status: active
   ref: "encoding.md 8.2 row"
-  note: "Client ids at or above 2^53 are rejected (Q12); JS rounds them to the nearest double."
+  note: "Client ids are ulong (ADR 0008, A1): up to 2^53-1 are accepted and round-trip; ids at or above 2^53 stay Malformed (Q12, ADR 0003) where JS rounds them to the nearest double."
 
 - id: ENC-38
   title: "Malformed input: info with content ref 11 -> TypeError (\"not a function\")"

@@ -12,6 +12,7 @@
   owner: 5
   status: active
   ref: "quirks.md:166"
+  note: "Client ids are ulong in the public API (ADR 0008, A1); ids and clocks above 2^53-1 stay Malformed (ADR 0003)."
 
 - id: Q13
   title: "-0 is load-bearing in UintOptRleEncoder (V2 only)"
