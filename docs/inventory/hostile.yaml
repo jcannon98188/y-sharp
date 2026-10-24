@@ -9,7 +9,7 @@
   layers: [unit, fuzz]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0013:6"
 
 - id: HOS-MUT
@@ -19,7 +19,7 @@
   layers: [unit, fuzz]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0013:7"
 
 - id: HOS-LEN
@@ -30,7 +30,7 @@
   wire: false
   adr: ["0009"]
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0013:8"
 
 - id: HOS-DEEP
@@ -40,7 +40,7 @@
   layers: [unit, fuzz]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0013:9"
 
 - id: HOS-CLOCK
@@ -50,7 +50,7 @@
   layers: [unit, fuzz]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0013:10"
 
 - id: HOS-REF
@@ -60,7 +60,7 @@
   layers: [unit, fuzz]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0013:11"
 
 - id: HOS-SEM
@@ -70,7 +70,7 @@
   layers: [unit, fuzz]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0013:12"
 
 - id: HOS-AMP
@@ -80,7 +80,7 @@
   layers: [unit, fuzz]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0013:13"
 
 - id: HOS-PROTO
@@ -90,5 +90,5 @@
   layers: [unit, fuzz]
   wire: false
   owner: 11
-  status: pending
+  status: active
   ref: "adr 0013:14"

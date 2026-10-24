@@ -43,6 +43,6 @@
   wire: false
   quirk: [Q15]
   owner: 11
-  status: pending
+  status: active
   ref: "quirks.md:196"
-  note: "Proposal in the quirk register: diverge, narrow. Needs a recorded decision (ADR 0003) and a [Diverges] test."
+  note: "Diverge, narrow: strict decoding (ADR 0005 is the recorded decision, per ADR 0003). The [Diverges] test replays every Q15-classified case of fixtures/hostile against the stored lenient oracle outcome (TASK-2.11)."
