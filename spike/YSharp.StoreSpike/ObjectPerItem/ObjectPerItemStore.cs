@@ -105,12 +105,10 @@ public sealed class ObjectPerItemStore : IStoreDriver
     {
         Begin();
 
-        // Yjs typeListPushGenerics: start from the marker with the highest index, then walk to the end.
-        var n = _arrayBranch.Start;
-        if (n is not null)
-        {
-            while (n.Right is not null) n = n.Right;
-        }
+        // Yjs typeListPushGenerics starts from the search marker with the highest index (or the start) and walks right to the last item.
+        // Pushes never create markers, so in Yjs that walk crosses every item pushed since the last merge. The branch keeps its last
+        // item instead (the "equivalent index" the ADR 0018 amendment allows), which is exactly where the walk ends, so a push is O(1).
+        var n = _arrayBranch.End;
 
         var column = _values.Count;
         _values.Add(value);
@@ -138,7 +136,7 @@ public sealed class ObjectPerItemStore : IStoreDriver
 
         var item = NewItem(_mapBranch, left, null, ContentKind.MapValue, payload, 0, 1);
         item.ParentSub = payload;
-        Integrate(item);
+        Integrate(item, keyLookedUp: true);
     }
 
     /// <summary>Ends the transaction: the Yjs cleanup order of <c>cleanupTransactions</c>, without observers.</summary>
@@ -299,7 +297,7 @@ public sealed class ObjectPerItemStore : IStoreDriver
     /// Yjs <c>Item.integrate</c> for an item whose left and right are already resolved. The conflict-resolution scan between origin and right
     /// origin runs only when another item sits between them; a local insert never meets one. That scan is the remote-integration hook.
     /// </summary>
-    private void Integrate(Item item)
+    private void Integrate(Item item, bool keyLookedUp = false)
     {
         var parent = item.Parent;
         var left = item.Left;
@@ -336,9 +334,13 @@ public sealed class ObjectPerItemStore : IStoreDriver
         {
             item.Right.Left = item;
         }
-        else if (item.ParentSub != Item.NoParentSub)
+        else if (item.ParentSub == Item.NoParentSub)
         {
-            parent.Map!.Set(item);
+            parent.End = item;
+        }
+        else
+        {
+            if (keyLookedUp) parent.Map!.SetLookedUp(item);
             if (left is not null) Delete(left);
         }
 
@@ -404,6 +406,7 @@ public sealed class ObjectPerItemStore : IStoreDriver
 
         left.Right = right;
         if (right.Right is not null) right.Right.Left = right;
+        else if (right.ParentSub == Item.NoParentSub) right.Parent.End = right;
         _mergeStructs.Add(right);
         if (right.ParentSub != Item.NoParentSub && right.Right is null) right.Parent.Map!.Set(right);
         left.Length = diff;
@@ -533,6 +536,7 @@ public sealed class ObjectPerItemStore : IStoreDriver
         if ((right.Flags & ItemFlags.Keep) != 0) left.Flags |= ItemFlags.Keep;
         left.Right = right.Right;
         if (left.Right is not null) left.Right.Left = left;
+        else if (ReferenceEquals(left.Parent.End, right)) left.Parent.End = left;
         left.Length += right.Length;
         return true;
     }

@@ -6,6 +6,10 @@ namespace YSharp.StoreSpike.ObjectPerItem;
 public sealed class Branch
 {
     internal Item? Start;
+
+    /// <summary>The last item of the sequence (deleted or not), or null when it is empty. Not used for maps.</summary>
+    internal Item? End;
+
     internal int Length;
     internal readonly SearchMarkers? Markers;
     internal readonly MapKeyTable? Map;
