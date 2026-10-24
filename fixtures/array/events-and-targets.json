@@ -1,0 +1,145 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["A-E1","A-E2","A-E4","A-E5","A-E6","A-E8","V-6","V-7","V-8"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":131},{"name":"b","clientId":132}],
+    "steps": [
+      {"step":"observe","doc":"a","target":{"root":"arr","kind":"array"},"name":"arr-a"},
+      {"step":"observe","doc":"b","target":{"root":"arr","kind":"array"},"name":"arr-b"},
+      {"step":"array.insert","doc":"a","target":{"root":"arr","kind":"array"},"at":0,"values":[0,1,2]},
+      {"step":"array.delete","doc":"a","target":{"root":"arr","kind":"array"},"at":0},
+      {
+        "step": "transact",
+        "doc": "a",
+        "origin": "tx",
+        "steps": [
+          {"step":"array.push","doc":"a","target":{"root":"arr","kind":"array"},"values":["x","y"]},
+          {"step":"array.delete","doc":"a","target":{"root":"arr","kind":"array"},"at":3},
+          {"step":"array.insertType","doc":"a","target":{"root":"arr","kind":"array"},"at":0,"kind":"map"},
+          {"step":"map.set","doc":"a","target":[{"root":"arr","kind":"array"},0],"key":"tst","value":42},
+          {"step":"array.insert","doc":"a","target":{"root":"arr","kind":"array"},"at":1,"values":[9]}
+        ]
+      },
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"array.delete","doc":"b","target":{"root":"arr","kind":"array"},"at":0,"len":2},
+      {"step":"sync","from":"b","to":"a"}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [
+            {"$":"bytes","hex":"0101830100080103617272037d007d017d0200"},
+            {"$":"bytes","hex":"00018301010001"},
+            {
+              "$": "bytes",
+              "hex": "0105830103888301020177017881830103014783010001280083010503747374017d2ac8830105830100017d09018301010401"
+            },
+            {"$":"bytes","hex":"00018301010503"}
+          ],
+          "v2": [
+            {"$":"bytes","hex":"00000283020000010805036172720301010001030101007d007d017d0200"},
+            {"$":"bytes","hex":"000000000000010000000000018301010000"},
+            {
+              "$": "bytes",
+              "hex": "000003c302050404020400020100098800810047002800c8050374737403010001010241020105037701787d2a7d09018301010400"
+            },
+            {"$":"bytes","hex":"000000000000010000000000018301010502"}
+          ]
+        },
+        "b": {
+          "v1": [
+            {
+              "$": "bytes",
+              "hex": "01068301000101036172720188830100037d017d0277017881830103014783010001280083010503747374017d2ac8830105830100017d090183010200010401"
+            },
+            {"$":"bytes","hex":"00018301010503"}
+          ],
+          "v2": [
+            {
+              "$": "bytes",
+              "hex": "000003c3020504000604000201000b01008800810047002800c80906617272747374430003010000010104010341010106007d017d027701787d2a7d090183010200000300"
+            },
+            {"$":"bytes","hex":"000000000000010000000000018301010502"}
+          ]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "01068301000101036172720188830100037d017d02770178818301030141830100010001c1830105830100010183010200010404"
+            },
+            "diff": {"b":{"$":"bytes","hex":"000183010200010404"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "000003c30204030006040201000b01008800810041000000c105036172720301010004010341020106007d017d027701780183010200000303"
+            },
+            "diff": {"b":{"$":"bytes","hex":"0000000000000100000000000183010200000303"}}
+          }
+        },
+        "b": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "01068301000101036172720188830100037d017d02770178818301030141830100010001c1830105830100010183010200010404"
+            },
+            "diff": {"a":{"$":"bytes","hex":"000183010200010404"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "000003c30204030006040201000b01008800810041000000c105036172720301010004010341020106007d017d027701780183010200000303"
+            },
+            "diff": {"a":{"$":"bytes","hex":"0000000000000100000000000183010200000303"}}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {
+        "a": {"v1":{"$":"bytes","hex":"01830108"},"v2":{"$":"bytes","hex":"01830108"}},
+        "b": {"v1":{"$":"bytes","hex":"01830108"},"v2":{"$":"bytes","hex":"01830108"}}
+      }
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {"a":[["arr",{"kind":"array","items":[1,2,"x"]}]],"b":[["arr",{"kind":"array","items":[1,2,"x"]}]]}
+    },
+    "events": {
+      "api": "AbstractType.observe",
+      "value": [
+        {"observer":"arr-a","type":"YArrayEvent","delta":[{"insert":[0,1,2]}]},
+        {"observer":"arr-a","type":"YArrayEvent","delta":[{"delete":1}]},
+        {
+          "observer": "arr-a",
+          "type": "YArrayEvent",
+          "delta": [{"insert":[{"kind":"map","pairs":[["tst",42]]},9]},{"retain":2},{"insert":["x"]}]
+        },
+        {
+          "observer": "arr-b",
+          "type": "YArrayEvent",
+          "delta": [{"insert":[{"kind":"map","pairs":[["tst",42]]},9,1,2,"x"]}]
+        },
+        {"observer":"arr-b","type":"YArrayEvent","delta":[{"delete":2}]},
+        {"observer":"arr-a","type":"YArrayEvent","delta":[{"delete":2}]}
+      ]
+    }
+  }
+}

@@ -1,0 +1,223 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["X-1","X-2","X-E2","X-E7","V-5"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":171},{"name":"b","clientId":172}],
+    "steps": [
+      {
+        "step": "xml.insert",
+        "doc": "a",
+        "target": {"root":"x","kind":"xmlFragment"},
+        "at": 0,
+        "kind": "element",
+        "name": "div"
+      },
+      {
+        "step": "xml.insert",
+        "doc": "a",
+        "target": {"root":"x","kind":"xmlFragment"},
+        "at": 1,
+        "kind": "text",
+        "init": "text"
+      },
+      {"step":"sync","from":"a","to":"b"},
+      {
+        "step": "xml.setAttribute",
+        "doc": "a",
+        "target": [{"root":"x","kind":"xmlFragment"},0],
+        "name": "height",
+        "value": "10"
+      },
+      {
+        "step": "xml.setAttribute",
+        "doc": "b",
+        "target": [{"root":"x","kind":"xmlFragment"},0],
+        "name": "height",
+        "value": "20"
+      },
+      {
+        "step": "xml.setAttribute",
+        "doc": "a",
+        "target": [{"root":"x","kind":"xmlFragment"},0],
+        "name": "obj",
+        "value": {"$":"obj","pairs":[["a",[1,2]],["b",null]]}
+      },
+      {
+        "step": "xml.setAttribute",
+        "doc": "a",
+        "target": [{"root":"x","kind":"xmlFragment"},1],
+        "name": "test",
+        "value": 42
+      },
+      {
+        "step": "xml.removeAttribute",
+        "doc": "a",
+        "target": [{"root":"x","kind":"xmlFragment"},0],
+        "name": "missing"
+      },
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"sync","from":"b","to":"a"},
+      {
+        "step": "xml.removeAttribute",
+        "doc": "b",
+        "target": [{"root":"x","kind":"xmlFragment"},0],
+        "name": "height"
+      },
+      {
+        "step": "xml.setAttribute",
+        "doc": "a",
+        "target": [{"root":"x","kind":"xmlFragment"},1],
+        "name": "test",
+        "value": 43
+      },
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"sync","from":"b","to":"a"}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [
+            {"$":"bytes","hex":"0101ab010007010178030364697600"},
+            {"$":"bytes","hex":"0102ab010187ab0100060400ab0101047465787400"},
+            {"$":"bytes","hex":"0101ab01062800ab010006686569676874017702313000"},
+            {"$":"bytes","hex":"0101ab01072800ab0100036f626a017602016175027d017d0201627e00"},
+            {"$":"bytes","hex":"0101ab01082800ab01010474657374017d2a00"},
+            {"$":"bytes","hex":"0101ac01002800ab010006686569676874017702323001ab01010601"},
+            {"$":"bytes","hex":"0101ab0109a8ab0108017d2b01ab01010801"},
+            {"$":"bytes","hex":"0001ac01010001"}
+          ],
+          "v2": [
+            {"$":"bytes","hex":"00010002ab02000001070704786469760103010101030001010000"},
+            {"$":"bytes","hex":"000003eb0201020002000387000406047465787404010001060001020100"},
+            {"$":"bytes","hex":"000003eb0200010000012808066865696768740601000001010101067702313000"},
+            {"$":"bytes","hex":"000003eb0200010000012805036f626a0301000001010101077602016175027d017d0201627e00"},
+            {"$":"bytes","hex":"000003eb020001020001280604746573740401000001010101087d2a00"},
+            {"$":"bytes","hex":"000004ac02ab02010000012808066865696768740601000001010101007702323001ab01010600"},
+            {"$":"bytes","hex":"000003eb020001100001a80100000001010101097d2b01ab01010800"},
+            {"$":"bytes","hex":"00000000000001000000000001ac01010000"}
+          ]
+        },
+        "b": {
+          "v1": [
+            {"$":"bytes","hex":"0103ab010007010178030364697687ab0100060400ab0101047465787400"},
+            {"$":"bytes","hex":"0101ac01002800ab010006686569676874017702323000"},
+            {
+              "$": "bytes",
+              "hex": "0103ab01062100ab010006686569676874012800ab0100036f626a017602016175027d017d0201627e2800ab01010474657374017d2a01ab01010601"
+            },
+            {"$":"bytes","hex":"0001ac01010001"},
+            {"$":"bytes","hex":"0101ab0109a8ab0108017d2b01ab01010801"}
+          ],
+          "v2": [
+            {
+              "$": "bytes",
+              "hex": "00010003eb0201020002000507008700040c087864697674657874010304030100000203060001030000"
+            },
+            {"$":"bytes","hex":"000004ac02ab02010000012808066865696768740601000001010101007702323000"},
+            {
+              "$": "bytes",
+              "hex": "000003eb0202030100020003210028110d6865696768746f626a746573740603040100000241010103067602016175027d017d0201627e7d2a01ab01010600"
+            },
+            {"$":"bytes","hex":"00000000000001000000000001ac01010000"},
+            {"$":"bytes","hex":"000003eb020001100001a80100000001010101097d2b01ab01010800"}
+          ]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "0201ac01002100ab0100066865696768740107ab010007010178030364697687ab0100060400ab010104746578742100ab010006686569676874012800ab0100036f626a017602016175027d017d0201627e2100ab0101047465737401a8ab0108017d2b02ac01010001ab010206010801"
+            },
+            "diff": {"b":{"$":"bytes","hex":"0002ac01010001ab010206010801"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "00010005ac02eb0206070100024200020e000f2100070087000400210028002100a8231b68656967687478646976746578746865696768746f626a746573740601030406030405000001000002030602410302010007007602016175027d017d0201627e7d2b02ac01010000ab010206000100"
+            },
+            "diff": {"b":{"$":"bytes","hex":"00000000000001000000000002ac01010000ab010206000100"}}
+          }
+        },
+        "b": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "0201ac01002100ab0100066865696768740107ab010007010178030364697687ab0100060400ab010104746578742100ab010006686569676874012800ab0100036f626a017602016175027d017d0201627e2100ab0101047465737401a8ab0108017d2b02ac01010001ab010206010801"
+            },
+            "diff": {"a":{"$":"bytes","hex":"0002ac01010001ab010206010801"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "00010005ac02eb0206070100024200020e000f2100070087000400210028002100a8231b68656967687478646976746578746865696768746f626a746573740601030406030405000001000002030602410302010007007602016175027d017d0201627e7d2b02ac01010000ab010206000100"
+            },
+            "diff": {"a":{"$":"bytes","hex":"00000000000001000000000002ac01010000ab010206000100"}}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {
+        "a": {"v1":{"$":"bytes","hex":"02ac0101ab010a"},"v2":{"$":"bytes","hex":"02ac0101ab010a"}},
+        "b": {"v1":{"$":"bytes","hex":"02ac0101ab010a"},"v2":{"$":"bytes","hex":"02ac0101ab010a"}}
+      }
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {
+        "a": [
+          [
+            "x",
+            {
+              "kind": "xmlFragment",
+              "attrs": [],
+              "children": [
+                {
+                  "kind": "xmlElement",
+                  "name": "div",
+                  "attrs": [["obj",{"$":"obj","pairs":[["a",[1,2]],["b",null]]}]],
+                  "children": []
+                },
+                {"kind":"xmlText","attrs":[["test",43]],"delta":[{"insert":"text"}]}
+              ]
+            }
+          ]
+        ],
+        "b": [
+          [
+            "x",
+            {
+              "kind": "xmlFragment",
+              "attrs": [],
+              "children": [
+                {
+                  "kind": "xmlElement",
+                  "name": "div",
+                  "attrs": [["obj",{"$":"obj","pairs":[["a",[1,2]],["b",null]]}]],
+                  "children": []
+                },
+                {"kind":"xmlText","attrs":[["test",43]],"delta":[{"insert":"text"}]}
+              ]
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

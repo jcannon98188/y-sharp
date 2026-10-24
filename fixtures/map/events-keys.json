@@ -1,0 +1,181 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["M-E1","M-E2","M-E3","M-E4","M-E7","V-5","Q23"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":151},{"name":"b","clientId":152}],
+    "steps": [
+      {"step":"observe","doc":"a","target":{"root":"m","kind":"map"},"name":"m-a"},
+      {"step":"observe","doc":"b","target":{"root":"m","kind":"map"},"name":"m-b"},
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"k","value":1},
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"k","value":2},
+      {
+        "step": "transact",
+        "doc": "a",
+        "steps": [
+          {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"k","value":3},
+          {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"k","value":4}
+        ]
+      },
+      {
+        "step": "transact",
+        "doc": "a",
+        "steps": [
+          {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"n","value":1},
+          {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"n","value":2}
+        ]
+      },
+      {
+        "step": "transact",
+        "doc": "a",
+        "steps": [
+          {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"gone","value":1},
+          {"step":"map.delete","doc":"a","target":{"root":"m","kind":"map"},"key":"gone"}
+        ]
+      },
+      {"step":"map.insertType","doc":"a","target":{"root":"m","kind":"map"},"key":"child","kind":"array"},
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"child","value":"replaced"},
+      {"step":"map.delete","doc":"a","target":{"root":"m","kind":"map"},"key":"k"},
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"map.set","doc":"b","target":{"root":"m","kind":"map"},"key":"k","value":"from-b"},
+      {"step":"map.clear","doc":"b","target":{"root":"m","kind":"map"}},
+      {"step":"sync","from":"b","to":"a"}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [
+            {"$":"bytes","hex":"01019701002801016d016b017d0100"},
+            {"$":"bytes","hex":"0101970101a8970100017d02019701010001"},
+            {"$":"bytes","hex":"0102970102a197010101a8970102017d04019701010102"},
+            {"$":"bytes","hex":"01029701042101016d016e01a8970104017d02019701010401"},
+            {"$":"bytes","hex":"01019701062101016d04676f6e6501019701010601"},
+            {"$":"bytes","hex":"01019701072701016d056368696c640000"},
+            {"$":"bytes","hex":"0101970108a89701070177087265706c61636564019701010701"},
+            {"$":"bytes","hex":"00019701010301"},
+            {"$":"bytes","hex":"0101980100a19701030102980101000197010205010801"}
+          ],
+          "v2": [
+            {"$":"bytes","hex":"00000297020000012805026d6b410001010001010101007d0100"},
+            {"$":"bytes","hex":"000003d7020001000001a80100000001010101017d02019701010000"},
+            {"$":"bytes","hex":"000003d702010203000003a100a8010000000241000102027d04019701010101"},
+            {"$":"bytes","hex":"000003d70200010800032100a805026d6e41000101000241000102047d02019701010400"},
+            {"$":"bytes","hex":"00000297020000012108056d676f6e6501040101000101010106019701010600"},
+            {"$":"bytes","hex":"00000297020000012709066d6368696c640105010101000001010700"},
+            {"$":"bytes","hex":"000003d70200010e0001a801000000010101010877087265706c61636564019701010700"},
+            {"$":"bytes","hex":"000000000000010000000000019701010300"},
+            {"$":"bytes","hex":"0000049802970201060001a101000000010101010002980101000097010205000200"}
+          ]
+        },
+        "b": {
+          "v1": [
+            {
+              "$": "bytes",
+              "hex": "01069701002101016d016b042101016d016e01a8970104017d022101016d04676f6e65012101016d056368696c6401a89701070177087265706c616365640197010200050602"
+            },
+            {"$":"bytes","hex":"0101980100a897010301770666726f6d2d6200"},
+            {"$":"bytes","hex":"0002980101000197010205010801"}
+          ],
+          "v2": [
+            {
+              "$": "bytes",
+              "hex": "000003d7020102080600072101a8002101a8150f6d6b6d6e6d676f6e656d6368696c644103040105010100030441030106007d0277087265706c616365640197010200040101"
+            },
+            {"$":"bytes","hex":"0000049802970201060001a8010000000101010100770666726f6d2d6200"},
+            {"$":"bytes","hex":"00000000000001000000000002980101000097010205000200"}
+          ]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "0201980100a197010301049701002101016d016b042101016d016e022101016d04676f6e65012101016d056368696c64020298010100019701010009"
+            },
+            "diff": {"b":{"$":"bytes","hex":"000298010100019701010009"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "0000059802d7020001060003a10021150f6d6b6d6e6d676f6e656d6368696c64410304010501010005010402010202010004000298010100009701010008"
+            },
+            "diff": {"b":{"$":"bytes","hex":"0000000000000100000000000298010100009701010008"}}
+          }
+        },
+        "b": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "0201980100a197010301049701002101016d016b042101016d016e022101016d04676f6e65012101016d056368696c64020298010100019701010009"
+            },
+            "diff": {"a":{"$":"bytes","hex":"000298010100019701010009"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "0000059802d7020001060003a10021150f6d6b6d6e6d676f6e656d6368696c64410304010501010005010402010202010004000298010100009701010008"
+            },
+            "diff": {"a":{"$":"bytes","hex":"0000000000000100000000000298010100009701010008"}}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {
+        "a": {"v1":{"$":"bytes","hex":"02980101970109"},"v2":{"$":"bytes","hex":"02980101970109"}},
+        "b": {"v1":{"$":"bytes","hex":"02980101970109"},"v2":{"$":"bytes","hex":"02980101970109"}}
+      }
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {"a":[["m",{"kind":"map","pairs":[]}]],"b":[["m",{"kind":"map","pairs":[]}]]}
+    },
+    "events": {
+      "api": "AbstractType.observe",
+      "value": [
+        {"observer":"m-a","type":"YMapEvent","keys":[["k",{"action":"add"}]]},
+        {"observer":"m-a","type":"YMapEvent","keys":[["k",{"action":"update","oldValue":1}]]},
+        {"observer":"m-a","type":"YMapEvent","keys":[["k",{"action":"update","oldValue":2}]]},
+        {"observer":"m-a","type":"YMapEvent","keys":[["n",{"action":"add"}]]},
+        {"observer":"m-a","type":"YMapEvent","keys":[]},
+        {"observer":"m-a","type":"YMapEvent","keys":[["child",{"action":"add"}]]},
+        {
+          "observer": "m-a",
+          "type": "YMapEvent",
+          "keys": [["child",{"action":"update","oldValue":{"kind":"array","items":[]}}]]
+        },
+        {"observer":"m-a","type":"YMapEvent","keys":[["k",{"action":"delete","oldValue":4}]]},
+        {"observer":"m-b","type":"YMapEvent","keys":[["n",{"action":"add"}],["child",{"action":"add"}]]},
+        {"observer":"m-b","type":"YMapEvent","keys":[["k",{"action":"add"}]]},
+        {
+          "observer": "m-b",
+          "type": "YMapEvent",
+          "keys": [
+            ["k",{"action":"delete","oldValue":"from-b"}],
+            ["n",{"action":"delete","oldValue":2}],
+            ["child",{"action":"delete","oldValue":"replaced"}]
+          ]
+        },
+        {
+          "observer": "m-a",
+          "type": "YMapEvent",
+          "keys": [["n",{"action":"delete","oldValue":2}],["child",{"action":"delete","oldValue":"replaced"}]]
+        }
+      ]
+    }
+  }
+}

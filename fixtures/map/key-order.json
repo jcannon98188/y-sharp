@@ -1,0 +1,526 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["Q26","M-11","M-3","M-6"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":141},{"name":"b","clientId":142}],
+    "steps": [
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"b","value":1},
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"10","value":2},
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"2","value":3},
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"a","value":4},
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"-1","value":5},
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"01","value":6},
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"4294967294","value":7},
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"4294967295","value":8},
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"1.5","value":9},
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"","value":10},
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"__proto__","value":11},
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"constructor","value":12},
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"u","value":{"$":"undefined"}},
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"map.delete","doc":"b","target":{"root":"m","kind":"map"},"key":"2"},
+      {"step":"map.set","doc":"b","target":{"root":"m","kind":"map"},"key":"2","value":"again"},
+      {"step":"map.set","doc":"b","target":{"root":"m","kind":"map"},"key":"3","value":"new"},
+      {"step":"sync","from":"b","to":"a"}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [
+            {"$":"bytes","hex":"01018d01002801016d0162017d0100"},
+            {"$":"bytes","hex":"01018d01012801016d023130017d0200"},
+            {"$":"bytes","hex":"01018d01022801016d0132017d0300"},
+            {"$":"bytes","hex":"01018d01032801016d0161017d0400"},
+            {"$":"bytes","hex":"01018d01042801016d022d31017d0500"},
+            {"$":"bytes","hex":"01018d01052801016d023031017d0600"},
+            {"$":"bytes","hex":"01018d01062801016d0a34323934393637323934017d0700"},
+            {"$":"bytes","hex":"01018d01072801016d0a34323934393637323935017d0800"},
+            {"$":"bytes","hex":"01018d01082801016d03312e35017d0900"},
+            {"$":"bytes","hex":"01018d01092801016d00017d0a00"},
+            {"$":"bytes","hex":"01018d010a2801016d095f5f70726f746f5f5f017d0b00"},
+            {"$":"bytes","hex":"01018d010b2801016d0b636f6e7374727563746f72017d0c00"},
+            {"$":"bytes","hex":"01018d010c2801016d0175017f00"},
+            {"$":"bytes","hex":"01028e0100a88d0102017705616761696e2801016d01330177036e6577018d01010201"}
+          ],
+          "v2": [
+            {"$":"bytes","hex":"0000028d020000012805026d62410001010001010101007d0100"},
+            {"$":"bytes","hex":"0000028d020000012806036d3130010201010001010101017d0200"},
+            {"$":"bytes","hex":"0000028d020000012805026d32410001010001010101027d0300"},
+            {"$":"bytes","hex":"0000028d020000012805026d61410001010001010101037d0400"},
+            {"$":"bytes","hex":"0000028d020000012806036d2d31010201010001010101047d0500"},
+            {"$":"bytes","hex":"0000028d020000012806036d3031010201010001010101057d0600"},
+            {"$":"bytes","hex":"0000028d02000001280e0b6d34323934393637323934010a01010001010101067d0700"},
+            {"$":"bytes","hex":"0000028d02000001280e0b6d34323934393637323935010a01010001010101077d0800"},
+            {"$":"bytes","hex":"0000028d020000012807046d312e35010301010001010101087d0900"},
+            {"$":"bytes","hex":"0000028d020000012804016d010001010001010101097d0a00"},
+            {"$":"bytes","hex":"0000028d02000001280d0a6d5f5f70726f746f5f5f0109010100010101010a7d0b00"},
+            {"$":"bytes","hex":"0000028d02000001280f0c6d636f6e7374727563746f72010b010100010101010b7d0c00"},
+            {"$":"bytes","hex":"0000028d020000012805026d754100010100010101010c7f00"},
+            {
+              "$": "bytes",
+              "hex": "0000048e028d0201040003a8002805026d3341000101000241000102007705616761696e77036e6577018d01010200"
+            }
+          ]
+        },
+        "b": {
+          "v1": [
+            {
+              "$": "bytes",
+              "hex": "010d8d01002801016d0162017d012801016d023130017d022801016d0132017d032801016d0161017d042801016d022d31017d052801016d023031017d062801016d0a34323934393637323934017d072801016d0a34323934393637323935017d082801016d03312e35017d092801016d00017d0a2801016d095f5f70726f746f5f5f017d0b2801016d0b636f6e7374727563746f72017d0c2801016d0175017f00"
+            },
+            {"$":"bytes","hex":"00018d01010201"},
+            {"$":"bytes","hex":"01018e0100a88d0102017705616761696e00"},
+            {"$":"bytes","hex":"01018e01012801016d01330177036e657700"}
+          ],
+          "v2": [
+            {
+              "$": "bytes",
+              "hex": "0000028d020000012859426d626d31306d326d616d2d316d30316d343239343936373239346d343239343936373239356d312e356d6d5f5f70726f746f5f5f6d636f6e7374727563746f726d754101024103020102010a010a010301000109010b410001010002410b010d007d017d027d037d047d057d067d077d087d097d0a7d0b7d0c7f00"
+            },
+            {"$":"bytes","hex":"000000000000010000000000018d01010200"},
+            {"$":"bytes","hex":"0000048e028d0201040001a80100000001010101007705616761696e00"},
+            {"$":"bytes","hex":"0000028e020000012805026d334100010100010101010177036e657700"}
+          ]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "02028e0100a88d0102017705616761696e2801016d01330177036e65770d8d01002801016d0162017d012801016d023130017d022101016d0132012801016d0161017d042801016d022d31017d052801016d023031017d062801016d0a34323934393637323934017d072801016d0a34323934393637323935017d082801016d03312e35017d092801016d00017d0a2801016d095f5f70726f746f5f5f017d0b2801016d0b636f6e7374727563746f72017d0c2801016d0175017f018d01010201"
+            },
+            "diff": {"b":{"$":"bytes","hex":"00018d01010201"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "0000058e02cd020001040007a80028022100285b446d336d626d31306d326d616d2d316d30316d343239343936373239346d343239343936373239356d312e356d6d5f5f70726f746f5f5f6d636f6e7374727563746f726d754103024103020102010a010a010301000109010b410001010002410d0202007705616761696e77036e65770d007d017d027d047d057d067d077d087d097d0a7d0b7d0c7f018d01010200"
+            },
+            "diff": {"b":{"$":"bytes","hex":"000000000000010000000000018d01010200"}}
+          }
+        },
+        "b": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "02028e0100a88d0102017705616761696e2801016d01330177036e65770d8d01002801016d0162017d012801016d023130017d022101016d0132012801016d0161017d042801016d022d31017d052801016d023031017d062801016d0a34323934393637323934017d072801016d0a34323934393637323935017d082801016d03312e35017d092801016d00017d0a2801016d095f5f70726f746f5f5f017d0b2801016d0b636f6e7374727563746f72017d0c2801016d0175017f018d01010201"
+            },
+            "diff": {"a":{"$":"bytes","hex":"00018d01010201"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "0000058e02cd020001040007a80028022100285b446d336d626d31306d326d616d2d316d30316d343239343936373239346d343239343936373239356d312e356d6d5f5f70726f746f5f5f6d636f6e7374727563746f726d754103024103020102010a010a010301000109010b410001010002410d0202007705616761696e77036e65770d007d017d027d047d057d067d077d087d097d0a7d0b7d0c7f018d01010200"
+            },
+            "diff": {"a":{"$":"bytes","hex":"000000000000010000000000018d01010200"}}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {
+        "a": {"v1":{"$":"bytes","hex":"028e01028d010d"},"v2":{"$":"bytes","hex":"028e01028d010d"}},
+        "b": {"v1":{"$":"bytes","hex":"028e01028d010d"},"v2":{"$":"bytes","hex":"028e01028d010d"}}
+      }
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {
+        "a": [
+          [
+            "m",
+            {
+              "kind": "map",
+              "pairs": [
+                ["b",1],
+                ["10",2],
+                ["2","again"],
+                ["a",4],
+                ["-1",5],
+                ["01",6],
+                ["4294967294",7],
+                ["4294967295",8],
+                ["1.5",9],
+                ["",10],
+                ["__proto__",11],
+                ["constructor",12],
+                ["u",{"$":"undefined"}],
+                ["3","new"]
+              ]
+            }
+          ]
+        ],
+        "b": [
+          [
+            "m",
+            {
+              "kind": "map",
+              "pairs": [
+                ["b",1],
+                ["10",2],
+                ["2","again"],
+                ["a",4],
+                ["-1",5],
+                ["01",6],
+                ["4294967294",7],
+                ["4294967295",8],
+                ["1.5",9],
+                ["",10],
+                ["__proto__",11],
+                ["constructor",12],
+                ["u",{"$":"undefined"}],
+                ["3","new"]
+              ]
+            }
+          ]
+        ]
+      }
+    },
+    "structs": {
+      "api": "doc.store.clients",
+      "value": {
+        "a": [
+          [
+            142,
+            [
+              {
+                "id": [142,0],
+                "len": 1,
+                "kind": "item",
+                "origin": [141,2],
+                "parent": "m",
+                "parentSub": "2",
+                "content": {"ref":8,"value":["again"]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [142,1],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "3",
+                "content": {"ref":8,"value":["new"]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ],
+          [
+            141,
+            [
+              {
+                "id": [141,0],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "b",
+                "content": {"ref":8,"value":[1]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [141,1],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "10",
+                "content": {"ref":8,"value":[2]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [141,2],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "2",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [141,3],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "a",
+                "content": {"ref":8,"value":[4]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [141,4],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "-1",
+                "content": {"ref":8,"value":[5]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [141,5],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "01",
+                "content": {"ref":8,"value":[6]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [141,6],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "4294967294",
+                "content": {"ref":8,"value":[7]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [141,7],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "4294967295",
+                "content": {"ref":8,"value":[8]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [141,8],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "1.5",
+                "content": {"ref":8,"value":[9]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [141,9],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "",
+                "content": {"ref":8,"value":[10]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [141,10],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "__proto__",
+                "content": {"ref":8,"value":[11]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [141,11],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "constructor",
+                "content": {"ref":8,"value":[12]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [141,12],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "u",
+                "content": {"ref":8,"value":[{"$":"undefined"}]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ],
+        "b": [
+          [
+            142,
+            [
+              {
+                "id": [142,0],
+                "len": 1,
+                "kind": "item",
+                "origin": [141,2],
+                "parent": "m",
+                "parentSub": "2",
+                "content": {"ref":8,"value":["again"]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [142,1],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "3",
+                "content": {"ref":8,"value":["new"]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ],
+          [
+            141,
+            [
+              {
+                "id": [141,0],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "b",
+                "content": {"ref":8,"value":[1]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [141,1],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "10",
+                "content": {"ref":8,"value":[2]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [141,2],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "2",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [141,3],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "a",
+                "content": {"ref":8,"value":[4]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [141,4],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "-1",
+                "content": {"ref":8,"value":[5]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [141,5],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "01",
+                "content": {"ref":8,"value":[6]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [141,6],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "4294967294",
+                "content": {"ref":8,"value":[7]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [141,7],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "4294967295",
+                "content": {"ref":8,"value":[8]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [141,8],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "1.5",
+                "content": {"ref":8,"value":[9]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [141,9],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "",
+                "content": {"ref":8,"value":[10]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [141,10],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "__proto__",
+                "content": {"ref":8,"value":[11]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [141,11],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "constructor",
+                "content": {"ref":8,"value":[12]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [141,12],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "u",
+                "content": {"ref":8,"value":[{"$":"undefined"}]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ]
+      }
+    }
+  }
+}

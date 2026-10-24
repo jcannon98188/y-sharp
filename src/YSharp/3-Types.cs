@@ -70,7 +70,20 @@ public readonly record struct KeyChange(KeyChangeAction Action, YEntry? OldValue
 public enum DeltaKind { Insert, Delete, Retain }
 /// Counts only. Items are not exposed (open question 2).
 public readonly struct ListDeltaOp { public DeltaKind Kind { get; } public int Length { get; } public ReadOnlyMemory<YEntry> Inserted { get; } }
-public readonly struct TextDeltaOp { public DeltaKind Kind { get; } public int Length { get; } public string? Text { get; } public YEntry Embed { get; } public YValue Attributes { get; } }
+public readonly struct TextDeltaOp
+{
+    // TASK-2.7: ApplyDelta needs a way to build ops (T-6), so the sketch gains a constructor.
+    public TextDeltaOp(DeltaKind kind, int length, string? text = null, YEntry embed = default, YValue attributes = default)
+    {
+        Kind = kind; Length = length; Text = text; Embed = embed; Attributes = attributes;
+    }
+
+    public DeltaKind Kind { get; }
+    public int Length { get; }
+    public string? Text { get; }
+    public YEntry Embed { get; }
+    public YValue Attributes { get; }
+}
 
 public sealed class YArrayEvent : YEvent { public ReadOnlySpan<ListDeltaOp> Delta => throw Sketch.NI; }
 public sealed class YMapEvent : YEvent { public IReadOnlyCollection<string> KeysChanged => throw Sketch.NI; }
@@ -139,6 +152,7 @@ public class YText : YType
     public void SetAttribute(string name, in YValue value) => throw Sketch.NI;
     public bool TryGetAttribute(string name, out YValue value) { value = default; throw Sketch.NI; }
     public void RemoveAttribute(string name) => throw Sketch.NI;
+    public IReadOnlyDictionary<string, YValue> GetAttributes() => throw Sketch.NI;   // TASK-2.7: live attributes (X-2); YXmlElement has the same method
     public override YType Clone() => throw Sketch.NI;
     public override YValue ToJson() => throw Sketch.NI;                      // plain text for YText (X-T3)
 }
