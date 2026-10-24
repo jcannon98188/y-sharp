@@ -836,6 +836,121 @@
           "additionalProperties": false
         },
         {
+          "title": "deliver",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "deliver"
+            },
+            "schedule": {
+              "type": "array",
+              "description": "Delivery schedule: entries run in order. sv captures a state vector (a SyncStep1 message); reply captures encodeStateAsUpdate(doc, sv) (a SyncStep2 reply); apply delivers a captured reply by name or the index-th update event of another replica to doc. Repeating an apply duplicates a delivery, omitting one drops it, reordering entries reorders delivery.",
+              "items": {
+                "oneOf": [
+                  {
+                    "title": "sv",
+                    "type": "object",
+                    "properties": {
+                      "do": {
+                        "const": "sv"
+                      },
+                      "doc": {
+                        "$ref": "#/$defs/replicaName"
+                      },
+                      "name": {
+                        "$ref": "#/$defs/identifier"
+                      }
+                    },
+                    "required": [
+                      "do",
+                      "doc",
+                      "name"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "title": "reply",
+                    "type": "object",
+                    "properties": {
+                      "do": {
+                        "const": "reply"
+                      },
+                      "doc": {
+                        "$ref": "#/$defs/replicaName"
+                      },
+                      "sv": {
+                        "$ref": "#/$defs/identifier"
+                      },
+                      "name": {
+                        "$ref": "#/$defs/identifier"
+                      }
+                    },
+                    "required": [
+                      "do",
+                      "doc",
+                      "sv",
+                      "name"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "title": "apply",
+                    "type": "object",
+                    "properties": {
+                      "do": {
+                        "const": "apply"
+                      },
+                      "doc": {
+                        "$ref": "#/$defs/replicaName"
+                      },
+                      "update": {
+                        "oneOf": [
+                          {
+                            "$ref": "#/$defs/identifier"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "from": {
+                                "$ref": "#/$defs/replicaName"
+                              },
+                              "index": {
+                                "$ref": "#/$defs/index"
+                              }
+                            },
+                            "required": [
+                              "from",
+                              "index"
+                            ],
+                            "additionalProperties": false
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "do",
+                      "doc",
+                      "update"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            },
+            "encoding": {
+              "enum": [
+                "v1",
+                "v2"
+              ]
+            }
+          },
+          "required": [
+            "step",
+            "schedule"
+          ],
+          "additionalProperties": false
+        },
+        {
           "title": "applyUpdate",
           "type": "object",
           "properties": {
@@ -868,6 +983,31 @@
           "properties": {
             "step": {
               "const": "observe"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "target": {
+              "$ref": "#/$defs/target"
+            },
+            "name": {
+              "$ref": "#/$defs/identifier"
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "target",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "observeDeep",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "observeDeep"
             },
             "doc": {
               "$ref": "#/$defs/replicaName"
@@ -948,6 +1088,45 @@
             "target",
             "at",
             "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "text.insertEmbedType",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "text.insertEmbedType"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "target": {
+              "$ref": "#/$defs/target"
+            },
+            "at": {
+              "$ref": "#/$defs/index"
+            },
+            "kind": {
+              "enum": [
+                "text",
+                "array",
+                "map"
+              ]
+            },
+            "init": {
+              "$ref": "#/$defs/value"
+            },
+            "attributes": {
+              "$ref": "#/$defs/value"
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "target",
+            "at",
+            "kind"
           ],
           "additionalProperties": false
         },

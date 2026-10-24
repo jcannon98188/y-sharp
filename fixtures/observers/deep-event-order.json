@@ -1,0 +1,409 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["Q25","TX-1"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":1},{"name":"b","clientId":2}],
+    "steps": [
+      {"step":"map.insertType","doc":"a","target":{"root":"root","kind":"map"},"key":"c00","kind":"map"},
+      {"step":"map.insertType","doc":"a","target":{"root":"root","kind":"map"},"key":"c01","kind":"map"},
+      {"step":"map.insertType","doc":"a","target":{"root":"root","kind":"map"},"key":"c02","kind":"map"},
+      {"step":"map.insertType","doc":"a","target":{"root":"root","kind":"map"},"key":"c03","kind":"map"},
+      {"step":"map.insertType","doc":"a","target":{"root":"root","kind":"map"},"key":"c04","kind":"map"},
+      {"step":"map.insertType","doc":"a","target":{"root":"root","kind":"map"},"key":"c05","kind":"map"},
+      {"step":"map.insertType","doc":"a","target":{"root":"root","kind":"map"},"key":"c06","kind":"map"},
+      {"step":"map.insertType","doc":"a","target":{"root":"root","kind":"map"},"key":"c07","kind":"map"},
+      {"step":"map.insertType","doc":"a","target":{"root":"root","kind":"map"},"key":"c08","kind":"map"},
+      {"step":"map.insertType","doc":"a","target":{"root":"root","kind":"map"},"key":"c09","kind":"map"},
+      {"step":"map.insertType","doc":"a","target":{"root":"root","kind":"map"},"key":"c10","kind":"map"},
+      {"step":"map.insertType","doc":"a","target":{"root":"root","kind":"map"},"key":"c11","kind":"map"},
+      {"step":"map.insertType","doc":"a","target":{"root":"root","kind":"map"},"key":"c12","kind":"map"},
+      {"step":"map.insertType","doc":"a","target":{"root":"root","kind":"map"},"key":"c13","kind":"map"},
+      {"step":"map.insertType","doc":"a","target":{"root":"root","kind":"map"},"key":"c14","kind":"map"},
+      {"step":"map.insertType","doc":"a","target":{"root":"root","kind":"map"},"key":"c15","kind":"map"},
+      {"step":"map.insertType","doc":"a","target":{"root":"root","kind":"map"},"key":"c16","kind":"map"},
+      {"step":"map.insertType","doc":"a","target":{"root":"root","kind":"map"},"key":"c17","kind":"map"},
+      {"step":"map.insertType","doc":"a","target":{"root":"root","kind":"map"},"key":"c18","kind":"map"},
+      {"step":"map.insertType","doc":"a","target":{"root":"root","kind":"map"},"key":"c19","kind":"map"},
+      {"step":"map.insertType","doc":"a","target":{"root":"root","kind":"map"},"key":"c20","kind":"map"},
+      {"step":"map.insertType","doc":"a","target":{"root":"root","kind":"map"},"key":"c21","kind":"map"},
+      {"step":"map.insertType","doc":"a","target":{"root":"root","kind":"map"},"key":"c22","kind":"map"},
+      {"step":"map.insertType","doc":"a","target":{"root":"root","kind":"map"},"key":"c23","kind":"map"},
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"observeDeep","doc":"a","target":{"root":"root","kind":"map"},"name":"deepA"},
+      {"step":"observeDeep","doc":"b","target":{"root":"root","kind":"map"},"name":"deepB"},
+      {
+        "step": "transact",
+        "doc": "a",
+        "steps": [
+          {"step":"map.set","doc":"a","target":[{"root":"root","kind":"map"},"c23"],"key":"k","value":23},
+          {"step":"map.set","doc":"a","target":[{"root":"root","kind":"map"},"c22"],"key":"k","value":22},
+          {"step":"map.set","doc":"a","target":[{"root":"root","kind":"map"},"c21"],"key":"k","value":21},
+          {"step":"map.set","doc":"a","target":[{"root":"root","kind":"map"},"c20"],"key":"k","value":20},
+          {"step":"map.set","doc":"a","target":[{"root":"root","kind":"map"},"c19"],"key":"k","value":19},
+          {"step":"map.set","doc":"a","target":[{"root":"root","kind":"map"},"c18"],"key":"k","value":18},
+          {"step":"map.set","doc":"a","target":[{"root":"root","kind":"map"},"c17"],"key":"k","value":17},
+          {"step":"map.set","doc":"a","target":[{"root":"root","kind":"map"},"c16"],"key":"k","value":16},
+          {"step":"map.set","doc":"a","target":[{"root":"root","kind":"map"},"c15"],"key":"k","value":15},
+          {"step":"map.set","doc":"a","target":[{"root":"root","kind":"map"},"c14"],"key":"k","value":14},
+          {"step":"map.set","doc":"a","target":[{"root":"root","kind":"map"},"c13"],"key":"k","value":13},
+          {"step":"map.set","doc":"a","target":[{"root":"root","kind":"map"},"c12"],"key":"k","value":12},
+          {"step":"map.set","doc":"a","target":[{"root":"root","kind":"map"},"c11"],"key":"k","value":11},
+          {"step":"map.set","doc":"a","target":[{"root":"root","kind":"map"},"c10"],"key":"k","value":10},
+          {"step":"map.set","doc":"a","target":[{"root":"root","kind":"map"},"c09"],"key":"k","value":9},
+          {"step":"map.set","doc":"a","target":[{"root":"root","kind":"map"},"c08"],"key":"k","value":8},
+          {"step":"map.set","doc":"a","target":[{"root":"root","kind":"map"},"c07"],"key":"k","value":7},
+          {"step":"map.set","doc":"a","target":[{"root":"root","kind":"map"},"c06"],"key":"k","value":6},
+          {"step":"map.set","doc":"a","target":[{"root":"root","kind":"map"},"c05"],"key":"k","value":5},
+          {"step":"map.set","doc":"a","target":[{"root":"root","kind":"map"},"c04"],"key":"k","value":4},
+          {"step":"map.set","doc":"a","target":[{"root":"root","kind":"map"},"c03"],"key":"k","value":3},
+          {"step":"map.set","doc":"a","target":[{"root":"root","kind":"map"},"c02"],"key":"k","value":2},
+          {"step":"map.set","doc":"a","target":[{"root":"root","kind":"map"},"c01"],"key":"k","value":1},
+          {"step":"map.set","doc":"a","target":[{"root":"root","kind":"map"},"c00"],"key":"k","value":0},
+          {
+            "step": "map.insertType",
+            "doc": "a",
+            "target": [{"root":"root","kind":"map"},"c05"],
+            "key": "inner",
+            "kind": "map"
+          },
+          {"step":"map.set","doc":"a","target":{"root":"root","kind":"map"},"key":"own","value":1}
+        ]
+      },
+      {"step":"sync","from":"a","to":"b"},
+      {
+        "step": "transact",
+        "doc": "b",
+        "steps": [
+          {"step":"map.set","doc":"b","target":[{"root":"root","kind":"map"},"c03"],"key":"k2","value":3},
+          {"step":"map.set","doc":"b","target":[{"root":"root","kind":"map"},"c17"],"key":"k2","value":17},
+          {"step":"map.set","doc":"b","target":[{"root":"root","kind":"map"},"c00"],"key":"k2","value":0},
+          {"step":"map.set","doc":"b","target":[{"root":"root","kind":"map"},"c23"],"key":"k2","value":23},
+          {"step":"map.set","doc":"b","target":[{"root":"root","kind":"map"},"c09"],"key":"k2","value":9}
+        ]
+      },
+      {"step":"sync","from":"b","to":"a"}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [
+            {"$":"bytes","hex":"01010100270104726f6f74036330300100"},
+            {"$":"bytes","hex":"01010101270104726f6f74036330310100"},
+            {"$":"bytes","hex":"01010102270104726f6f74036330320100"},
+            {"$":"bytes","hex":"01010103270104726f6f74036330330100"},
+            {"$":"bytes","hex":"01010104270104726f6f74036330340100"},
+            {"$":"bytes","hex":"01010105270104726f6f74036330350100"},
+            {"$":"bytes","hex":"01010106270104726f6f74036330360100"},
+            {"$":"bytes","hex":"01010107270104726f6f74036330370100"},
+            {"$":"bytes","hex":"01010108270104726f6f74036330380100"},
+            {"$":"bytes","hex":"01010109270104726f6f74036330390100"},
+            {"$":"bytes","hex":"0101010a270104726f6f74036331300100"},
+            {"$":"bytes","hex":"0101010b270104726f6f74036331310100"},
+            {"$":"bytes","hex":"0101010c270104726f6f74036331320100"},
+            {"$":"bytes","hex":"0101010d270104726f6f74036331330100"},
+            {"$":"bytes","hex":"0101010e270104726f6f74036331340100"},
+            {"$":"bytes","hex":"0101010f270104726f6f74036331350100"},
+            {"$":"bytes","hex":"01010110270104726f6f74036331360100"},
+            {"$":"bytes","hex":"01010111270104726f6f74036331370100"},
+            {"$":"bytes","hex":"01010112270104726f6f74036331380100"},
+            {"$":"bytes","hex":"01010113270104726f6f74036331390100"},
+            {"$":"bytes","hex":"01010114270104726f6f74036332300100"},
+            {"$":"bytes","hex":"01010115270104726f6f74036332310100"},
+            {"$":"bytes","hex":"01010116270104726f6f74036332320100"},
+            {"$":"bytes","hex":"01010117270104726f6f74036332330100"},
+            {
+              "$": "bytes",
+              "hex": "011a011828000117016b017d1728000116016b017d1628000115016b017d1528000114016b017d1428000113016b017d1328000112016b017d1228000111016b017d1128000110016b017d102800010f016b017d0f2800010e016b017d0e2800010d016b017d0d2800010c016b017d0c2800010b016b017d0b2800010a016b017d0a28000109016b017d0928000108016b017d0828000107016b017d0728000106016b017d0628000105016b017d0528000104016b017d0428000103016b017d0328000102016b017d0228000101016b017d0128000100016b017d002700010505696e6e657201280104726f6f74036f776e017d0100"
+            },
+            {
+              "$": "bytes",
+              "hex": "0105020028000103026b32017d0328000111026b32017d1128000100026b32017d0028000117026b32017d1728000109026b32017d0900"
+            }
+          ],
+          "v2": [
+            {"$":"bytes","hex":"00000101000001270a07726f6f746330300403010101010001010000"},
+            {"$":"bytes","hex":"00000101000001270a07726f6f746330310403010101010001010100"},
+            {"$":"bytes","hex":"00000101000001270a07726f6f746330320403010101010001010200"},
+            {"$":"bytes","hex":"00000101000001270a07726f6f746330330403010101010001010300"},
+            {"$":"bytes","hex":"00000101000001270a07726f6f746330340403010101010001010400"},
+            {"$":"bytes","hex":"00000101000001270a07726f6f746330350403010101010001010500"},
+            {"$":"bytes","hex":"00000101000001270a07726f6f746330360403010101010001010600"},
+            {"$":"bytes","hex":"00000101000001270a07726f6f746330370403010101010001010700"},
+            {"$":"bytes","hex":"00000101000001270a07726f6f746330380403010101010001010800"},
+            {"$":"bytes","hex":"00000101000001270a07726f6f746330390403010101010001010900"},
+            {"$":"bytes","hex":"00000101000001270a07726f6f746331300403010101010001010a00"},
+            {"$":"bytes","hex":"00000101000001270a07726f6f746331310403010101010001010b00"},
+            {"$":"bytes","hex":"00000101000001270a07726f6f746331320403010101010001010c00"},
+            {"$":"bytes","hex":"00000101000001270a07726f6f746331330403010101010001010d00"},
+            {"$":"bytes","hex":"00000101000001270a07726f6f746331340403010101010001010e00"},
+            {"$":"bytes","hex":"00000101000001270a07726f6f746331350403010101010001010f00"},
+            {"$":"bytes","hex":"00000101000001270a07726f6f746331360403010101010001011000"},
+            {"$":"bytes","hex":"00000101000001270a07726f6f746331370403010101010001011100"},
+            {"$":"bytes","hex":"00000101000001270a07726f6f746331380403010101010001011200"},
+            {"$":"bytes","hex":"00000101000001270a07726f6f746331390403010101010001011300"},
+            {"$":"bytes","hex":"00000101000001270a07726f6f746332300403010101010001011400"},
+            {"$":"bytes","hex":"00000101000001270a07726f6f746332310403010101010001011500"},
+            {"$":"bytes","hex":"00000101000001270a07726f6f746332320403010101010001011600"},
+            {"$":"bytes","hex":"00000101000001270a07726f6f746332330403010101010001011700"},
+            {
+              "$": "bytes",
+              "hex": "0000024118042e41150a000528172700282a246b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b696e6e6572726f6f746f776e4116050403030018010101024117011a187d177d167d157d147d137d127d117d107d0f7d0e7d0d7d0c7d0b7d0a7d097d087d077d067d057d047d037d027d017d007d0100"
+            },
+            {
+              "$": "bytes",
+              "hex": "00000302410305061c622e5c0001280d0a6b326b326b326b326b3242030100000241030105007d037d117d007d177d0900"
+            }
+          ]
+        },
+        "b": {
+          "v1": [
+            {
+              "$": "bytes",
+              "hex": "01180100270104726f6f740363303001270104726f6f740363303101270104726f6f740363303201270104726f6f740363303301270104726f6f740363303401270104726f6f740363303501270104726f6f740363303601270104726f6f740363303701270104726f6f740363303801270104726f6f740363303901270104726f6f740363313001270104726f6f740363313101270104726f6f740363313201270104726f6f740363313301270104726f6f740363313401270104726f6f740363313501270104726f6f740363313601270104726f6f740363313701270104726f6f740363313801270104726f6f740363313901270104726f6f740363323001270104726f6f740363323101270104726f6f740363323201270104726f6f74036332330100"
+            },
+            {
+              "$": "bytes",
+              "hex": "011a011828000117016b017d1728000116016b017d1628000115016b017d1528000114016b017d1428000113016b017d1328000112016b017d1228000111016b017d1128000110016b017d102800010f016b017d0f2800010e016b017d0e2800010d016b017d0d2800010c016b017d0c2800010b016b017d0b2800010a016b017d0a28000109016b017d0928000108016b017d0828000107016b017d0728000106016b017d0628000105016b017d0528000104016b017d0428000103016b017d0328000102016b017d0228000101016b017d0128000100016b017d002700010505696e6e657201280104726f6f74036f776e017d0100"
+            },
+            {
+              "$": "bytes",
+              "hex": "0105020028000103026b32017d0328000111026b32017d1128000100026b32017d0028000117026b32017d1728000109026b32017d0900"
+            }
+          ],
+          "v2": [
+            {
+              "$": "bytes",
+              "hex": "0000010100000127da01a801726f6f74633030726f6f74633031726f6f74633032726f6f74633033726f6f74633034726f6f74633035726f6f74633036726f6f74633037726f6f74633038726f6f74633039726f6f74633130726f6f74633131726f6f74633132726f6f74633133726f6f74633134726f6f74633135726f6f74633136726f6f74633137726f6f74633138726f6f74633139726f6f74633230726f6f74633231726f6f74633232726f6f7463323304030403040304030403040304030403040304030403040304030403040304030403040304030403040304030403040301010241160001180000"
+            },
+            {
+              "$": "bytes",
+              "hex": "0000024118042e41150a000528172700282a246b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b696e6e6572726f6f746f776e4116050403030018010101024117011a187d177d167d157d147d137d127d117d107d0f7d0e7d0d7d0c7d0b7d0a7d097d087d077d067d057d047d037d027d017d007d0100"
+            },
+            {
+              "$": "bytes",
+              "hex": "00000302410305061c622e5c0001280d0a6b326b326b326b326b3242030100000241030105007d037d117d007d177d0900"
+            }
+          ]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "0205020028000103026b32017d0328000111026b32017d1128000100026b32017d0028000117026b32017d1728000109026b32017d09320100270104726f6f740363303001270104726f6f740363303101270104726f6f740363303201270104726f6f740363303301270104726f6f740363303401270104726f6f740363303501270104726f6f740363303601270104726f6f740363303701270104726f6f740363303801270104726f6f740363303901270104726f6f740363313001270104726f6f740363313101270104726f6f740363313201270104726f6f740363313301270104726f6f740363313401270104726f6f740363313501270104726f6f740363313601270104726f6f740363313701270104726f6f740363313801270104726f6f740363313901270104726f6f740363323001270104726f6f740363323101270104726f6f740363323201270104726f6f74036332330128000117016b017d1728000116016b017d1628000115016b017d1528000114016b017d1428000113016b017d1328000112016b017d1228000111016b017d1128000110016b017d102800010f016b017d0f2800010e016b017d0e2800010d016b017d0d2800010c016b017d0c2800010b016b017d0b2800010a016b017d0a28000109016b017d0928000108016b017d0828000107016b017d0728000106016b017d0628000105016b017d0528000104016b017d0428000103016b017d0328000102016b017d0228000101016b017d0128000100016b017d002700010505696e6e657201280104726f6f74036f776e017d0100"
+            },
+            "diff": {"b":{"$":"bytes","hex":"0000"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "00000302411d09061c622e5c1c41150a00092804271728172700288f02d6016b326b326b326b326b32726f6f74633030726f6f74633031726f6f74633032726f6f74633033726f6f74633034726f6f74633035726f6f74633036726f6f74633037726f6f74633038726f6f74633039726f6f74633130726f6f74633131726f6f74633132726f6f74633133726f6f74633134726f6f74633135726f6f74633136726f6f74633137726f6f74633138726f6f74633139726f6f74633230726f6f74633231726f6f74633232726f6f746332336b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b696e6e6572726f6f746f776e42030403040304030403040304030403040304030403040304030403040304030403040304030403040304030403040304034116050403070004011700180102411702411c0205007d037d117d007d177d0932007d177d167d157d147d137d127d117d107d0f7d0e7d0d7d0c7d0b7d0a7d097d087d077d067d057d047d037d027d017d007d0100"
+            },
+            "diff": {"b":{"$":"bytes","hex":"00000000000001000000000000"}}
+          }
+        },
+        "b": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "0205020028000103026b32017d0328000111026b32017d1128000100026b32017d0028000117026b32017d1728000109026b32017d09320100270104726f6f740363303001270104726f6f740363303101270104726f6f740363303201270104726f6f740363303301270104726f6f740363303401270104726f6f740363303501270104726f6f740363303601270104726f6f740363303701270104726f6f740363303801270104726f6f740363303901270104726f6f740363313001270104726f6f740363313101270104726f6f740363313201270104726f6f740363313301270104726f6f740363313401270104726f6f740363313501270104726f6f740363313601270104726f6f740363313701270104726f6f740363313801270104726f6f740363313901270104726f6f740363323001270104726f6f740363323101270104726f6f740363323201270104726f6f74036332330128000117016b017d1728000116016b017d1628000115016b017d1528000114016b017d1428000113016b017d1328000112016b017d1228000111016b017d1128000110016b017d102800010f016b017d0f2800010e016b017d0e2800010d016b017d0d2800010c016b017d0c2800010b016b017d0b2800010a016b017d0a28000109016b017d0928000108016b017d0828000107016b017d0728000106016b017d0628000105016b017d0528000104016b017d0428000103016b017d0328000102016b017d0228000101016b017d0128000100016b017d002700010505696e6e657201280104726f6f74036f776e017d0100"
+            },
+            "diff": {"a":{"$":"bytes","hex":"0000"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "00000302411d09061c622e5c1c41150a00092804271728172700288f02d6016b326b326b326b326b32726f6f74633030726f6f74633031726f6f74633032726f6f74633033726f6f74633034726f6f74633035726f6f74633036726f6f74633037726f6f74633038726f6f74633039726f6f74633130726f6f74633131726f6f74633132726f6f74633133726f6f74633134726f6f74633135726f6f74633136726f6f74633137726f6f74633138726f6f74633139726f6f74633230726f6f74633231726f6f74633232726f6f746332336b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b696e6e6572726f6f746f776e42030403040304030403040304030403040304030403040304030403040304030403040304030403040304030403040304034116050403070004011700180102411702411c0205007d037d117d007d177d0932007d177d167d157d147d137d127d117d107d0f7d0e7d0d7d0c7d0b7d0a7d097d087d077d067d057d047d037d027d017d007d0100"
+            },
+            "diff": {"a":{"$":"bytes","hex":"00000000000001000000000000"}}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {
+        "a": {"v1":{"$":"bytes","hex":"0202050132"},"v2":{"$":"bytes","hex":"0202050132"}},
+        "b": {"v1":{"$":"bytes","hex":"0202050132"},"v2":{"$":"bytes","hex":"0202050132"}}
+      }
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {
+        "a": [
+          [
+            "root",
+            {
+              "kind": "map",
+              "pairs": [
+                ["c00",{"kind":"map","pairs":[["k",0],["k2",0]]}],
+                ["c01",{"kind":"map","pairs":[["k",1]]}],
+                ["c02",{"kind":"map","pairs":[["k",2]]}],
+                ["c03",{"kind":"map","pairs":[["k",3],["k2",3]]}],
+                ["c04",{"kind":"map","pairs":[["k",4]]}],
+                ["c05",{"kind":"map","pairs":[["k",5],["inner",{"kind":"map","pairs":[]}]]}],
+                ["c06",{"kind":"map","pairs":[["k",6]]}],
+                ["c07",{"kind":"map","pairs":[["k",7]]}],
+                ["c08",{"kind":"map","pairs":[["k",8]]}],
+                ["c09",{"kind":"map","pairs":[["k",9],["k2",9]]}],
+                ["c10",{"kind":"map","pairs":[["k",10]]}],
+                ["c11",{"kind":"map","pairs":[["k",11]]}],
+                ["c12",{"kind":"map","pairs":[["k",12]]}],
+                ["c13",{"kind":"map","pairs":[["k",13]]}],
+                ["c14",{"kind":"map","pairs":[["k",14]]}],
+                ["c15",{"kind":"map","pairs":[["k",15]]}],
+                ["c16",{"kind":"map","pairs":[["k",16]]}],
+                ["c17",{"kind":"map","pairs":[["k",17],["k2",17]]}],
+                ["c18",{"kind":"map","pairs":[["k",18]]}],
+                ["c19",{"kind":"map","pairs":[["k",19]]}],
+                ["c20",{"kind":"map","pairs":[["k",20]]}],
+                ["c21",{"kind":"map","pairs":[["k",21]]}],
+                ["c22",{"kind":"map","pairs":[["k",22]]}],
+                ["c23",{"kind":"map","pairs":[["k",23],["k2",23]]}],
+                ["own",1]
+              ]
+            }
+          ]
+        ],
+        "b": [
+          [
+            "root",
+            {
+              "kind": "map",
+              "pairs": [
+                ["c00",{"kind":"map","pairs":[["k",0],["k2",0]]}],
+                ["c01",{"kind":"map","pairs":[["k",1]]}],
+                ["c02",{"kind":"map","pairs":[["k",2]]}],
+                ["c03",{"kind":"map","pairs":[["k",3],["k2",3]]}],
+                ["c04",{"kind":"map","pairs":[["k",4]]}],
+                ["c05",{"kind":"map","pairs":[["k",5],["inner",{"kind":"map","pairs":[]}]]}],
+                ["c06",{"kind":"map","pairs":[["k",6]]}],
+                ["c07",{"kind":"map","pairs":[["k",7]]}],
+                ["c08",{"kind":"map","pairs":[["k",8]]}],
+                ["c09",{"kind":"map","pairs":[["k",9],["k2",9]]}],
+                ["c10",{"kind":"map","pairs":[["k",10]]}],
+                ["c11",{"kind":"map","pairs":[["k",11]]}],
+                ["c12",{"kind":"map","pairs":[["k",12]]}],
+                ["c13",{"kind":"map","pairs":[["k",13]]}],
+                ["c14",{"kind":"map","pairs":[["k",14]]}],
+                ["c15",{"kind":"map","pairs":[["k",15]]}],
+                ["c16",{"kind":"map","pairs":[["k",16]]}],
+                ["c17",{"kind":"map","pairs":[["k",17],["k2",17]]}],
+                ["c18",{"kind":"map","pairs":[["k",18]]}],
+                ["c19",{"kind":"map","pairs":[["k",19]]}],
+                ["c20",{"kind":"map","pairs":[["k",20]]}],
+                ["c21",{"kind":"map","pairs":[["k",21]]}],
+                ["c22",{"kind":"map","pairs":[["k",22]]}],
+                ["c23",{"kind":"map","pairs":[["k",23],["k2",23]]}],
+                ["own",1]
+              ]
+            }
+          ]
+        ]
+      }
+    },
+    "events": {
+      "api": "AbstractType.observe",
+      "value": [
+        {
+          "observer": "deepA",
+          "deep": true,
+          "events": [
+            {"type":"YMapEvent","path":[]},
+            {"type":"YMapEvent","path":["c23"]},
+            {"type":"YMapEvent","path":["c22"]},
+            {"type":"YMapEvent","path":["c21"]},
+            {"type":"YMapEvent","path":["c20"]},
+            {"type":"YMapEvent","path":["c19"]},
+            {"type":"YMapEvent","path":["c18"]},
+            {"type":"YMapEvent","path":["c17"]},
+            {"type":"YMapEvent","path":["c16"]},
+            {"type":"YMapEvent","path":["c15"]},
+            {"type":"YMapEvent","path":["c14"]},
+            {"type":"YMapEvent","path":["c13"]},
+            {"type":"YMapEvent","path":["c12"]},
+            {"type":"YMapEvent","path":["c11"]},
+            {"type":"YMapEvent","path":["c10"]},
+            {"type":"YMapEvent","path":["c09"]},
+            {"type":"YMapEvent","path":["c08"]},
+            {"type":"YMapEvent","path":["c07"]},
+            {"type":"YMapEvent","path":["c06"]},
+            {"type":"YMapEvent","path":["c05"]},
+            {"type":"YMapEvent","path":["c04"]},
+            {"type":"YMapEvent","path":["c03"]},
+            {"type":"YMapEvent","path":["c02"]},
+            {"type":"YMapEvent","path":["c01"]},
+            {"type":"YMapEvent","path":["c00"]}
+          ]
+        },
+        {
+          "observer": "deepB",
+          "deep": true,
+          "events": [
+            {"type":"YMapEvent","path":[]},
+            {"type":"YMapEvent","path":["c23"]},
+            {"type":"YMapEvent","path":["c22"]},
+            {"type":"YMapEvent","path":["c21"]},
+            {"type":"YMapEvent","path":["c20"]},
+            {"type":"YMapEvent","path":["c19"]},
+            {"type":"YMapEvent","path":["c18"]},
+            {"type":"YMapEvent","path":["c17"]},
+            {"type":"YMapEvent","path":["c16"]},
+            {"type":"YMapEvent","path":["c15"]},
+            {"type":"YMapEvent","path":["c14"]},
+            {"type":"YMapEvent","path":["c13"]},
+            {"type":"YMapEvent","path":["c12"]},
+            {"type":"YMapEvent","path":["c11"]},
+            {"type":"YMapEvent","path":["c10"]},
+            {"type":"YMapEvent","path":["c09"]},
+            {"type":"YMapEvent","path":["c08"]},
+            {"type":"YMapEvent","path":["c07"]},
+            {"type":"YMapEvent","path":["c06"]},
+            {"type":"YMapEvent","path":["c05"]},
+            {"type":"YMapEvent","path":["c04"]},
+            {"type":"YMapEvent","path":["c03"]},
+            {"type":"YMapEvent","path":["c02"]},
+            {"type":"YMapEvent","path":["c01"]},
+            {"type":"YMapEvent","path":["c00"]}
+          ]
+        },
+        {
+          "observer": "deepB",
+          "deep": true,
+          "events": [
+            {"type":"YMapEvent","path":["c03"]},
+            {"type":"YMapEvent","path":["c17"]},
+            {"type":"YMapEvent","path":["c00"]},
+            {"type":"YMapEvent","path":["c23"]},
+            {"type":"YMapEvent","path":["c09"]}
+          ]
+        },
+        {
+          "observer": "deepA",
+          "deep": true,
+          "events": [
+            {"type":"YMapEvent","path":["c03"]},
+            {"type":"YMapEvent","path":["c17"]},
+            {"type":"YMapEvent","path":["c00"]},
+            {"type":"YMapEvent","path":["c23"]},
+            {"type":"YMapEvent","path":["c09"]}
+          ]
+        }
+      ]
+    }
+  }
+}

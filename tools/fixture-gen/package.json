@@ -5,8 +5,9 @@
   "type": "module",
   "description": "Node fixture generator: replays ops scripts on the pinned Yjs/lib0/y-protocols submodules and writes fixtures/ (ADR 0011).",
   "scripts": {
-    "gen": "node --import ./lib/register.mjs generate.mjs",
-    "check": "node --import ./lib/register.mjs generate.mjs --check"
+    "gen": "node --import ./lib/register.mjs generate.mjs && node sim-plan-goldens.mjs",
+    "check": "node --import ./lib/register.mjs generate.mjs --check && node sim-plan-goldens.mjs --check",
+    "check:draws": "node check-sim-draws.mjs"
   },
   "dependencies": {
     "ajv": "8.18.0"
