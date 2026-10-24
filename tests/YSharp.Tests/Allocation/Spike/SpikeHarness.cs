@@ -138,6 +138,7 @@ public static class SpikeCandidates
     public static Func<IStoreDriver> Factory(string candidate) => candidate switch
     {
         Control => () => new ControlStore(),
+        YSharp.StoreSpike.Arenas.ArenaStore.CandidateId => () => new YSharp.StoreSpike.Arenas.ArenaStore(),
         _ => throw new ArgumentException("unknown candidate " + candidate, nameof(candidate)),
     };
 }
