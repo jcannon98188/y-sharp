@@ -63,10 +63,10 @@ internal static class StructsProbe
         using var json = JsonDocument.Parse(DumpJson(doc));
         return json.RootElement.EnumerateArray().Select(c => new ClientStructs(
             c[0].GetUInt32(),
-            c[1].EnumerateArray().Select(s => StructInfo.From(c[0].GetUInt32(), s)).ToList())).ToList();
+            c[1].EnumerateArray().Select(s => StructInfo.From(c[0].GetUInt64(), s)).ToList())).ToList();
     }
 
-    public static IReadOnlyList<StructInfo> Of(Doc doc, uint client) =>
+    public static IReadOnlyList<StructInfo> Of(Doc doc, ulong client) =>
         Dump(doc).FirstOrDefault(c => c.Client == client)?.Structs ?? new List<StructInfo>();
 
     public static IReadOnlyList<StructInfo> All(Doc doc) => Dump(doc).SelectMany(c => c.Structs).ToList();
@@ -103,25 +103,25 @@ internal sealed class StructsSimInternals : YSharp.TestKit.Sim.ISimInternals
     }
 }
 
-internal sealed record ClientStructs(uint Client, List<StructInfo> Structs);
+internal sealed record ClientStructs(ulong Client, List<StructInfo> Structs);
 
 /// <summary>One struct of the dump; GC and Skip report <see cref="Deleted"/> true.</summary>
 internal sealed record StructInfo(
-    uint Client, long Clock, long Len, string Kind, (uint Client, long Clock)? Origin, (uint Client, long Clock)? RightOrigin,
-    string? ParentName, (uint Client, long Clock)? ParentId, string? ParentSub, int Ref, JsonElement? Value, bool Deleted, bool Keep)
+    ulong Client, long Clock, long Len, string Kind, (ulong Client, long Clock)? Origin, (ulong Client, long Clock)? RightOrigin,
+    string? ParentName, (ulong Client, long Clock)? ParentId, string? ParentSub, int Ref, JsonElement? Value, bool Deleted, bool Keep)
 {
     public bool IsItem => Kind == "item";
     public bool IsGc => Kind == "gc";
     public long End => Clock + Len;
     public string? Text => Ref == 4 ? Value?.GetString() : null;
 
-    public static StructInfo From(uint client, JsonElement s)
+    public static StructInfo From(ulong client, JsonElement s)
     {
         var kind = s.GetProperty("kind").GetString()!;
         var id = s.GetProperty("id");
-        (uint, long)? Pair(string name) => s.TryGetProperty(name, out var p) && p.ValueKind == JsonValueKind.Array ? (p[0].GetUInt32(), p[1].GetInt64()) : null;
+        (ulong, long)? Pair(string name) => s.TryGetProperty(name, out var p) && p.ValueKind == JsonValueKind.Array ? (p[0].GetUInt64(), p[1].GetInt64()) : null;
         string? parentName = null;
-        (uint, long)? parentId = null;
+        (ulong, long)? parentId = null;
         if (s.TryGetProperty("parent", out var parent))
         {
             if (parent.ValueKind == JsonValueKind.String) parentName = parent.GetString();
@@ -141,7 +141,7 @@ internal sealed record StructInfo(
 /// <summary>Small helpers for building replicas and moving updates between them.</summary>
 internal static class Net
 {
-    public static Doc Mk(uint client, bool gc = true) => new(new DocOptions { ClientId = client, Gc = gc });
+    public static Doc Mk(ulong client, bool gc = true) => new(new DocOptions { ClientId = client, Gc = gc });
 
     public static byte[] StateVector(Doc d)
     {

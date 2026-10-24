@@ -27,7 +27,7 @@ internal static class Impl
 /// <summary>Small helpers for building replicas and moving updates between them.</summary>
 internal static class Net
 {
-    public static Doc Mk(uint client, bool gc = true) => new(new DocOptions { ClientId = client, Gc = gc });
+    public static Doc Mk(ulong client, bool gc = true) => new(new DocOptions { ClientId = client, Gc = gc });
 
     public static byte[] StateVector(Doc d)
     {

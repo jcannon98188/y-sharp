@@ -37,7 +37,7 @@ internal sealed record ValidInput(UpdateFormat Format, UpdateModel Model, string
 internal static class HostileModels
 {
     private static readonly ulong[] Clients = { 1, 2, 3, 900, (1UL << 31) - 1, 1UL << 31, uint.MaxValue };
-    private static readonly ulong[] RareClients = { 1UL << 32, 1UL << 53, ulong.MaxValue };
+    private static readonly ulong[] RareClients = { (1UL << 53) - 1, 1UL << 53, ulong.MaxValue };
     private static readonly ulong[] Clocks = { 0, 1, 2, 5, 10, (1UL << 31) - 1, 1UL << 31, (1UL << 53) - 1 };
     private static readonly ulong[] RareClocks = { 1UL << 53, ulong.MaxValue };
     private static readonly ulong[] HugeLengths = { 1UL << 31, 1UL << 32, 1UL << 40, (1UL << 53) - 1, 1UL << 53 };

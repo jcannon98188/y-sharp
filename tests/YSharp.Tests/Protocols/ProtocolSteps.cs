@@ -63,7 +63,7 @@ internal static class ProtocolSteps
             var name = s.String("awareness");
             var aw = new Awareness(ctx.Doc(s.String("doc")), ctx.Clock);
             if (!st.Awarenesses.TryAdd(name, aw)) throw new OpsScriptException($"awareness '{name}' declared twice.");
-            JsonNode Ids(IReadOnlyList<uint> ids) => new JsonArray(ids.Select(i => (JsonNode)JsonValue.Create((long)i)!).ToArray());
+            JsonNode Ids(IReadOnlyList<ulong> ids) => new JsonArray(ids.Select(i => (JsonNode)JsonValue.Create((long)i)!).ToArray());
             AwarenessHandler Log(string ev) => (c, origin) => st.Events.Add(new JsonObject
             {
                 ["observer"] = name, ["event"] = ev, ["at"] = ElapsedMs(ctx), ["added"] = Ids(c.Added), ["updated"] = Ids(c.Updated),
@@ -87,9 +87,9 @@ internal static class ProtocolSteps
             Aw(ctx, s).RemoveStates(Ids(s), s.OptString("origin")));
         Add("awareness.encode", new[] { "name", "awareness", "clients" }, new[] { "states" }, (ctx, s) =>
         {
-            Dictionary<uint, YValue>? states = null;
+            Dictionary<ulong, YValue>? states = null;
             if (s.Has("states"))
-                states = s.Tagged("states").Items.ToDictionary(p => (uint)p.Items[0].Number, p => p.Items[1].ToYValue());
+                states = s.Tagged("states").Items.ToDictionary(p => (ulong)p.Items[0].Number, p => p.Items[1].ToYValue());
             var w = new ArrayBufferWriter<byte>();
             var status = Aw(ctx, s).TryEncodeUpdate(w, Ids(s), states);
             Record(ctx, s, status.Ok ? w.WrittenSpan.ToArray() : null, !status.Ok);
@@ -158,7 +158,7 @@ internal static class ProtocolSteps
     private static Awareness Aw(OpsContext ctx, OpsStep s) =>
         Of(ctx).Awarenesses.TryGetValue(s.String("awareness"), out var a) ? a : throw new OpsScriptException($"unknown awareness '{s.String("awareness")}'.");
 
-    private static uint[] Ids(OpsStep s) => s.Element("clients").EnumerateArray().Select(e => e.GetUInt32()).ToArray();
+    private static ulong[] Ids(OpsStep s) => s.Element("clients").EnumerateArray().Select(e => e.GetUInt64()).ToArray();
 
     private static void Record(OpsContext ctx, OpsStep s, byte[]? bytes, bool threw) =>
         Of(ctx).Results[s.String("name")] = new ProtocolResult { Name = s.String("name"), Bytes = bytes, Threw = threw };

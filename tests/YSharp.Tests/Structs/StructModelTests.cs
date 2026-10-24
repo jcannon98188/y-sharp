@@ -29,7 +29,7 @@ public sealed class StructModelTests
         var structs = StructsProbe.Of(a, 1);
         Assert.Equal(new[] { (0L, 3L), (3L, 3L), (6L, 1L), (7L, 1L) }, structs.Select(s => (s.Clock, s.Len)));
         Assert.Equal(new[] { 4, 8, 7, 8 }, structs.Select(s => s.Ref));
-        Assert.All(structs, s => Assert.Equal(1u, s.Client));
+        Assert.All(structs, s => Assert.Equal(1UL, s.Client));
     });
 
     [Fact]
@@ -49,7 +49,7 @@ public sealed class StructModelTests
         foreach (var doc in new[] { a, b })
         {
             var dump = StructsProbe.Dump(doc);
-            Assert.Equal(new uint[] { 2, 1 }, dump.Select(c => c.Client));   // descending client order
+            Assert.Equal(new ulong[] { 2, 1 }, dump.Select(c => c.Client));   // descending client order
             foreach (var client in dump)
             {
                 Assert.Equal(0L, client.Structs[0].Clock);
@@ -123,7 +123,7 @@ public sealed class StructModelTests
         c.GetText("t").Insert(0, "a");
         Net.Sync(c, d);
         d.GetText("t").Insert(1, "Y");
-        Assert.Equal((1u, 0L), StructsProbe.Of(d, 2).Single().Origin);        // a one-long item: its own id
+        Assert.Equal((1UL, 0L), StructsProbe.Of(d, 2).Single().Origin);        // a one-long item: its own id
     });
 
     [Fact]

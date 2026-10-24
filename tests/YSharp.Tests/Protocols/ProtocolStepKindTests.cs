@@ -68,7 +68,7 @@ public sealed class ProtocolStepKindTests
             """);
         var st = ProtocolSteps.Of(ctx);
         Assert.Equal("""{"x":1}""", Js.StateJson(st.Awarenesses["b"], 1));
-        Assert.Equal(new[] { (1u, 1L, """{"x":1}""") }, AwBytes.Parse(st.Results["e"].Bytes!));
+        Assert.Equal(new[] { (1UL, 1L, """{"x":1}""") }, AwBytes.Parse(st.Results["e"].Bytes!));
     });
 
     [Fact, Covers("AW-25", "AW-27")]
@@ -93,7 +93,7 @@ public sealed class ProtocolStepKindTests
              {"step":"awareness.destroy","awareness":"a"}]
             """);
         var st = ProtocolSteps.Of(ctx);
-        Assert.Equal(new[] { (1u, 1L, "null") }, AwBytes.Parse(st.Results["m"].Bytes!));
+        Assert.Equal(new[] { (1UL, 1L, "null") }, AwBytes.Parse(st.Results["m"].Bytes!));
         Assert.Contains(st.Events, e => e["event"]!.GetValue<string>() == "destroy");
     });
 

@@ -11,7 +11,7 @@ namespace YSharp.Tests.Types;
 /// <summary>Transaction lifecycle and observer ordering (TX-*, Q23), after docs/research/types.md section 6.</summary>
 public sealed class TransactionTests
 {
-    private static Doc NewDoc(uint client = 1) => new(new DocOptions { ClientId = client });
+    private static Doc NewDoc(ulong client = 1) => new(new DocOptions { ClientId = client });
 
     /// <summary>Subscribes a logger to every doc-level transaction event.</summary>
     private static List<string> LogDocEvents(Doc doc)
@@ -83,7 +83,6 @@ public sealed class TransactionTests
     [Fact, Covers("TX-4")]
     public void Transaction_DefaultsToANullOriginAndLocal_AndApplyUpdateIsRemote() => Stub.Run(() =>
     {
-        // JS transact returns the callback's value; the sketch's Transact returns nothing (API gap), so the state is read from the body.
         var doc = NewDoc(1);
         var origins = new List<(object? Origin, bool Local, bool Write)>();
         doc.AfterTransaction += (tx, _) => origins.Add((tx.Origin, tx.IsLocal, tx.IsWrite));
@@ -93,9 +92,9 @@ public sealed class TransactionTests
         other.GetText("t").Insert(0, "x");
         doc.ApplyUpdate(other.EncodeStateAsUpdate(), "remote");
         Assert.Equal(new (object?, bool, bool)[] { (null, true, true), ("origin", true, true), ("remote", false, true) }, origins);
-        var result = 0;
-        doc.Transact(_ => result = doc.GetText("t").Length);
-        Assert.Equal(3, result);
+        Assert.Equal(3, doc.Transact(_ => doc.GetText("t").Length));                      // JS transact returns the callback's value (A4)
+        Assert.Equal("seen", doc.Transact(tx => (string)tx.Origin!, "seen"));
+        Assert.Equal(7, doc.Transact(5, static (n, _) => n + 2));                          // the state-passing form
     });
 
     [Fact, PortOf("y-text.tests.js:testBasicInsertAndDelete", "TX-5")]
@@ -143,8 +142,13 @@ public sealed class TransactionTests
         var running = 0;
         var maxDepth = 0;
         var afterAll = 0;
+        var round = new List<object?>();
         doc.AfterTransaction += (tx, _) => log.Add($"after:{tx.Origin}");
-        doc.AfterAllTransactions += (_, _) => afterAll++;
+        doc.AfterAllTransactions += (txs, _) =>
+        {
+            afterAll++;
+            round.AddRange(txs.Select(tx => tx.Origin));   // the list is pooled: copy what is needed during dispatch (A5)
+        };
         array.Observe((_, tx) =>
         {
             running++;
@@ -157,6 +161,7 @@ public sealed class TransactionTests
         Assert.Equal(1, maxDepth);
         Assert.Equal(3, array.Length);
         Assert.Equal(1, afterAll); // once for the whole cycle
+        Assert.Equal(new object?[] { "first", "follow1", "follow2" }, round);   // with every transaction of the cycle, in order
         Assert.Equal(
             new[] { "observe:first:1", "after:first", "observe:follow1:2", "after:follow1", "observe:follow2:3", "after:follow2" },
             log);

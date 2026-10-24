@@ -52,7 +52,7 @@ public sealed class PermanentUserDataTests
         return sb.Append('}').ToString();
     }
 
-    private static Doc Mk(uint client) => Net.Mk(client);
+    private static Doc Mk(ulong client) => Net.Mk(client);
 
     // ------------------------------------------------------------------ PUD-01, PUD-03, PUD-06, PUD-08
 

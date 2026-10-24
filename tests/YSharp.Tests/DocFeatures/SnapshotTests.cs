@@ -16,7 +16,7 @@ namespace YSharp.Tests.DocFeatures;
 /// </summary>
 public sealed class SnapshotTests
 {
-    private static Doc NoGc(uint client = 1) => Net.Mk(client, gc: false);
+    private static Doc NoGc(ulong client = 1) => Net.Mk(client, gc: false);
 
     private static byte[] Encode(YSnapshot s, UpdateFormat format = UpdateFormat.V1)
     {
@@ -390,7 +390,7 @@ public sealed class SnapshotTests
         Assert.Same(target, result);
         Assert.Equal("hello", target.GetText("t").ToString());
         Assert.Equal("snapshot", seen);
-        Assert.Equal(77u, target.ClientId);
+        Assert.Equal(77UL, target.ClientId);
     });
 
     [Fact]

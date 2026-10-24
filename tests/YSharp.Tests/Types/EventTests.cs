@@ -11,7 +11,7 @@ namespace YSharp.Tests.Types;
 /// <summary>Type events: YArrayEvent, YMapEvent, YTextEvent, the common event surface and deep paths (A-E*, M-E*, Y-*, V-*).</summary>
 public sealed class EventTests
 {
-    private static Doc NewDoc(uint client = 1) => new(new DocOptions { ClientId = client });
+    private static Doc NewDoc(ulong client = 1) => new(new DocOptions { ClientId = client });
 
     /// <summary>The event path as JSON, e.g. <c>["my-array",3]</c>. Computed inside the handler: events are valid only during dispatch.</summary>
     private static string PathOf(YEvent e) =>

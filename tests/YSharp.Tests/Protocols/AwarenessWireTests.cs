@@ -17,9 +17,9 @@ public sealed class AwarenessWireTests
 {
     private static AwRig Populated()
     {
-        var rig = new AwRig(2147483648u);
+        var rig = new AwRig(2147483648UL);
         rig.Awareness.SetLocalState(Js.Obj(("name", "héllo ✓ \U0001F600")));
-        rig.Apply(AwBytes.Update((4294967295u, 3, """{"big":true}"""), (300, 128, """{"id":300}"""), (16384, 2, "null"), (1, 1, """{"a":1}""")));
+        rig.Apply(AwBytes.Update((4294967295UL, 3, """{"big":true}"""), (300, 128, """{"id":300}"""), (16384, 2, "null"), (1, 1, """{"a":1}""")));
         return rig;
     }
 
@@ -28,14 +28,14 @@ public sealed class AwarenessWireTests
     {
         using var rig = Populated();
         var entries = AwBytes.Parse(AwBytes.Encode(rig.Awareness, 1, 16384));
-        Assert.Equal(new[] { (1u, 1L, """{"a":1}"""), (16384u, 2L, "null") }, entries);
+        Assert.Equal(new[] { (1UL, 1L, """{"a":1}"""), (16384UL, 2L, "null") }, entries);
     });
 
     [Fact, Covers("AW-31")]
     public void Encode_KeepsTheGivenOrder_WritesDuplicatesTwice_AndAnEmptyListIsOneZeroByte() => Stub.Run(() =>
     {
         using var rig = Populated();
-        Assert.Equal(new uint[] { 1, 300, 1 }, AwBytes.Parse(AwBytes.Encode(rig.Awareness, 1, 300, 1)).Select(e => e.Id));
+        Assert.Equal(new ulong[] { 1, 300, 1 }, AwBytes.Parse(AwBytes.Encode(rig.Awareness, 1, 300, 1)).Select(e => e.Id));
         Assert.Equal(new byte[] { 0 }, AwBytes.Encode(rig.Awareness));
     });
 
@@ -44,7 +44,7 @@ public sealed class AwarenessWireTests
     {
         using var rig = Populated();
         var w = new ArrayBufferWriter<byte>();
-        var status = rig.Awareness.TryEncodeUpdate(w, new uint[] { 1, 12345 });
+        var status = rig.Awareness.TryEncodeUpdate(w, new ulong[] { 1, 12345 });
         Assert.False(status.Ok);
     });
 
@@ -53,36 +53,52 @@ public sealed class AwarenessWireTests
     {
         using var rig = Populated();
         var w = new ArrayBufferWriter<byte>();
-        var states = new Dictionary<uint, YValue> { [1] = Js.Obj(("replaced", "state")) };
-        Assert.True(rig.Awareness.TryEncodeUpdate(w, new uint[] { 1, 300 }, states).Ok);
-        Assert.Equal(new[] { (1u, 1L, """{"replaced":"state"}"""), (300u, 128L, "null") }, AwBytes.Parse(w.WrittenSpan.ToArray()));
+        var states = new Dictionary<ulong, YValue> { [1] = Js.Obj(("replaced", "state")) };
+        Assert.True(rig.Awareness.TryEncodeUpdate(w, new ulong[] { 1, 300 }, states).Ok);
+        Assert.Equal(new[] { (1UL, 1L, """{"replaced":"state"}"""), (300UL, 128L, "null") }, AwBytes.Parse(w.WrittenSpan.ToArray()));
     });
 
     [Fact, Covers("AW-34")]
     public void ClientIdsAndClocks_AboveTwoToThe31_RoundTripAsVarUints() => Stub.Run(() =>
     {
-        using var a = new AwRig(4294967295u);
+        using var a = new AwRig(4294967295UL);
         a.Awareness.SetLocalState(Js.Obj(("k", 1)));
-        using var b = new AwRig(2147483648u);
-        var bytes = AwBytes.Encode(a.Awareness, 4294967295u);
+        using var b = new AwRig(2147483648UL);
+        var bytes = AwBytes.Encode(a.Awareness, 4294967295UL);
         Assert.Equal(new byte[] { 1, 0xff, 0xff, 0xff, 0xff, 0x0f, 1 }, bytes.Take(7).ToArray());
         Assert.True(b.Apply(bytes).Ok);
-        Assert.Equal("""{"k":1}""", Js.StateJson(b.Awareness, 4294967295u));
-        Assert.Equal(1, b.ClockOf(4294967295u));
+        Assert.Equal("""{"k":1}""", Js.StateJson(b.Awareness, 4294967295UL));
+        Assert.Equal(1, b.ClockOf(4294967295UL));
+    });
+
+    [Fact, Covers("AW-34")]
+    public void ClientIds_UpTo2Pow53Minus1_RoundTripAsVarUints() => Stub.Run(() =>
+    {
+        const ulong max = (1UL << 53) - 1;
+        using var a = new AwRig(max);
+        Assert.Equal(max, a.Awareness.ClientId);
+        a.Awareness.SetLocalState(Js.Obj(("k", 1)));
+        using var b = new AwRig(1UL << 40);
+        var bytes = AwBytes.Encode(a.Awareness, max);
+        Assert.Equal(new byte[] { 1, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0f, 1 }, bytes.Take(10).ToArray());
+        Assert.True(b.Apply(bytes).Ok);
+        Assert.Equal("""{"k":1}""", Js.StateJson(b.Awareness, max));
+        Assert.Equal(1, b.ClockOf(max));
+        Assert.Contains(max, b.Awareness.GetStates().Keys);
     });
 
     [Fact, Covers("AW-35")]
     public void Strings_AreUtf8_WithAByteLengthPrefix() => Stub.Run(() =>
     {
         using var rig = Populated();
-        var bytes = AwBytes.Encode(rig.Awareness, 2147483648u);
+        var bytes = AwBytes.Encode(rig.Awareness, 2147483648UL);
         var entry = AwBytes.Parse(bytes).Single();
         var json = entry.Json;
         Assert.True(Encoding.UTF8.GetByteCount(json) > json.Length);
         Assert.Contains("héllo ✓ \U0001F600", json);
         using var peer = new AwRig(5);
         Assert.True(peer.Apply(bytes).Ok);
-        Assert.Equal(json, Js.StateJson(peer.Awareness, 2147483648u));
+        Assert.Equal(json, Js.StateJson(peer.Awareness, 2147483648UL));
     });
 
     [Fact, Covers("AW-36", "AW-37")]
@@ -95,7 +111,7 @@ public sealed class AwarenessWireTests
         var status = Awareness.TryModifyUpdate(source, v => { seen.Add(v.Kind); return v.Kind == YValueKind.Null ? v : ProtocolSteps.WithField(v, "by", "server"); }, w);
         Assert.True(status.Ok);
         Assert.Equal(new[] { YValueKind.Object, YValueKind.Null }, seen);
-        Assert.Equal(new[] { (1u, 1L, """{"a":1,"by":"server"}"""), (16384u, 2L, "null") }, AwBytes.Parse(w.WrittenSpan.ToArray()));
+        Assert.Equal(new[] { (1UL, 1L, """{"a":1,"by":"server"}"""), (16384UL, 2L, "null") }, AwBytes.Parse(w.WrittenSpan.ToArray()));
     });
 
     [Fact, Diverges("AW-38", adr: "0007")]
@@ -124,7 +140,7 @@ public sealed class AwarenessWireTests
     public void IdentityModify_EncoderOutput_IsByteIdentical() => Stub.Run(() =>
     {
         using var rig = Populated();
-        var source = AwBytes.Encode(rig.Awareness, 2147483648u, 4294967295u, 300, 16384, 1);
+        var source = AwBytes.Encode(rig.Awareness, 2147483648UL, 4294967295UL, 300, 16384, 1);
         var w = new ArrayBufferWriter<byte>();
         Assert.True(Awareness.TryModifyUpdate(source, v => v, w).Ok);
         Assert.Equal(source, w.WrittenSpan.ToArray());

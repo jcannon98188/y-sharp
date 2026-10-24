@@ -39,7 +39,7 @@ public sealed class AcquireTests
     {
         var doc = Conc.NewDoc();
         var ran = false;
-        doc.Transact(_ => ran = true, origin: "origin", timeout: Short);
+        doc.TransactWithTimeout(_ => ran = true, "origin", Short);
         Assert.True(ran);
     });
 

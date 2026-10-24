@@ -49,8 +49,8 @@ public sealed class ItemHelperTests
         var s = StructsProbe.Of(b, 1);
         Assert.Equal(new[] { (0L, 3L), (3L, 1L), (4L, 1L), (5L, 1L) }, s.Select(x => (x.Clock, x.Len)));
         Assert.Equal(new[] { "abc", "X", "Y", "Z" }, s.Select(x => x.Text));
-        Assert.Equal(new (uint, long)?[] { null, null, (1u, 3L), (1u, 4L) }, s.Select(x => x.Origin));            // right half: origin = (client, clock + diff - 1)
-        Assert.Equal(new (uint, long)?[] { null, (1u, 0L), (1u, 0L), (1u, 0L) }, s.Select(x => x.RightOrigin));    // copied to the right half, left half unchanged
+        Assert.Equal(new (ulong, long)?[] { null, null, (1UL, 3L), (1UL, 4L) }, s.Select(x => x.Origin));            // right half: origin = (client, clock + diff - 1)
+        Assert.Equal(new (ulong, long)?[] { null, (1UL, 0L), (1UL, 0L), (1UL, 0L) }, s.Select(x => x.RightOrigin));    // copied to the right half, left half unchanged
         Assert.Equal(new[] { false, false, true, false }, s.Select(x => x.Deleted));
         Assert.Equal("[[1,[[4,1]]]]", StructsProbe.DeleteSetJson(StructsProbe.Dump(b)));
         Assert.Equal("abcXZ", b.GetText("t").ToString());
@@ -75,7 +75,7 @@ public sealed class ItemHelperTests
 
         // The re-inserted items are new structs between the same neighbours and are kept.
         var last = StructsProbe.Of(a, 1).Last();
-        Assert.Equal(((uint, long)?)(1u, 0L), last.Origin);
+        Assert.Equal(((ulong, long)?)(1UL, 0L), last.Origin);
         Assert.False(last.Deleted);
         Assert.True(last.Keep);
     });

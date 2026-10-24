@@ -8,7 +8,7 @@ using YSharp.TestKit.Values;
 
 namespace YSharp.TestKit.Ops;
 
-public sealed record ReplicaSpec(string Name, uint ClientId, bool Gc);
+public sealed record ReplicaSpec(string Name, ulong ClientId, bool Gc);
 
 /// <summary>An observer firing recorded under the <c>events</c> observation, in firing order.</summary>
 public sealed record ObservedEvent(string Observer, string EventType);
@@ -110,6 +110,7 @@ public sealed class OpsContext
             "array" => doc.GetArray(n),
             "map" => doc.GetMap(n),
             "xmlFragment" => doc.GetXmlFragment(n),
+            "xmlText" => doc.GetXmlText(n),
             var other => throw new OpsScriptException($"Unknown root kind '{other}'."),
         };
     }
@@ -173,7 +174,7 @@ public static class StandardSteps
         var r = new OpsRegistry();
         r.Register(new StepDefinition("replica", new[] { "name", "clientId" }, new[] { "gc" }, (ctx, s) =>
         {
-            var spec = new ReplicaSpec(s.String("name"), checked((uint)s.Long("clientId")), s.Bool("gc", true));
+            var spec = new ReplicaSpec(s.String("name"), checked((ulong)s.Long("clientId")), s.Bool("gc", true));
             ctx.DeclareReplica(spec.Name, ctx.DocFactory(ctx, spec));
         }));
         r.Register(Transact);

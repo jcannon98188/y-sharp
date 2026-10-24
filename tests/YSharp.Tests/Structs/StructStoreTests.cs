@@ -58,8 +58,8 @@ public sealed class StructStoreTests
         Assert.Equal(new[] { (0L, 1L), (1L, 2L), (3L, 2L) }, s.Select(x => (x.Clock, x.Len)));
         Assert.Equal(new[] { "h", "el", "lo" }, s.Select(x => x.Text));
         Assert.Equal(new[] { false, true, false }, s.Select(x => x.Deleted));
-        Assert.Equal(((uint, long)?)(1u, 0L), s[1].Origin);
-        Assert.Equal(((uint, long)?)(1u, 2L), s[2].Origin);
+        Assert.Equal(((ulong, long)?)(1UL, 0L), s[1].Origin);
+        Assert.Equal(((ulong, long)?)(1UL, 2L), s[2].Origin);
 
         // A range that covers a whole struct splits nothing; the two adjacent tombstones then merge.
         a.GetText("t").Delete(0, 1);

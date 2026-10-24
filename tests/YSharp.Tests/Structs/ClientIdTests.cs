@@ -10,10 +10,10 @@ public sealed class ClientIdTests
 {
     private sealed class ScriptedIds : IClientIdGenerator
     {
-        private readonly Queue<uint> _ids;
-        public ScriptedIds(params uint[] ids) => _ids = new Queue<uint>(ids);
+        private readonly Queue<ulong> _ids;
+        public ScriptedIds(params ulong[] ids) => _ids = new Queue<ulong>(ids);
         public int Calls { get; private set; }
-        public uint Next() { Calls++; return _ids.Dequeue(); }
+        public ulong Next() { Calls++; return _ids.Dequeue(); }
     }
 
     [Fact]
@@ -26,11 +26,11 @@ public sealed class ClientIdTests
 
         var generator = new ScriptedIds(1, 99);
         var b = new Doc(new DocOptions { ClientIdGenerator = generator });
-        Assert.Equal(1u, b.ClientId);
+        Assert.Equal(1UL, b.ClientId);
         var a = Net.Mk(1);
         a.GetText("t").Insert(0, "abc");
         Net.Sync(a, b);                                            // a's structs carry b's id: b picks the next generated id
-        Assert.Equal(99u, b.ClientId);
+        Assert.Equal(99UL, b.ClientId);
         Assert.Equal(2, generator.Calls);
     });
 
@@ -54,7 +54,7 @@ public sealed class ClientIdTests
         foreach (var d in new[] { a, b, c })
         {
             Assert.Equal("CzyxBA", d.GetText("t").ToString());
-            Assert.Equal(new uint[] { 4294967295, 2147483648, 1 }, StructsProbe.Dump(d).Select(s => s.Client));   // descending, unsigned
+            Assert.Equal(new ulong[] { 4294967295, 2147483648, 1 }, StructsProbe.Dump(d).Select(s => s.Client));   // descending, unsigned
             Assert.Equal(2L, d.GetStateVector()[4294967295]);
         }
     });

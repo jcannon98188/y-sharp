@@ -100,14 +100,14 @@ public readonly struct YObjectView
 
 // ---------------------------------------------------------------- ids, state vectors, delete sets
 
-public readonly record struct ItemId(uint Client, long Clock);   // REVIEW: clock <= 2^53-1 (Q12), so long, not ulong
+public readonly record struct ItemId(ulong Client, long Clock);   // client ids are 53-bit capable (ADR 0008, Q12); clock <= 2^53-1, so long
 
 public sealed class StateVector
 {
     public static StateVector Decode(ReadOnlySpan<byte> v1) => throw Sketch.NI;
     public static StateVector Of(Doc doc) => throw Sketch.NI;
-    public long this[uint client] => throw Sketch.NI;            // 0 when unknown
-    public IEnumerable<KeyValuePair<uint, long>> Clients => throw Sketch.NI;
+    public long this[ulong client] => throw Sketch.NI;            // 0 when unknown
+    public IEnumerable<KeyValuePair<ulong, long>> Clients => throw Sketch.NI;
     public void Encode(IBufferWriter<byte> writer) => throw Sketch.NI;
 }
 

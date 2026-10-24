@@ -10,7 +10,7 @@ namespace YSharp.Tests.Protocols;
 /// <summary>The check timer, local renewal and remote expiry (AW-14..21) on a virtual <see cref="TimeProvider"/>; no test waits on a real clock.</summary>
 public sealed class AwarenessTimeTests
 {
-    private static byte[] U(uint id, long clock, string json) => AwBytes.Update((id, clock, json));
+    private static byte[] U(ulong id, long clock, string json) => AwBytes.Update((id, clock, json));
 
     [Fact, Covers("AW-14")]
     public void CheckTimer_Default_IsOneTimerWithAPeriodOf3000Milliseconds() => Stub.Run(() =>
@@ -95,7 +95,7 @@ public sealed class AwarenessTimeTests
         rig.Apply(AwBytes.Update((5, 1, "{}"), (6, 1, "{}")));
         rig.Tick(30000);
         var removal = rig.Events.Where(e => e.Name == "change" && e.Removed.Length > 0).ToList();
-        Assert.Equal(new[] { 5u, 6u }, Assert.Single(removal).Removed);
+        Assert.Equal(new[] { 5UL, 6UL }, Assert.Single(removal).Removed);
     });
 
     [Fact, Covers("AW-18", "AW-49")]
@@ -112,7 +112,7 @@ public sealed class AwarenessTimeTests
         Assert.Equal("absent", Js.StateJson(rig.Awareness, 5));
         rig.Apply(U(5, 2, """{"who":"back"}"""));
         Assert.Equal("""{"who":"back"}""", Js.StateJson(rig.Awareness, 5));
-        Assert.Equal(new[] { 5u }, rig.Events[^1].Updated);
+        Assert.Equal(new[] { 5UL }, rig.Events[^1].Updated);
     });
 
     [Fact, Covers("AW-19")]
@@ -134,7 +134,7 @@ public sealed class AwarenessTimeTests
         rig.Awareness.SetLocalState(YValue.Null);
         rig.Awareness.SetLocalState(Js.Obj(("a", 1)));
         rig.Apply(U(9, 50, """{"b":1}"""));
-        rig.Awareness.RemoveStates(new uint[] { 9 }, null);
+        rig.Awareness.RemoveStates(new ulong[] { 9 }, null);
         Assert.True(rig.Awareness.Meta.ContainsKey(9));
         rig.Tick(120000);
     });

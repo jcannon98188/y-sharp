@@ -11,7 +11,7 @@ namespace YSharp.Tests.Types;
 /// <summary>Behaviour of <see cref="YMap"/> (M-1..M-12, Q26) and the map tests ported from y-map.tests.js that are not about events.</summary>
 public sealed class MapTests
 {
-    private static Doc NewDoc(uint client = 1) => new(new DocOptions { ClientId = client });
+    private static Doc NewDoc(ulong client = 1) => new(new DocOptions { ClientId = client });
 
     // ------------------------------------------------------------------ behaviours
 

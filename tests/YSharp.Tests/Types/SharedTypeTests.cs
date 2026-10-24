@@ -74,8 +74,7 @@ public sealed class SharedTypeTests
     [Fact, PortOf("y-xml.tests.js:testYtextAttributes", "T-0.3", "X-1")]
     public void RootPlaceholder_IsUpgradedInPlace_AndConflictingConstructorsThrow() => Stub.Run(() =>
     {
-        // JS: ydoc.get('', Y.XmlText) creates an XmlText root. The API has no root XmlText (API gap), so the YXmlText of the
-        // port sits inside a fragment; the placeholder part of the test uses the untyped Get.
+        // JS: ydoc.get('', Y.XmlText) creates an XmlText root (Doc.GetXmlText); the placeholder part of the test uses the untyped Get.
         var source = new Doc(new DocOptions { ClientId = 1 });
         source.GetText("t").Insert(0, "hello");
         source.GetMap("m").Set("k", 1);
@@ -98,8 +97,9 @@ public sealed class SharedTypeTests
         Assert.Throws<YTypeConflictException>(() => doc.GetXmlFragment("e"));
 
         var attributes = new Doc(new DocOptions { ClientId = 3 });
-        var xmlText = new YXmlText();
-        attributes.GetXmlFragment("x").Insert(0, new YType[] { xmlText });
+        var xmlText = attributes.GetXmlText("");
+        Assert.Same(xmlText, attributes.GetXmlText(""));
+        Assert.Throws<YTypeConflictException>(() => attributes.GetText(""));   // YText and YXmlText are different constructors
         var changes = new List<KeyChange>();
         xmlText.Observe((e, _) => changes.Add(e.Keys["test"]));
         xmlText.SetAttribute("test", 42);

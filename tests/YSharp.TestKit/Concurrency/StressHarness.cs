@@ -284,7 +284,7 @@ public static class StressHarness
         Probe();
         var result = new StressResult { Options = o };
         var count = Math.Max(2, o.Writers);
-        var docs = Enumerable.Range(0, count).Select(i => new Doc(new DocOptions { ClientId = (uint)(10 + i) })).ToArray();
+        var docs = Enumerable.Range(0, count).Select(i => new Doc(new DocOptions { ClientId = (ulong)(10 + i) })).ToArray();
         var threads = new List<Thread>();
         for (var d = 0; d < count; d++)
         {

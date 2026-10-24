@@ -236,7 +236,7 @@ public sealed class HandleTests
     {
         var doc = new Doc(new DocOptions { ClientId = 77, Guid = "guid-1", Gc = false, ShouldLoad = false });
         using var holder = Holder.Write(doc);
-        uint client = 0;
+        ulong client = 0;
         string guid = "";
         var gc = true;
         Conc.AssertDoesNotWait(() =>
@@ -246,7 +246,7 @@ public sealed class HandleTests
             gc = doc.Gc;
             GC.KeepAlive(doc.Limits);
         }, "reading ClientId, Guid, Gc and Limits");
-        Assert.Equal(77u, client);
+        Assert.Equal(77UL, client);
         Assert.Equal("guid-1", guid);
         Assert.False(gc);
         holder.Release();
@@ -268,7 +268,7 @@ public sealed class HandleTests
         {
             for (var i = 0; i < 20000; i++)
             {
-                Assert.Equal(5u, doc.ClientId);
+                Assert.Equal(5UL, doc.ClientId);
                 Assert.Equal("g", doc.Guid);
             }
         })).ToArray();

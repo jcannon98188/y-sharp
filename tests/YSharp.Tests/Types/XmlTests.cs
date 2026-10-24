@@ -11,7 +11,7 @@ namespace YSharp.Tests.Types;
 /// <summary>Behaviour of the XML types (X-E*) and the ports of y-xml.tests.js.</summary>
 public sealed class XmlTests
 {
-    private static Doc NewDoc(uint client = 1) => new(new DocOptions { ClientId = client });
+    private static Doc NewDoc(ulong client = 1) => new(new DocOptions { ClientId = client });
 
     private static YType[] Nodes(params YType[] nodes) => nodes;
 

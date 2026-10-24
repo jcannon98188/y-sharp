@@ -23,7 +23,7 @@ internal static class Stub
 internal static class AllocDocs
 {
     /// <summary>A document with a little of everything, so encode and apply have real work.</summary>
-    public static Doc Populated(uint clientId = 1, int chars = 200)
+    public static Doc Populated(ulong clientId = 1, int chars = 200)
     {
         var doc = new Doc(new DocOptions { ClientId = clientId });
         var text = doc.GetText("t");
@@ -42,7 +42,7 @@ internal static class AllocDocs
     /// <paramref name="count"/> consecutive updates of a fresh source document, one per local edit, so each applies new structs to a
     /// target that has applied the ones before it.
     /// </summary>
-    public static byte[][] UpdateStream(int count, UpdateFormat format, uint clientId = 7)
+    public static byte[][] UpdateStream(int count, UpdateFormat format, ulong clientId = 7)
     {
         var source = new Doc(new DocOptions { ClientId = clientId });
         var text = source.GetText("t");

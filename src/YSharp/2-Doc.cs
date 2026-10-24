@@ -8,12 +8,13 @@ namespace YSharp;
 
 public delegate void UpdateHandler(ReadOnlySpan<byte> update, object? origin, Doc doc, Transaction tx);   // span: zero-alloc, valid during the call only
 public delegate void TransactionHandler(Transaction tx, Doc doc);
+public delegate void AllTransactionsHandler(IReadOnlyList<Transaction> transactions, Doc doc);   // list is pooled: valid during dispatch only (A5)
 public delegate void SubdocsHandler(SubdocsChange change, Doc doc, Transaction tx);
 public delegate void ObserverFaultHandler(Exception fault, object handlerOwner);
 
 public readonly struct SubdocsChange { public IReadOnlyList<Doc> Added { get; } public IReadOnlyList<Doc> Removed { get; } public IReadOnlyList<Doc> Loaded { get; } }
 
-public interface IClientIdGenerator { uint Next(); }   // seam: fixtures pin client IDs
+public interface IClientIdGenerator { ulong Next(); }   // seam: fixtures pin client IDs
 
 public sealed record DocOptions
 {
@@ -24,7 +25,7 @@ public sealed record DocOptions
     public YValue Meta { get; init; }
     public bool AutoLoad { get; init; }
     public bool ShouldLoad { get; init; } = true;
-    public uint? ClientId { get; init; }
+    public ulong? ClientId { get; init; }
     public IClientIdGenerator? ClientIdGenerator { get; init; }
     public YLimits Limits { get; init; } = YLimits.Default;
     public TimeProvider? TimeProvider { get; init; }
@@ -36,7 +37,7 @@ public sealed class Doc : IDisposable
 {
     public Doc(DocOptions? options = null) { }
 
-    public uint ClientId { get; set; }
+    public ulong ClientId { get; set; }
     public string Guid => throw Sketch.NI;
     public bool Gc { get; set; }
     public YLimits Limits => throw Sketch.NI;
@@ -45,6 +46,7 @@ public sealed class Doc : IDisposable
     public bool IsDestroyed => throw Sketch.NI;
     public Doc? ParentDoc => throw Sketch.NI;
     public IReadOnlyCollection<Doc> Subdocs => throw Sketch.NI;
+    public IReadOnlyCollection<string> GetSubdocGuids() => throw Sketch.NI;   // new set, duplicates collapsed (DOC-16)
     public bool IsFaulted => throw Sketch.NI;   // ADR 0005: readable, refuses changes
 
     // ---- root types. Get(name) returns an untyped placeholder that a later typed Get upgrades.
@@ -52,6 +54,7 @@ public sealed class Doc : IDisposable
     public YMap GetMap(string name = "") => throw Sketch.NI;
     public YText GetText(string name = "") => throw Sketch.NI;
     public YXmlFragment GetXmlFragment(string name = "") => throw Sketch.NI;
+    public YXmlText GetXmlText(string name = "") => throw Sketch.NI;
     public YXmlElement GetXmlElement(string name = "") => throw Sketch.NI;   // nodeName "UNDEFINED" (X-E8)
     public YType Get(string name) => throw Sketch.NI;
     public IReadOnlyDictionary<string, YType> Share => throw Sketch.NI;       // snapshot
@@ -60,7 +63,9 @@ public sealed class Doc : IDisposable
     // ---- transactions (CC-1..CC-8, CC-15, CC-16)
     public void Transact(Action<Transaction> body, object? origin = null) => throw Sketch.NI;
     public void Transact<TState>(TState state, Action<TState, Transaction> body, object? origin = null) => throw Sketch.NI;   // pass a static lambda: no closure allocation
-    public void Transact(Action<Transaction> body, object? origin, TimeSpan timeout, CancellationToken ct = default) => throw Sketch.NI;
+    public TResult Transact<TResult>(Func<Transaction, TResult> body, object? origin = null) => throw Sketch.NI;
+    public TResult Transact<TState, TResult>(TState state, Func<TState, Transaction, TResult> body, object? origin = null) => throw Sketch.NI;   // state-passing, no closure allocation   // JS transact returns the callback value (A4)
+    public void TransactWithTimeout(Action<Transaction> body, object? origin, TimeSpan timeout, CancellationToken ct = default) => throw Sketch.NI;   // not an overload of Transact: a null origin would bind to the state-passing form
     public TryTransactResult TryTransact(Action<Transaction> body, object? origin = null) => throw Sketch.NI;
     public void ReadTransact(Action<Transaction> body) => throw Sketch.NI;
     public TransactionScope BeginTransaction(object? origin = null) => throw Sketch.NI;
@@ -75,7 +80,8 @@ public sealed class Doc : IDisposable
     public StateVector GetStateVector() => throw Sketch.NI;
 
     // ---- events: registration order, snapshot dispatch (CC-12, CC-13)
-    public event TransactionHandler? BeforeAllTransactions, BeforeTransaction, BeforeObserverCalls, AfterTransaction, AfterTransactionCleanup, AfterAllTransactions;
+    public event TransactionHandler? BeforeAllTransactions, BeforeTransaction, BeforeObserverCalls, AfterTransaction, AfterTransactionCleanup;
+    public event AllTransactionsHandler? AfterAllTransactions;
     public event UpdateHandler? Update, UpdateV2;            // encoded only while subscribed and content changed (DOC-10)
     public event SubdocsHandler? SubdocsChanged;
     public event Action<Doc>? Loaded, Synced, Destroying, Destroyed;

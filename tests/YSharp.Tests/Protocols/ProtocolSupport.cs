@@ -11,7 +11,7 @@ using YSharp.TestKit.Time;
 namespace YSharp.Tests.Protocols;
 
 /// <summary>One recorded awareness event.</summary>
-internal sealed record AwEvent(string Name, long AtMs, uint[] Added, uint[] Updated, uint[] Removed, object? Origin)
+internal sealed record AwEvent(string Name, long AtMs, ulong[] Added, ulong[] Updated, ulong[] Removed, object? Origin)
 {
     public override string ToString() =>
         $"{Name}@{AtMs} +[{string.Join(",", Added)}] ~[{string.Join(",", Updated)}] -[{string.Join(",", Removed)}] origin={Origin ?? "null"}";
@@ -22,7 +22,7 @@ internal sealed class AwRig : IDisposable
 {
     private readonly DateTimeOffset _epoch;
 
-    public AwRig(uint clientId = 1, VirtualTimeProvider? clock = null, TimeProvider? provider = null)
+    public AwRig(ulong clientId = 1, VirtualTimeProvider? clock = null, TimeProvider? provider = null)
     {
         Clock = clock ?? new VirtualTimeProvider();
         _epoch = Clock.GetUtcNow();
@@ -30,7 +30,7 @@ internal sealed class AwRig : IDisposable
         Awareness = new Awareness(Doc, provider ?? Clock);
         Awareness.Change += (c, o) => Events.Add(Of("change", c, o));
         Awareness.Update += (c, o) => Events.Add(Of("update", c, o));
-        Awareness.Destroyed += () => Events.Add(new AwEvent("destroy", Now, Array.Empty<uint>(), Array.Empty<uint>(), Array.Empty<uint>(), null));
+        Awareness.Destroyed += () => Events.Add(new AwEvent("destroy", Now, Array.Empty<ulong>(), Array.Empty<ulong>(), Array.Empty<ulong>(), null));
     }
 
     public VirtualTimeProvider Clock { get; }
@@ -46,9 +46,9 @@ internal sealed class AwRig : IDisposable
 
     public ApplyResult Apply(byte[] update, object? origin = null) => Awareness.TryApplyUpdate(update, origin);
 
-    public long ClockOf(uint id) => Awareness.Meta[id].Clock;
+    public long ClockOf(ulong id) => Awareness.Meta[id].Clock;
 
-    public long LastUpdatedMs(uint id) => (long)(Awareness.Meta[id].LastUpdated - _epoch).TotalMilliseconds;
+    public long LastUpdatedMs(ulong id) => (long)(Awareness.Meta[id].LastUpdated - _epoch).TotalMilliseconds;
 
     /// <summary>Events after the last <see cref="Mark"/>, as text.</summary>
     public string[] Log(int from = 0) => Events.Skip(from).Select(e => e.ToString()).ToArray();
@@ -59,7 +59,7 @@ internal sealed class AwRig : IDisposable
 internal static class AwBytes
 {
     /// <summary>An awareness update with exactly these entries; the state is JSON text, written as UTF-8 with a byte-length prefix.</summary>
-    public static byte[] Update(params (uint Id, long Clock, string Json)[] entries)
+    public static byte[] Update(params (ulong Id, long Clock, string Json)[] entries)
     {
         var b = new List<byte>();
         VarUint(b, (ulong)entries.Length);
@@ -94,14 +94,14 @@ internal static class AwBytes
     }
 
     /// <summary>Decodes an awareness update with a reader written from the documented layout (not from y-sharp).</summary>
-    public static List<(uint Id, long Clock, string Json)> Parse(byte[] bytes)
+    public static List<(ulong Id, long Clock, string Json)> Parse(byte[] bytes)
     {
         var pos = 0;
         var count = (int)ReadVarUint(bytes, ref pos);
-        var list = new List<(uint, long, string)>();
+        var list = new List<(ulong, long, string)>();
         for (var i = 0; i < count; i++)
         {
-            var id = (uint)ReadVarUint(bytes, ref pos);
+            var id = (ulong)ReadVarUint(bytes, ref pos);
             var clock = (long)ReadVarUint(bytes, ref pos);
             var len = (int)ReadVarUint(bytes, ref pos);
             list.Add((id, clock, Encoding.UTF8.GetString(bytes, pos, len)));
@@ -111,7 +111,7 @@ internal static class AwBytes
         return list;
     }
 
-    public static byte[] Encode(Awareness aw, params uint[] clients)
+    public static byte[] Encode(Awareness aw, params ulong[] clients)
     {
         var w = new ArrayBufferWriter<byte>();
         var status = aw.TryEncodeUpdate(w, clients);
@@ -140,7 +140,7 @@ internal static class Js
         return Encoding.UTF8.GetString(w.WrittenSpan);
     }
 
-    public static string StateJson(Awareness aw, uint id) => aw.GetStates().TryGetValue(id, out var v) ? Json(v) : "absent";
+    public static string StateJson(Awareness aw, ulong id) => aw.GetStates().TryGetValue(id, out var v) ? Json(v) : "absent";
 
     public static string[] Keys(Awareness aw) => aw.GetStates().Keys.OrderBy(k => k).Select(k => k.ToString()).ToArray();
 }

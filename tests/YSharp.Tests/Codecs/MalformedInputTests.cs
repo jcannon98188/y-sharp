@@ -1,5 +1,6 @@
 using System;
 using System.Buffers;
+using System.Linq;
 using Xunit;
 using YSharp.TestKit.Traceability;
 using static YSharp.Tests.Codecs.Malformed;
@@ -58,6 +59,22 @@ public sealed class MalformedInputTests
     [Fact, Covers("ENC-37", "Q12"), Diverges("ENC-37", adr: "0003")]
     public void Enc37_ClientId2Pow63_IsRejected_WhereJsRoundsItToTheNearestDouble() => Stub.Run(() =>
         AssertRejected("01 01 80 80 80 80 80 80 80 80 80 01 00 04 01 01 74 02 68 69 00"));
+
+    [Fact, Covers("ENC-37", "Q12")]
+    public void Enc37_ClientIdUpTo2Pow53Minus1_RoundTripsThroughTheDocumentAndTheStateVector() => Stub.Run(() =>
+    {
+        const ulong max = (1UL << 53) - 1;
+        var doc = new Doc(new DocOptions { ClientId = max });
+        doc.GetText("t").Insert(0, "x");
+        Assert.Equal(max, doc.ClientId);
+        Assert.Equal("01ffffffffffffff0f01", Hex.Of(Wire.StateVector(doc)));
+        Assert.Equal("0101ffffffffffffff0f0004010174017800", Hex.Of(doc.EncodeStateAsUpdate()));
+        var peer = AssertAccepted("01 01 ff ff ff ff ff ff ff 0f 00 04 01 01 74 01 78 00");
+        Assert.Equal("x", peer.GetText("t").ToString());
+        Assert.Equal(1L, peer.GetStateVector()[max]);
+        Assert.Equal(new[] { max }, peer.GetStateVector().Clients.Select(c => c.Key).ToArray());
+        Assert.Equal(1L, StateVector.Decode(Hex.Bytes("01 ff ff ff ff ff ff ff 0f 01"))[max]);
+    });
 
     [Fact, Covers("ENC-38")]
     public void Enc38_ContentRef11_IsRejected() => Stub.Run(() => AssertRejected(Struct("0b", "")));

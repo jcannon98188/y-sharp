@@ -51,9 +51,10 @@ internal static class Ds
     /// within one millisecond (every change merges unless the timeout is 0 or capturing is stopped).
     /// </summary>
     public static UndoManagerOptions Opts(VirtualTimeProvider? clock = null, int? captureTimeoutMs = null, ISet<object?>? trackedOrigins = null,
-        bool ignoreRemoteMapChanges = false, Func<ItemView, bool>? deleteFilter = null, Func<Transaction, bool>? captureTransaction = null) =>
+        bool ignoreRemoteMapChanges = false, Func<ItemView, bool>? deleteFilter = null, Func<Transaction, bool>? captureTransaction = null, Doc? doc = null) =>
         new()
         {
+            Doc = doc,
             TimeProvider = clock ?? new VirtualTimeProvider(),
             CaptureTimeout = captureTimeoutMs is { } ms ? TimeSpan.FromMilliseconds(ms) : TimeSpan.FromMilliseconds(500),
             TrackedOrigins = trackedOrigins,

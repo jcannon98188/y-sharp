@@ -17,7 +17,7 @@ public sealed class UpdateLayoutTests
     private const string HiV1 = "010101000401017402686900";
     private const string HiV2 = "0000010100000104060374686901020101000001010000";
 
-    private static Doc ClientText(uint client, string text, bool gc = true)
+    private static Doc ClientText(ulong client, string text, bool gc = true)
     {
         var doc = Wire.NewDoc(client, gc);
         doc.GetText("t").Insert(0, text);
@@ -49,10 +49,12 @@ public sealed class UpdateLayoutTests
     });
 
     [Theory, Covers("ENC-02", "ENC-71", "ENC-70")]
-    [InlineData(127u, 3, "017f03")]
-    [InlineData(128u, 130, "0180018201")]
-    [InlineData(4294967295u, 16384, "01ffffffff0f808001")]
-    public void Enc02_VarUint_ClientsAndClocksAtTheByteBoundaries(uint client, int length, string expectedSv) => Stub.Run(() =>
+    [InlineData(127UL, 3, "017f03")]
+    [InlineData(128UL, 130, "0180018201")]
+    [InlineData(4294967295UL, 16384, "01ffffffff0f808001")]
+    [InlineData(1099511627776UL, 1, "0180808080802001")]          // 2^40: past 32 bits, still a 53-bit client id (A1)
+    [InlineData(9007199254740991UL, 1, "01ffffffffffffff0f01")]   // 2^53-1
+    public void Enc02_VarUint_ClientsAndClocksAtTheByteBoundaries(ulong client, int length, string expectedSv) => Stub.Run(() =>
     {
         var doc = ClientText(client, new string('x', length));
         Assert.Equal(expectedSv, Hex.Of(Wire.StateVector(doc)));
@@ -83,7 +85,7 @@ public sealed class UpdateLayoutTests
         Assert.Equal("02ac02030502", Hex.Of(Wire.StateVector(a)));
         Assert.Equal("00", Hex.Of(Wire.StateVector(Wire.NewDoc())));
         var decoded = StateVector.Decode(Hex.Bytes("02ac02030502"));
-        Assert.Equal(new[] { (300u, 3L), (5u, 2L) }, decoded.Clients.Select(c => (c.Key, c.Value)).ToArray());
+        Assert.Equal(new[] { (300UL, 3L), (5UL, 2L) }, decoded.Clients.Select(c => (c.Key, c.Value)).ToArray());
         Assert.Equal(0L, decoded[999]);                                                          // unknown clients are at clock 0
         // the state vector of an update is the same bytes whichever format the update has
         Assert.Equal(Hex.Of(Wire.StateVector(a)), Hex.Of(Wire.StateVectorOfUpdate(Wire.Encode(a))));

@@ -53,7 +53,7 @@ public sealed class DocTests
         var doc = new Doc(new DocOptions { Guid = "g", Gc = false, ClientId = 7, AutoLoad = true, ShouldLoad = false, CollectionId = "col", Meta = "m" });
         Assert.Equal("g", doc.Guid);
         Assert.False(doc.Gc);
-        Assert.Equal(7u, doc.ClientId);
+        Assert.Equal(7UL, doc.ClientId);
         Assert.True(DocSeams.AutoLoad(doc));
         Assert.False(DocSeams.ShouldLoad(doc));
         Assert.Equal("col", DocSeams.CollectionId(doc));
@@ -70,7 +70,7 @@ public sealed class DocTests
         Assert.Contains(draws, id => id > int.MaxValue);   // the range is 0..2^32-1, so about half of the draws exceed 2^31
 
         var doc = Net.Mk(uint.MaxValue);
-        Assert.Equal(uint.MaxValue, doc.ClientId);
+        Assert.Equal((ulong)uint.MaxValue, doc.ClientId);
         doc.GetText("t").Insert(0, "x");
         Assert.Equal("01ffffffff0f01", Hex.Of(Net.StateVector(doc)));
         Assert.Equal("0101ffffffff0f0004010174017800", Hex.Of(doc.EncodeStateAsUpdate()));
@@ -283,7 +283,7 @@ public sealed class DocTests
         doc.BeforeObserverCalls += (tx, _) => log.Add("beforeObserverCalls:" + O(tx));
         doc.AfterTransaction += (tx, _) => log.Add("afterTransaction:" + O(tx));
         doc.AfterTransactionCleanup += (tx, _) => log.Add("afterTransactionCleanup:" + O(tx));
-        doc.AfterAllTransactions += (tx, _) => log.Add("afterAllTransactions:" + O(tx));
+        doc.AfterAllTransactions += (txs, _) => log.Add("afterAllTransactions:" + string.Join(",", txs.Select(O)));   // the whole cleanup round (A5)
         doc.Update += (_, origin, _, _) => log.Add("update:" + origin);
         var t = doc.GetText("t");
         var first = true;
@@ -299,7 +299,7 @@ public sealed class DocTests
         {
             "beforeAllTransactions:", "beforeTransaction:first", "beforeObserverCalls:first", "observe", "beforeTransaction:second", "inner-body",
             "afterTransaction:first", "afterTransactionCleanup:first", "update:", "beforeObserverCalls:second", "observe",
-            "afterTransaction:second", "afterTransactionCleanup:second", "update:", "afterAllTransactions:",
+            "afterTransaction:second", "afterTransactionCleanup:second", "update:", "afterAllTransactions:first,second",
         }, log);
     });
 
@@ -348,9 +348,9 @@ public sealed class DocTests
 
     private sealed class ScriptedIds : IClientIdGenerator
     {
-        private readonly Queue<uint> _ids;
-        public ScriptedIds(params uint[] ids) => _ids = new Queue<uint>(ids);
-        public uint Next() => _ids.Dequeue();
+        private readonly Queue<ulong> _ids;
+        public ScriptedIds(params ulong[] ids) => _ids = new Queue<ulong>(ids);
+        public ulong Next() => _ids.Dequeue();
     }
 
     [Fact]
@@ -376,11 +376,11 @@ public sealed class DocTests
         var other = Net.Mk(2);
         other.GetText("t").Insert(0, "x");
         b.ApplyUpdate(other.EncodeStateAsUpdate());                    // a different client id: no collision, no regeneration
-        Assert.Equal(1u, b.ClientId);
+        Assert.Equal(1UL, b.ClientId);
         var same = Net.Mk(1);
         same.GetText("t").Insert(0, "y");
         b.ApplyUpdate(same.EncodeStateAsUpdate());
-        Assert.Equal(77u, b.ClientId);
+        Assert.Equal(77UL, b.ClientId);
     });
 
     // ------------------------------------------------------------------ DOC-12..DOC-14 load and sync
@@ -492,7 +492,11 @@ public sealed class DocTests
         map.Set("c", new Doc(new DocOptions { Guid = "y" }));
         Assert.Equal(3, doc.Subdocs.Count);
         Assert.Equal(3, subdocs.Count);                                // the same collection instance reflects later changes
-        Assert.Equal(new[] { "x", "y" }, doc.Subdocs.Select(d => d.Guid).Distinct().ToArray());
+        var guids = doc.GetSubdocGuids();
+        Assert.Equal(new[] { "x", "y" }, guids.OrderBy(g => g, StringComparer.Ordinal).ToArray());   // duplicates collapse
+        map.Set("d", new Doc(new DocOptions { Guid = "z" }));
+        Assert.Equal(2, guids.Count);                                  // GetSubdocGuids returns a new set, not a live view
+        Assert.Equal(3, doc.GetSubdocGuids().Count);
     });
 
     [Fact]

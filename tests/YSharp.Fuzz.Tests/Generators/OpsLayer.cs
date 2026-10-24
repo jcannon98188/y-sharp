@@ -99,7 +99,7 @@ internal static class OpsLayer
             ["schema"] = 1,
             ["replicas"] = new JsonArray(Enumerable.Range(0, plan.Replicas).Select(i => (JsonNode)new JsonObject
             {
-                ["name"] = "r" + i, ["clientId"] = (uint)(100 + i),
+                ["name"] = "r" + i, ["clientId"] = (ulong)(100 + i),
             }).ToArray()),
             ["steps"] = steps,
         };

@@ -10,7 +10,7 @@ namespace YSharp.Tests.Protocols;
 
 internal static class SyncSupport
 {
-    public static Doc DocWith(uint client, string? text = null)
+    public static Doc DocWith(ulong client, string? text = null)
     {
         var doc = new Doc(new DocOptions { ClientId = client });
         if (text != null) doc.GetText("t").Insert(0, text);

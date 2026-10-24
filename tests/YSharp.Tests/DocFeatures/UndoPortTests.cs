@@ -24,10 +24,9 @@ public sealed class UndoPortTests
     [PortOf("undo-redo.tests.js:testInconsistentFormat", "UM-18")]
     public void Undo_InconsistentFormatMerge_KeepsTheMergedFormatting() => Impl.Run(() =>
     {
-        // upstream uses ydoc.get('text', Y.XmlText); the stub has no root XmlText getter, YXmlText only adds XML rendering to YText
         static void TestYjsMerge(Doc ydoc)
         {
-            var content = ydoc.GetText("text");
+            var content = ydoc.GetXmlText("text");
             content.Format(0, 6, Attrs(("bold", YValue.Null)));
             content.Format(6, 4, Attrs(("type", "text")));
             Assert.Equal("[Merge Test{\"type\":\"text\"}][ After{\"italic\":true,\"type\":\"text\"}]", Delta(content));
@@ -36,7 +35,7 @@ public sealed class UndoPortTests
         static Doc Initialize()
         {
             var yDoc = new Doc(new DocOptions { Gc = false });
-            var content = yDoc.GetText("text");
+            var content = yDoc.GetXmlText("text");
             content.Insert(0, " After", Attrs(("type", "text"), ("italic", true)));
             content.Insert(0, "Test", Attrs(("type", "text")));
             content.Insert(0, "Merge ", Attrs(("type", "text"), ("bold", true)));
@@ -70,9 +69,8 @@ public sealed class UndoPortTests
     [PortOf("undo-redo.tests.js:testEmptyTypeScope", "UM-02", "UM-16")]
     public void Undo_EmptyTypeScopeExtendedLater_UndoesTheAddedType() => Impl.Run(() =>
     {
-        // upstream: new UndoManager([], { doc: ydoc }). The stub has no Doc option, so the scope starts with an unrelated type (API gap).
         var ydoc = new Doc();
-        var um = Um(new YType[] { ydoc.GetText("unrelated") });
+        var um = new UndoManager(Array.Empty<YType>(), Opts(doc: ydoc));   // upstream: new UndoManager([], { doc: ydoc })
         var yarray = ydoc.GetArray();
         um.AddToScope(yarray);
         yarray.Insert(0, new YEntry[] { 1 });
@@ -716,9 +714,8 @@ public sealed class UndoPortTests
     [PortOf("undo-redo.tests.js:testUndoSetAttributeAndDeleteSyncsAttributes", "UM-12", "UM-18")]
     public void Undo_SetAttributeThenDelete_SyncsTheAttributes() => Impl.Run(() =>
     {
-        // upstream: doc.get('sharedRoot', Y.XmlText); the stub has no root XmlText getter, so the root is a YText holding the YXmlText embed
         var doc = new Doc();
-        var root = doc.GetText("sharedRoot");
+        var root = doc.GetXmlText("sharedRoot");   // upstream: doc.get('sharedRoot', Y.XmlText)
         var button = new YXmlText();
         button.SetAttribute("type", "button");
         button.SetAttribute("test", true);
@@ -746,7 +743,7 @@ public sealed class UndoPortTests
 
         var remoteDoc = new Doc();
         remoteDoc.ApplyUpdate(doc.EncodeStateAsUpdate(default, UpdateFormat.V2), null, UpdateFormat.V2);
-        AssertButton(remoteDoc.GetText("sharedRoot"));
+        AssertButton(remoteDoc.GetXmlText("sharedRoot"));
     });
 
     // ------------------------------------------------------------------ events

@@ -167,7 +167,7 @@ public sealed class SubdocTests
         parent.GetArray("arr").Push(new YEntry[] { sub });
         Assert.True(log.IndexOf("update") < log.IndexOf("subdocs"));
         Assert.True(log.IndexOf("updateV2") < log.IndexOf("subdocs"));
-        Assert.Equal(1u, sub.ClientId);                                 // adopted from the parent at add time
+        Assert.Equal(1UL, sub.ClientId);                                 // adopted from the parent at add time
         Assert.NotEqual(before, sub.ClientId);
     });
 
@@ -217,7 +217,7 @@ public sealed class SubdocTests
             subdocs.Set("c", docC);
             AssertEvent(w, new[] { "c" }, Array.Empty<string>(), new[] { "c" });
 
-            Assert.Equal(new[] { "a", "c" }, doc.Subdocs.Select(d => d.Guid).Distinct().ToArray());
+            Assert.Equal(new[] { "a", "c" }, doc.GetSubdocGuids().OrderBy(g => g, StringComparer.Ordinal).ToArray());
         }
 
         var doc2 = new Doc();
@@ -230,11 +230,11 @@ public sealed class SubdocTests
             DocAt(doc2.GetMap("mysubdocs"), "a").Load();
             AssertEvent(w, Array.Empty<string>(), Array.Empty<string>(), new[] { "a" });
 
-            Assert.Equal(new[] { "a", "c" }, doc2.Subdocs.Select(d => d.Guid).Distinct().ToArray());
+            Assert.Equal(new[] { "a", "c" }, doc2.GetSubdocGuids().OrderBy(g => g, StringComparer.Ordinal).ToArray());
 
             doc2.GetMap("mysubdocs").Delete("a");
             AssertEvent(w, Array.Empty<string>(), new[] { "a" }, Array.Empty<string>());
-            Assert.Equal(new[] { "a", "c" }, doc2.Subdocs.Select(d => d.Guid).Distinct().ToArray());   // key "b" still holds a doc with guid a
+            Assert.Equal(new[] { "a", "c" }, doc2.GetSubdocGuids().OrderBy(g => g, StringComparer.Ordinal).ToArray());   // key "b" still holds a doc with guid a
         }
     });
 
@@ -312,15 +312,15 @@ public sealed class SubdocTests
     [PortOf("doc.tests.js:testSubdocsUndo", "SUB-10", "UM-19")]
     public void Port_SubdocsUndo_UndoThenRedoLeavesOneElement() => Impl.Run(() =>
     {
-        // Upstream inserts the doc into a Y.XmlFragment; the API stub only lets lists and maps hold a Doc, so this port uses a Y.Array (API gap, see the task notes).
         var ydoc = new Doc();
-        var elems = ydoc.GetArray("elems");
+        var elems = ydoc.GetXmlFragment("elems");
         var undoManager = new UndoManager(elems);
         var subdoc = new Doc();
-        elems.Insert(0, new YEntry[] { subdoc });
+        elems.InsertSubdoc(0, subdoc);   // upstream: elems.insert(0, [subdoc]); a fragment holds a subdoc (A8)
         undoManager.Undo();
         undoManager.Redo();
         Assert.Equal(1, elems.Length);
+        Assert.Single(ydoc.Subdocs);
     });
 
     [Fact]

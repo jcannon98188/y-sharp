@@ -175,7 +175,8 @@ internal static class TypeDump
             var kind = pair[1].GetProperty("kind").GetString();
             YType root = kind switch
             {
-                "text" or "xmlText" => doc.GetText(name),
+                "text" => doc.GetText(name),
+                "xmlText" => doc.GetXmlText(name),
                 "array" => doc.GetArray(name),
                 "map" => doc.GetMap(name),
                 "xmlFragment" or "xmlElement" => doc.GetXmlFragment(name),

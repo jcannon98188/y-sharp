@@ -9,9 +9,9 @@ namespace YSharp;
 
 public readonly struct AwarenessChange
 {
-    public IReadOnlyList<uint> Added { get; }
-    public IReadOnlyList<uint> Updated { get; }
-    public IReadOnlyList<uint> Removed { get; }
+    public IReadOnlyList<ulong> Added { get; }
+    public IReadOnlyList<ulong> Updated { get; }
+    public IReadOnlyList<ulong> Removed { get; }
 }
 
 public readonly record struct AwarenessMeta(long Clock, DateTimeOffset LastUpdated);
@@ -22,21 +22,21 @@ public sealed class Awareness : IDisposable
 {
     public static readonly TimeSpan OutdatedTimeout = TimeSpan.FromMilliseconds(30000);
     public Awareness(Doc doc, TimeProvider? timeProvider = null) { }
-    public uint ClientId => throw Sketch.NI;
+    public ulong ClientId => throw Sketch.NI;
     public YValue LocalState => throw Sketch.NI;                     // YValue.Null when removed (AW-7)
     public void SetLocalState(in YValue state) => throw Sketch.NI;   // Null removes (AW-8)
     public void SetLocalStateField(string field, in YValue value) => throw Sketch.NI;
-    public IReadOnlyDictionary<uint, YValue> GetStates() => throw Sketch.NI;     // REVIEW: snapshot, not the live map (AW-11, AW-13)
-    public IReadOnlyDictionary<uint, AwarenessMeta> Meta => throw Sketch.NI;
+    public IReadOnlyDictionary<ulong, YValue> GetStates() => throw Sketch.NI;     // REVIEW: snapshot, not the live map (AW-11, AW-13)
+    public IReadOnlyDictionary<ulong, AwarenessMeta> Meta => throw Sketch.NI;
     public event AwarenessHandler? Change, Update;
     public event Action? Destroyed;
     public void Dispose() => throw Sketch.NI;
 
-    public void RemoveStates(ReadOnlySpan<uint> clients, object? origin) => throw Sketch.NI;
+    public void RemoveStates(ReadOnlySpan<ulong> clients, object? origin) => throw Sketch.NI;
     public void EncodeUpdate(IBufferWriter<byte> writer) => throw Sketch.NI;   // every client with a live state
     /// Entries in the order given, duplicates written twice, an empty list is the single byte 0 (AW-31). An id with no meta fails (AW-32, ADR 0014).
     /// `states` substitutes the state map but not the meta (AW-33).
-    public YStatus TryEncodeUpdate(IBufferWriter<byte> writer, ReadOnlySpan<uint> clients, IReadOnlyDictionary<uint, YValue>? states = null) => throw Sketch.NI;
+    public YStatus TryEncodeUpdate(IBufferWriter<byte> writer, ReadOnlySpan<ulong> clients, IReadOnlyDictionary<ulong, YValue>? states = null) => throw Sketch.NI;
     public ApplyResult TryApplyUpdate(ReadOnlySpan<byte> update, object? origin) => throw Sketch.NI;
     public static YStatus TryModifyUpdate(ReadOnlySpan<byte> update, Func<YValue, YValue> modify, IBufferWriter<byte> output) => throw Sketch.NI;
 }

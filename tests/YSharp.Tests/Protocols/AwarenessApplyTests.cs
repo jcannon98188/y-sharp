@@ -9,7 +9,7 @@ namespace YSharp.Tests.Protocols;
 /// <summary>applyAwarenessUpdate (AW-41..52): the clock rules, the local-client rules, event classification and error behaviour.</summary>
 public sealed class AwarenessApplyTests
 {
-    private static byte[] U(uint id, long clock, string json) => AwBytes.Update((id, clock, json));
+    private static byte[] U(ulong id, long clock, string json) => AwBytes.Update((id, clock, json));
 
     [Fact, Covers("AW-41")]
     public void Apply_DecodesIdClockAndJsonState_AndAnUnknownClientCountsAsClockZero() => Stub.Run(() =>

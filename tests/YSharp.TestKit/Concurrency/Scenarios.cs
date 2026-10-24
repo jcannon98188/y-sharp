@@ -98,7 +98,7 @@ public static class Explorer
 /// <summary>The scenarios ADR 0006 names: re-entrancy, writer against reader, subscribe against commit, the subdoc ABBA case, awareness timer against <c>SetLocalState</c>, plus upgrade, destroy and undo.</summary>
 public static class Scenarios
 {
-    private static Doc NewDoc(uint client = 1) => new(new DocOptions { ClientId = client });
+    private static Doc NewDoc(ulong client = 1) => new(new DocOptions { ClientId = client });
 
     // a property: building a YEntry throws on the API stub, and a static initializer must not
 

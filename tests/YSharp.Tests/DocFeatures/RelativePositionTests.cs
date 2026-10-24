@@ -34,7 +34,7 @@ public sealed class RelativePositionTests
     private static AbsolutePosition Resolve(RelativePosition p, Doc doc, bool follow = true) =>
         p.Resolve(doc, follow) ?? throw new Xunit.Sdk.XunitException("the position did not resolve");
 
-    private static Doc TextDoc(string content, uint client = 1)
+    private static Doc TextDoc(string content, ulong client = 1)
     {
         var doc = Net.Mk(client);
         doc.GetText("t").Insert(0, content);

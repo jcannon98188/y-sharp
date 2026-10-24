@@ -44,7 +44,7 @@ internal static class Work
     }
 
     /// <summary>A document with text, array and map content of roughly <paramref name="items"/> items in total.</summary>
-    public static Doc Build(uint clientId, int items)
+    public static Doc Build(ulong clientId, int items)
     {
         var doc = new Doc(new DocOptions { ClientId = clientId });
         Text(doc, items / 3);

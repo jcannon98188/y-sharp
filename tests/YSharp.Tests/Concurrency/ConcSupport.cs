@@ -119,16 +119,16 @@ internal sealed class Holder : IDisposable
 
 internal static class Conc
 {
-    public static Doc NewDoc(uint client = 1) => new(new DocOptions { ClientId = client });
+    public static Doc NewDoc(ulong client = 1) => new(new DocOptions { ClientId = client });
 
     public static YEntry[] One => new YEntry[] { 1 };   // a property: building a YEntry throws on the API stub
 
-    /// <summary>The blocking timed form with named arguments, so it never binds to the generic <c>Transact&lt;TState&gt;</c> overload.</summary>
+    /// <summary>The blocking timed form: <c>TransactWithTimeout</c> has a name of its own, so a null origin cannot bind to the state-passing <c>Transact</c>.</summary>
     public static void TransactFor(Doc doc, Action<Transaction> body, TimeSpan timeout) =>
-        doc.Transact(body, origin: null, timeout: timeout, ct: default);
+        doc.TransactWithTimeout(body, null, timeout);
 
     public static void TransactUntilCancelled(Doc doc, Action<Transaction> body, CancellationToken ct) =>
-        doc.Transact(body, origin: null, timeout: Timeout.InfiniteTimeSpan, ct: ct);
+        doc.TransactWithTimeout(body, null, Timeout.InfiniteTimeSpan, ct);
 
     /// <summary>The seeds the gating tier runs per scenario; <c>YSHARP_SEED</c> pins one to replay a failure.</summary>
     public static IReadOnlyList<uint> Seeds => YSharp.TestKit.Concurrency.Explorer.GatingSeeds;

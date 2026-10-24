@@ -133,7 +133,7 @@ public static class DocFeatureSteps
         Add("snapshot.restore", new[] { "doc", "snapshot", "as", "clientId" }, None(), (ctx, s) =>
         {
             var snap = Of(ctx).Snapshot(s.String("snapshot"));
-            var spec = new ReplicaSpec(s.String("as"), checked((uint)s.Long("clientId")), true);
+            var spec = new ReplicaSpec(s.String("as"), checked((ulong)s.Long("clientId")), true);
             var target = ctx.DocFactory(ctx, spec);
             var restored = YSnapshot.CreateDoc(ctx.Doc(s.String("doc")), snap, target);
             ctx.DeclareReplica(spec.Name, restored);
@@ -255,7 +255,7 @@ public static class DocFeatureSteps
         Add("pud.setUserDescription", new[] { "doc", "clientId", "description" }, None(), (ctx, s) =>
         {
             var doc = ctx.Doc(s.String("doc"));
-            Pud(ctx, s.String("doc")).SetUserMapping(doc, checked((uint)s.Long("clientId")), s.String("description"));
+            Pud(ctx, s.String("doc")).SetUserMapping(doc, checked((ulong)s.Long("clientId")), s.String("description"));
         });
         Add("pud.observe", new[] { "doc", "name" }, new[] { "clientIds", "deletedIds" }, (ctx, s) =>
         {
@@ -272,8 +272,8 @@ public static class DocFeatureSteps
                     foreach (var id in s.Element("clientIds").EnumerateArray())
                     {
                         w.WriteStartArray();
-                        w.WriteNumberValue(id.GetUInt32());
-                        if (pud.GetUserByClientId(id.GetUInt32()) is { } user) w.WriteStringValue(user); else w.WriteNullValue();
+                        w.WriteNumberValue(id.GetUInt64());
+                        if (pud.GetUserByClientId(id.GetUInt64()) is { } user) w.WriteStringValue(user); else w.WriteNullValue();
                         w.WriteEndArray();
                     }
                 w.WriteEndArray();
@@ -282,7 +282,7 @@ public static class DocFeatureSteps
                 if (s.Has("deletedIds"))
                     foreach (var pair in s.Element("deletedIds").EnumerateArray())
                     {
-                        var client = pair[0].GetUInt32();
+                        var client = pair[0].GetUInt64();
                         var clock = pair[1].GetInt64();
                         w.WriteStartArray();
                         w.WriteStartArray();

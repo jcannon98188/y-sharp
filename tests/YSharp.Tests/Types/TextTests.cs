@@ -12,7 +12,7 @@ namespace YSharp.Tests.Types;
 /// <summary>Behaviour of <see cref="YText"/>: plain text, formats, embeds, deltas (T-*, F-*, E-*, D-*, X-1, X-2) and the y-text.tests.js ports.</summary>
 public sealed class TextTests
 {
-    private static Doc NewDoc(uint client = 1) => new(new DocOptions { ClientId = client });
+    private static Doc NewDoc(ulong client = 1) => new(new DocOptions { ClientId = client });
 
     private static YValue Bold => Obj(("bold", true));
 
@@ -258,10 +258,8 @@ public sealed class TextTests
     [Fact, PortOf("y-xml.tests.js:testFormattingBug", "F-5", "Q27")]
     public void XmlText_FormattingRegression_RendersTheExpectedDelta() => Stub.Run(() =>
     {
-        // JS creates the root with ydoc.get('', Y.XmlText); the sketch has no root XmlText (API gap), so the text sits in a fragment.
         var ydoc = NewDoc();
-        var yxml = new YXmlText();
-        ydoc.GetXmlFragment("f").Insert(0, new YType[] { yxml });
+        var yxml = ydoc.GetXmlText("");   // upstream: ydoc.get('', Y.XmlText)
         var delta = new[]
         {
             Insert("A", Obj(("em", Obj()), ("strong", Obj()))),

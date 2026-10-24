@@ -33,9 +33,9 @@ public sealed class AwarenessStateTests
     public void ClientId_IsCopiedAtConstruction_AndNotFollowed() => Stub.Run(() =>
     {
         using var rig = new AwRig(7);
-        Assert.Equal(7u, rig.Awareness.ClientId);
+        Assert.Equal(7UL, rig.Awareness.ClientId);
         rig.Doc.ClientId = 99;
-        Assert.Equal(7u, rig.Awareness.ClientId);
+        Assert.Equal(7UL, rig.Awareness.ClientId);
         rig.Awareness.SetLocalState(Obj("x", 1));
         Assert.Equal(new[] { "7" }, Js.Keys(rig.Awareness));
     });
@@ -220,10 +220,10 @@ public sealed class AwarenessStateTests
     {
         using var rig = new AwRig(9);
         rig.Apply(AwBytes.Update((1, 1, """{"a":1}"""), (2, 4, """{"a":2}""")));
-        rig.Awareness.RemoveStates(new uint[] { 99, 2 }, "o");
+        rig.Awareness.RemoveStates(new ulong[] { 99, 2 }, "o");
         Assert.Equal(new[] { "1", "9" }, Js.Keys(rig.Awareness));
         Assert.Equal(4, rig.ClockOf(2));
-        Assert.Equal(new[] { 2u }, rig.Events[^1].Removed);
+        Assert.Equal(new[] { 2UL }, rig.Events[^1].Removed);
     });
 
     [Fact, Covers("AW-26")]
@@ -233,7 +233,7 @@ public sealed class AwarenessStateTests
         rig.Apply(AwBytes.Update((1, 5, """{"a":1}""")));
         rig.Tick(100);
         var local = rig.ClockOf(9);
-        rig.Awareness.RemoveStates(new uint[] { 9, 1 }, null);
+        rig.Awareness.RemoveStates(new ulong[] { 9, 1 }, null);
         Assert.Equal(local + 1, rig.ClockOf(9));
         Assert.Equal(100, rig.LastUpdatedMs(9));
         Assert.Equal(5, rig.ClockOf(1));
@@ -246,11 +246,11 @@ public sealed class AwarenessStateTests
         using var rig = new AwRig(9);
         rig.Apply(AwBytes.Update((1, 1, "{}")));
         var before = rig.Events.Count;
-        rig.Awareness.RemoveStates(new uint[] { 1 }, "bye");
+        rig.Awareness.RemoveStates(new ulong[] { 1 }, "bye");
         Assert.Equal(new[] { "change@0 +[] ~[] -[1] origin=bye", "update@0 +[] ~[] -[1] origin=bye" }, rig.Log(before));
         before = rig.Events.Count;
-        rig.Awareness.RemoveStates(new uint[] { 1, 77 }, "again");
-        rig.Awareness.RemoveStates(ReadOnlySpan<uint>.Empty, "none");
+        rig.Awareness.RemoveStates(new ulong[] { 1, 77 }, "again");
+        rig.Awareness.RemoveStates(ReadOnlySpan<ulong>.Empty, "none");
         Assert.Equal(before, rig.Events.Count);
     });
 
@@ -259,9 +259,9 @@ public sealed class AwarenessStateTests
     {
         using var rig = new AwRig(9);
         var clock = rig.ClockOf(9);
-        rig.Awareness.RemoveStates(new uint[] { 9, 9 }, null);
+        rig.Awareness.RemoveStates(new ulong[] { 9, 9 }, null);
         Assert.Equal(clock + 1, rig.ClockOf(9));
-        Assert.Equal(new[] { 9u }, rig.Events[^1].Removed);
+        Assert.Equal(new[] { 9UL }, rig.Events[^1].Removed);
     });
 
     [Fact, Covers("AW-29")]
@@ -270,7 +270,7 @@ public sealed class AwarenessStateTests
         using var rig = new AwRig(9);
         var updates = 0;
         rig.Doc.Update += (_, _, _, _) => updates++;
-        rig.Awareness.RemoveStates(new uint[] { 9 }, "x");
+        rig.Awareness.RemoveStates(new ulong[] { 9 }, "x");
         Assert.Equal(0, updates);
     });
 }

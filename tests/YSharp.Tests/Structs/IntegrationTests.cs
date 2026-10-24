@@ -73,8 +73,8 @@ public sealed class IntegrationTests
         var mine = StructsProbe.Of(a, 1);
         Assert.Equal(new[] { (0L, 1L), (1L, 2L) }, mine.Select(s => (s.Clock, s.Len)));
         var x = Assert.Single(StructsProbe.Of(a, 2));
-        Assert.Equal(((uint, long)?)(1u, 0L), x.Origin);
-        Assert.Equal(((uint, long)?)(1u, 1L), x.RightOrigin);
+        Assert.Equal(((ulong, long)?)(1UL, 0L), x.Origin);
+        Assert.Equal(((ulong, long)?)(1UL, 1L), x.RightOrigin);
         Assert.Equal("aXbc", Text(a));
     });
 
@@ -91,7 +91,7 @@ public sealed class IntegrationTests
         var s = StructsProbe.Of(b, 1);
         Assert.Equal(new[] { "m", "m" }, s.Select(x => x.ParentName));
         Assert.Equal(new[] { "k", "k" }, s.Select(x => x.ParentSub));
-        Assert.Equal(((uint, long)?)(1u, 0L), s[1].Origin);
+        Assert.Equal(((ulong, long)?)(1UL, 0L), s[1].Origin);
         Assert.True(b.GetMap("m").TryGet("k", out var value));
         Assert.Equal(2d, value.Value.AsNumber());
     });
@@ -219,8 +219,8 @@ public sealed class IntegrationTests
             Assert.True(d.GetMap("m").TryGet("k", out var v));
             Assert.Equal("b1", v.Value.AsString());
             var s = StructsProbe.All(d).OrderBy(x => x.Client).ToList();
-            Assert.Equal((1u, 0L, 2L, true), (s[0].Client, s[0].Clock, s[0].Len, s[0].Deleted));   // both of a's entries, merged tombstone
-            Assert.Equal((2u, 0L, 1L, false), (s[1].Client, s[1].Clock, s[1].Len, s[1].Deleted));
+            Assert.Equal((1UL, 0L, 2L, true), (s[0].Client, s[0].Clock, s[0].Len, s[0].Deleted));   // both of a's entries, merged tombstone
+            Assert.Equal((2UL, 0L, 1L, false), (s[1].Client, s[1].Clock, s[1].Len, s[1].Deleted));
         }
         Assert.Equal("[[1,[[0,2]]]]", StructsProbe.DeleteSetJson(StructsProbe.Dump(a)));
     });
@@ -272,7 +272,7 @@ public sealed class IntegrationTests
             else
             {
                 Assert.True(late.IsItem);
-                Assert.Equal(((uint, long)?)(1u, 0L), late.ParentId);
+                Assert.Equal(((ulong, long)?)(1UL, 0L), late.ParentId);
                 Assert.True(inDeleteSet);                            // deleted by its own integration, so it is in the transaction's delete set
                 Assert.Equal("[[1,[[0,1]]],[2,[[0,1]]]]", StructsProbe.DeleteSetJson(StructsProbe.Dump(a)));
             }

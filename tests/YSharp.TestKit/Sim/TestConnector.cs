@@ -19,7 +19,7 @@ public sealed class TestYInstance
     {
         Tc = connector;
         UserId = userId;
-        Doc = new Doc(new DocOptions { ClientId = (uint)userId });
+        Doc = new Doc(new DocOptions { ClientId = (ulong)userId });
         connector.AllConns.Add(this);
         Doc.Update += OnUpdate;
         Doc.UpdateV2 += OnUpdateV2;

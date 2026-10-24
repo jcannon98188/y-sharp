@@ -100,7 +100,7 @@ public sealed class UpdateApplicationTests
     public void WritingAState_OmitsClientsThePeerHasInFull_AndWritesTheRestInDescendingClientOrder() => Impl.Run(() =>
     {
         var x = Net.Mk(9);
-        foreach (var id in new uint[] { 1, 2, 3 })
+        foreach (var id in new ulong[] { 1, 2, 3 })
         {
             var d = Net.Mk(id);
             d.GetText("t").Insert(0, id == 1 ? "a" : id == 2 ? "b" : "c");
@@ -245,7 +245,7 @@ public sealed class UpdateApplicationTests
         d.ApplyUpdate(merged.WrittenSpan);
 
         Assert.Equal("AB", Text(d));
-        Assert.Equal(new long[] { 1, 1, 0, 0 }, new uint[] { 1, 2, 3, 4 }.Select(c => d.GetStateVector()[c]));
+        Assert.Equal(new long[] { 1, 1, 0, 0 }, new ulong[] { 1, 2, 3, 4 }.Select(c => d.GetStateVector()[c]));
         Assert.True(StructsProbe.HasPending(d));
 
         var downstream = Net.Mk(10);
@@ -352,11 +352,11 @@ public sealed class UpdateApplicationTests
         a.GetText("t").Insert(0, "abc");
         Net.Sync(a, b);
 
-        Assert.NotEqual(1u, b.ClientId);
+        Assert.NotEqual(1UL, b.ClientId);
         Assert.Equal("abc", Text(b));
         b.GetText("t").Insert(3, "Z");           // written under the new id, so it cannot collide with a's clocks
         Net.Sync(b, a);
         Assert.Equal("abcZ", Text(a));
-        Assert.Equal(new[] { b.ClientId, 1u }, StructsProbe.Dump(a).Select(c => c.Client));
+        Assert.Equal(new[] { b.ClientId, 1UL }, StructsProbe.Dump(a).Select(c => c.Client));
     });
 }

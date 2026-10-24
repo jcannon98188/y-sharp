@@ -84,7 +84,7 @@ internal sealed class TwoPeerHarness
 {
     private readonly Queue<byte[]> _toA = new(), _toB = new();
 
-    public TwoPeerHarness(uint clientA = 1, uint clientB = 2)
+    public TwoPeerHarness(ulong clientA = 1, ulong clientB = 2)
     {
         A = new Doc(new DocOptions { ClientId = clientA });
         B = new Doc(new DocOptions { ClientId = clientB });

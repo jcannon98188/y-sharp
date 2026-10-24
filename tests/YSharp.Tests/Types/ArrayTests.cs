@@ -12,7 +12,7 @@ namespace YSharp.Tests.Types;
 /// <summary>Behaviour of <see cref="YArray"/> (A-1..A-20) and the list-type tests ported from y-array.tests.js.</summary>
 public sealed class ArrayTests
 {
-    private static Doc NewDoc(uint client = 1) => new(new DocOptions { ClientId = client });
+    private static Doc NewDoc(ulong client = 1) => new(new DocOptions { ClientId = client });
 
     private static int Rnd(IPrng gen, int min, int max) => (int)Prng.Int32(gen, min, max);
 
@@ -109,24 +109,21 @@ public sealed class ArrayTests
     });
 
     [Fact, PortOf("y-array.tests.js:testSlice", "A-8")]
-    public void CopyTo_AnyRange_ReadsLikeSlice() => Stub.Run(() =>
+    public void Slice_Ranges_ReturnTheElementsLikeJs() => Stub.Run(() =>
     {
-        // JS slice(start, end) has no counterpart: the sketch offers ToArray and CopyTo(start, destination) (API gap).
         var doc1 = NewDoc();
         var arr = doc1.GetArray("array");
         arr.Insert(0, new YEntry[] { 1, 2, 3 });
-        string Slice(int start, int len)
-        {
-            var buf = new YEntry[len];
-            arr.CopyTo(start, buf);
-            return YValue.Array(buf.Select(e => e.Value).ToArray()).Json();
-        }
-        Assert.Equal("[1,2,3]", arr.ArrayJson());
-        Assert.Equal("[2,3]", Slice(1, 2));
-        Assert.Equal("[1,2]", Slice(0, 2));
+        string Slice(int start, int? end = null) => YValue.Array(arr.Slice(start, end).Select(e => e.Value).ToArray()).Json();
+        Assert.Equal("[1,2,3]", Slice(0));
+        Assert.Equal("[2,3]", Slice(1));
+        Assert.Equal("[1,2]", Slice(0, -1));                 // a negative end counts from the end
         arr.Insert(0, new YEntry[] { 0 });
-        Assert.Equal("[0,1,2,3]", Slice(0, 4));
+        Assert.Equal("[0,1,2,3]", Slice(0));
         Assert.Equal("[0,1]", Slice(0, 2));
+        Assert.Equal("[2,3]", Slice(-2));                    // a negative start too
+        Assert.Equal("[]", Slice(3, 1));                     // an empty range
+        Assert.Equal("[1,2,3]", Slice(1, 4));
     });
 
     [Fact, Covers("A-9")]
@@ -164,7 +161,7 @@ public sealed class ArrayTests
     [Fact, Covers("A-11", "A-12")]
     public void Enumeration_VisitsLiveElementsInOrder_AndSurvivesMutation() => Stub.Run(() =>
     {
-        // JS forEach/map pass (value, index, type); the sketch has only the enumerator and ToArray (API gap).
+        // JS forEach/map have no counterpart by decision (A3): foreach and LINQ over the enumerator do the same.
         var array = NewDoc().GetArray("a");
         array.Push(new YEntry[] { 0, 1, 2, 3, 4 });
         array.Delete(1, 2);

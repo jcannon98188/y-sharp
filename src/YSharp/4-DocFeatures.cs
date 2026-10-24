@@ -44,6 +44,7 @@ public sealed class StackItem
 
 public sealed class UndoManagerOptions
 {
+    public Doc? Doc { get; init; }                               // needed when the initial scope is empty (A8)
     public TimeSpan CaptureTimeout { get; init; } = TimeSpan.FromMilliseconds(500);
     public Func<Transaction, bool>? CaptureTransaction { get; init; }
     public Func<ItemView, bool>? DeleteFilter { get; init; }
@@ -86,7 +87,7 @@ public sealed class PermanentUserDataOptions
 public sealed class PermanentUserData
 {
     public PermanentUserData(Doc doc, PermanentUserDataOptions? options = null) { }
-    public void SetUserMapping(Doc doc, uint clientId, string description, Func<Transaction, DeleteSet, bool>? filter = null) => throw Sketch.NI;
-    public string? GetUserByClientId(uint clientId) => throw Sketch.NI;
+    public void SetUserMapping(Doc doc, ulong clientId, string description, Func<Transaction, DeleteSet, bool>? filter = null) => throw Sketch.NI;
+    public string? GetUserByClientId(ulong clientId) => throw Sketch.NI;
     public string? GetUserByDeletedId(ItemId id) => throw Sketch.NI;
 }

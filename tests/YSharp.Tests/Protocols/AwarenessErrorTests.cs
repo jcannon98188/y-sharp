@@ -52,7 +52,7 @@ public sealed class AwarenessErrorTests
         // y-sharp replays the same fixture and fails every bad batch (ProtocolFixtureTests compares threw), keeping nothing of them.
         var ctx = ProtocolFixtureTests.Replay(fixture, out _);
         var aw = ProtocolSteps.Of(ctx).Awarenesses["partial"];
-        Assert.Equal(new[] { 8u }, aw.GetStates().Keys.OrderBy(k => k).ToArray());
+        Assert.Equal(new[] { 8UL }, aw.GetStates().Keys.OrderBy(k => k).ToArray());
     });
 
     [Fact]
@@ -73,8 +73,8 @@ public sealed class AwarenessErrorTests
         a1.Awareness.SetLocalState(Js.Obj(("x", 3)));
         Assert.Equal("""{"x":3}""", Js.StateJson(a2.Awareness, 0));
         Assert.Equal(1, a2.ClockOf(0));
-        Assert.Equal(new[] { 0u }, remote!.Added);
-        Assert.Equal(new[] { 0u }, local!.Updated);
+        Assert.Equal(new[] { 0UL }, remote!.Added);
+        Assert.Equal(new[] { 0UL }, local!.Updated);
 
         remote = local = null;
         a1.Awareness.SetLocalState(Js.Obj(("x", 4)));

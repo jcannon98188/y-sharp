@@ -136,7 +136,7 @@ public class SimHarnessTests
             var gen = Prng.Create(seed);
             var sim = SimHarness.Init(gen, users: 3);
             Assert.Equal(3, sim.Users.Count);
-            Assert.Equal(new uint[] { 0, 1, 2 }, sim.Users.Select(u => u.Doc.ClientId));
+            Assert.Equal(new ulong[] { 0, 1, 2 }, sim.Users.Select(u => u.Doc.ClientId));
             SimHarness.Compare(sim.Users);
         });
     }

@@ -25,9 +25,9 @@ internal static class Stub
 internal static class Wire
 {
     /// <summary>Client id used by every single-client helper document.</summary>
-    public const uint Client = 1;
+    public const ulong Client = 1;
 
-    public static Doc NewDoc(uint client = Client, bool gc = true) => new(new DocOptions { ClientId = client, Gc = gc });
+    public static Doc NewDoc(ulong client = Client, bool gc = true) => new(new DocOptions { ClientId = client, Gc = gc });
 
     public static byte[] Encode(Doc doc, UpdateFormat format = UpdateFormat.V1, ReadOnlySpan<byte> targetSv = default) =>
         doc.EncodeStateAsUpdate(targetSv, format);
@@ -72,7 +72,7 @@ internal static class Wire
     }
 
     /// <summary>A V1 state vector with one client entry.</summary>
-    public static byte[] Sv(uint client, long clock)
+    public static byte[] Sv(ulong client, long clock)
     {
         var b = new List<byte> { 1 };
         VarUint(b, client);
