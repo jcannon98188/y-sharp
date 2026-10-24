@@ -5,6 +5,11 @@ using YSharp.TestKit.Allocation;
 
 namespace YSharp.Tests.TestKit;
 
+// Runs alone: the allocation-tick listener is process-wide, so parallel tests' allocations swamp the allocator ranking.
+[CollectionDefinition("Allocation", DisableParallelization = true)]
+public class AllocationCollection;
+
+[Collection("Allocation")]
 public class AllocationAssertTests
 {
     private static object? _sink;
