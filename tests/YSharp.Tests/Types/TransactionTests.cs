@@ -191,6 +191,28 @@ public sealed class TransactionTests
         Assert.Equal(new[] { 2 }, deep);
     });
 
+    [Fact, Covers("Q25", "TX-1")]
+    public void DeepEvents_OfEqualPathLength_KeepTheOrderTheTypesChanged() => Stub.Run(() =>
+    {
+        // JS Array.prototype.sort is stable (ES2019); an unstable sort would reorder ties once there are enough of them
+        var doc = NewDoc();
+        var root = doc.GetMap("root");
+        const int n = 40;
+        var children = Enumerable.Range(0, n).Select(i => root.Set($"c{i:D2}", new YMap())).ToArray();
+        var seen = new List<string>();
+        root.ObserveDeep((events, _) => seen.AddRange(events.Select(e => string.Join("", e.GetPath().Select(p => p.Key)))));
+        doc.Transact(_ =>
+        {
+            for (var i = n - 1; i >= 0; i -= 1) children[i].Set("k", i);
+            root.Set("own", 1);
+        });
+        var expected = new List<string> { "" };
+        expected.AddRange(Enumerable.Range(0, n).Reverse().Select(i => $"c{i:D2}"));
+        // the root's own event has the shortest path and comes first; the 40 equal-depth events keep their change order
+        Assert.Equal(expected.Count, seen.Count);
+        Assert.Equal(expected, seen);
+    });
+
     [Fact, Covers("TX-11")]
     public void ADeepObserver_WorksWithoutAnObserveHandlerOnTheSameType() => Stub.Run(() =>
     {
