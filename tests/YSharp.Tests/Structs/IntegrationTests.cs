@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Assertions;
 
 namespace YSharp.Tests.Structs;
 
@@ -112,7 +113,7 @@ public sealed class IntegrationTests
         d.ApplyUpdate(a.EncodeStateAsUpdate());      // one struct "hello" of which "he" is already known
 
         var emitted = Assert.Single(seen);
-        Assert.Equal("01010102840101036c6c6f00", Net.Hex(emitted));   // only "llo", clock 2, origin (1,1)
+        Assert.Equal("01010102840101036c6c6f00", Hex.Of(emitted));   // only "llo", clock 2, origin (1,1)
         Assert.Equal("hello", Text(d));
         var s = Assert.Single(StructsProbe.Of(d, 1));
         Assert.Equal((0L, 5L), (s.Clock, s.Len));
@@ -182,7 +183,7 @@ public sealed class IntegrationTests
             d.ApplyUpdate(ups[0]);
             foreach (var u in order) d.ApplyUpdate(u);
             results.Add(Text(d));
-            states.Add(Net.Hex(d.EncodeStateAsUpdate()));
+            states.Add(Hex.Of(d.EncodeStateAsUpdate()));
         }
         Assert.Equal(new[] { "aAABBxCyCb" }, results);
         Assert.Single(states);

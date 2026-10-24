@@ -40,8 +40,8 @@ public sealed class UpdateApplicationTests
     {
         var a = Net.Mk(1);
         a.GetText("t").Insert(0, "abc");
-        Assert.Equal("01010100040101740361626300", Net.Hex(a.EncodeStateAsUpdate()));
-        Assert.Equal("000001010000010407047461626301030101000001010000", Net.Hex(a.EncodeStateAsUpdate(default, UpdateFormat.V2)));
+        Assert.Equal("01010100040101740361626300", Hex.Of(a.EncodeStateAsUpdate()));
+        Assert.Equal("000001010000010407047461626301030101000001010000", Hex.Of(a.EncodeStateAsUpdate(default, UpdateFormat.V2)));
 
         var c = Net.Mk(1);
         var b = Net.Mk(2);
@@ -50,8 +50,8 @@ public sealed class UpdateApplicationTests
         var ups = Net.Capture(b);
         b.GetText("t").Insert(3, "X");     // origin only
         b.GetText("t").Insert(0, "Y");     // right origin only
-        Assert.Equal("01010200840102015800", Net.Hex(ups[0]));
-        Assert.Equal("01010201440100015900", Net.Hex(ups[1]));
+        Assert.Equal("01010200840102015800", Hex.Of(ups[0]));
+        Assert.Equal("01010201440100015900", Hex.Of(ups[1]));
     });
 
     [Fact]
@@ -62,8 +62,8 @@ public sealed class UpdateApplicationTests
         var ups = Net.Capture(a);
         a.GetMap("m").Set("k", 1);
         a.GetMap("m").Set("k", 2);
-        Assert.Equal("010101002801016d016b017d0100", Net.Hex(ups[0]));       // info 0x28: parentSub bit, parent root "m", key "k"
-        Assert.Equal("01010101a80100017d020101010001", Net.Hex(ups[1]));     // info 0xa8: origin present, so neither parent nor key is written
+        Assert.Equal("010101002801016d016b017d0100", Hex.Of(ups[0]));       // info 0x28: parentSub bit, parent root "m", key "k"
+        Assert.Equal("01010101a80100017d020101010001", Hex.Of(ups[1]));     // info 0xa8: origin present, so neither parent nor key is written
     });
 
     [Fact]
@@ -73,9 +73,9 @@ public sealed class UpdateApplicationTests
         var a = Net.Mk(1);
         a.GetText("t").Insert(0, "he");
         a.GetText("t").Insert(2, "llo");           // one struct "hello" after the merge
-        var sv = Net.FromHex("010102");            // the peer knows two characters of client 1
-        Assert.Equal("01010102840101036c6c6f00", Net.Hex(a.EncodeStateAsUpdate(sv)));
-        Assert.Equal("0000024100010200018405036c6c6f0300000001010200", Net.Hex(a.EncodeStateAsUpdate(sv, UpdateFormat.V2)));
+        var sv = Hex.Bytes("010102");            // the peer knows two characters of client 1
+        Assert.Equal("01010102840101036c6c6f00", Hex.Of(a.EncodeStateAsUpdate(sv)));
+        Assert.Equal("0000024100010200018405036c6c6f0300000001010200", Hex.Of(a.EncodeStateAsUpdate(sv, UpdateFormat.V2)));
     });
 
     [Fact]
@@ -90,9 +90,9 @@ public sealed class UpdateApplicationTests
         map.Set("k2", 2);
         arr.Delete(0, 1);
         // struct 1: ContentDeleted shell; struct 2: GC (info 0x00, length 2); then the delete set.
-        Assert.Equal("010201000101036172720100020101010003", Net.Hex(a.EncodeStateAsUpdate()));
+        Assert.Equal("010201000101036172720100020101010003", Hex.Of(a.EncodeStateAsUpdate()));
         // V2 writes the GC length through the RLE-encoded length column.
-        Assert.Equal("000001010000030100000503617272030101000201020102000101010002", Net.Hex(a.EncodeStateAsUpdate(default, UpdateFormat.V2)));
+        Assert.Equal("000001010000030100000503617272030101000201020102000101010002", Hex.Of(a.EncodeStateAsUpdate(default, UpdateFormat.V2)));
     });
 
     [Fact]
@@ -107,12 +107,12 @@ public sealed class UpdateApplicationTests
             Net.Sync(d, x);
         }
         var y = Net.Mk(8);
-        y.ApplyUpdate(Net.FromHex("0101010004010174016100"));       // client 1's "a" only
-        Assert.Equal("010101", Net.Hex(Net.StateVector(y)));
+        y.ApplyUpdate(Hex.Bytes("0101010004010174016100"));       // client 1's "a" only
+        Assert.Equal("010101", Hex.Of(Net.StateVector(y)));
 
-        Assert.Equal("0201030004010174016301020004010174016200", Net.Hex(x.EncodeStateAsUpdate(Net.StateVector(y))));   // clients 3 and 2; client 1 omitted
-        Assert.Equal("0301030004010174016301020004010174016201010004010174016100", Net.Hex(x.EncodeStateAsUpdate()));
-        Assert.Equal("0000", Net.Hex(x.EncodeStateAsUpdate(Net.StateVector(x))));                                          // nothing to send: zero clients, empty delete set
+        Assert.Equal("0201030004010174016301020004010174016200", Hex.Of(x.EncodeStateAsUpdate(Net.StateVector(y))));   // clients 3 and 2; client 1 omitted
+        Assert.Equal("0301030004010174016301020004010174016201010004010174016100", Hex.Of(x.EncodeStateAsUpdate()));
+        Assert.Equal("0000", Hex.Of(x.EncodeStateAsUpdate(Net.StateVector(x))));                                          // nothing to send: zero clients, empty delete set
     });
 
     [Fact]
@@ -122,8 +122,8 @@ public sealed class UpdateApplicationTests
         var a = Net.Mk(1);
         a.GetText("t").Insert(0, "hello");
         a.GetText("t").Delete(1, 3);
-        Assert.Equal("0103010004010174016881010003840103016f0101010103", Net.Hex(a.EncodeStateAsUpdate()));
-        Assert.Equal("000002410102000600050400810084060374686f410101010001030103000101010102", Net.Hex(a.EncodeStateAsUpdate(default, UpdateFormat.V2)));
+        Assert.Equal("0103010004010174016881010003840103016f0101010103", Hex.Of(a.EncodeStateAsUpdate()));
+        Assert.Equal("000002410102000600050400810084060374686f410101010001030103000101010102", Hex.Of(a.EncodeStateAsUpdate(default, UpdateFormat.V2)));
     });
 
     [Fact]
@@ -137,8 +137,8 @@ public sealed class UpdateApplicationTests
             d.GetText("t").Insert(0, "hello");
             d.GetText("t").Delete(1, 3);
         }
-        Assert.Equal("0103010004010174016881010003840103016f0101010103", Net.Hex(on.EncodeStateAsUpdate()));       // ContentDeleted: ref 1 + length
-        Assert.Equal("0103010004010174016884010003656c6c840103016f0101010103", Net.Hex(off.EncodeStateAsUpdate())); // the deleted text is still written
+        Assert.Equal("0103010004010174016881010003840103016f0101010103", Hex.Of(on.EncodeStateAsUpdate()));       // ContentDeleted: ref 1 + length
+        Assert.Equal("0103010004010174016884010003656c6c840103016f0101010103", Hex.Of(off.EncodeStateAsUpdate())); // the deleted text is still written
         Assert.Equal(Text(on), Text(off));
     });
 
@@ -153,7 +153,7 @@ public sealed class UpdateApplicationTests
     {
         var d = Net.Mk(1);
         if (existing != "") d.GetText("t").Insert(0, existing);
-        var result = d.TryApplyUpdate(Net.FromHex(hex.Replace(" ", "")));
+        var result = d.TryApplyUpdate(Hex.Bytes(hex.Replace(" ", "")));
         Assert.True(result.Ok);
         Assert.Equal(expected, Text(d));
         Assert.Equal(1L, d.GetStateVector()[5]);
@@ -164,22 +164,22 @@ public sealed class UpdateApplicationTests
     public void ReadingStructRefs_GcSkipAndMapEntries() => Impl.Run(() =>
     {
         var gc = Net.Mk(1);
-        Assert.True(gc.TryApplyUpdate(Net.FromHex("01010500000300")).Ok);            // GC of length 3 (info 0, length)
+        Assert.True(gc.TryApplyUpdate(Hex.Bytes("01010500000300")).Ok);            // GC of length 3 (info 0, length)
         Assert.Equal(3L, gc.GetStateVector()[5]);
         var s = Assert.Single(StructsProbe.Of(gc, 5));
         Assert.True(s.IsGc);
         Assert.Equal(3L, s.Len);
 
         var map = Net.Mk(1);
-        Assert.True(map.TryApplyUpdate(Net.FromHex("010105002801016d016b017d0100")).Ok);     // map entry: parentSub read because both origins are absent
+        Assert.True(map.TryApplyUpdate(Hex.Bytes("010105002801016d016b017d0100")).Ok);     // map entry: parentSub read because both origins are absent
         Assert.True(map.GetMap("m").TryGet("k", out var v));
         Assert.Equal(1d, v.Value.AsNumber());
 
         var skip = Net.Mk(1);
-        Assert.True(skip.TryApplyUpdate(Net.FromHex("010205000a0204010174017900")).Ok);   // Skip(2) then an item at clock 2
+        Assert.True(skip.TryApplyUpdate(Hex.Bytes("010205000a0204010174017900")).Ok);   // Skip(2) then an item at clock 2
         Assert.Equal(0L, skip.GetStateVector()[5]);                                          // the item waits behind the skipped range
         Assert.Empty(StructsProbe.Of(skip, 5));
-        Assert.Equal("0101050204010174017900", Net.Hex(skip.EncodeStateAsUpdate()));         // the Skip itself is not kept
+        Assert.Equal("0101050204010174017900", Hex.Of(skip.EncodeStateAsUpdate()));         // the Skip itself is not kept
     });
 
     [Fact]
@@ -193,12 +193,12 @@ public sealed class UpdateApplicationTests
         var d = Net.Mk(2);
         var events = Net.Capture(d);
         d.ApplyUpdate(update);
-        var state = Net.Hex(d.EncodeStateAsUpdate());
+        var state = Hex.Of(d.EncodeStateAsUpdate());
         d.ApplyUpdate(update);
         d.ApplyUpdate(a.EncodeStateAsUpdate());
 
         Assert.Single(events);
-        Assert.Equal(state, Net.Hex(d.EncodeStateAsUpdate()));
+        Assert.Equal(state, Hex.Of(d.EncodeStateAsUpdate()));
         Assert.Equal("ab", Text(d));
     });
 
@@ -215,7 +215,7 @@ public sealed class UpdateApplicationTests
             foreach (var u in order) d.ApplyUpdate(u);
             Assert.Equal("ABC", Text(d));
             Assert.False(StructsProbe.HasPending(d));
-            states.Add(Net.Hex(d.EncodeStateAsUpdate()));
+            states.Add(Hex.Of(d.EncodeStateAsUpdate()));
         }
         Assert.Single(states);
     });

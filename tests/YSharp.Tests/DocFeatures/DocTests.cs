@@ -6,6 +6,7 @@ using System.Text;
 using Xunit;
 using YSharp.TestKit.Ops;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Assertions;
 
 namespace YSharp.Tests.DocFeatures;
 
@@ -71,8 +72,8 @@ public sealed class DocTests
         var doc = Net.Mk(uint.MaxValue);
         Assert.Equal(uint.MaxValue, doc.ClientId);
         doc.GetText("t").Insert(0, "x");
-        Assert.Equal("01ffffffff0f01", Net.Hex(Net.StateVector(doc)));
-        Assert.Equal("0101ffffffff0f0004010174017800", Net.Hex(doc.EncodeStateAsUpdate()));
+        Assert.Equal("01ffffffff0f01", Hex.Of(Net.StateVector(doc)));
+        Assert.Equal("0101ffffffff0f0004010174017800", Hex.Of(doc.EncodeStateAsUpdate()));
     });
 
     // ------------------------------------------------------------------ DOC-03..DOC-06 root types
@@ -315,9 +316,9 @@ public sealed class DocTests
         {
             Assert.Same(doc, d);
             Assert.True(tx.IsLocal);
-            v1.Add(Net.Hex(u) + "|" + origin);
+            v1.Add(Hex.Of(u) + "|" + origin);
         };
-        doc.UpdateV2 += (u, _, _, _) => v2.Add(Net.Hex(u));
+        doc.UpdateV2 += (u, _, _, _) => v2.Add(Hex.Of(u));
         var t = doc.GetText("t");
         doc.Transact(_ => { });                                        // no content: no event
         t.Insert(0, "abc");

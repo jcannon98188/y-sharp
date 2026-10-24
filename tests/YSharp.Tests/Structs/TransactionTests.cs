@@ -173,7 +173,7 @@ public sealed class TransactionTests
 
         t.Delete(1, 1);
         var update = Assert.Single(updates);
-        Assert.Equal("000102010101", Net.Hex(update));            // no structs, one delete range (client 2, clock 1, length 1)
+        Assert.Equal("000102010101", Hex.Of(update));            // no structs, one delete range (client 2, clock 1, length 1)
     });
 
     [Fact]

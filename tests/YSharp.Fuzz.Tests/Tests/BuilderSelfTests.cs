@@ -1,5 +1,6 @@
 using Xunit;
 using YSharp.Fuzz.Builder;
+using YSharp.TestKit.Assertions;
 
 namespace YSharp.Fuzz.Tests;
 

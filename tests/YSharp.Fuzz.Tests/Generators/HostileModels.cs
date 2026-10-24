@@ -5,6 +5,7 @@ using System.Text;
 using FsCheck;
 using FsCheck.Fluent;
 using YSharp.Fuzz.Builder;
+using YSharp.TestKit.Assertions;
 
 namespace YSharp.Fuzz.Generators;
 

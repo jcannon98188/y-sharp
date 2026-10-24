@@ -27,7 +27,7 @@ public sealed class SnapshotTests
 
     private static YSnapshot Decode(string hex, UpdateFormat format = UpdateFormat.V1)
     {
-        Assert.True(YSnapshot.TryDecode(Net.FromHex(hex), format, out var snapshot).Ok);
+        Assert.True(YSnapshot.TryDecode(Hex.Bytes(hex), format, out var snapshot).Ok);
         return snapshot;
     }
 
@@ -76,8 +76,8 @@ public sealed class SnapshotTests
         if (label != "empty") doc.GetText("t").Insert(0, "world!");
         if (label == "world-with-deletion") doc.GetText("t").Delete(1, 2);
         var s = YSnapshot.Create(doc);
-        Assert.Equal(v1, Net.Hex(Encode(s)));
-        Assert.Equal(v2, Net.Hex(Encode(s, UpdateFormat.V2)));
+        Assert.Equal(v1, Hex.Of(Encode(s)));
+        Assert.Equal(v2, Hex.Of(Encode(s, UpdateFormat.V2)));
         Assert.True(YSnapshot.TryDecode(Encode(s), UpdateFormat.V1, out var back1).Ok);
         Assert.True(s.Equals(back1));
         Assert.True(YSnapshot.TryDecode(Encode(s, UpdateFormat.V2), UpdateFormat.V2, out var back2).Ok);
@@ -88,7 +88,7 @@ public sealed class SnapshotTests
     [Covers("SNAP-02")]
     public void TryDecode_RejectsTruncatedBytes() => Impl.Run(() =>
     {
-        Assert.False(YSnapshot.TryDecode(Net.FromHex("010101"), UpdateFormat.V1, out _).Ok);
+        Assert.False(YSnapshot.TryDecode(Hex.Bytes("010101"), UpdateFormat.V1, out _).Ok);
         Assert.False(YSnapshot.TryDecode(ReadOnlySpan<byte>.Empty, UpdateFormat.V1, out _).Ok);
     });
 
@@ -128,7 +128,7 @@ public sealed class SnapshotTests
         var empty = YSnapshot.Empty;
         Assert.Equal(0, empty.StateVector[1]);
         Assert.False(empty.DeleteSet.Contains(new ItemId(1, 0)));
-        Assert.Equal("0000", Net.Hex(Encode(empty)));
+        Assert.Equal("0000", Hex.Of(Encode(empty)));
         Assert.True(empty.Equals(YSnapshot.Create(new Doc())));
         Assert.True(YSnapshot.Empty.Equals(empty));                    // the JS module singleton is shared and mutable; the contract here is content only
     });
@@ -175,14 +175,14 @@ public sealed class SnapshotTests
         t.Insert(0, "hello world");
         var s = YSnapshot.Create(doc);
         t.Insert(5, " brave");
-        var before = Net.Hex(doc.EncodeStateAsUpdate());
-        var svBefore = Net.Hex(Net.StateVector(doc));
+        var before = Hex.Of(doc.EncodeStateAsUpdate());
+        var svBefore = Hex.Of(Net.StateVector(doc));
         var updates = 0;
         doc.Update += (_, _, _, _) => updates++;
         Assert.Equal("[hello world]", Delta(t, s));
         Assert.Equal(0, updates);
-        Assert.Equal(before, Net.Hex(doc.EncodeStateAsUpdate()));
-        Assert.Equal(svBefore, Net.Hex(Net.StateVector(doc)));
+        Assert.Equal(before, Hex.Of(doc.EncodeStateAsUpdate()));
+        Assert.Equal(svBefore, Hex.Of(Net.StateVector(doc)));
     });
 
     [Fact]
@@ -402,13 +402,13 @@ public sealed class SnapshotTests
         t.Insert(0, "hello world");
         var snap = YSnapshot.Create(doc);
         t.Insert(5, " brave");
-        var before = Net.Hex(doc.EncodeStateAsUpdate());
-        var svBefore = Net.Hex(Net.StateVector(doc));
+        var before = Hex.Of(doc.EncodeStateAsUpdate());
+        var svBefore = Hex.Of(Net.StateVector(doc));
         var restored = YSnapshot.CreateDoc(doc, snap);
         Assert.Equal("hello world", restored.GetText("t").ToString());
         Assert.Equal("hello brave world", t.ToString());
-        Assert.Equal(before, Net.Hex(doc.EncodeStateAsUpdate()));      // the origin may split structs internally; that is not observable here
-        Assert.Equal(svBefore, Net.Hex(Net.StateVector(doc)));
+        Assert.Equal(before, Hex.Of(doc.EncodeStateAsUpdate()));      // the origin may split structs internally; that is not observable here
+        Assert.Equal(svBefore, Hex.Of(Net.StateVector(doc)));
     });
 
     // ------------------------------------------------------------------ SNAP-10

@@ -5,6 +5,7 @@ using Xunit;
 using YSharp.TestKit.Rng;
 using YSharp.TestKit.Sim;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Assertions;
 
 namespace YSharp.Tests.Structs;
 
@@ -145,7 +146,7 @@ public sealed class GarbageCollectionTests
             Net.Both(a, b);
 
             visible.Add($"{a.GetArray("arr").Length}/{b.GetArray("arr").Length}");
-            states.Add(Net.Hex(a.EncodeStateAsUpdate()));
+            states.Add(Hex.Of(a.EncodeStateAsUpdate()));
             var late = Assert.Single(StructsProbe.Of(a, 2));
             Assert.Equal(gc, late.IsGc);                    // gc on: a GC of the full length; off: a deleted item
             Assert.True(late.Deleted);

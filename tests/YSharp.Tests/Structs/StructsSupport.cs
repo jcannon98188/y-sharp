@@ -162,7 +162,4 @@ internal static class Net
         return list;
     }
 
-    public static string Hex(ReadOnlySpan<byte> b) => Convert.ToHexString(b).ToLowerInvariant();
-
-    public static byte[] FromHex(string h) => Convert.FromHexString(h);
 }

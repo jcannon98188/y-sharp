@@ -4,6 +4,7 @@ using System.Linq;
 using FsCheck;
 using FsCheck.Fluent;
 using YSharp.Fuzz.Corpus;
+using YSharp.TestKit.Assertions;
 
 namespace YSharp.Fuzz.Generators;
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Assertions;
 
 namespace YSharp.Tests.Codecs;
 

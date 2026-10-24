@@ -5,6 +5,7 @@ using System.Text;
 using Xunit;
 using YSharp.TestKit.Traceability;
 using static YSharp.Tests.DocFeatures.Ds;
+using YSharp.TestKit.Assertions;
 
 namespace YSharp.Tests.DocFeatures;
 
@@ -19,12 +20,12 @@ public sealed class RelativePositionTests
     {
         var w = new ArrayBufferWriter<byte>();
         p.Encode(w);
-        return Net.Hex(w.WrittenSpan);
+        return Hex.Of(w.WrittenSpan);
     }
 
     private static RelativePosition Decode(string hex)
     {
-        Assert.True(RelativePosition.TryDecode(Net.FromHex(hex), out var p).Ok, $"decoding {hex}");
+        Assert.True(RelativePosition.TryDecode(Hex.Bytes(hex), out var p).Ok, $"decoding {hex}");
         return p;
     }
 
@@ -269,7 +270,7 @@ public sealed class RelativePositionTests
     {
         foreach (var hex in new[] { "0501", "00", "0001", "01", "02" })
         {
-            var status = RelativePosition.TryDecode(Net.FromHex(hex), out var position);
+            var status = RelativePosition.TryDecode(Hex.Bytes(hex), out var position);
             if (!status.Ok) continue;
             // JS decodes an unknown tag to an all-null position that then throws on re-encode
             Assert.ThrowsAny<Exception>(() => position.Encode(new ArrayBufferWriter<byte>()));

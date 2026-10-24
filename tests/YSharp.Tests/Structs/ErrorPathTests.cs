@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Assertions;
 
 namespace YSharp.Tests.Structs;
 
@@ -21,18 +22,18 @@ public sealed class ErrorPathTests
     {
         // addStruct clock gap and findIndexSS miss: a struct beyond the known state, and a delete range for an unknown client.
         var gap = Net.Mk(1);
-        var gapResult = gap.TryApplyUpdate(Net.FromHex("0101050504010174017900"));             // client 5, clock 5, first struct for that client
+        var gapResult = gap.TryApplyUpdate(Hex.Bytes("0101050504010174017900"));             // client 5, clock 5, first struct for that client
         Assert.True(gapResult.Ok);
         Assert.Empty(StructsProbe.Dump(gap));
-        Assert.Equal("0101050504010174017900", Net.Hex(gap.EncodeStateAsUpdate()));                  // kept as pending, not stored
+        Assert.Equal("0101050504010174017900", Hex.Of(gap.EncodeStateAsUpdate()));                  // kept as pending, not stored
 
         var unknownDs = Net.Mk(1);
-        Assert.True(unknownDs.TryApplyUpdate(Net.FromHex("000107010001")).Ok);
+        Assert.True(unknownDs.TryApplyUpdate(Hex.Bytes("000107010001")).Ok);
         Assert.Empty(StructsProbe.Dump(unknownDs));
 
         // Skip.integrate and GC/Skip.getMissing: Skips are dropped before integration.
         var skip = Net.Mk(1);
-        Assert.True(skip.TryApplyUpdate(Net.FromHex("010205000a0204010174017900")).Ok);
+        Assert.True(skip.TryApplyUpdate(Hex.Bytes("010205000a0204010174017900")).Ok);
         Assert.DoesNotContain(StructsProbe.All(skip), s => s.Kind == "skip");
     });
 
@@ -53,7 +54,7 @@ public sealed class ErrorPathTests
             var d = Net.Mk(100 + (uint)k);
             for (var i = 0; i < k; i++) d.ApplyUpdate(ups[i]);
             Net.Sync(a, d);                                                                                       // the diff may start anywhere between structs
-            Assert.Equal(Net.Hex(a.EncodeStateAsUpdate()), Net.Hex(d.EncodeStateAsUpdate()));
+            Assert.Equal(Hex.Of(a.EncodeStateAsUpdate()), Hex.Of(d.EncodeStateAsUpdate()));
         }
     });
 
@@ -68,16 +69,16 @@ public sealed class ErrorPathTests
     {
         var d = Net.Mk(1);
         d.GetText("t").Insert(0, "x");
-        var before = Net.Hex(d.EncodeStateAsUpdate());
+        var before = Hex.Of(d.EncodeStateAsUpdate());
 
         // JS: the pinned Yjs throws a TypeError or RangeError, after integrating whatever came before the bad struct.
-        var result = d.TryApplyUpdate(Net.FromHex(hex.Replace(" ", "")));
+        var result = d.TryApplyUpdate(Hex.Bytes(hex.Replace(" ", "")));
 
         Assert.False(result.Ok);
         Assert.Equal(YError.Malformed, result.Error);
-        Assert.Equal(before, Net.Hex(d.EncodeStateAsUpdate()));
+        Assert.Equal(before, Hex.Of(d.EncodeStateAsUpdate()));
         Assert.False(d.IsFaulted);
-        Assert.Throws<YDecodeException>(() => d.ApplyUpdate(Net.FromHex(hex.Replace(" ", ""))));
+        Assert.Throws<YDecodeException>(() => d.ApplyUpdate(Hex.Bytes(hex.Replace(" ", ""))));
     });
 
     [Fact]
@@ -89,7 +90,7 @@ public sealed class ErrorPathTests
         var d = Net.Mk(1);
         d.GetText("t").Insert(0, "x");
 
-        var result = d.TryApplyUpdate(Net.FromHex("0101050004000100017900"));
+        var result = d.TryApplyUpdate(Hex.Bytes("0101050004000100017900"));
         Assert.Equal(1, result.RejectedStructs);
         Assert.Equal("x", Text(d));
         Assert.False(d.IsFaulted);
@@ -117,7 +118,7 @@ public sealed class ErrorPathTests
         // bit 6 (parentSub) is ignored when an origin exists
         var e = Net.Mk(3);
         e.GetText("t").Insert(0, "x");
-        Assert.True(e.TryApplyUpdate(Net.FromHex("01010500a40100017900")).Ok);
+        Assert.True(e.TryApplyUpdate(Hex.Bytes("01010500a40100017900")).Ok);
         Assert.Equal("xy", Text(e));
     });
 

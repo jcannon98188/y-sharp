@@ -5,6 +5,7 @@ using System.Text;
 using Xunit;
 using YSharp.TestKit.Traceability;
 using static YSharp.Tests.DocFeatures.Ds;
+using YSharp.TestKit.Assertions;
 
 namespace YSharp.Tests.DocFeatures;
 
@@ -44,7 +45,7 @@ public sealed class PermanentUserDataTests
             var ds = ((YArray)Get(user, "ds").Type!).ToArray().Select(e =>
             {
                 Assert.True(e.Value.TryGetBytes(out var bytes));
-                return "\"" + Net.Hex(bytes) + "\"";
+                return "\"" + Hex.Of(bytes) + "\"";
             });
             sb.Append('"').Append(kv.Key).Append("\":{\"ids\":[").Append(string.Join(",", ids)).Append("],\"ds\":[").Append(string.Join(",", ds)).Append("]}");
         }

@@ -30,7 +30,7 @@ public sealed class ContentTests
         var b = Net.Mk(2, gc: false);
         b.ApplyUpdate(a.EncodeStateAsUpdate());
         Assert.Null(StructuralDiff.Find(StructsProbe.DumpJson(a), StructsProbe.DumpJson(b)));
-        Assert.Equal(Net.Hex(a.EncodeStateAsUpdate()), Net.Hex(b.EncodeStateAsUpdate()));
+        Assert.Equal(Hex.Of(a.EncodeStateAsUpdate()), Hex.Of(b.EncodeStateAsUpdate()));
 
         // Deleted content with gc on is ContentDeleted (1).
         var c = Net.Mk(3);

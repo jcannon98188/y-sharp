@@ -9,6 +9,7 @@ using System.Text.Json;
 using Xunit;
 using YSharp.Fuzz.Builder;
 using YSharp.TestKit.Fixtures;
+using YSharp.TestKit.Assertions;
 
 namespace YSharp.Fuzz.Guards;
 

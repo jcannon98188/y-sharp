@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Xunit;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Assertions;
 
 namespace YSharp.Tests.Codecs;
 

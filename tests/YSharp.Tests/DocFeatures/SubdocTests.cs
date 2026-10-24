@@ -4,6 +4,7 @@ using System.Linq;
 using Xunit;
 using YSharp.TestKit.Ops;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Assertions;
 
 namespace YSharp.Tests.DocFeatures;
 
@@ -16,7 +17,7 @@ public sealed class SubdocTests
     private static Doc Sub(string guid, bool? gc = null, bool autoLoad = false, bool shouldLoad = true, YValue meta = default, string? collectionId = null) =>
         new(new DocOptions { Guid = guid, Gc = gc ?? true, AutoLoad = autoLoad, ShouldLoad = shouldLoad, Meta = meta, CollectionId = collectionId });
 
-    private static string UpdateHex(Doc parent, UpdateFormat format = UpdateFormat.V1) => Net.Hex(parent.EncodeStateAsUpdate(default, format));
+    private static string UpdateHex(Doc parent, UpdateFormat format = UpdateFormat.V1) => Hex.Of(parent.EncodeStateAsUpdate(default, format));
 
     /// <summary>The last <c>subdocs</c> event as plain lists (the change object is only valid during the callback).</summary>
     private sealed class Watch

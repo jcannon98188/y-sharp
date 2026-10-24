@@ -10,6 +10,7 @@ using YSharp.TestKit.Fixtures;
 using YSharp.TestKit.Rng;
 using YSharp.TestKit.Sim;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Assertions;
 
 namespace YSharp.Tests.Codecs;
 

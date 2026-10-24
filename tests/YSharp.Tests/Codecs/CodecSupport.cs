@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
+using YSharp.TestKit.Assertions;
 
 namespace YSharp.Tests.Codecs;
 
@@ -26,14 +27,6 @@ internal static class Stub
         try { return body(); }
         catch (NotImplementedException) { Assert.Skip(Reason); throw; }
     }
-}
-
-internal static class Hex
-{
-    /// <summary>Bytes of a spaced or unspaced hex string.</summary>
-    public static byte[] Bytes(string hex) => Convert.FromHexString(hex.Replace(" ", "", StringComparison.Ordinal));
-
-    public static string Of(ReadOnlySpan<byte> bytes) => Convert.ToHexString(bytes).ToLowerInvariant();
 }
 
 internal static class Wire

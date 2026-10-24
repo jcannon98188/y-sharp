@@ -1,6 +1,7 @@
 using System.Linq;
 using Xunit;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Assertions;
 
 namespace YSharp.Tests.Structs;
 
@@ -35,11 +36,11 @@ public sealed class StructStoreTests
     {
         var d = Net.Mk(1);
         // No structs; a delete set for client 7, range [0, 1): JS would fail a lookup in the store, y-sharp keeps it pending.
-        var result = d.TryApplyUpdate(Net.FromHex("000107010001"));
+        var result = d.TryApplyUpdate(Hex.Bytes("000107010001"));
         Assert.True(result.Ok);
         Assert.Empty(StructsProbe.Dump(d));
         Assert.Equal(0L, d.GetStateVector()[7]);
-        Assert.Equal("000107010001", Net.Hex(d.EncodeStateAsUpdate()));    // re-exported as pending delete set
+        Assert.Equal("000107010001", Hex.Of(d.EncodeStateAsUpdate()));    // re-exported as pending delete set
     });
 
     [Fact]
@@ -98,7 +99,7 @@ public sealed class StructStoreTests
         var d = Net.Mk(9);
         d.ApplyUpdate(ups[1]);
         Assert.Equal(0L, d.GetStateVector()[1]);
-        Assert.Equal("01010101840100016200", Net.Hex(d.EncodeStateAsUpdate()));   // the waiting struct is part of the exported state
+        Assert.Equal("01010101840100016200", Hex.Of(d.EncodeStateAsUpdate()));   // the waiting struct is part of the exported state
         var downstream = Net.Mk(10);
         downstream.ApplyUpdate(d.EncodeStateAsUpdate());
         downstream.ApplyUpdate(ups[0]);
@@ -111,7 +112,7 @@ public sealed class StructStoreTests
         b.GetText("t").Delete(1, 1);
         var e = Net.Mk(11);
         e.ApplyUpdate(ups2[1]);
-        Assert.Equal("000102010101", Net.Hex(e.EncodeStateAsUpdate()));
+        Assert.Equal("000102010101", Hex.Of(e.EncodeStateAsUpdate()));
         var f = Net.Mk(12);
         f.ApplyUpdate(e.EncodeStateAsUpdate());
         f.ApplyUpdate(ups2[0]);

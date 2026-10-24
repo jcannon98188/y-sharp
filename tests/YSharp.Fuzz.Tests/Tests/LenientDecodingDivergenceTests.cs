@@ -9,6 +9,7 @@ using YSharp.Fuzz.Guards;
 using YSharp.TestKit.Fixtures;
 using YSharp.TestKit.Traceability;
 using YSharp.TestKit.Values;
+using YSharp.TestKit.Assertions;
 
 namespace YSharp.Fuzz.Tests;
 

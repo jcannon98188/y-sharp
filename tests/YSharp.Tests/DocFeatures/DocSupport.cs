@@ -41,9 +41,6 @@ internal static class Net
 
     public static void Both(Doc a, Doc b) { Sync(a, b); Sync(b, a); }
 
-    public static string Hex(ReadOnlySpan<byte> b) => Convert.ToHexString(b).ToLowerInvariant();
-
-    public static byte[] FromHex(string h) => Convert.FromHexString(h);
 
     public static List<byte[]> Capture(Doc d)
     {

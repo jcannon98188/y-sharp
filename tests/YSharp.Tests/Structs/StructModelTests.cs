@@ -185,7 +185,7 @@ public sealed class StructModelTests
         Assert.Equal(a.GetStateVector()[1], d.GetStateVector()[1]);
         Assert.Null(StructuralDiff.Find(StructsProbe.DumpJson(a), StructsProbe.DumpJson(d)));
         Assert.Equal(0, d.GetArray("arr").Length);
-        Assert.Equal(Net.Hex(a.EncodeStateAsUpdate()), Net.Hex(d.EncodeStateAsUpdate()));   // nothing is held back as pending
+        Assert.Equal(Hex.Of(a.EncodeStateAsUpdate()), Hex.Of(d.EncodeStateAsUpdate()));   // nothing is held back as pending
     });
 
     private static readonly string MergedWithSkipV1 = "010301000401017401610a01840101016300";
@@ -211,7 +211,7 @@ public sealed class StructModelTests
             var w = new System.Buffers.ArrayBufferWriter<byte>();
             Assert.True(YUpdate.TryMerge(new System.ReadOnlyMemory<byte>[] { source[0], source[2] }, w, format).Ok);
             // Skip is info 0x0a followed by a raw VarUint length (1): the same bytes in V1 and V2, unlike GC whose V2 length is RLE.
-            HexAssert.Equal(Net.FromHex(format == UpdateFormat.V1 ? MergedWithSkipV1 : MergedWithSkipV2), w.WrittenSpan, format.ToString());
+            HexAssert.Equal(Hex.Bytes(format == UpdateFormat.V1 ? MergedWithSkipV1 : MergedWithSkipV2), w.WrittenSpan, format.ToString());
 
             var d = Net.Mk(9);
             d.ApplyUpdate(w.WrittenSpan, null, format);

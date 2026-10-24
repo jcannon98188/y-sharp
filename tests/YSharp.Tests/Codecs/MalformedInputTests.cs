@@ -3,6 +3,7 @@ using System.Buffers;
 using Xunit;
 using YSharp.TestKit.Traceability;
 using static YSharp.Tests.Codecs.Malformed;
+using YSharp.TestKit.Assertions;
 
 namespace YSharp.Tests.Codecs;
 

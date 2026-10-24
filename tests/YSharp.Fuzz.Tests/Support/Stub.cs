@@ -1,6 +1,7 @@
 using System;
 using Xunit;
 using YSharp.TestKit.Tiers;
+using YSharp.TestKit.Assertions;
 
 namespace YSharp.Fuzz;
 

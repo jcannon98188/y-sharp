@@ -7,6 +7,7 @@ using YSharp.Fuzz.Builder;
 using YSharp.Fuzz.Corpus;
 using YSharp.Fuzz.Guards;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Assertions;
 
 namespace YSharp.Fuzz.Tests;
 
