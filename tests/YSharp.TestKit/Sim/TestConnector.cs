@@ -13,7 +13,7 @@ namespace YSharp.TestKit.Sim;
 /// </summary>
 public sealed class TestYInstance
 {
-    private readonly List<(TestYInstance Sender, Queue<byte[]> Messages)> _receiving = new();
+    private readonly List<(TestYInstance Sender, Queue<SimMessage> Messages)> _receiving = new();
 
     public TestYInstance(TestConnector connector, int userId)
     {
@@ -47,9 +47,10 @@ public sealed class TestYInstance
         Publish(update, origin, SimFraming.FrameV2(SyncMessageType.Update, update));
     }
 
-    private void Publish(ReadOnlySpan<byte> update, object? origin, byte[] message)
+    private void Publish(ReadOnlySpan<byte> update, object? origin, byte[] frame)
     {
-        if (!ReferenceEquals(origin, Tc)) Tc.Broadcast(this, message);
+        // JS: broadcast first, then push; the message knows its position in this client's update list
+        if (!ReferenceEquals(origin, Tc)) Tc.Broadcast(this, new SimMessage(frame, SimMessageKind.Update, Updates.Count));
         Updates.Add(update.ToArray());
     }
 
@@ -64,28 +65,37 @@ public sealed class TestYInstance
     {
         if (Tc.OnlineConns.Contains(this)) return;
         Tc.OnlineConns.Add(this);
-        Tc.Broadcast(this, SimFraming.Step1(Tc.Format, Doc));
+        Tc.Broadcast(this, Step1Of(this));
         foreach (var remote in Tc.OnlineConns)
         {
-            if (!ReferenceEquals(remote, this)) Receive(SimFraming.Step1(Tc.Format, remote.Doc), remote);
+            if (!ReferenceEquals(remote, this)) Receive(Step1Of(remote), remote);
         }
     }
 
+    /// <summary>A fresh SyncStep1 for <paramref name="who"/>: the state vector is captured now, under its schedule name.</summary>
+    private SimMessage Step1Of(TestYInstance who) =>
+        new(SimFraming.Step1(Tc.Format, who.Doc), SimMessageKind.Step1, Name: Tc.Recorder?.StateVector(who.UserId));
+
     /// <summary>Queues a message; the connector decides when this client reads it.</summary>
-    public void Receive(byte[] message, TestYInstance remote)
+    public void Receive(byte[] message, TestYInstance remote) => Receive(new SimMessage(message, KindOf(message)), remote);
+
+    public void Receive(SimMessage message, TestYInstance remote)
     {
         var i = _receiving.FindIndex(e => ReferenceEquals(e.Sender, remote));
         if (i < 0)
         {
-            _receiving.Add((remote, new Queue<byte[]>()));
+            _receiving.Add((remote, new Queue<SimMessage>()));
             i = _receiving.Count - 1;
         }
         _receiving[i].Messages.Enqueue(message);
     }
 
-    internal IReadOnlyList<(TestYInstance Sender, Queue<byte[]> Messages)> Pending => _receiving;
+    /// <summary>Both framings start with the message type as a varuint (0 step 1, 1 step 2, 2 update).</summary>
+    private static SimMessageKind KindOf(byte[] frame) => (SimMessageKind)frame[0];
 
-    internal byte[] Dequeue(TestYInstance sender)
+    internal IReadOnlyList<(TestYInstance Sender, Queue<SimMessage> Messages)> Pending => _receiving;
+
+    internal SimMessage Dequeue(TestYInstance sender)
     {
         var i = _receiving.FindIndex(e => ReferenceEquals(e.Sender, sender));
         var m = _receiving[i].Messages.Dequeue();
@@ -100,16 +110,20 @@ public sealed class TestYInstance
 /// </summary>
 public sealed class TestConnector
 {
-    public TestConnector(IPrng gen, UpdateFormat format = UpdateFormat.V1)
+    public TestConnector(IPrng gen, UpdateFormat format = UpdateFormat.V1, ISimRecorder? recorder = null)
     {
         Gen = gen;
         Format = format;
+        Recorder = recorder;
     }
 
     public IPrng Gen { get; }
 
     /// <summary>The encoding this whole run uses (SIM-04: the init coin flip really selects it).</summary>
     public UpdateFormat Format { get; }
+
+    /// <summary>When set, receives the op log of the run (edits made through <see cref="Recorder"/> by the generators, and the delivery schedule).</summary>
+    public ISimRecorder? Recorder { get; }
 
     public OrderedSet<TestYInstance> AllConns { get; } = new();
     public OrderedSet<TestYInstance> OnlineConns { get; } = new();
@@ -118,7 +132,7 @@ public sealed class TestConnector
     public TestYInstance CreateY(int clientId) => new(this, clientId);
 
     /// <summary>Publish a message created by <paramref name="from"/> to all other online clients.</summary>
-    internal void Broadcast(TestYInstance from, byte[] message)
+    internal void Broadcast(TestYInstance from, SimMessage message)
     {
         if (!OnlineConns.Contains(from)) return;
         foreach (var remote in OnlineConns)
@@ -133,8 +147,15 @@ public sealed class TestConnector
         var receiver = Rng.Prng.OneOf(Gen, conns);
         var (sender, _) = Rng.Prng.OneOf(Gen, receiver.Pending.ToList());
         var message = receiver.Dequeue(sender);
-        var reply = SimFraming.Read(Format, message, receiver.Doc, this);
-        if (reply is { Length: > 0 }) sender.Receive(reply, receiver);
+        string? replyName = null;
+        switch (message.Kind)
+        {
+            case SimMessageKind.Step1: replyName = Recorder?.Reply(receiver.UserId, message.Name!); break;
+            case SimMessageKind.Step2: Recorder?.ApplyReply(receiver.UserId, message.Name!); break;
+            default: Recorder?.ApplyUpdate(receiver.UserId, sender.UserId, message.UpdateIndex); break;
+        }
+        var reply = SimFraming.Read(Format, message.Frame, receiver.Doc, this);
+        if (reply is { Length: > 0 }) sender.Receive(new SimMessage(reply, SimMessageKind.Step2, Name: replyName), receiver);
         return true;
     }
 

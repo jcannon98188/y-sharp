@@ -51,10 +51,15 @@ public static class SimHarness
     /// </summary>
     public static UpdateFormat ChooseEncoding(IPrng gen) => Prng.Bool(gen) ? UpdateFormat.V2 : UpdateFormat.V1;
 
-    /// <summary>JS <c>init</c>: connector, <paramref name="users"/> clients with ids <c>0..n-1</c>, all synced.</summary>
-    public static SimResult<T> Init<T>(IPrng gen, int users = 5, Func<TestYInstance, T>? initTestObject = null)
+    /// <summary>
+    /// JS <c>init</c>: connector, <paramref name="users"/> clients with ids <c>0..n-1</c>, all synced. A <paramref name="recorder"/>
+    /// receives the op log of the run (ADR 0017 golden fixtures, draw parity, repro files).
+    /// </summary>
+    public static SimResult<T> Init<T>(IPrng gen, int users = 5, Func<TestYInstance, T>? initTestObject = null, ISimRecorder? recorder = null)
     {
-        var connector = new TestConnector(gen, ChooseEncoding(gen));
+        var format = ChooseEncoding(gen);
+        recorder?.Begin(format);
+        var connector = new TestConnector(gen, format, recorder);
         var list = new List<TestYInstance>();
         for (var i = 0; i < users; i++) list.Add(connector.CreateY(i));
         connector.SyncAll();
@@ -82,9 +87,11 @@ public static class SimHarness
         IReadOnlyList<Action<TestYInstance, IPrng, T>> mods,
         int iterations,
         Func<TestYInstance, T>? initTestObject = null,
-        ISimInternals? internals = null)
+        ISimInternals? internals = null,
+        ISimRecorder? recorder = null,
+        Action<SimResult<T>>? beforeDestroy = null)
     {
-        var result = Init(gen, 5, initTestObject);
+        var result = Init(gen, 5, initTestObject, recorder);
         var connector = result.TestConnector;
         for (var i = 0; i < iterations; i++)
         {
@@ -99,7 +106,7 @@ public static class SimHarness
             var mod = Prng.OneOf(gen, mods);
             mod(result.Users[user], gen, result.TestObjects[user]);
         }
-        Compare(result.Users, internals);
+        Compare(result.Users, internals, beforeDestroy == null ? null : () => beforeDestroy(result));
         return result;
     }
 
@@ -108,9 +115,10 @@ public static class SimHarness
     /// updates it saw, then require every consecutive pair of replicas (real and merged) to agree on array, map, XML, text
     /// delta, state vector, snapshot and (through <paramref name="internals"/>) struct store and delete set.
     /// Differences from upstream: the caller's list is not mutated, and the delete-set result is asserted (SIM-02).
-    /// All docs are destroyed afterwards.
+    /// All docs are destroyed afterwards; <paramref name="beforeDestroy"/> runs after the checks, while the replicas can still be read
+    /// (upstream reads them after <c>compare</c> destroyed them, which only works in JS).
     /// </summary>
-    public static void Compare(IReadOnlyList<TestYInstance> users, ISimInternals? internals = null)
+    public static void Compare(IReadOnlyList<TestYInstance> users, ISimInternals? internals = null, Action? beforeDestroy = null)
     {
         Assert.True(users.Count >= 2, "compare needs at least two replicas");
         var connector = users[0].Tc;
@@ -150,6 +158,7 @@ public static class SimHarness
             internals?.AssertStoresEqual(docs[i], docs[i + 1]);
         }
 
+        beforeDestroy?.Invoke();
         foreach (var d in docs) d.Destroy();
     }
 
