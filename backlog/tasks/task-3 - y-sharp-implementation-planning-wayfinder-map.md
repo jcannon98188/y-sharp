@@ -4,7 +4,7 @@ title: 'y-sharp implementation planning: wayfinder map'
 status: To Do
 assignee: []
 created_date: '2026-10-24 16:51'
-updated_date: '2026-10-24 17:13'
+updated_date: '2026-10-24 17:48'
 labels:
   - 'wayfinder:map'
 dependencies: []
@@ -35,6 +35,8 @@ A spec-ready **y-sharp implementation plan** in Backlog: a parent task whose chi
 - [Research: Yjs and Yrs struct layout and the baseline workloads](TASK-3.3): Yjs figures are bytes per op; array needs a dense 8-byte chunked column; "item" and the steady-state mix are undefined (`docs/research/storage-layout.md`).
 - [Milestone boundaries and order](TASK-3.4): M0 spike and M1 values in parallel, then M2 core (store, integrate, transactions and lock, V1), then a fan-out of M3 V2, M4 types and events, M5 doc features and M6 protocols, closing with M7 integration and release (ADR 0018 amendment).
 - [Skip gating once the stub starts disappearing](TASK-3.9): declared spec-sized feature gates replace the global stub probe; tests whose features have not landed skip before running, the checker rejects untagged tests, NotImplementedException always fails; built by an M0 spec that blocks M1 (ADR 0020).
+- [Module boundaries and file ownership in src/YSharp](TASK-3.6): module folders per milestone; storage hidden behind an ItemRef handle; generic V1/V2 codec seam; partial-method lifecycle hooks; one owner per file, partial classes for shared public types; an M0 layout-skeleton spec (ADR 0021).
+- [M0 spike design](TASK-3.5): both models spiked local-only over a shared content layer behind a driver the real store later reuses; bytes per operation, median of 3; eliminate failures, prefer headroom, then simplicity (ADR 0018 spike amendment, ADR 0009 wording).
 
 ## Not yet specified
 

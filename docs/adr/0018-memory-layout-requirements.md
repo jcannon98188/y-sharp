@@ -30,7 +30,7 @@ Compaction of fragmented chunks and a fixed per-item byte count are not requirem
 
 ## How the budgets gate implementation
 
-1. **Spike gate (M0).** Before decode and integrate are built on a store, a spike of the chosen storage model runs the three slow-tier workloads (1M text inserts, 1M array pushes, 100k map keys) and the steady-state check (zero gen2 collections, no LOH growth over 100k edits). Bytes per item must be at or below the Yjs figure. The choice between object-per-item and indexed arenas is recorded in a follow-up ADR with those measurements. Nothing builds on a store that fails.
+1. **Spike gate (M0).** Before decode and integrate are built on a store, a spike of the chosen storage model runs the three slow-tier workloads (1M text inserts, 1M array pushes, 100k map keys) and the steady-state check (zero gen2 collections, no LOH growth over 100k edits). Bytes per item must be at or below the Yjs figure. The choice between object-per-item and indexed arenas is recorded in a follow-up ADR with those measurements. Nothing builds on a store that fails. The spike's design is under "Amendment: M0 spike design" below.
 2. **Milestone gate.** The milestones are listed under "Amendment: milestone boundaries and order" below. They replace the original list (store and integrate, V1 codec, V2 codec, shared types, transactions and events, awareness and sync). A milestone is done only when its hot paths from ADR 0009 are in `AllocationBudgets` with measured values (plus 25%), the zero-byte paths read 0, and its memory gate is green. Budgets only move down after that.
 3. **Pending hot paths.** A hot path whose milestone is still open may be pending. Pending paths are counted and the count never grows, like pending registry entries (ADR 0010). No milestone closes with a pending path of its own.
 4. **Layout changes.** Changing the storage model after M0 reruns the spike workloads and is a reviewed change with a reason.
@@ -57,3 +57,37 @@ Decided with the owner (TASK-3.4), from `docs/research/test-surface.md`. The gat
 - **The memory gate depends on the milestone.** M1 has no store and no memory gate. M2 and M3 rerun the M0 spike's private-harness workloads against the real store, so the spike harness is kept. From M4 onwards, when the public workloads in `Allocation/MemoryWorkloads.cs` can run, the slow memory tier is the gate.
 - **Hostile input closes as it goes.** Each codec or protocol milestone makes its own decode-side hostile tests pass. M7 owns the full fuzz, canary and BUD-12 runs over every decoder.
 - The per-ID split inside a prefix (for example V1 versus V2 `ENC` entries) is made when the plan is packaged (TASK-3.8), from the registry `layers` and the test files.
+
+## Amendment: M0 spike design
+
+Decided with the owner (TASK-3.5), from `docs/research/storage-layout.md`.
+
+- **Candidates.** Both storage models are built: object-per-item (A) and structs in chunked arenas addressed by index (B). Each runs local operations only. Each implements:
+  - a client table, and per-client sequences that support split
+  - neighbour, origin and right-origin links, and the parent sub-key
+  - local insert and delete
+  - the Yjs merge rules at commit (`Item.mergeWith`)
+  - search markers, or an index with the same per-operation cost
+  - a chunked delete set
+  - a map key table
+  - release of deleted payloads
+  - chunks of 64 KB or less
+
+  Not built: remote conflict resolution, codecs, events and the lock. The design must still leave room to add remote integration.
+- **Shared content layer.** Text-buffer slices, homogeneous 8-byte value columns and map payloads are one layer that both candidates use. The comparison therefore isolates the item model. The array figure of 8.31 B per operation needs the column whichever model wins.
+- **Driver and harness.** The workloads run through a small driver: insert a character at an index, delete at an index, push a value, set a key, commit. The two candidates are two adapters. In M2 the real `Store/` module becomes a third adapter, and the M2 and M3 memory gates rerun the same harness. The harness and driver live in `tests/YSharp.Tests/Allocation` (Nightly tier, Release only, internals visible). The candidates live in a throwaway `spike/YSharp.StoreSpike` project. The losing candidate is deleted when the storage ADR lands. M2 may port from the winner but does not have to. The spike project is deleted once M2's store passes the harness.
+- **Workloads.** These are the three slow-tier workloads exactly as `MemoryWorkloads` defines them, and the steady-state mix of `MemoryWorkloads.SteadyStateEdits`.
+- **Measurement.** The method is the same as `measure.mjs`: force two collections, read the heap, build, force two collections, read again, and divide by operations. Runs use Release, TieredCompilation off and workstation GC (the test projects' configuration). Each workload runs in its own process, and the median of 3 runs is taken. The steady-state check follows `MemoryTierTests`. Throughput (operations per second) is recorded but not gated.
+- **Selection.**
+  1. A candidate that fails any gate is out. The gates are text 194.77, array 8.31 and map 312.26 bytes per operation, zero gen2 collections, and no LOH growth beyond the allowance.
+  2. If both pass, the one with more headroom on its tightest gate wins.
+  3. If both have at least 20% headroom on every gate, object-per-item wins because it is simpler.
+  4. A winner more than 2x slower than the other needs the owner's sign-off.
+  5. If both fail, work stops and goes to the owner. A hybrid spike is the next step.
+- **The follow-up storage ADR records:**
+  - a measurement table per candidate: bytes and structs per operation, gen2 count, LOH growth, throughput, plus runtime, GC configuration and commit
+  - the choice, and which selection rule decided it
+  - how the winner fits behind the `ItemRef` handle (ADR 0021)
+  - for arenas, the index-reuse policy (a generation check, or no reuse)
+  - the rule for releasing deleted payloads
+  - the remaining risks, and how to rerun the spike

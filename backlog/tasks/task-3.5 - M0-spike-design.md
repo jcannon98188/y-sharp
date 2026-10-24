@@ -1,10 +1,11 @@
 ---
 id: TASK-3.5
 title: M0 spike design
-status: To Do
-assignee: []
+status: Done
+assignee:
+  - '@claude'
 created_date: '2026-10-24 16:52'
-updated_date: '2026-10-24 17:05'
+updated_date: '2026-10-24 17:47'
 labels:
   - 'wayfinder:grilling'
 dependencies:
@@ -26,15 +27,25 @@ What exactly does the M0 spike build and measure for each of the two storage mod
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Spike scope, location and disposal are decided
-- [ ] #2 Measurement procedure and the selection rule between the two models are decided
-- [ ] #3 The contents of the follow-up storage ADR are listed
+- [x] #1 Spike scope, location and disposal are decided
+- [x] #2 Measurement procedure and the selection rule between the two models are decided
+- [x] #3 The contents of the follow-up storage ADR are listed
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Read storage research sections 4-5 and the suite's memory workloads. 2. Grill scope, measurement, selection and ADR contents. 3. Record in ADR 0018 (spike) and ADR 0009 (unit).
+<!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
-From the research: the spike must name the unit of "bytes per item" (per op vs per struct; they diverge 1M:1 for the array workload), define the 100k steady-state edit mix ADR 0009 leaves open, and meet 8.31 B/op for array pushes (needs a homogeneous 8-byte chunked column). The spike needs a private harness; the public API cannot drive the workloads before types and transactions exist. See docs/research/storage-layout.md sections 4-5.
-
-Decided in TASK-3.4: the spike's private harness is kept. M2 and M3 rerun it against the real store as their memory gate (ADR 0018 amendment).
+The suite already defines the steady-state mix (MemoryWorkloads.SteadyStateEdits) and divides by operations, which settles the two gaps the research raised. Owner agreed Q1-Q7 in chat on 2026-10-24.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Both models (object-per-item, chunked arenas) get a local-only spike over a shared content layer. A driver interface runs the suite's three workloads and steady-state mix; the harness lives in tests/YSharp.Tests/Allocation, so M2 and M3 rerun it on the real store. Candidates sit in a throwaway spike/YSharp.StoreSpike project. Measurement follows measure.mjs: Release, one process per workload, median of 3. Selection eliminates any failure, prefers headroom, prefers object-per-item when both have 20% headroom, needs sign-off when the winner is 2x slower, and escalates if both fail. The storage ADR contents are listed. ADR 0009 now says bytes per operation and names the steady-state mix. Recorded in ADR 0018 and 0009. Verified by owner review in chat.
+<!-- SECTION:FINAL_SUMMARY:END -->
