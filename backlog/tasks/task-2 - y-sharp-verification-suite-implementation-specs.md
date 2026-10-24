@@ -4,7 +4,7 @@ title: 'y-sharp verification suite: implementation specs'
 status: To Do
 assignee: []
 created_date: '2026-10-23 22:01'
-updated_date: '2026-10-24 06:12'
+updated_date: '2026-10-24 10:34'
 labels: []
 dependencies: []
 references:
@@ -32,4 +32,6 @@ Spec 8 API gaps: seams by reflection (Doc.CollectGarbage/ShouldLoad/AutoLoad/Col
 Spec 9 API changes/gaps: added Awareness.TryEncodeUpdate and optional YSync.TryReadMessage errorHandler to the stub (AW-31/32, SY-8/19/20); client ids uint vs 53-bit (AW-34); GetStates snapshot vs live semantics unspecified (AW-13); AU-5 assumes ArgumentNullException. Needs ADR 0008 decisions.
 
 Spec 10: Q25 now active (owner 10). API gaps: no Y.cleanupYTextFormatting counterpart (internal int YText.CleanupFormatting() seam); Q25 fixture assumes YEvent.GetPath() relative to CurrentTarget. fixtures/sim ~18MB. Randomized gating budget (~60s) unmeasured until implementation exists. Spec 11: ERR-20 pending (needs fault-injection seam); limit semantics unspecified (MaxAnyDepth, MaxStructsPerUpdate, MaxStringBytes, MaxUpdateBytes); ERR-19 assumes OOM from observer propagates. 2-min gating budget unproven. AFL++ job untested. Merged high-water: registry 36 / ledger 0.
+
+Spec 12 API gaps: needs internal static class YSharp.ScheduleSeam (settable Action<string>? Point, Action<string, Func<bool>>? Block) per tests/YSharp.TestKit/Concurrency/ScheduleSeam.cs; CC-9 exception type for stale views unspecified; TryTransact under held read lock unspecified; Transact(body, origin, timeout) with null origin binds to generic overload (use named args); CC-18 lock-order checker is Debug-only. Pending: registry 16 / ledger 0.
 <!-- SECTION:NOTES:END -->
