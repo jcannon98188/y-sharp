@@ -1,10 +1,10 @@
 ---
 id: TASK-2
 title: 'y-sharp verification suite: implementation specs'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-10-23 22:01'
-updated_date: '2026-10-24 10:38'
+updated_date: '2026-10-24 19:43'
 labels: []
 dependencies: []
 references:
@@ -37,3 +37,9 @@ Spec 12 API gaps: needs internal static class YSharp.ScheduleSeam (settable Acti
 
 Spec 13 limits: live properties unrun until implementation exists (expect unrecorded divergences needing normalisers); no awareness/sync.* or XML/nested/subdoc generators yet (SharpSide.Extensions hook only); events/structs/ds not compared on the y-sharp side yet.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+All 14 suite specs are Done. The one criterion that could not run against the stub (end-to-end sim harness) moved to TASK-4.38 in the implementation plan.
+<!-- SECTION:FINAL_SUMMARY:END -->

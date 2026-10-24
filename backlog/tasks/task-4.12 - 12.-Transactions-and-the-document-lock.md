@@ -1,0 +1,48 @@
+---
+id: TASK-4.12
+title: 12. Transactions and the document lock
+status: To Do
+assignee: []
+created_date: '2026-10-24 19:41'
+updated_date: '2026-10-24 19:42'
+labels:
+  - spec
+  - 'model:opus'
+milestone: m-2
+dependencies:
+  - TASK-4.11
+parent_task_id: TASK-4
+ordinal: 12000
+---
+
+## Description
+
+<!-- SECTION:DESCRIPTION:BEGIN -->
+Every mutator runs in a transaction that takes the document lock (ADR 0006 CC-8), so the lock and the transaction lifecycle are core, not a later milestone.
+
+**Features:** `Transactions`
+**Owns:** `src/YSharp/Transactions/`, `Doc.cs` (transaction members), `Transaction`
+**Registry:** lifecycle `CC` entries this spec can satisfy single-threaded (CC scenario and stress tests close in spec 39)
+**Test files:** `Concurrency/LifecycleTests.cs`, `Concurrency/AcquireTests.cs` (uncontended cases)
+**Seams provided:** `ScheduleSeam.Point`/`Block` calls from every lock transition; the partial hook points declared by spec 2 are invoked in cleanup
+**Suggested model:** opus (override freely)
+
+Read first: `docs/handoff-implementation-planning.md`, ADRs 0005, 0006, 0008, 0018 (amendments), 0020, 0021, 0022, and the research notes for this area.
+<!-- SECTION:DESCRIPTION:END -->
+
+## Acceptance Criteria
+<!-- AC:BEGIN -->
+- [ ] #1 Every test whose required features have all landed passes, and no test requiring this spec's features skips
+- [ ] #2 This spec's features are added to `Features.Landed`
+- [ ] #3 The traceability gate passes and no pending registry entry is added
+- [ ] #4 Implicit transactions join the calling thread's open transaction; `Transact`, `TryTransact`, `ReadTransact`, `BeginTransaction`, `TransactionScope` and `TransactWithTimeout` follow ADR 0006 and 0008
+- [ ] #5 Stale views throw `YLifetimeException`; read-to-write upgrade returns `UpgradeRefused` or throws `YConcurrencyException`
+<!-- AC:END -->
+
+## Definition of Done
+<!-- DOD:BEGIN -->
+- [ ] #1 `dotnet build YSharp.slnx` has 0 warnings
+- [ ] #2 `dotnet test --solution YSharp.slnx` is green in Debug and in Release
+- [ ] #3 Fixture drift check (`npm run check` in `tools/fixture-gen`) is clean
+- [ ] #4 ADR 0022 followed: suite changes in separate `suite:` commits, a Suite changes list in the notes, no open owner decision
+<!-- DOD:END -->
