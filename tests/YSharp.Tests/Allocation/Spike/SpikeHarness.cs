@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime;
 
-namespace YSharp.StoreSpike.Harness;
+namespace YSharp.StoreHarness;
 
 /// <summary>One measured run (or the median of three). Field names are the report keys of ADR 0018's spike table.</summary>
 public sealed record WorkloadMeasurement(
@@ -128,18 +128,18 @@ public static class SpikeHarness
 }
 
 /// <summary>
-/// Candidate registry and the one-process-per-workload runner. The runner launches the spike assembly with <c>measure</c> for each run, so every
-/// workload gets a fresh process, and takes the median of <see cref="Runs"/> runs.
+/// Candidate registry and the one-process-per-workload runner. The runner launches the host executable with <c>measure</c> for each run, so
+/// every workload gets a fresh process, and takes the median of <see cref="SpikeProcess.Runs"/> runs.
 /// </summary>
 public static class SpikeCandidates
 {
     public const string Control = "control";
-    public const string ObjectPerItem = "object-per-item";
+    public const string RealStore = "real-store";
 
     public static Func<IStoreDriver> Factory(string candidate) => candidate switch
     {
         Control => () => new ControlStore(),
-        ObjectPerItem => () => new YSharp.StoreSpike.ObjectPerItem.ObjectPerItemStore(),
+        RealStore => () => new RealStoreDriver(),
         _ => throw new ArgumentException("unknown candidate " + candidate, nameof(candidate)),
     };
 }
@@ -157,6 +157,13 @@ public static class SpikeProcess
             : SpikeHarness.MeasureWorkload(candidate, create, workload, SpikeWorkloads.ItemsOf(workload));
     }
 
+    /// <summary><see cref="MeasureChild"/> as one JSON line: what the host process (<c>YSharp.StoreHarness</c>) calls by reflection and prints.</summary>
+    public static string MeasureChildJson(string candidate, string workload) =>
+        System.Text.Json.JsonSerializer.Serialize(MeasureChild(candidate, workload));
+
+    /// <summary>The host executable, copied next to the test assembly by its project reference.</summary>
+    public static string HostPath => System.IO.Path.Combine(System.IO.Path.GetDirectoryName(typeof(SpikeProcess).Assembly.Location)!, "YSharp.StoreHarness.dll");
+
     /// <summary>Runs <see cref="Runs"/> fresh processes for one workload and returns their median.</summary>
     public static WorkloadMeasurement MedianOfRuns(string candidate, string workload)
     {
@@ -168,10 +175,11 @@ public static class SpikeProcess
     private static WorkloadMeasurement RunChild(string candidate, string workload)
     {
         var start = new ProcessStartInfo("dotnet") { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
-        start.ArgumentList.Add(typeof(SpikeProcess).Assembly.Location);
+        start.ArgumentList.Add(HostPath);
         start.ArgumentList.Add("measure");
         start.ArgumentList.Add(candidate);
         start.ArgumentList.Add(workload);
+        start.ArgumentList.Add(typeof(SpikeProcess).Assembly.Location);
 
         using var process = Process.Start(start) ?? throw new InvalidOperationException("could not start the measurement process");
         var stdout = process.StandardOutput.ReadToEnd();

@@ -1,21 +1,21 @@
-using YSharp.StoreSpike.Content;
+using System;
 
-namespace YSharp.StoreSpike.ObjectPerItem;
+namespace YSharp.Store;
 
-/// <summary>One deleted clock range of one client (Yjs <c>DeleteItem</c>, plus the client slot).</summary>
-public readonly record struct DeleteRange(int Client, uint Clock, uint Length)
+/// <summary>One deleted clock range of one client (Yjs <c>DeleteItem</c> plus its client).</summary>
+internal readonly record struct DeleteRange(ulong Client, long Clock, long Length)
 {
-    internal uint End => Clock + Length;
+    internal long End => Clock + Length;
 }
 
 /// <summary>
-/// A delete set kept sorted by (client slot, clock) and merged as it grows, so the commit needs no separate <c>sortAndMergeDeleteSet</c> pass.
-/// Ranges are 12-byte structs in chunks of at most 64 KB. The store owns one and clears it after every commit, so a steady stream of
-/// edits reuses its blocks instead of allocating new ones.
+/// The internal delete set (Yjs <c>DeleteSet</c>): clock ranges kept sorted by (client, clock) and merged as they are added, so it never needs a
+/// separate <c>sortAndMergeDeleteSet</c> pass. Ranges are held in chunks of at most 64 KB. A transaction's set is cleared after its commit and
+/// keeps its blocks, so a steady stream of edits reuses them instead of allocating new ones.
 /// </summary>
-public sealed class DeleteSet
+internal sealed class DeleteRanges
 {
-    private readonly SmallStartList<DeleteRange> _ranges = new();
+    private readonly ChunkedList<DeleteRange> _ranges = new();
 
     public int Count => _ranges.Count;
 
@@ -23,11 +23,12 @@ public sealed class DeleteSet
 
     internal long MaxChunkBytes => _ranges.MaxBlockBytes;
 
-    public void Add(int client, uint clock, uint length)
+    /// <summary>Yjs <c>addToDeleteSet</c>, merging with any range it touches or overlaps.</summary>
+    public void Add(ulong client, long clock, long length)
     {
-        if (length == 0) return;
+        if (length <= 0) return;
 
-        // first range that starts after (client, clock)
+        // the first range that starts after (client, clock)
         int lo = 0, hi = _ranges.Count;
         while (lo < hi)
         {
@@ -44,7 +45,6 @@ public sealed class DeleteSet
             var prev = _ranges[at - 1];
             if (prev.Client == client && prev.End >= clock)
             {
-                // extend the previous range
                 at--;
                 clock = prev.Clock;
                 if (prev.End > end) end = prev.End;
@@ -59,7 +59,7 @@ public sealed class DeleteSet
     }
 
     /// <summary>Yjs <c>isDeleted</c>.</summary>
-    public bool IsDeleted(int client, uint clock)
+    public bool Contains(ulong client, long clock)
     {
         int lo = 0, hi = _ranges.Count - 1;
         while (lo <= hi)
@@ -75,22 +75,23 @@ public sealed class DeleteSet
     }
 
     /// <summary>Empties the set but keeps its blocks for the next transaction.</summary>
-    public void Clear()
-    {
-        for (var i = _ranges.Count - 1; i >= 0; i--) _ranges.RemoveAt(i);
-    }
+    public void Clear() => _ranges.Clear();
 
     private void AbsorbFollowing(int at)
     {
         var current = _ranges[at];
-        while (at + 1 < _ranges.Count)
+        var remove = 0;
+        while (at + 1 + remove < _ranges.Count)
         {
-            var next = _ranges[at + 1];
+            var next = _ranges[at + 1 + remove];
             if (next.Client != current.Client || next.Clock > current.End) break;
-            var end = next.End > current.End ? next.End : current.End;
+            var end = Math.Max(next.End, current.End);
             current = new DeleteRange(current.Client, current.Clock, end - current.Clock);
-            _ranges[at] = current;
-            _ranges.RemoveAt(at + 1);
+            remove++;
         }
+
+        if (remove == 0) return;
+        _ranges[at] = current;
+        _ranges.RemoveRange(at + 1, remove);
     }
 }

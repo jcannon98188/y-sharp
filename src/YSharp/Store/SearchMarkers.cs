@@ -1,36 +1,14 @@
 using System;
 
-namespace YSharp.StoreSpike.ObjectPerItem;
-
-/// <summary>A shared type's list or map root: the first item of its sequence, its visible length, and its search markers or key table.</summary>
-public sealed class Branch
-{
-    internal Item? Start;
-
-    /// <summary>The last item of the sequence (deleted or not), or null when it is empty. Not used for maps.</summary>
-    internal Item? End;
-
-    internal int Length;
-    internal readonly SearchMarkers? Markers;
-    internal readonly MapKeyTable? Map;
-
-    private Branch(SearchMarkers? markers, MapKeyTable? map)
-    {
-        Markers = markers;
-        Map = map;
-    }
-
-    internal static Branch Sequence(SearchMarkers markers) => new(markers, null);
-
-    internal static Branch Keyed(MapKeyTable map) => new(null, map);
-}
+namespace YSharp.Store;
 
 /// <summary>
 /// Yjs search markers (<c>AbstractType.js</c>): at most 80 remembered (item, index) pairs per sequence, so an index lookup walks only from the
-/// nearest marker. Fixed arrays, allocated once per branch, so marker upkeep allocates nothing. The timestamp clock belongs to the document,
-/// not to a static, so no state outlives the document (ADR 0018).
+/// nearest marker. Fixed arrays allocated once per branch, so marker upkeep allocates nothing. The timestamp clock belongs to the document, not
+/// to a static, so no state outlives the document (ADR 0018). They live in the store because merging and splitting items must keep them
+/// pointing at live items.
 /// </summary>
-public sealed class SearchMarkers
+internal sealed class SearchMarkers
 {
     public const int Max = 80;
 
@@ -47,7 +25,7 @@ public sealed class SearchMarkers
     /// <summary>A marker found by <see cref="Find"/>: the marked item and its index.</summary>
     internal readonly record struct Hit(Item Item, int Index);
 
-    /// <summary>Yjs <c>findMarker</c>: returns a refreshed marker at or near <paramref name="index"/>, or null when the walk should start at the front.</summary>
+    /// <summary>Yjs <c>findMarker</c>: a refreshed marker at or near <paramref name="index"/>, or null when the walk should start at the front.</summary>
     internal Hit? Find(Branch parent, int index)
     {
         if (parent.Start is null || index == 0) return null;
@@ -73,7 +51,7 @@ public sealed class SearchMarkers
             if (!p.Deleted && p.Countable)
             {
                 if (index < pindex + p.Length) break;
-                pindex += p.Length;
+                pindex += (int)p.Length;
             }
 
             p = p.Right;
@@ -83,14 +61,14 @@ public sealed class SearchMarkers
         while (p.Left is not null && pindex > index)
         {
             p = p.Left;
-            if (!p.Deleted && p.Countable) pindex -= p.Length;
+            if (!p.Deleted && p.Countable) pindex -= (int)p.Length;
         }
 
         // move left until p cannot be merged with its left neighbour
-        while (p.Left is not null && p.Left.Client == p.Client && p.Left.Clock + (uint)p.Left.Length == p.Clock)
+        while (p.Left is not null && p.Left.Client == p.Client && p.Left.Clock + p.Left.Length == p.Clock)
         {
             p = p.Left;
-            if (!p.Deleted && p.Countable) pindex -= p.Length;
+            if (!p.Deleted && p.Countable) pindex -= (int)p.Length;
         }
 
         if (best >= 0 && Math.Abs(_indexes[best] - pindex) < parent.Length / (double)Max)
@@ -115,7 +93,7 @@ public sealed class SearchMarkers
                 while (p is not null && (p.Deleted || !p.Countable))
                 {
                     p = p.Left;
-                    if (p is not null && !p.Deleted && p.Countable) _indexes[i] -= p.Length;
+                    if (p is not null && !p.Deleted && p.Countable) _indexes[i] -= (int)p.Length;
                 }
 
                 if (p is null || p.Marker)
@@ -132,14 +110,14 @@ public sealed class SearchMarkers
         }
     }
 
-    /// <summary>The merge rule of <c>Item.mergeWith</c>: a marker on <paramref name="right"/> moves to <paramref name="left"/>.</summary>
+    /// <summary>The marker rule of <c>Item.mergeWith</c>: a marker on <paramref name="right"/> moves to <paramref name="left"/>.</summary>
     internal void Repoint(Item right, Item left)
     {
         for (var i = 0; i < _count; i++)
         {
             if (!ReferenceEquals(_items[i], right)) continue;
             _items[i] = left;
-            if (!left.Deleted && left.Countable) _indexes[i] -= left.Length;
+            if (!left.Deleted && left.Countable) _indexes[i] -= (int)left.Length;
         }
     }
 

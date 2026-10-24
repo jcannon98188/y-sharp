@@ -1,6 +1,6 @@
 using System;
 
-namespace YSharp.StoreSpike.Harness;
+namespace YSharp.StoreHarness;
 
 /// <summary>
 /// The three slow-tier workloads and the steady-state mix, written against <see cref="IStoreDriver"/>. They issue the same operations, in the same

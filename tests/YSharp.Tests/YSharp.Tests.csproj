@@ -14,11 +14,8 @@
   <ItemGroup>
     <ProjectReference Include="..\YSharp.TestKit\YSharp.TestKit.csproj" />
     <ProjectReference Include="..\..\src\YSharp\YSharp.csproj" />
-    <!-- The M0 spike content layer and the harness (ADR 0018). The harness sources are compiled into the spike project, not here. -->
-    <ProjectReference Include="..\..\spike\YSharp.StoreSpike\YSharp.StoreSpike.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="Allocation\Spike\**" />
+    <!-- The spike harness's process host (ADR 0018, ADR 0023): referenced so it is built and copied next to this assembly, which holds the harness. -->
+    <ProjectReference Include="..\YSharp.StoreHarness\YSharp.StoreHarness.csproj" />
   </ItemGroup>
   <ItemGroup>
     <!-- The benchmark comparison has no dependencies, so the gating tests compile it directly instead of referencing the BenchmarkDotNet project (Spec 14). -->

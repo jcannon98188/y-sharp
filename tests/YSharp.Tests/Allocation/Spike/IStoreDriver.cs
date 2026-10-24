@@ -1,4 +1,4 @@
-namespace YSharp.StoreSpike.Harness;
+namespace YSharp.StoreHarness;
 
 /// <summary>What a store reports about its own work. <c>StructCount</c> counts every item the store created (ADR 0018, structs per operation).</summary>
 public readonly record struct DriverStats(long StructCount, long Commits);

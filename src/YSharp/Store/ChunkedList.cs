@@ -1,19 +1,26 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using YSharp.StoreSpike.Content;
 
-namespace YSharp.StoreSpike.ObjectPerItem;
+namespace YSharp.Store;
+
+/// <summary>The chunk ceiling of ADR 0018: no document-owned allocation grows past about 64 KB, so steady-state edits never reach the large object heap.</summary>
+internal static class ChunkLimits
+{
+    public const int ChunkBytes = 64 * 1024;
+}
 
 /// <summary>
-/// The candidate's own chunked list for document tables that are usually small (the client table, per-client struct lists, the key table's
-/// buckets). It behaves like <see cref="ChunkedList{T}"/>, but its first block starts at 16 elements and doubles until it reaches the 64 KB
-/// block size; only then are further full blocks added. A document with one client and a short array therefore holds a few hundred bytes
-/// of tables, not one 64 KB block per table, which matters to the per-operation figure of the array workload.
+/// A growable sequence stored in blocks of at most <see cref="ChunkLimits.ChunkBytes"/> (ADR 0018, chunked storage). The first block starts at 16
+/// elements and doubles until it reaches the full block size; only then are further full blocks added. A small document therefore holds a few
+/// hundred bytes per table, not one 64 KB block per table. Adding never copies existing full blocks; insert and remove shift within blocks and
+/// carry one element across each block boundary.
 /// </summary>
-public sealed class SmallStartList<T>
+internal sealed class ChunkedList<T>
 {
+    /// <summary>Elements per full block for <typeparamref name="T"/>: the largest count whose block stays within the chunk ceiling.</summary>
     public static readonly int BlockCapacity = Math.Max(1, ChunkLimits.ChunkBytes / Unsafe.SizeOf<T>());
+
     private const int FirstCapacity = 16;
 
     private readonly List<T[]> _blocks = new(1);
@@ -21,6 +28,7 @@ public sealed class SmallStartList<T>
 
     public int Count => _count;
 
+    /// <summary>Size in bytes of the largest block allocated; never above the chunk ceiling.</summary>
     public long MaxBlockBytes
     {
         get
@@ -39,12 +47,16 @@ public sealed class SmallStartList<T>
             if ((uint)index >= (uint)_count) throw new ArgumentOutOfRangeException(nameof(index));
             return _blocks[index / BlockCapacity][index % BlockCapacity];
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         set
         {
             if ((uint)index >= (uint)_count) throw new ArgumentOutOfRangeException(nameof(index));
             _blocks[index / BlockCapacity][index % BlockCapacity] = value;
         }
     }
+
+    /// <summary>The last element; the list must not be empty.</summary>
+    public T Last => this[_count - 1];
 
     public void Add(T item)
     {
@@ -56,6 +68,12 @@ public sealed class SmallStartList<T>
     public void Insert(int index, T item)
     {
         if ((uint)index > (uint)_count) throw new ArgumentOutOfRangeException(nameof(index));
+        if (index == _count)
+        {
+            Add(item);
+            return;
+        }
+
         EnsureRoomFor(_count + 1);
         var carry = item;
         var block = index / BlockCapacity;
@@ -71,7 +89,7 @@ public sealed class SmallStartList<T>
                 break;
             }
 
-            // full block: its last element moves to the front of the next block
+            // A full block: its last element moves to the front of the next block.
             var spilled = data[data.Length - 1];
             Array.Copy(data, offset, data, offset + 1, data.Length - 1 - offset);
             data[offset] = carry;
@@ -94,7 +112,7 @@ public sealed class SmallStartList<T>
             Array.Copy(data, offset + 1, data, offset, used - offset - 1);
             if (block == lastBlock)
             {
-                data[used - 1] = default!; // drop the reference, so a removed item is not kept alive
+                data[used - 1] = default!; // drop the reference, so a removed element is not kept alive
                 break;
             }
 
@@ -122,6 +140,17 @@ public sealed class SmallStartList<T>
 
         for (var i = _count - count; i < _count; i++) _blocks[i / BlockCapacity][i % BlockCapacity] = default!;
         _count -= count;
+    }
+
+    /// <summary>Empties the list but keeps its blocks, so a list reused per transaction allocates nothing once warm.</summary>
+    public void Clear()
+    {
+        if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+        {
+            foreach (var block in _blocks) Array.Clear(block);
+        }
+
+        _count = 0;
     }
 
     private int UsedIn(int block) => Math.Clamp(_count - block * BlockCapacity, 0, BlockCapacity);

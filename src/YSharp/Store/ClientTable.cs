@@ -1,42 +1,48 @@
 using System;
-using YSharp.StoreSpike.Content;
 
-namespace YSharp.StoreSpike.ObjectPerItem;
+namespace YSharp.Store;
 
-/// <summary>One client's structs, sorted by clock and contiguous (Yjs <c>StructStore.clients</c> entry). The list holds references in chunks of at most 64 KB.</summary>
-public sealed class ClientStructs
+/// <summary>One client's structs, sorted by clock and contiguous (Yjs <c>StructStore.clients</c> entry, STR-02). References are held in chunks of at most 64 KB.</summary>
+internal sealed class ClientStructs
 {
     internal readonly ulong Id;
-    internal readonly SmallStartList<Item> Structs = new();
+    internal readonly int Slot;
+    internal readonly ChunkedList<Item> Structs = new();
 
-    internal ClientStructs(ulong id) => Id = id;
+    internal ClientStructs(ulong id, int slot)
+    {
+        Id = id;
+        Slot = slot;
+    }
 
     /// <summary>The next clock this client will use (Yjs <c>getState</c>).</summary>
-    internal uint NextClock
+    internal long NextClock
     {
         get
         {
             if (Structs.Count == 0) return 0;
-            var last = Structs[Structs.Count - 1];
-            return last.Clock + (uint)last.Length;
+            var last = Structs.Last;
+            return last.Clock + last.Length;
         }
     }
 
-    /// <summary>Yjs <c>findIndexSS</c>: pivoted binary search for the struct that contains <paramref name="clock"/>.</summary>
-    internal int FindIndex(uint clock)
+    /// <summary>Yjs <c>findIndexSS</c> (STR-46): pivoted binary search for the struct that holds <paramref name="clock"/>.</summary>
+    internal int FindIndex(long clock)
     {
         var left = 0;
         var right = Structs.Count - 1;
+        if (right < 0) throw new YInternalException($"No struct holds clock {clock}: the client has no structs.");
         var mid = Structs[right];
         if (mid.Clock == clock) return right;
-        var lastClock = mid.Clock + (uint)mid.Length - 1;
-        var midIndex = lastClock == 0 ? 0 : (int)Math.Min(right, (double)clock / lastClock * right);
+        var lastClock = mid.Clock + mid.Length - 1;
+        var midIndex = lastClock <= 0 ? 0 : (int)Math.Min(right, Math.Floor((double)clock / lastClock * right));
+        if (midIndex < 0) midIndex = 0;
         while (left <= right)
         {
             mid = Structs[midIndex];
             if (mid.Clock <= clock)
             {
-                if (clock < mid.Clock + (uint)mid.Length) return midIndex;
+                if (clock < mid.Clock + mid.Length) return midIndex;
                 left = midIndex + 1;
             }
             else
@@ -47,34 +53,37 @@ public sealed class ClientStructs
             midIndex = (left + right) / 2;
         }
 
-        throw new InvalidOperationException($"no struct holds clock {clock}");
+        throw new YInternalException($"No struct holds clock {clock}.");
     }
 }
 
 /// <summary>
-/// The client table: 53-bit client ids (held as <see cref="ulong"/>, ADR 0018) mapped to a dense slot. Items store the slot, not the id, so an id
-/// is 8 bytes inline. Slots are never reused. Both the slot list and the id-sorted index grow in chunks of at most 64 KB.
+/// The client table: 53-bit client ids (held as <see cref="ulong"/>, ADR 0018) mapped to dense slots. Items store the slot, not the id. Slots are
+/// never reused. The slot list and the id-sorted index both grow in chunks of at most 64 KB.
 /// </summary>
-public sealed class ClientTable
+internal sealed class ClientTable
 {
     public const ulong MaxClientId = (1UL << 53) - 1;
 
-    private readonly SmallStartList<ClientStructs> _bySlot = new();
-    private readonly SmallStartList<int> _sortedSlots = new();
+    private readonly ChunkedList<ClientStructs> _bySlot = new();
+    private readonly ChunkedList<int> _sortedSlots = new();
 
     public int Count => _bySlot.Count;
 
     internal ClientStructs this[int slot] => _bySlot[slot];
 
+    /// <summary>The slot at <paramref name="rank"/> in ascending client-id order.</summary>
+    internal int SlotAtRank(int rank) => _sortedSlots[rank];
+
     /// <summary>The slot of <paramref name="client"/>, adding it if it is new.</summary>
     internal int SlotOf(ulong client)
     {
-        if (client > MaxClientId) throw new ArgumentOutOfRangeException(nameof(client), "client ids are 53-bit");
+        if (client > MaxClientId) throw new ArgumentOutOfRangeException(nameof(client), "Client ids are 53-bit.");
         var at = Search(client);
         if (at >= 0) return _sortedSlots[at];
 
         var slot = _bySlot.Count;
-        _bySlot.Add(new ClientStructs(client));
+        _bySlot.Add(new ClientStructs(client, slot));
         _sortedSlots.Insert(~at, slot);
         return slot;
     }

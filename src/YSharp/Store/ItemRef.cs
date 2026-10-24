@@ -1,34 +1,39 @@
+using System;
 using System.Runtime.CompilerServices;
 
-namespace YSharp.StoreSpike.ObjectPerItem;
+namespace YSharp.Store;
 
 /// <summary>
-/// The opaque item handle of ADR 0021, as candidate A would provide it. Integration, codecs and types hold an <see cref="ItemRef"/> and call
-/// small accessors; they never see whether an item is an object (this candidate) or an index into an arena (candidate B). Here the handle is
-/// one reference wide, so passing it costs what passing a raw <see cref="Item"/> costs, and each accessor is one inlined field read. Accessors
-/// that need document tables (client ids, origins) are on the store: <see cref="ObjectPerItemStore.ClientOf"/>,
-/// <see cref="ObjectPerItemStore.OriginOf"/>, <see cref="ObjectPerItemStore.RightOriginOf"/>. The handle compares by identity, and
-/// <see cref="IsNull"/> stands for Yjs's <c>null</c> neighbour.
+/// The opaque struct handle of ADR 0021 and ADR 0023. Integration, codecs and types hold an <see cref="ItemRef"/> and call small accessors; they
+/// never see that a struct is an object. The handle is one reference wide, each accessor is one inlined field read, equality is reference
+/// identity, and <see cref="IsNull"/> stands for Yjs's <c>null</c>. Accessors that need document tables (client ids, origins, keys, content)
+/// are on <see cref="StructStore"/>. A handle kept across a commit may name a struct that has since merged into its left neighbour; re-find
+/// by id, as Yjs code does.
 /// </summary>
-public readonly struct ItemRef : System.IEquatable<ItemRef>
+internal readonly struct ItemRef : IEquatable<ItemRef>
 {
     internal readonly Item? Item;
 
     internal ItemRef(Item? item) => Item = item;
 
+    public static ItemRef Null => default;
+
     public bool IsNull => Item is null;
 
-    public uint Clock
+    public long Clock
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => Item!.Clock;
     }
 
-    public int Length
+    public long Length
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => Item!.Length;
     }
+
+    /// <summary>Clock of the last element (Yjs <c>lastId.clock</c>).</summary>
+    public long LastClock => Item!.LastClock;
 
     public bool IsDeleted
     {
@@ -41,6 +46,11 @@ public readonly struct ItemRef : System.IEquatable<ItemRef>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => Item!.Countable;
     }
+
+    public bool IsKeep => Item!.Keep;
+
+    /// <summary>True for a GC struct (Yjs <c>GC</c>), false for an item.</summary>
+    public bool IsGc => Item!.IsGc;
 
     public ContentKind Kind
     {
@@ -60,6 +70,11 @@ public readonly struct ItemRef : System.IEquatable<ItemRef>
         get => new(Item!.Right);
     }
 
+    public Branch? Parent => Item!.Parent;
+
+    /// <summary>True when the item has a map key (Yjs <c>parentSub !== null</c>).</summary>
+    public bool HasParentSub => Item!.ParentSub >= 0;
+
     public bool Equals(ItemRef other) => ReferenceEquals(Item, other.Item);
 
     public override bool Equals(object? obj) => obj is ItemRef other && Equals(other);
@@ -69,4 +84,6 @@ public readonly struct ItemRef : System.IEquatable<ItemRef>
     public static bool operator ==(ItemRef a, ItemRef b) => a.Equals(b);
 
     public static bool operator !=(ItemRef a, ItemRef b) => !a.Equals(b);
+
+    public override string ToString() => Item is null ? "null" : $"{Item.Kind}@{Item.Client}:{Item.Clock}+{Item.Length}";
 }
