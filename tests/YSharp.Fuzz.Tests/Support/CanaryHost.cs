@@ -7,7 +7,7 @@ using Xunit;
 
 namespace YSharp.Fuzz;
 
-public enum CanaryVerdict { Passed, Failed, StackOverflow, Crashed, TimedOut, Stub, UnknownCase }
+public enum CanaryVerdict { Passed, Failed, StackOverflow, Crashed, TimedOut, UnknownCase }
 
 /// <summary>What a canary run did, classified from its exit code and output.</summary>
 internal sealed record CanaryRun(CanaryVerdict Verdict, int ExitCode, string Stdout, string Stderr)
@@ -81,16 +81,14 @@ internal static class CanaryHost
             0 when stdout.Contains("OK", StringComparison.Ordinal) => new CanaryRun(CanaryVerdict.Passed, exitCode, stdout, stderr),
             1 => new CanaryRun(CanaryVerdict.Failed, exitCode, stdout, stderr),
             2 => new CanaryRun(CanaryVerdict.UnknownCase, exitCode, stdout, stderr),
-            3 => new CanaryRun(CanaryVerdict.Stub, exitCode, stdout, stderr),
             _ => new CanaryRun(CanaryVerdict.Crashed, exitCode, stdout, stderr),
         };
     }
 
-    /// <summary>Asserts the canary case passed, naming a stack overflow or crash as such; skips on the stub.</summary>
+    /// <summary>Asserts the canary case passed, naming a stack overflow or crash as such.</summary>
     public static void AssertPasses(string caseName, int? depth = null, TimeSpan? timeout = null)
     {
         var run = Run(caseName, depth, timeout);
-        if (run.Verdict == CanaryVerdict.Stub) Assert.Skip(Stub.Reason);
         Assert.True(run.Verdict == CanaryVerdict.Passed, $"HOS-DEEP canary '{caseName}' (depth {depth?.ToString() ?? "default"}): {run}");
     }
 }

@@ -4,17 +4,20 @@ using System.Text.Json;
 using Xunit;
 using YSharp.TestKit.Assertions;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Structs;
 
 /// <summary>Content types (docs/research/structs.md section H): the content table, string splitting, ContentType and ContentDoc.</summary>
+[Requires(Feature.Gc)]
 public sealed class ContentTests
 {
     private static YValue Obj(string key, YValue value) => StructModelTests.Attr(key, value);
 
     [Fact]
     [Covers("STR-30", "STR-44")]
-    public void EveryProducibleContentKind_HasItsRef_AndSurvivesAWireRoundTrip() => Impl.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Text, Feature.Array, Feature.Map)]
+    public void EveryProducibleContentKind_HasItsRef_AndSurvivesAWireRoundTrip()
     {
         var a = Net.Mk(1, gc: false);
         var t = a.GetText("t");
@@ -37,11 +40,12 @@ public sealed class ContentTests
         c.GetArray("arr").Push(new YEntry[] { 1, 2 });
         c.GetArray("arr").Delete(0, 2);
         Assert.Equal(new[] { 1 }, StructsProbe.Of(c, 3).Select(s => s.Ref));
-    });
+    }
 
     [Fact]
     [Covers("STR-41")]
-    public void SplittingStringContent_InsideASurrogatePair_ReplacesBothHalves_AndOnlyThere() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void SplittingStringContent_InsideASurrogatePair_ReplacesBothHalves_AndOnlyThere()
     {
         var inside = Net.Mk(1, gc: false);
         inside.GetText("t").Insert(0, "a\U0001F600b");
@@ -64,11 +68,12 @@ public sealed class ContentTests
         edge.GetText("t").Insert(0, "\U0001F600b");
         edge.GetText("t").Delete(0, 1);                                // a split right after the high surrogate
         Assert.Equal(new[] { "�", "�b" }, StructsProbe.Of(edge, 3).Select(x => x.Text));
-    });
+    }
 
     [Fact]
     [Covers("STR-42", "GC-04")]
-    public void DeletingAType_DeletesEveryDescendant_WithoutEventsForTheDeletedType() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Array, Feature.Events)]
+    public void DeletingAType_DeletesEveryDescendant_WithoutEventsForTheDeletedType()
     {
         var a = Net.Mk(1, gc: false);
         var arr = a.GetArray("arr");
@@ -93,11 +98,12 @@ public sealed class ContentTests
         Assert.False(inDeleteSet[1]);                                  // the old tombstone was deleted by an earlier transaction
         Assert.True(inDeleteSet[2] && inDeleteSet[3]);                 // the live children
         Assert.All(StructsProbe.Of(a, 1), s => Assert.True(s.Deleted));
-    });
+    }
 
     [Fact]
     [Covers("STR-42", "GC-04")]
-    public void CollectingADeletedType_TurnsItsChildrenIntoGcStructs_AndLeavesAContentDeletedShell() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Array)]
+    public void CollectingADeletedType_TurnsItsChildrenIntoGcStructs_AndLeavesAContentDeletedShell()
     {
         var a = Net.Mk(1);
         var arr = a.GetArray("arr");
@@ -108,11 +114,12 @@ public sealed class ContentTests
         Assert.Equal(2, s.Count);
         Assert.Equal((0L, 1L, 1, true), (s[0].Clock, s[0].Len, s[0].Ref, s[0].Deleted));   // the Item shell with ContentDeleted
         Assert.Equal((1L, 3L, true), (s[1].Clock, s[1].Len, s[1].IsGc));                   // children: one merged GC
-    });
+    }
 
     [Fact]
     [Covers("STR-43")]
-    public void ContentDoc_CarriesGuidAndOptions_ThroughTheWire_AndRaisesSubdocEventsOnTheReceiver() => Impl.Run(() =>
+    [Requires(Feature.Map, Feature.Subdocs)]
+    public void ContentDoc_CarriesGuidAndOptions_ThroughTheWire_AndRaisesSubdocEventsOnTheReceiver()
     {
         var a = Net.Mk(1);
         var sub = new Doc(new DocOptions { Guid = "g", AutoLoad = true, Gc = false });
@@ -135,11 +142,12 @@ public sealed class ContentTests
         Assert.Equal(new[] { "g" }, added);
         Assert.Equal(new[] { "g" }, loaded);                           // autoLoad implies shouldLoad
         Assert.Null(StructuralDiff.Find(StructsProbe.DumpJson(a), StructsProbe.DumpJson(b)));
-    });
+    }
 
     [Fact]
     [Covers("STR-43", "GC-09")]
-    public void ContentDoc_AddedAndDeletedInOneTransaction_ReportsNeitherAddedNorRemoved() => Impl.Run(() =>
+    [Requires(Feature.Map, Feature.Subdocs)]
+    public void ContentDoc_AddedAndDeletedInOneTransaction_ReportsNeitherAddedNorRemoved()
     {
         var a = Net.Mk(1);
         var m = a.GetMap("m");
@@ -158,11 +166,12 @@ public sealed class ContentTests
         m.Delete("s2");                                                // a later transaction: reported as removed
         Assert.Contains(changes, c => c.Added == 1);
         Assert.Contains(changes, c => c.Removed == 1);
-    });
+    }
 
     [Fact]
     [Covers("STR-44")]
-    public void NonSplittableContent_IsDeletedAsWholeItems_NeverSplit() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void NonSplittableContent_IsDeletedAsWholeItems_NeverSplit()
     {
         var a = Net.Mk(1, gc: false);
         var b = Net.Mk(2, gc: false);
@@ -176,11 +185,12 @@ public sealed class ContentTests
         Assert.Equal(new[] { (0L, 1L), (1L, 1L), (2L, 1L) }, s.Select(x => (x.Clock, x.Len)));
         Assert.Equal(new[] { false, true, false }, s.Select(x => x.Deleted));
         Assert.All(s, x => Assert.Equal(3, x.Ref));
-    });
+    }
 
     [Fact]
     [Covers("STR-45")]
-    public void AdjacentItems_DifferentContentKinds_AreNotMerged() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void AdjacentItems_DifferentContentKinds_AreNotMerged()
     {
         var a = Net.Mk(1);
         var arr = a.GetArray("arr");
@@ -191,5 +201,5 @@ public sealed class ContentTests
 
         var s = StructsProbe.Of(a, 1);
         Assert.Equal(new[] { (0L, 2L, 8), (2L, 1L, 3), (3L, 1L, 8) }, s.Select(x => (x.Clock, x.Len, x.Ref)));   // [1,"s"] merged, bytes and 2 stay apart
-    });
+    }
 }

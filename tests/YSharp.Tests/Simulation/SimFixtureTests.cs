@@ -14,6 +14,7 @@ using YSharp.TestKit.Ops;
 using YSharp.TestKit.Rng;
 using YSharp.TestKit.Sim;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Simulation;
 
@@ -44,10 +45,12 @@ internal static class GoldenSet
 /// in y-sharp must reproduce update bytes, state, state vectors, the typed dump, the struct store and the delete set of every replica.
 /// They are the gating guard against wrong-but-convergent conflict order.
 /// </summary>
+[Requires(Feature.Sim)]
 public sealed class SimGoldenFixtureTests
 {
     [Fact]
     [Covers("SIM-13")]
+    [LibraryIndependent]
     public void TheTwelveFixtures_Exist_AndAreSeedOneRunsOfTheirGenerator()
     {
         var pinned = PinnedVersions.Read(RepoRoot.Find());
@@ -66,14 +69,14 @@ public sealed class SimGoldenFixtureTests
 
     [Theory, MemberData(nameof(GoldenSet.Names), MemberType = typeof(GoldenSet))]
     [Covers("SIM-10", "SIM-11", "SIM-12", "SIM-13", "SIM-14")]
-    public void Fixture_EveryStoredScenario_ReplaysToTheOraclesBytesDumpsAndStructs(string name) => Stub.Run(() =>
+    public void Fixture_EveryStoredScenario_ReplaysToTheOraclesBytesDumpsAndStructs(string name)
     {
         var fixture = FixtureReplay.Load(GoldenSet.Path(name));
         var replay = SimSteps.Run(fixture);
         FixtureReplay.AssertWire(fixture, replay);
         SimAsserts.DocDump(fixture, replay);
         SimAsserts.Structs(fixture, replay);
-    });
+    }
 }
 
 /// <summary>Comparisons of a replay with a fixture's observations shared by the simulation fixture tests.</summary>
@@ -122,11 +125,12 @@ internal static class SimAsserts
 /// generators match the Node port, which <c>tools/fixture-gen/check-sim-draws.mjs</c> proves matches upstream; it is the only place the
 /// draw sequence of a whole run is asserted. A mismatch is reported as the first differing path in the script.
 /// </summary>
+[Requires(Feature.Sim)]
 public sealed class SimDrawParityTests
 {
     [Theory, MemberData(nameof(GoldenSet.Names), MemberType = typeof(GoldenSet))]
     [Covers("SIM-10", "SIM-11", "SIM-12", "SIM-13", "SIM-14")]
-    public void CSharpGenerators_AtSeedOne_ProduceTheFixturesOpLog(string name) => Stub.Run(() =>
+    public void CSharpGenerators_AtSeedOne_ProduceTheFixturesOpLog(string name)
     {
         var (_, kind, iterations) = GoldenSet.All().Single(g => g.Name == name);
         var fixture = FixtureReplay.Load(GoldenSet.Path(name));
@@ -136,7 +140,7 @@ public sealed class SimDrawParityTests
 
         var diff = StructuralDiff.Find(fixture.Script.GetRawText(), log.ToScript().ToJsonString());
         Assert.True(diff == null, $"{name}: the C# run's op log differs from the fixture's at {diff}");
-    });
+    }
 }
 
 /// <summary>
@@ -144,6 +148,7 @@ public sealed class SimDrawParityTests
 /// <c>apply</c> delivers a captured reply or the n-th update event of another replica, and a schedule may reorder, duplicate or drop
 /// deliveries. Also <c>text.insertEmbedType</c>, and that the three new kinds match the schema field for field.
 /// </summary>
+[Requires(Feature.Sim)]
 public sealed class DeliverStepTests
 {
     private const string Text = """{"root":"t","kind":"text"}""";
@@ -168,6 +173,7 @@ public sealed class DeliverStepTests
 
     [Fact]
     [Covers("SIM-10")]
+    [LibraryIndependent]
     public void NewStepKinds_SchemaAndRegistry_MatchFieldForField()
     {
         using var schema = JsonDocument.Parse(File.ReadAllText(Path.Combine(RepoRoot.Find(), "tools", "fixture-gen", "schema", "ops.schema.json")));
@@ -187,7 +193,7 @@ public sealed class DeliverStepTests
 
     [Fact]
     [Covers("SIM-10", "SIM-14")]
-    public void SvReplyApply_IsASyncStep1AndStep2_AndBringsTheReplicaUpToDate() => Stub.Run(() =>
+    public void SvReplyApply_IsASyncStep1AndStep2_AndBringsTheReplicaUpToDate()
     {
         var r = Run(Script(Insert("a", 0, "hello") + """
             ,{"step":"deliver","schedule":[
@@ -196,11 +202,11 @@ public sealed class DeliverStepTests
               {"do":"apply","doc":"b","update":"r0"}]}
             """));
         Assert.Equal("hello", TextOf(r, "b"));
-    });
+    }
 
     [Fact]
     [Covers("SIM-10", "SIM-14")]
-    public void AReply_IsComputedWhenItIsCaptured_NotWhenItIsApplied() => Stub.Run(() =>
+    public void AReply_IsComputedWhenItIsCaptured_NotWhenItIsApplied()
     {
         // b asks a for what it is missing, a edits again, only then the reply is applied: b gets the state of the capture
         var r = Run(Script(
@@ -210,13 +216,13 @@ public sealed class DeliverStepTests
             ",{\"step\":\"deliver\",\"schedule\":[{\"do\":\"apply\",\"doc\":\"b\",\"update\":\"r0\"}]}"));
         Assert.Equal("one", TextOf(r, "b"));
         Assert.Equal("onetwo", TextOf(r, "a"));
-    });
+    }
 
     [Theory]
     [InlineData("v1")]
     [InlineData("v2")]
     [Covers("SIM-10", "SIM-14")]
-    public void UpdateReferences_CanBeReordered_Duplicated_AndDropped(string encoding) => Stub.Run(() =>
+    public void UpdateReferences_CanBeReordered_Duplicated_AndDropped(string encoding)
     {
         // a makes updates #0 "x", #1 "y", #2 "z". b gets [2, 0, 0, 1] (reordered, #0 twice), c gets [0, 2] (#1 dropped)
         const string deliver = """
@@ -231,11 +237,11 @@ public sealed class DeliverStepTests
         var r = Run(Script(Insert("a", 0, "x") + "," + Insert("a", 1, "y") + "," + Insert("a", 2, "z") + deliver.Replace("ENC", encoding), replicas: 3));
         Assert.Equal("xyz", TextOf(r, "b"));
         Assert.Equal("x", TextOf(r, "c")); // "z" waits for the dropped "y"
-    });
+    }
 
     [Fact]
     [Covers("SIM-10")]
-    public void ASchedule_ThatIsNotWellFormed_IsAScriptError() => Stub.Run(() =>
+    public void ASchedule_ThatIsNotWellFormed_IsAScriptError()
     {
         void Fails(string schedule, string reason)
         {
@@ -260,11 +266,12 @@ public sealed class DeliverStepTests
         Fails("""{"do":"sv","doc":"a","name":"s0"},{"do":"sv","doc":"b","name":"s0"}""", "twice");
         var enc = Assert.Throws<OpsScriptException>(() => Run(Script("""{"step":"deliver","encoding":"v3","schedule":[]}""")));
         Assert.Contains("unknown encoding", enc.Message);
-    });
+    }
 
     [Fact]
     [Covers("SIM-13")]
-    public void TextInsertEmbedType_SharedType_IsInsertedAsAnEmbed() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Text, Feature.Map)]
+    public void TextInsertEmbedType_SharedType_IsInsertedAsAnEmbed()
     {
         var r = Run(Script(Insert("a", 0, "ab") + """
             ,{"step":"text.insertEmbedType","doc":"a","target":{"root":"t","kind":"text"},"at":1,"kind":"map","init":{"$":"obj","pairs":[["k","v"]]}}
@@ -272,7 +279,7 @@ public sealed class DeliverStepTests
         var delta = r.Context.Doc("a").GetText("t").ToDelta();
         Assert.Equal(3, delta.Sum(op => op.Kind == DeltaKind.Insert ? (op.Text?.Length ?? 1) : 0));
         Assert.Contains(delta, op => op.Embed.Kind == YEntryKind.Type && op.Embed.Type is YMap);
-    });
+    }
 }
 
 /// <summary>
@@ -281,23 +288,25 @@ public sealed class DeliverStepTests
 /// reverse order, so an unstable sort (<c>List.Sort</c> is introsort) shows. The <c>observeDeep</c> step records every callback's events
 /// with their paths; replay must reproduce the oracle's order.
 /// </summary>
+[Requires(Feature.Sim)]
 public sealed class DeepObserverFixtureTests
 {
     private const string Path1 = "observers/deep-event-order.json";
 
     [Fact]
     [Covers("Q25", "TX-1")]
-    public void DeepObserverFixture_Replay_FollowsTheOraclesEventOrder() => Stub.Run(() =>
+    public void DeepObserverFixture_Replay_FollowsTheOraclesEventOrder()
     {
         var fixture = FixtureReplay.Load(Path1);
         var replay = SimSteps.Run(fixture);
         FixtureReplay.AssertWire(fixture, replay);
         SimAsserts.DocDump(fixture, replay);
         SimAsserts.Events(fixture, replay);
-    });
+    }
 
     [Fact]
     [Covers("Q25")]
+    [LibraryIndependent]
     public void OracleOrder_DeepEvents_IsPathLengthThenChangeOrder()
     {
         // what the fixture pins, read straight from the oracle's observation (runs without an implementation)

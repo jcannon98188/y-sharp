@@ -6,6 +6,7 @@ using Xunit;
 using YSharp.TestKit.Traceability;
 using static YSharp.Tests.DocFeatures.Ds;
 using YSharp.TestKit.Assertions;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.DocFeatures;
 
@@ -14,6 +15,7 @@ namespace YSharp.Tests.DocFeatures;
 /// tests. Wire bytes, JSON and resolved indexes come from running the same operations on the pinned Yjs; the oracle fixtures under
 /// <c>fixtures/relpos</c> replay the same behaviour end to end.
 /// </summary>
+[Requires(Feature.Positions)]
 public sealed class RelativePositionTests
 {
     private static string EncodeHex(RelativePosition p)
@@ -72,31 +74,32 @@ public sealed class RelativePositionTests
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionCase1", "RP-02", "RP-06")]
-    public void RelativePosition_FiveInsertsAtZero_ResolveAtEveryIndex() => Impl.Run(() => CheckRelativePositions(Seq((0, "1"), (0, "abc"), (0, "z"), (0, "y"), (0, "x"))));
+    public void RelativePosition_FiveInsertsAtZero_ResolveAtEveryIndex()=> CheckRelativePositions(Seq((0, "1"), (0, "abc"), (0, "z"), (0, "y"), (0, "x")));
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionCase2", "RP-02", "RP-06")]
-    public void RelativePosition_SingleInsert_ResolveAtEveryIndex() => Impl.Run(() => CheckRelativePositions(Seq((0, "abc"))));
+    public void RelativePosition_SingleInsert_ResolveAtEveryIndex()=> CheckRelativePositions(Seq((0, "abc")));
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionCase3", "RP-02", "RP-06")]
-    public void RelativePosition_ThreeInsertsAtZero_ResolveAtEveryIndex() => Impl.Run(() => CheckRelativePositions(Seq((0, "abc"), (0, "1"), (0, "xyz"))));
+    public void RelativePosition_ThreeInsertsAtZero_ResolveAtEveryIndex()=> CheckRelativePositions(Seq((0, "abc"), (0, "1"), (0, "xyz")));
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionCase4", "RP-02", "RP-06")]
-    public void RelativePosition_OneCharacter_ResolveAtEveryIndex() => Impl.Run(() => CheckRelativePositions(Seq((0, "1"))));
+    public void RelativePosition_OneCharacter_ResolveAtEveryIndex()=> CheckRelativePositions(Seq((0, "1")));
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionCase5", "RP-02", "RP-06")]
-    public void RelativePosition_TwoInsertsAtZero_ResolveAtEveryIndex() => Impl.Run(() => CheckRelativePositions(Seq((0, "2"), (0, "1"))));
+    public void RelativePosition_TwoInsertsAtZero_ResolveAtEveryIndex()=> CheckRelativePositions(Seq((0, "2"), (0, "1")));
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionCase6", "RP-02", "RP-06")]
-    public void RelativePosition_EmptyText_ResolveAtIndexZero() => Impl.Run(() => CheckRelativePositions(Seq()));
+    public void RelativePosition_EmptyText_ResolveAtIndexZero()=> CheckRelativePositions(Seq());
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionCase7", "RP-06", "RP-08")]
-    public void RelativePosition_FollowAndNoFollow_ResolveToTheSameIndex() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void RelativePosition_FollowAndNoFollow_ResolveToTheSameIndex()
     {
         var docA = new Doc();
         var textA = docA.GetText("text");
@@ -108,11 +111,12 @@ public sealed class RelativePositionTests
         var withoutFollow = relativePosition.Resolve(docA, false);
         Assert.Equal(2, withFollow?.Index);
         Assert.Equal(2, withoutFollow?.Index);
-    });
+    }
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionAssociationDifference", "RP-02", "RP-06", "RP-09")]
-    public void RelativePosition_InsertAtTheAnchor_RespectsTheAssociationSide() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void RelativePosition_InsertAtTheAnchor_RespectsTheAssociationSide()
     {
         var ydoc = new Doc();
         var ytext = ydoc.GetText();
@@ -127,11 +131,12 @@ public sealed class RelativePositionTests
         Assert.Equal(2, posRight!.Value.Index);
         Assert.NotNull(posLeft);
         Assert.Equal(1, posLeft!.Value.Index);
-    });
+    }
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionWithUndo", "RP-06", "RP-08")]
-    public void RelativePosition_DeleteThenUndo_FollowsTheRestoredContent() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void RelativePosition_DeleteThenUndo_FollowsTheRestoredContent()
     {
         var ydoc = new Doc();
         var ytext = ydoc.GetText();
@@ -147,13 +152,13 @@ public sealed class RelativePositionTests
         ydocClone.ApplyUpdate(ydoc.EncodeStateAsUpdate());
         Assert.Equal(6, rpos.Resolve(ydocClone)?.Index);
         Assert.Equal(6, rpos.Resolve(ydocClone, false)?.Index);
-    });
+    }
 
     // ------------------------------------------------------------------ RP-01, RP-02
 
     [Fact]
     [Covers("RP-01")]
-    public void Shape_DecodedPosition_HasExactlyTheAnchorItsTagNames() => Impl.Run(() =>
+    public void Shape_DecodedPosition_HasExactlyTheAnchorItsTagNames()
     {
         var item = Decode("00010100");
         Assert.Equal(new ItemId(1, 1), item.Item);
@@ -172,7 +177,7 @@ public sealed class RelativePositionTests
         Assert.Null(type.Item);
         Assert.Null(type.TypeName);
         Assert.Equal(1, type.Assoc);
-    });
+    }
 
     [Theory]
     [InlineData(1, 0, "00010100", 1)]
@@ -187,7 +192,8 @@ public sealed class RelativePositionTests
     [InlineData(5, 0, "01017400", 3)]
     [InlineData(5, -1, "00010241", 3)]
     [Covers("RP-02", "RP-04")]
-    public void CreateFromIndex_AnchorsOnTheItemRightOfTheIndexOrTheOneToItsLeft(int index, int assoc, string expectedHex, int resolvedIndex) => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void CreateFromIndex_AnchorsOnTheItemRightOfTheIndexOrTheOneToItsLeft(int index, int assoc, string expectedHex, int resolvedIndex)
     {
         var doc = TextDoc("abc");
         var rpos = doc.GetText("t").CreateRelativePosition(index, assoc);
@@ -196,11 +202,12 @@ public sealed class RelativePositionTests
         Assert.Equal(resolvedIndex, abs.Index);
         Assert.Equal(assoc, abs.Assoc);
         Assert.Same(doc.GetText("t"), abs.Type);
-    });
+    }
 
     [Fact]
     [Covers("RP-02")]
-    public void CreateFromIndex_DeletedItemsAndFormattingMarkers_AreSkipped() => Impl.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Text)]
+    public void CreateFromIndex_DeletedItemsAndFormattingMarkers_AreSkipped()
     {
         var doc = TextDoc("abcd");
         var t = doc.GetText("t");
@@ -212,13 +219,14 @@ public sealed class RelativePositionTests
         var end = t.CreateRelativePosition(3, -1);
         Assert.Equal(new ItemId(1, 2), end.Item);                        // "c": the deleted tail is skipped
         Assert.Equal(3, Resolve(end, doc).Index);
-    });
+    }
 
     // ------------------------------------------------------------------ RP-03
 
     [Fact]
     [Covers("RP-03")]
-    public void RootTypes_AreAnchoredByName_AndNestedTypesByTheirItemId() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Array)]
+    public void RootTypes_AreAnchoredByName_AndNestedTypesByTheirItemId()
     {
         var doc = TextDoc("abc");
         var arr = doc.GetArray("arr");
@@ -235,7 +243,7 @@ public sealed class RelativePositionTests
         Assert.Equal(1, Resolve(inside, doc).Index);
         Assert.Same(nested, Resolve(inside, doc).Type);
         Assert.Equal(3, Resolve(nested.CreateRelativePosition(3, 0), doc).Index);
-    });
+    }
 
     // ------------------------------------------------------------------ RP-04 binary encoding
 
@@ -247,14 +255,14 @@ public sealed class RelativePositionTests
     [InlineData("02010300")]
     [InlineData("02010301")]
     [Covers("RP-04")]
-    public void Encoding_EveryTagWithAndWithoutNegativeAssociation_RoundTrips(string hex) => Impl.Run(() =>
+    public void Encoding_EveryTagWithAndWithoutNegativeAssociation_RoundTrips(string hex)
     {
         Assert.Equal(hex, EncodeHex(Decode(hex)));
-    });
+    }
 
     [Fact]
     [Covers("RP-04")]
-    public void Decoding_MissingAssociation_MeansZero() => Impl.Run(() =>
+    public void Decoding_MissingAssociation_MeansZero()
     {
         var item = Decode("000100");
         Assert.Equal(new ItemId(1, 0), item.Item);
@@ -262,11 +270,11 @@ public sealed class RelativePositionTests
         var name = Decode("010174");
         Assert.Equal("t", name.TypeName);
         Assert.Equal(0, name.Assoc);
-    });
+    }
 
     [Fact]
     [Covers("RP-04")]
-    public void Decoding_AnUnknownTagOrTruncatedBytes_NeverYieldsAnEncodablePosition() => Impl.Run(() =>
+    public void Decoding_AnUnknownTagOrTruncatedBytes_NeverYieldsAnEncodablePosition()
     {
         foreach (var hex in new[] { "0501", "00", "0001", "01", "02" })
         {
@@ -275,13 +283,14 @@ public sealed class RelativePositionTests
             // JS decodes an unknown tag to an all-null position that then throws on re-encode
             Assert.ThrowsAny<Exception>(() => position.Encode(new ArrayBufferWriter<byte>()));
         }
-    });
+    }
 
     // ------------------------------------------------------------------ RP-05 JSON
 
     [Fact]
     [Covers("RP-05")]
-    public void Json_NamesOnlyThePresentAnchors_AndAlwaysTheAssociation() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Array)]
+    public void Json_NamesOnlyThePresentAnchors_AndAlwaysTheAssociation()
     {
         var doc = TextDoc("abc");
         var t = doc.GetText("t");
@@ -292,11 +301,12 @@ public sealed class RelativePositionTests
         doc.GetArray("arr").Insert(0, new YEntry[] { nested });
         nested.Insert(0, "xyz");
         Assert.Equal(Canon("{\"type\":{\"client\":1,\"clock\":3},\"item\":{\"client\":1,\"clock\":5},\"assoc\":0}"), JsonOf(nested.CreateRelativePosition(1, 0)));
-    });
+    }
 
     [Fact]
     [Covers("RP-05")]
-    public void Json_AnyPosition_RoundTripsThroughFromJson() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void Json_AnyPosition_RoundTripsThroughFromJson()
     {
         var doc = TextDoc("abc");
         var t = doc.GetText("t");
@@ -308,21 +318,22 @@ public sealed class RelativePositionTests
             Assert.Equal(Resolve(rpos, doc).Index, Resolve(back, doc).Index);
             Assert.Equal(assoc, back.Assoc);
         }
-    });
+    }
 
     [Fact]
     [Covers("RP-05")]
-    public void Json_AbsentAssociation_DefaultsToZero() => Impl.Run(() =>
+    public void Json_AbsentAssociation_DefaultsToZero()
     {
         Assert.True(YValue.TryParseJson(Encoding.UTF8.GetBytes("{\"tname\":\"n\"}"), null, out var parsed).Ok);
         Assert.True(RelativePosition.TryFromJson(parsed, out var back).Ok);
         Assert.Equal("n", back.TypeName);
         Assert.Equal(0, back.Assoc);
-    });
+    }
 
     [Fact]
     [Covers("RP-05")]
-    public void Json_TheDefaultRootNameIsFalsyAndDroppedAsInJs_LeavingAPositionThatCannotBeUsed() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void Json_TheDefaultRootNameIsFalsyAndDroppedAsInJs_LeavingAPositionThatCannotBeUsed()
     {
         var doc = new Doc();
         var rpos = doc.GetText().CreateRelativePosition(0);              // root named "": tname is "" and falsy in JS
@@ -335,13 +346,14 @@ public sealed class RelativePositionTests
             Assert.ThrowsAny<Exception>(() => rebuilt.Encode(new ArrayBufferWriter<byte>()));   // JS: Unexpected case
             Assert.ThrowsAny<Exception>(() => rebuilt.Resolve(doc));
         }
-    });
+    }
 
     // ------------------------------------------------------------------ RP-06 resolution
 
     [Fact]
     [Covers("RP-06")]
-    public void Resolve_AnItemThatIsUnknownToTheDoc_IsNull() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void Resolve_AnItemThatIsUnknownToTheDoc_IsNull()
     {
         var a = TextDoc("abc");
         var rpos = a.GetText("t").CreateRelativePosition(1);
@@ -349,11 +361,12 @@ public sealed class RelativePositionTests
         Assert.Null(rpos.Resolve(fresh));
         Net.Sync(a, fresh);
         Assert.Equal(1, rpos.Resolve(fresh)?.Index);
-    });
+    }
 
     [Fact]
     [Covers("RP-06")]
-    public void Resolve_ADeletedAnchor_GivesTheIndexOfTheNextLiveContent() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void Resolve_ADeletedAnchor_GivesTheIndexOfTheNextLiveContent()
     {
         var doc = TextDoc("abcdef");
         var t = doc.GetText("t");
@@ -368,11 +381,12 @@ public sealed class RelativePositionTests
         t.Insert(0, "XY");
         Assert.Equal(0, Resolve(onD, doc).Index);
         Assert.Equal(0, Resolve(afterC, doc).Index);
-    });
+    }
 
     [Fact]
     [Covers("RP-06")]
-    public void Resolve_ACollectedRegion_IsNull() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Array)]
+    public void Resolve_ACollectedRegion_IsNull()
     {
         var a = TextDoc("abc");
         var arr = a.GetArray("arr");
@@ -388,11 +402,12 @@ public sealed class RelativePositionTests
         var b = Net.Mk(3);
         Net.Sync(a, b);
         Assert.Null(inside.Resolve(b));
-    });
+    }
 
     [Fact]
     [Covers("RP-06")]
-    public void Resolve_BoundaryPositions_FollowTheAssociation() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void Resolve_BoundaryPositions_FollowTheAssociation()
     {
         var doc = TextDoc("abc");
         var t = doc.GetText("t");
@@ -400,13 +415,14 @@ public sealed class RelativePositionTests
         Assert.Equal(0, Resolve(t.CreateRelativePosition(0, -1), doc).Index);   // start of type
         t.Insert(0, "X");
         Assert.Equal(4, Resolve(t.CreateRelativePosition(99, 0), doc).Index);
-    });
+    }
 
     // ------------------------------------------------------------------ RP-07
 
     [Fact]
     [Covers("RP-07")]
-    public void Positions_AnyPair_CompareByAnchorsAndAssociation() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void Positions_AnyPair_CompareByAnchorsAndAssociation()
     {
         var doc = TextDoc("abc");
         var t = doc.GetText("t");
@@ -415,13 +431,14 @@ public sealed class RelativePositionTests
         Assert.NotEqual(a, t.CreateRelativePosition(1, 1));
         Assert.NotEqual(a, t.CreateRelativePosition(2, 0));
         Assert.Equal(Decode(EncodeHex(a)), Decode(EncodeHex(a)));
-    });
+    }
 
     // ------------------------------------------------------------------ RP-08, RP-09
 
     [Fact]
     [Covers("RP-09", "RP-08")]
-    public void Positions_ConcurrentEditsAndDeletions_FollowContent() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void Positions_ConcurrentEditsAndDeletions_FollowContent()
     {
         var a = Net.Mk(3);
         var b = Net.Mk(4);
@@ -445,11 +462,12 @@ public sealed class RelativePositionTests
         }
         ta.Insert(4, "!");
         Assert.Equal(7, Resolve(mid, a, false).Index);
-    });
+    }
 
     [Fact]
     [Covers("RP-08")]
-    public void FollowUndoneDeletions_MayDifferBetweenReplicas_SoComparisonsUseFalse() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void FollowUndoneDeletions_MayDifferBetweenReplicas_SoComparisonsUseFalse()
     {
         var a = Net.Mk(5);
         var b = Net.Mk(6);
@@ -465,5 +483,5 @@ public sealed class RelativePositionTests
         Net.Both(a, b);
         Assert.Equal(6, Resolve(p, b).Index);                            // the replica never saw the redo chain
         Assert.Equal(6, Resolve(p, b, false).Index);
-    });
+    }
 }

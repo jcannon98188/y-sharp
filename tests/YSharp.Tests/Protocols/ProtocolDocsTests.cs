@@ -5,6 +5,7 @@ using Xunit;
 using YSharp.Tests.Codecs;
 using YSharp.TestKit.Time;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Protocols;
 
@@ -12,12 +13,14 @@ namespace YSharp.Tests.Protocols;
 /// PROTOCOL.md versus the code (PR-1..6, flagged in docs/research/y-protocols.md section 5): y-sharp follows the code, so each
 /// test pins the code's behaviour where the prose is wrong or silent. Plus Q32, time and timers, under the TimeProvider decision of ADR 0014.
 /// </summary>
+[Requires(Feature.Sync)]
 public sealed class ProtocolDocsTests
 {
     private static string[] PublicMembers(Type t) =>
         t.GetMembers(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly).Select(m => m.Name).ToArray();
 
     [Fact, Covers("PR-1")]
+    [LibraryIndependent]
     public void ReadAwarenessMessage_DoesNotExist_ApplyingAnUpdateIsTheEntryPoint()
     {
         Assert.DoesNotContain("ReadAwarenessMessage", PublicMembers(typeof(Awareness)));
@@ -25,6 +28,7 @@ public sealed class ProtocolDocsTests
     }
 
     [Fact, Covers("PR-2")]
+    [LibraryIndependent]
     public void EnvelopeConstants_ProtocolTypes_AreNotPartOfThem()
     {
         var names = PublicMembers(typeof(YSync)).Concat(PublicMembers(typeof(Awareness))).Concat(PublicMembers(typeof(YAuth)));
@@ -32,16 +36,18 @@ public sealed class ProtocolDocsTests
     }
 
     [Fact, Covers("PR-3")]
-    public void ClockRule_EqualClockWithNull_HasTheExceptionTheProseOmits() => Stub.Run(() =>
+    [Requires(Feature.Awareness)]
+    public void ClockRule_EqualClockWithNull_HasTheExceptionTheProseOmits()
     {
         using var rig = new AwRig(9);
         rig.Apply(AwBytes.Update((5, 3, """{"a":1}""")));
         rig.Apply(AwBytes.Update((5, 3, "null")));
         Assert.Equal("absent", Js.StateJson(rig.Awareness, 5));
-    });
+    }
 
     [Fact, Covers("PR-4")]
-    public void ClientsExpire_OnTheCheckGrid_AtExactlyThirtySecondsNotMoreThanThirty() => Stub.Run(() =>
+    [Requires(Feature.Awareness)]
+    public void ClientsExpire_OnTheCheckGrid_AtExactlyThirtySecondsNotMoreThanThirty()
     {
         using var rig = new AwRig(9);
         rig.Apply(AwBytes.Update((5, 1, "{}")));
@@ -49,27 +55,28 @@ public sealed class ProtocolDocsTests
         Assert.Contains("5", Js.Keys(rig.Awareness));
         rig.Tick(1);
         Assert.DoesNotContain("5", Js.Keys(rig.Awareness));
-    });
+    }
 
     [Fact, Covers("PR-5")]
-    public void ReadingStep2_DoesNotTrackASyncState_ThatIsTheProvidersJob() => Stub.Run(() =>
+    public void ReadingStep2_DoesNotTrackASyncState_ThatIsTheProvidersJob()
     {
         var source = SyncSupport.DocWith(1, "hello");
         var peer = SyncSupport.DocWith(2);
         SyncSupport.Read(peer, SyncSupport.Step2(source));
         Assert.False(peer.IsSynced);
-    });
+    }
 
     [Fact, Covers("PR-6")]
-    public void SyncMessages_StartWithTheSyncTypeByte_NotAnEnvelopeByte() => Stub.Run(() =>
+    public void SyncMessages_StartWithTheSyncTypeByte_NotAnEnvelopeByte()
     {
         var doc = SyncSupport.DocWith(1, "hello");
         Assert.Equal(1, SyncSupport.Step2(doc)[0]);
         Assert.Equal(2, SyncSupport.Update(new byte[] { 1 })[0]);
-    });
+    }
 
     [Fact, Diverges("Q32", adr: "0014")]
-    public void Time_IsInjectedThroughTimeProvider_WhileTheTimeoutValuesAreMatched() => Stub.Run(() =>
+    [Requires(Feature.Awareness)]
+    public void Time_IsInjectedThroughTimeProvider_WhileTheTimeoutValuesAreMatched()
     {
         // JS reads Date.now and calls setInterval; y-sharp takes a TimeProvider, so a virtual clock decides both. The semantics
         // (30000 ms timeout, 3000 ms check, 15000 ms renewal) are the same, and no real time passes in this test.
@@ -82,5 +89,5 @@ public sealed class ProtocolDocsTests
         var before = rig.Events.Count;
         rig.Tick(15000);
         Assert.Equal(before + 1, rig.Events.Count);
-    });
+    }
 }

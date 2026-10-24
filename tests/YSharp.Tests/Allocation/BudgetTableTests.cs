@@ -6,10 +6,12 @@ using Xunit;
 using YSharp.TestKit.Fixtures;
 using YSharp.TestKit.Tiers;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Allocation;
 
 /// <summary>The cross-check of ADR 0009: the table's stable IDs against the registry, the tests that reference them, and the ratchet rules. Runs in every configuration and tier.</summary>
+[LibraryIndependent]
 [Tier(Tier.Gating)]
 public sealed class BudgetTableTests
 {

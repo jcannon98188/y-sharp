@@ -6,6 +6,7 @@ using Xunit;
 using YSharp.Tests.Codecs;
 using YSharp.TestKit.Tiers;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Simulation;
 
@@ -33,6 +34,7 @@ internal static class NightlyBudget
 /// <c>repro</c> header under <c>failing-seeds/</c> (uploaded by the nightly job), and the seed belongs in <c>regression-seeds.json</c>.
 /// Runs only when <c>YSHARP_TIER=Nightly</c>.
 /// </summary>
+[Requires(Feature.Sim)]
 [Tier(Tier.Nightly)]
 [Covers("SIM-11", "SIM-12", "SIM-13")]
 public sealed class NightlyRandomizedTests
@@ -72,7 +74,6 @@ public sealed class NightlyRandomizedTests
         var context = TestContext.Current;
         context.SendDiagnosticMessage($"{key}: start seed {start}, box {seconds:0.##} s" +
             (seconds < NightlyBudget.BoxSeconds ? $" (shrunk from {NightlyBudget.BoxSeconds:0} s: {SimCases.All.Count} tests would overrun the {NightlyBudget.BudgetSeconds:0} s budget)" : ""));
-        Stub.Run(() =>
         {
             var clock = Stopwatch.StartNew();
             var runs = 0;
@@ -84,10 +85,11 @@ public sealed class NightlyRandomizedTests
                 seed++;
             } while (clock.Elapsed.TotalSeconds < seconds);
             context.SendDiagnosticMessage($"{key}: {runs} runs from seed {start}");
-        });
+        }
     }
 }
 
+[LibraryIndependent]
 public sealed class NightlyBudgetTests
 {
     [Fact]

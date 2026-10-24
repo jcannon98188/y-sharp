@@ -8,6 +8,7 @@ using Xunit;
 using YSharp.TestKit.Fixtures;
 using YSharp.TestKit.Ops;
 using YSharp.TestKit.Values;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.TestKit;
 
@@ -16,6 +17,7 @@ namespace YSharp.Tests.TestKit;
 /// reader. Drift against a regeneration is the CI job's concern; this checks the files agree with the pinned submodules,
 /// <c>.nvmrc</c>, the manifest and the normative <c>ops.schema.json</c> vocabulary.
 /// </summary>
+[LibraryIndependent]
 public sealed class GeneratedFixtureTests
 {
     private static readonly string Root = RepoRoot.Find();

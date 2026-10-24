@@ -4,25 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using YSharp.TestKit.Sim;
-using YSharp.TestKit.Stubs;
 
 namespace YSharp.Tests.DocFeatures;
-
-/// <summary>
-/// Spec 8 tests assert against y-sharp, which is still the API stub (ADR 0019). Every body goes through <see cref="Run"/>: while the
-/// stub throws <see cref="NotImplementedException"/> the test is skipped visibly, and the moment the implementation exists the same
-/// assertions run for real.
-/// </summary>
-internal static class Impl
-{
-    public static void Run(Action body)
-    {
-        ApiStub.Run(body);
-    }
-
-    /// <summary>For tests whose first calls would work on the stub (plain properties, event subscriptions): fails over to a skip until the implementation exists.</summary>
-    public static void RequireImplementation() => ApiStub.SkipIfStub();
-}
 
 /// <summary>Small helpers for building replicas and moving updates between them.</summary>
 internal static class Net

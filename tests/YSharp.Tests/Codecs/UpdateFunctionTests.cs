@@ -5,6 +5,7 @@ using System.Linq;
 using Xunit;
 using YSharp.TestKit.Traceability;
 using YSharp.TestKit.Assertions;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Codecs;
 
@@ -12,6 +13,7 @@ namespace YSharp.Tests.Codecs;
 /// The stateless update functions (<see cref="YUpdate"/>): merge, diff, state vector from an update and format conversion
 /// (ENC-23 to ENC-25). The oracle's byte-for-byte results for larger inputs are replayed by <see cref="WireFixtureTests"/>.
 /// </summary>
+[Requires(Feature.UpdateFunctions)]
 public sealed class UpdateFunctionTests
 {
     private const string HiV1 = "010101000401017402686900";
@@ -46,7 +48,8 @@ public sealed class UpdateFunctionTests
     [Theory, Covers("ENC-23")]
     [InlineData(UpdateFormat.V1)]
     [InlineData(UpdateFormat.V2)]
-    public void Enc23_Merge_OfAllUpdates_AppliesToTheSameStateInAnyOrder(UpdateFormat format) => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.V2)]
+    public void Enc23_Merge_OfAllUpdates_AppliesToTheSameStateInAnyOrder(UpdateFormat format)
     {
         var (doc, updates) = Busy(format);
         var reversed = Enumerable.Reverse(updates).ToArray();
@@ -60,10 +63,11 @@ public sealed class UpdateFunctionTests
             Assert.Equal(Hex.Of(Wire.StateVector(doc)), Hex.Of(Wire.StateVector(peer)));
             Assert.Equal(Hex.Of(Wire.StateVector(doc)), Hex.Of(Wire.StateVectorOfUpdate(merged, format)));
         }
-    });
+    }
 
     [Fact, Covers("ENC-23", "ENC-24")]
-    public void Enc23_Merge_RejectsMalformedInput_AndWritesNothing() => Stub.Run(() =>
+    [Requires(Feature.V2)]
+    public void Enc23_Merge_RejectsMalformedInput_AndWritesNothing()
     {
         var output = new ArrayBufferWriter<byte>();
         var truncated = new ReadOnlyMemory<byte>(Hex.Bytes(HiV1)[..8]);
@@ -71,10 +75,11 @@ public sealed class UpdateFunctionTests
         Assert.False(status.Ok);
         Assert.Equal(YError.Malformed, status.Error);
         Assert.False(YUpdate.TryMerge(new[] { (ReadOnlyMemory<byte>)Hex.Bytes(HiV1), Hex.Bytes(HiV1) }, new ArrayBufferWriter<byte>(), UpdateFormat.V2).Ok);
-    });
+    }
 
     [Fact, Covers("ENC-24")]
-    public void Enc24_Diff_KeepsOnlyWhatTheStateVectorLacks() => Stub.Run(() =>
+    [Requires(Feature.Text)]
+    public void Enc24_Diff_KeepsOnlyWhatTheStateVectorLacks()
     {
         var all = Wire.Merge(UpdateFormat.V1, U0, U1, U2);
         var diff = Wire.Diff(all, Hex.Bytes("010101"));                  // the target already has client 1 up to clock 1
@@ -90,18 +95,19 @@ public sealed class UpdateFunctionTests
         Assert.True(Wire.IsEmpty(StateVector.Of(Wire.TryApply(nothing).Doc)));
         // an empty state vector asks for everything
         Assert.Equal("abc", Wire.TryApply(Wire.Diff(all, Hex.Bytes("00"))).Doc.GetText("t").ToString());
-    });
+    }
 
     [Fact, Covers("ENC-24")]
-    public void Enc24_Diff_RejectsAMalformedStateVector() => Stub.Run(() =>
+    public void Enc24_Diff_RejectsAMalformedStateVector()
     {
         var status = YUpdate.TryDiff(U0, Hex.Bytes("02 01"), new ArrayBufferWriter<byte>());
         Assert.False(status.Ok);
         Assert.Equal(YError.Malformed, status.Error);
-    });
+    }
 
     [Fact, Covers("ENC-25")]
-    public void Enc25_Convert_GivesTheNativeBytesOfTheOtherFormat() => Stub.Run(() =>
+    [Requires(Feature.V2)]
+    public void Enc25_Convert_GivesTheNativeBytesOfTheOtherFormat()
     {
         Assert.Equal(HiV2, Hex.Of(Wire.Convert(Hex.Bytes(HiV1), UpdateFormat.V1, UpdateFormat.V2)));
         Assert.Equal(HiV1, Hex.Of(Wire.Convert(Hex.Bytes(HiV2), UpdateFormat.V2, UpdateFormat.V1)));
@@ -111,10 +117,11 @@ public sealed class UpdateFunctionTests
         Assert.Equal(Hex.Of(v2), Hex.Of(Wire.Convert(v1, UpdateFormat.V1, UpdateFormat.V2)));
         Assert.Equal(Hex.Of(v1), Hex.Of(Wire.Convert(v2, UpdateFormat.V2, UpdateFormat.V1)));
         Assert.Equal(Hex.Of(v1), Hex.Of(Wire.Convert(Wire.Convert(v1, UpdateFormat.V1, UpdateFormat.V2), UpdateFormat.V2, UpdateFormat.V1)));
-    });
+    }
 
     [Fact, Covers("ENC-25")]
-    public void Enc25_Convert_RejectsTheWrongFormat_AndTruncatedInput() => Stub.Run(() =>
+    [Requires(Feature.V2, Feature.V2Functions)]
+    public void Enc25_Convert_RejectsTheWrongFormat_AndTruncatedInput()
     {
         foreach (var (bytes, from, to) in new[]
         {
@@ -129,10 +136,11 @@ public sealed class UpdateFunctionTests
             Assert.False(status.Ok);
             Assert.Equal(YError.Malformed, status.Error);
         }
-    });
+    }
 
     [Fact, Covers("ENC-27", "ENC-84")]
-    public void Enc27_EveryEmissionSource_ProducesUpdatesThatApplyToTheSameState() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.V2)]
+    public void Enc27_EveryEmissionSource_ProducesUpdatesThatApplyToTheSameState()
     {
         var (doc, events) = Busy(UpdateFormat.V1);
         var fromState = Wire.Encode(doc);
@@ -145,5 +153,5 @@ public sealed class UpdateFunctionTests
             Assert.Equal(doc.GetText("t").ToString(), peer.GetText("t").ToString());
             Assert.Equal(Hex.Of(Wire.StateVector(doc)), Hex.Of(Wire.StateVector(peer)));
         }
-    });
+    }
 }

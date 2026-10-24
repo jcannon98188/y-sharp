@@ -3,25 +3,27 @@ using System.Linq;
 using Xunit;
 using YSharp.Tests.Codecs;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Protocols;
 
 /// <summary>applyAwarenessUpdate (AW-41..52): the clock rules, the local-client rules, event classification and error behaviour.</summary>
+[Requires(Feature.Awareness)]
 public sealed class AwarenessApplyTests
 {
     private static byte[] U(ulong id, long clock, string json) => AwBytes.Update((id, clock, json));
 
     [Fact, Covers("AW-41")]
-    public void Apply_DecodesIdClockAndJsonState_AndAnUnknownClientCountsAsClockZero() => Stub.Run(() =>
+    public void Apply_DecodesIdClockAndJsonState_AndAnUnknownClientCountsAsClockZero()
     {
         using var rig = new AwRig(9);
         Assert.True(rig.Apply(U(5, 1, """{"a":[1,{"b":"c"}]}""")).Ok);
         Assert.Equal("""{"a":[1,{"b":"c"}]}""", Js.StateJson(rig.Awareness, 5));
         Assert.Equal(1, rig.ClockOf(5));
-    });
+    }
 
     [Fact, Covers("AW-42")]
-    public void Acceptance_NeedsAHigherClock_OrAnEqualClockNullForAPresentClient() => Stub.Run(() =>
+    public void Acceptance_NeedsAHigherClock_OrAnEqualClockNullForAPresentClient()
     {
         using var rig = new AwRig(9);
         rig.Apply(U(5, 2, """{"a":1}"""));
@@ -32,10 +34,10 @@ public sealed class AwarenessApplyTests
         Assert.Equal("""{"a":1}""", Js.StateJson(rig.Awareness, 5));
         rig.Apply(U(5, 2, "null"));
         Assert.Equal("absent", Js.StateJson(rig.Awareness, 5));
-    });
+    }
 
     [Fact, Covers("AW-43")]
-    public void FirstMessageFromAnUnknownClient_WithClockZero_IsIgnored() => Stub.Run(() =>
+    public void FirstMessageFromAnUnknownClient_WithClockZero_IsIgnored()
     {
         using var rig = new AwRig(9);
         Assert.True(rig.Apply(U(5, 0, """{"a":1}""")).Ok);
@@ -43,10 +45,10 @@ public sealed class AwarenessApplyTests
         Assert.False(rig.Awareness.Meta.ContainsKey(5));
         rig.Apply(U(5, 1, """{"a":1}"""));
         Assert.Equal("""{"a":1}""", Js.StateJson(rig.Awareness, 5));
-    });
+    }
 
     [Fact, Covers("AW-44")]
-    public void EqualClock_NonNull_IsIgnored_EqualClockNull_RemovesOnlyAPresentClient() => Stub.Run(() =>
+    public void EqualClock_NonNull_IsIgnored_EqualClockNull_RemovesOnlyAPresentClient()
     {
         using var rig = new AwRig(9);
         rig.Apply(U(5, 3, """{"a":1}"""));
@@ -57,10 +59,10 @@ public sealed class AwarenessApplyTests
         var n = rig.Events.Count;
         rig.Apply(U(5, 3, "null"));
         Assert.Equal(n, rig.Events.Count);
-    });
+    }
 
     [Fact, Covers("AW-45")]
-    public void RemovingTheLocalClient_IsRefused_TheStateIsKept_AndTheClockIsBumped() => Stub.Run(() =>
+    public void RemovingTheLocalClient_IsRefused_TheStateIsKept_AndTheClockIsBumped()
     {
         using var rig = new AwRig(9);
         rig.Awareness.SetLocalState(Js.Obj(("me", 1)));
@@ -69,20 +71,20 @@ public sealed class AwarenessApplyTests
         Assert.Equal("""{"me":1}""", Js.StateJson(rig.Awareness, 9));
         Assert.Equal(6, rig.ClockOf(9));
         Assert.Equal(new[] { "change@0 +[] ~[] -[9] origin=r", "update@0 +[] ~[] -[9] origin=r" }, rig.Log(n));
-    });
+    }
 
     [Fact, Covers("AW-46")]
-    public void RemoteUpdate_ForTheLocalClient_MayOverwriteTheLocalState() => Stub.Run(() =>
+    public void RemoteUpdate_ForTheLocalClient_MayOverwriteTheLocalState()
     {
         using var rig = new AwRig(9);
         rig.Awareness.SetLocalState(Js.Obj(("me", 1)));
         rig.Apply(U(9, 7, """{"overwritten":true}"""));
         Assert.Equal("""{"overwritten":true}""", Js.StateJson(rig.Awareness, 9));
         Assert.Equal(7, rig.ClockOf(9));
-    });
+    }
 
     [Fact, Covers("AW-47")]
-    public void Meta_IsSetOnAcceptance_AndTheTimestampIsSharedByTheWholeBatch() => Stub.Run(() =>
+    public void Meta_IsSetOnAcceptance_AndTheTimestampIsSharedByTheWholeBatch()
     {
         using var rig = new AwRig(9);
         rig.Apply(U(1, 1, "{}"));
@@ -92,10 +94,10 @@ public sealed class AwarenessApplyTests
         Assert.Equal(40, rig.LastUpdatedMs(2));
         Assert.Equal(40, rig.LastUpdatedMs(3));
         Assert.Equal(1, rig.ClockOf(2));
-    });
+    }
 
     [Fact, Covers("AW-48")]
-    public void Classification_AnyUpdate_FollowsTheDocumentedOrder() => Stub.Run(() =>
+    public void Classification_AnyUpdate_FollowsTheDocumentedOrder()
     {
         using var rig = new AwRig(9);
         // unknown + state: added; unknown + null: nowhere
@@ -115,10 +117,10 @@ public sealed class AwarenessApplyTests
                 "change@0 +[] ~[] -[1] origin=gone", "update@0 +[] ~[] -[1] origin=gone",
             },
             rig.Log(n));
-    });
+    }
 
     [Fact, Covers("AW-49")]
-    public void Quirks_RevivalIsUpdated_NullForAnAbsentClientIsRemoved_TombstonesRaiseTheBar() => Stub.Run(() =>
+    public void Quirks_RevivalIsUpdated_NullForAnAbsentClientIsRemoved_TombstonesRaiseTheBar()
     {
         using var rig = new AwRig(9);
         rig.Apply(U(5, 1, """{"a":1}"""));
@@ -137,10 +139,10 @@ public sealed class AwarenessApplyTests
         Assert.Equal("absent", Js.StateJson(rig.Awareness, 77));
         rig.Apply(U(77, 4, """{"z":1}"""));
         Assert.Equal("""{"z":1}""", Js.StateJson(rig.Awareness, 77));
-    });
+    }
 
     [Fact, Covers("AW-50")]
-    public void Events_ChangeFiresBeforeUpdate_HeartbeatsAreUpdateOnly_StaleOrEmptyBatchesAreSilent() => Stub.Run(() =>
+    public void Events_ChangeFiresBeforeUpdate_HeartbeatsAreUpdateOnly_StaleOrEmptyBatchesAreSilent()
     {
         using var rig = new AwRig(9);
         rig.Apply(U(5, 1, """{"a":1}"""), "x");
@@ -151,10 +153,10 @@ public sealed class AwarenessApplyTests
         rig.Apply(U(5, 1, """{"a":3}"""), "x");
         rig.Apply(AwBytes.Update(), "x");
         Assert.Equal(n, rig.Events.Count);
-    });
+    }
 
     [Fact, Covers("AW-52")]
-    public void Apply_IsIdempotent_DeliveryOrderAcrossClientsDoesNotMatter_HighestClockWins() => Stub.Run(() =>
+    public void Apply_IsIdempotent_DeliveryOrderAcrossClientsDoesNotMatter_HighestClockWins()
     {
         var updates = new[] { U(1, 1, """{"v":1}"""), U(2, 4, """{"v":"b"}"""), U(1, 3, """{"v":3}"""), U(2, 2, """{"v":"old"}"""), U(1, 2, """{"v":2}""") };
         string Final(byte[][] order, int repeat)
@@ -168,5 +170,5 @@ public sealed class AwarenessApplyTests
         Assert.Equal(expected, Final(updates, 1));
         Assert.Equal(expected, Final(updates, 3));
         Assert.Equal(expected, Final(updates.Reverse().ToArray(), 1));
-    });
+    }
 }

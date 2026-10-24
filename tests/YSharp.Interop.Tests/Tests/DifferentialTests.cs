@@ -6,15 +6,17 @@ using Xunit;
 using YSharp.Interop.Generation;
 using YSharp.TestKit.Tiers;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Interop.Tests;
 
 /// <summary>
 /// The live differential (ADR 0012): FsCheck-generated ops scripts replayed on a Node child (the oracle) and on y-sharp, and the observations
 /// compared. Smoke tier: fixed seeds, about a minute for the tier. Nightly tier: random seeds, a time box, failing scripts uploaded. Until
-/// y-sharp exists the API stub answers <see cref="NotImplementedException"/> and every property skips (ADR 0019). The <c>[Covers]</c> lists
+/// the features it needs have landed, every property skips (ADR 0020). The <c>[Covers]</c> lists
 /// name the behaviours the generator really draws on, so the differential layer of those entries is reported (ADR 0010).
 /// </summary>
+[Requires(Feature.V1, Feature.V2, Feature.UpdateFunctions, Feature.V2Functions, Feature.Array, Feature.Map, Feature.Text, Feature.TextFormat, Feature.Events)]
 [NeedsNode]
 [Tier(Tier.Smoke)]
 public sealed class DifferentialTests(OracleHost host)

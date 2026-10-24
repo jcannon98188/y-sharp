@@ -1,6 +1,7 @@
 using Xunit;
 using YSharp.Fuzz.Builder;
 using YSharp.TestKit.Assertions;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Fuzz.Tests;
 
@@ -8,6 +9,7 @@ namespace YSharp.Fuzz.Tests;
 /// The structure-aware builder must agree with the oracle byte for byte on valid input, or its hostile variations prove nothing.
 /// These tests need no y-sharp implementation: the expected bytes are the Node-recorded ones in the fixtures and the notes.
 /// </summary>
+[LibraryIndependent]
 public sealed class BuilderSelfTests
 {
     private const string HiV1 = "010101000401017402686900";

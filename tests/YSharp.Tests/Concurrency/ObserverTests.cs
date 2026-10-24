@@ -5,10 +5,12 @@ using System.Threading;
 using Xunit;
 using YSharp.TestKit.Tiers;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Concurrency;
 
 /// <summary>CC-11..CC-14: observers run synchronously on the committing thread inside the write lock, the handler list is safe to change from anywhere, and faults are contained. Tier: gating. No seeds.</summary>
+[Requires(Feature.Events)]
 [Collection(ConcurrencyCollection.Name)]
 [Tier(Tier.Gating)]
 public sealed class ObserverTests
@@ -55,7 +57,7 @@ public sealed class ObserverTests
     // ------------------------------------------------------------------ CC-11
 
     [Fact, Covers("CC-11")]
-    public void Observers_RunSynchronously_OnTheCommittingThread_InsideTheWriteLock() => Impl.Run(() =>
+    public void Observers_RunSynchronously_OnTheCommittingThread_InsideTheWriteLock()
     {
         var p = new Probe();
         p.Arr.Push(Conc.One);
@@ -64,10 +66,10 @@ public sealed class ObserverTests
         Assert.True(p.TimedOutFromElsewhere);
         // by the time the call returned every handler has run: no dispatcher, no deferred work
         Assert.Contains("all", p.Log);
-    });
+    }
 
     [Fact, Covers("CC-11")]
-    public void TheCommitOrder_IsTheSameOnEveryThread_AndHandlersNeverHopThreads() => Impl.Run(() =>
+    public void TheCommitOrder_IsTheSameOnEveryThread_AndHandlersNeverHopThreads()
     {
         var onMain = new Probe();
         onMain.Arr.Push(Conc.One);
@@ -85,10 +87,11 @@ public sealed class ObserverTests
             Assert.Equal(reference, p.Log.ToArray());
             Assert.All(p.Threads, t => Assert.Equal(bg.ThreadId, t));
         }
-    });
+    }
 
     [Fact, Covers("CC-11")]
-    public void RemoteUpdate_Applied_FiresOnTheThreadThatCalledApplyUpdate() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void RemoteUpdate_Applied_FiresOnTheThreadThatCalledApplyUpdate()
     {
         var source = Conc.NewDoc(9);
         source.GetArray("a").Push(Conc.One);
@@ -102,12 +105,13 @@ public sealed class ObserverTests
         Assert.Contains(("remote", bg.ThreadId), seen);
         Assert.Contains(("update", bg.ThreadId), seen);
         Assert.All(seen, s => Assert.Equal(bg.ThreadId, s.Thread));
-    });
+    }
 
     // ------------------------------------------------------------------ CC-12
 
     [Fact, Covers("CC-12")]
-    public void ObserveAndUnobserve_NeverTakeTheDocumentLock_FromAnyThread() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void ObserveAndUnobserve_NeverTakeTheDocumentLock_FromAnyThread()
     {
         var doc = Conc.NewDoc();
         var arr = doc.GetArray("a");
@@ -128,10 +132,11 @@ public sealed class ObserverTests
             doc.AfterTransaction += th;
             doc.AfterTransaction -= th;
         }, "subscribing and unsubscribing");
-    });
+    }
 
     [Fact, Covers("CC-12")]
-    public void ObserveAndUnobserve_InsideACallback_AreSafe() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void ObserveAndUnobserve_InsideACallback_AreSafe()
     {
         var doc = Conc.NewDoc();
         var arr = doc.GetArray("a");
@@ -148,10 +153,11 @@ public sealed class ObserverTests
         arr.Push(Conc.One);
         Assert.Equal(new[] { "first" }, log);                 // it removed itself after the first call
         Assert.Equal(1, late);                                // the handler added in the callback saw the second event only
-    });
+    }
 
     [Fact, Covers("CC-12")]
-    public void SubscribingFromAnotherThread_WhileACommitIsInFlight_DoesNotWaitForIt() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void SubscribingFromAnotherThread_WhileACommitIsInFlight_DoesNotWaitForIt()
     {
         var doc = Conc.NewDoc();
         var arr = doc.GetArray("a");
@@ -163,7 +169,7 @@ public sealed class ObserverTests
             proceed.Wait(Bg.Generous);
         });
         var committer = Bg.Start(() => arr.Push(Conc.One));
-        Assert.True(inHandler.Wait(Bg.Generous));
+        Assert.True(inHandler.Wait(Bg.Generous, TestContext.Current.CancellationToken));
         var calls = 0;
         Conc.AssertDoesNotWait(() => arr.Observe((_, _) => calls++), "Observe during a commit");
         proceed.Set();
@@ -171,12 +177,13 @@ public sealed class ObserverTests
         Assert.Equal(0, calls);                                // not part of the dispatch that was already running
         arr.Push(Conc.One);
         Assert.Equal(1, calls);
-    });
+    }
 
     // ------------------------------------------------------------------ CC-13
 
     [Fact, Covers("CC-13")]
-    public void HandlersRun_InRegistrationOrder_AndTheSameHandlerRegisteredTwiceRunsTwice() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void HandlersRun_InRegistrationOrder_AndTheSameHandlerRegisteredTwiceRunsTwice()
     {
         var arr = Conc.NewDoc().GetArray("a");
         var log = new List<string>();
@@ -187,10 +194,11 @@ public sealed class ObserverTests
         arr.Observe(a);
         arr.Push(Conc.One);
         Assert.Equal(new[] { "a", "b", "a" }, log);
-    });
+    }
 
     [Fact, Covers("CC-13")]
-    public void ARemovedHandlerStillRuns_InTheDispatchThatWasInFlight_AnAddedOneFirstRunsNextTrigger() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void ARemovedHandlerStillRuns_InTheDispatchThatWasInFlight_AnAddedOneFirstRunsNextTrigger()
     {
         // Spec 7's TX-12 probe ran this against Yjs 13.6.33 and got the same rule, so CC-13 is a match, not a divergence.
         var arr = Conc.NewDoc().GetArray("a");
@@ -209,10 +217,11 @@ public sealed class ObserverTests
         log.Add("--");
         arr.Push(Conc.One);
         Assert.Equal(new[] { "h1", "h2", "--", "h1", "h3" }, log);
-    });
+    }
 
     [Fact, Covers("CC-13")]
-    public void TheSnapshot_IsTakenWhenTheTriggerStarts_EvenWhenAnotherThreadChangesTheListMeanwhile() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void TheSnapshot_IsTakenWhenTheTriggerStarts_EvenWhenAnotherThreadChangesTheListMeanwhile()
     {
         var doc = Conc.NewDoc();
         var arr = doc.GetArray("a");
@@ -228,18 +237,19 @@ public sealed class ObserverTests
         });
         arr.Observe(second);
         var committer = Bg.Start(() => arr.Push(Conc.One));
-        Assert.True(inFirst.Wait(Bg.Generous));
+        Assert.True(inFirst.Wait(Bg.Generous, TestContext.Current.CancellationToken));
         arr.Unobserve(second);                                 // removed from another thread, mid-dispatch
         arr.Observe((_, _) => log.Add("late"));                // added from another thread, mid-dispatch
         proceed.Set();
         committer.Join();
         Assert.Equal(new[] { "first", "second" }, log);        // the removed one still ran, the added one did not
-    });
+    }
 
     // ------------------------------------------------------------------ CC-14
 
     [Fact, Covers("CC-14")]
-    public void AHandlerFault_IsContained_OnTheCommittingThread_WhicheverThreadThatIs() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void AHandlerFault_IsContained_OnTheCommittingThread_WhicheverThreadThatIs()
     {
         var doc = Conc.NewDoc();
         var arr = doc.GetArray("a");
@@ -263,10 +273,11 @@ public sealed class ObserverTests
         Assert.All(faults, f => Assert.Same(boom, f.Fault));
         Assert.Equal(new[] { Environment.CurrentManagedThreadId, bg.ThreadId }, faults.Select(f => f.Thread).ToArray());
         Conc.AssertDoesNotWait(() => doc.Transact(static _ => { }), "a writer after a faulting commit");   // the lock was released
-    });
+    }
 
     [Fact, Covers("CC-14")]
-    public void AFault_InARemoteUpdatesObserver_DoesNotStopTheApply_OrLeakTheLock() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void AFault_InARemoteUpdatesObserver_DoesNotStopTheApply_OrLeakTheLock()
     {
         var source = Conc.NewDoc(9);
         source.GetArray("a").Push(Conc.One);
@@ -280,5 +291,5 @@ public sealed class ObserverTests
         Assert.Equal(1, doc.GetArray("a").Length);
         Assert.False(doc.IsFaulted);                           // a handler fault is not an internal invariant violation (ADR 0005)
         Conc.AssertDoesNotWait(() => doc.Transact(static _ => { }), "a writer after the remote apply");
-    });
+    }
 }

@@ -5,6 +5,7 @@ using System.Reflection;
 using Xunit;
 using YSharp.Tests.Codecs;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Simulation;
 
@@ -22,6 +23,7 @@ namespace YSharp.Tests.Simulation;
 /// which no stored op log nor immutable attribute value can express; the check script re-creates it only to prove the rest matches.
 /// </para>
 /// </summary>
+[Requires(Feature.Sim)]
 [Covers("SIM-11", "SIM-12", "SIM-13")]
 public sealed class RepeatedRandomTests
 {
@@ -31,7 +33,7 @@ public sealed class RepeatedRandomTests
     private const string Quill = "y-text.tests.js:testRepeatGenerateQuillChanges";
     internal const string InsertDelete = "y-text.tests.js:testInsertAndDeleteAtRandomPositions";
 
-    private static void Gate(string key, uint seed) => Stub.Run(() => SimCases.RunChecked(SimCases.Get(key), seed));
+    private static void Gate(string key, uint seed)=> SimCases.RunChecked(SimCases.Get(key), seed);
 
     // ---- y-map.tests.js: testRepeatGeneratingYmapTests*
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Map + "10", "SIM-13")]
@@ -168,6 +170,7 @@ public sealed class RepeatedRandomTests
 
     [Fact]
     [Covers("SIM-13")]
+    [LibraryIndependent]
     public void RegressionSeeds_AreWellFormed_AndRunInGating()
     {
         var entries = RegressionSeeds.Load();
@@ -177,16 +180,16 @@ public sealed class RepeatedRandomTests
             Assert.False(string.IsNullOrWhiteSpace(e.Reason), $"regression seed {e.Test}/{e.Seed} needs a reason");
         }
         Assert.Equal(entries.Count, entries.Select(e => (e.Test, e.Seed)).Distinct().Count());
-        Stub.Run(() =>
         {
             foreach (var e in entries) SimCases.RunChecked(SimCases.Get(e.Test), e.Seed);
-        });
+        }
     }
 
     // ---- the seed lists themselves
 
     [Fact]
     [Covers("SIM-13")]
+    [LibraryIndependent]
     public void SeedLists_FollowTheSizeClasses_AndEveryGatingCaseHasItsTest()
     {
         if (YSharp.TestKit.Tiers.YSharpEnv.Seed == null)

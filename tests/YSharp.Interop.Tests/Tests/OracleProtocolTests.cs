@@ -7,10 +7,12 @@ using Xunit;
 using YSharp.TestKit.Node;
 using YSharp.TestKit.Tiers;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Interop.Tests;
 
 /// <summary>The rule for when the live tests run, fail or skip (ADR 0012 "Availability"). No Node needed.</summary>
+[LibraryIndependent]
 public sealed class AvailabilityTests
 {
     [Fact, Covers("DIFF-08", "DIFF-11")]
@@ -69,6 +71,7 @@ public sealed class AvailabilityTests
 }
 
 /// <summary>The live Node child: handshake, message catalogue, result statuses, virtual time (ADR 0012 "Process", "Protocol", "Time"). Smoke tier.</summary>
+[LibraryIndependent]
 [NeedsNode]
 [Tier(Tier.Smoke)]
 public sealed class OracleProtocolTests(OracleHost host)
@@ -189,6 +192,7 @@ public sealed class OracleProtocolTests(OracleHost host)
 }
 
 /// <summary>The hang and crash handling of the Node child (ADR 0012 "Hangs"), with the fault ops enabled. Smoke tier.</summary>
+[LibraryIndependent]
 [NeedsNode]
 [Tier(Tier.Smoke)]
 public sealed class OracleFaultTests

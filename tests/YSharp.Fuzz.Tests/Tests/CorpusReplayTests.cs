@@ -5,6 +5,7 @@ using System.Linq;
 using Xunit;
 using YSharp.Fuzz.Corpus;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Fuzz.Tests;
 
@@ -12,6 +13,7 @@ namespace YSharp.Fuzz.Tests;
 /// The fixed corpus of <c>fixtures/hostile</c> (ADR 0013 Corpus, Regression): every file is replayed on every commit through the
 /// guarded harness, so adding a file is the whole regression test. One test per class names all its failing cases.
 /// </summary>
+[Requires(Feature.V1)]
 public sealed class CorpusReplayTests
 {
     private static readonly string[] Classes =
@@ -25,7 +27,7 @@ public sealed class CorpusReplayTests
     private static IEnumerable<CorpusCase> CasesOf(string hosClass) =>
         CorpusFiles.LoadAll().Where(c => c.Classes.Contains(hosClass));
 
-    private static void Replay(string hosClass) => Stub.Run(() => CorpusRunner.ReplayAll(CasesOf(hosClass)));
+    private static void Replay(string hosClass)=> CorpusRunner.ReplayAll(CasesOf(hosClass));
 
     [Fact, Covers("HOS-TRUNC", Layer = CoverLayer.Unit)]
     public void Corpus_Truncation_EveryStoredPrefixIsMalformedAndChangesNothing() => Replay("HOS-TRUNC");
@@ -52,10 +54,10 @@ public sealed class CorpusReplayTests
     public void Corpus_ProtocolFrames_UnknownTypesOverrunsAndBadStatesAreContained() => Replay("HOS-PROTO");
 
     [Fact, Covers("ERR-21", Layer = CoverLayer.Unit)]
-    public void Corpus_EveryStoredFile_LeavesTheDocumentUnfaultedAndUsable() => Stub.Run(() =>
-        CorpusRunner.ReplayAll(CorpusFiles.LoadAll()));
+    public void Corpus_EveryStoredFile_LeavesTheDocumentUnfaultedAndUsable()=> CorpusRunner.ReplayAll(CorpusFiles.LoadAll());
 
     [Fact]
+    [LibraryIndependent]
     public void Corpus_EveryHostileClassWithStoredBytes_HasAFile()
     {
         var all = CorpusFiles.LoadAll();
@@ -64,6 +66,7 @@ public sealed class CorpusReplayTests
     }
 
     [Fact]
+    [LibraryIndependent]
     public void Corpus_Files_AreWellFormed()
     {
         var all = CorpusFiles.LoadAll();
@@ -83,6 +86,7 @@ public sealed class CorpusReplayTests
     }
 
     [Fact]
+    [LibraryIndependent]
     public void Corpus_FilesInTheFolder_AreHostileFixturesOrKnownLegacyOnes()
     {
         // the folder holds the Spec 5 malformed files (ENC-*) and the Spec 11 class files; anything else needs a deliberate decision
@@ -93,6 +97,7 @@ public sealed class CorpusReplayTests
     }
 
     [Fact]
+    [LibraryIndependent]
     public void Corpus_EveryUpdateCase_HasARecordedOracleOutcome()
     {
         // ADR 0011 / 0013: the stored oracle outcome table is what the smoke and nightly comparison reads; update cases must carry one

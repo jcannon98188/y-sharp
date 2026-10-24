@@ -5,10 +5,12 @@ using Xunit;
 using YSharp.Tests.Codecs;
 using YSharp.TestKit.Traceability;
 using static YSharp.Tests.Types.TypeTestExtensions;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Types;
 
 /// <summary>Behaviour of the XML types (X-E*) and the ports of y-xml.tests.js.</summary>
+[Requires(Feature.Xml)]
 public sealed class XmlTests
 {
     private static Doc NewDoc(ulong client = 1) => new(new DocOptions { ClientId = client });
@@ -16,7 +18,7 @@ public sealed class XmlTests
     private static YType[] Nodes(params YType[] nodes) => nodes;
 
     [Fact, Covers("X-E1")]
-    public void NodeName_DefaultsToUndefined_AndKeepsAGivenName() => Stub.Run(() =>
+    public void NodeName_DefaultsToUndefined_AndKeepsAGivenName()
     {
         Assert.Equal("UNDEFINED", new YXmlElement().NodeName);
         Assert.Equal("my-Tag", new YXmlElement("my-Tag").NodeName);
@@ -27,10 +29,11 @@ public sealed class XmlTests
         Assert.Equal("p", ((YXmlElement)remote[0]).NodeName);
         Assert.Equal("UNDEFINED", ((YXmlElement)remote[1]).NodeName);
         net.Compare();
-    });
+    }
 
     [Fact, Covers("X-E2")]
-    public void Attributes_AnyElement_AreAStringKeyedMapOfAnyValues() => Stub.Run(() =>
+    [Requires(Feature.TextFormat)]
+    public void Attributes_AnyElement_AreAStringKeyedMapOfAnyValues()
     {
         var doc = NewDoc();
         var fragment = doc.GetXmlFragment("f");
@@ -56,10 +59,11 @@ public sealed class XmlTests
         prelim.SetAttribute("a", 2);
         fragment.Insert(1, Nodes(prelim));
         Assert.Equal(new[] { "z", "a" }, prelim.GetAttributes().Keys);
-    });
+    }
 
     [Fact, Covers("X-E3")]
-    public void ToString_SortsAttributes_StringifiesValuesLikeJs_AndDoesNotEscape() => Stub.Run(() =>
+    [Requires(Feature.Text)]
+    public void ToString_SortsAttributes_StringifiesValuesLikeJs_AndDoesNotEscape()
     {
         var doc = NewDoc();
         var fragment = doc.GetXmlFragment("f");
@@ -80,10 +84,10 @@ public sealed class XmlTests
             el.ToString());
         Assert.Equal(el.ToString(), fragment.ToString());
         Assert.Equal(fragment.ToString(), fragment.ToJson().AsString());
-    });
+    }
 
     [Fact, PortOf("y-xml.tests.js:testSetProperty", "X-E2", "X-E5")]
-    public void Xml_SetAttribute_IsReadBackLocallyAndOnThePeer() => Stub.Run(() =>
+    public void Xml_SetAttribute_IsReadBackLocallyAndOnThePeer()
     {
         var net = Net.Init(2);
         var (xml0, xml1) = (net.Peers[0].Xml, net.Peers[1].Xml);
@@ -92,10 +96,10 @@ public sealed class XmlTests
         net.Flush();
         Assert.True(xml1.TryGetAttribute("height", out var h1) && h1.AsString() == "10");
         net.Compare();
-    });
+    }
 
     [Fact, PortOf("y-xml.tests.js:testHasProperty", "X-E2")]
-    public void Xml_HasAttribute_TrueAfterSetAndFalseAfterRemove() => Stub.Run(() =>
+    public void Xml_HasAttribute_TrueAfterSetAndFalseAfterRemove()
     {
         var net = Net.Init(2);
         var (xml0, xml1) = (net.Peers[0].Xml, net.Peers[1].Xml);
@@ -108,10 +112,11 @@ public sealed class XmlTests
         net.Flush();
         Assert.False(xml1.HasAttribute("height"));
         net.Compare();
-    });
+    }
 
     [Fact, PortOf("y-xml.tests.js:testEvents", "X-E5", "Y-1")]
-    public void Xml_AttributeAndChildChanges_RaiseEventsLocallyAndRemotely() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Text, Feature.Events)]
+    public void Xml_AttributeAndChildChanges_RaiseEventsLocallyAndRemotely()
     {
         var net = Net.Init(2);
         var (xml0, xml1) = (net.Peers[0].Xml, net.Peers[1].Xml);
@@ -139,10 +144,11 @@ public sealed class XmlTests
         net.Flush();
         Assert.True(remote.ChildList);
         net.Compare();
-    });
+    }
 
     [Fact, PortOf("y-xml.tests.js:testTreewalker", "X-E4")]
-    public void Xml_TreeWalker_VisitsNodesInDocumentOrder() => Stub.Run(() =>
+    [Requires(Feature.Text)]
+    public void Xml_TreeWalker_VisitsNodesInDocumentOrder()
     {
         var net = Net.Init(3);
         var xml0 = net.Peers[0].Xml;
@@ -163,10 +169,11 @@ public sealed class XmlTests
         xml0.Delete(0);
         Assert.Same(paragraph2, xml0.QuerySelector("p"));
         net.Compare();
-    });
+    }
 
     [Fact, PortOf("y-xml.tests.js:testSiblings", "X-E4")]
-    public void Xml_Siblings_LinkNeighboursParentAndFirstChild() => Stub.Run(() =>
+    [Requires(Feature.Text)]
+    public void Xml_Siblings_LinkNeighboursParentAndFirstChild()
     {
         var ydoc = NewDoc();
         var yxml = ydoc.GetXmlFragment();
@@ -187,10 +194,11 @@ public sealed class XmlTests
         Assert.Same(third, first.NextSibling);
         Assert.Same(first, third.PrevSibling);
         Assert.Null(new YXmlElement("x").NextSibling);
-    });
+    }
 
     [Fact, PortOf("y-xml.tests.js:testInsertafter", "X-E4")]
-    public void Xml_InsertAfterNestedNodes_KeepsTheOrderAndRejectsInvalidUse() => Stub.Run(() =>
+    [Requires(Feature.Text)]
+    public void Xml_InsertAfterNestedNodes_KeepsTheOrderAndRejectsInvalidUse()
     {
         var ydoc = NewDoc();
         var yxml = ydoc.GetXmlFragment();
@@ -219,10 +227,11 @@ public sealed class XmlTests
             var el = new YXmlElement("p");
             el.InsertAfter(deepsecond1, Nodes(new YXmlText()));
         });
-    });
+    }
 
     [Fact, PortOf("y-xml.tests.js:testClone", "X-E6")]
-    public void Xml_CloneOfAFragment_HasTheSameJsonAndLength() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.Array)]
+    public void Xml_CloneOfAFragment_HasTheSameJsonAndLength()
     {
         var ydoc = NewDoc();
         var yxml = ydoc.GetXmlFragment();
@@ -236,10 +245,11 @@ public sealed class XmlTests
         ydoc.GetArray("copyarr").Insert(0, new YEntry[] { cloneYxml });
         Assert.Equal(3, cloneYxml.Length);
         Assert.Equal(yxml.ToJson().Json(), cloneYxml.ToJson().Json());
-    });
+    }
 
     [Fact, PortOf("y-xml.tests.js:testElement", "X-E8")]
-    public void Xml_ElementWithTwoTextChildren_KeepsTheirOrder() => Stub.Run(() =>
+    [Requires(Feature.Text)]
+    public void Xml_ElementWithTwoTextChildren_KeepsTheirOrder()
     {
         var ydoc = NewDoc();
         var yxmlel = ydoc.GetXmlElement();
@@ -249,20 +259,21 @@ public sealed class XmlTests
         Assert.Equal(2, yxmlel.Length);
         Assert.Same(text1, yxmlel[0]);
         Assert.Same(text2, yxmlel[1]);
-    });
+    }
 
     [Fact, Covers("X-E8")]
-    public void RootElement_NoNodeName_HasTheDefaultNodeName() => Stub.Run(() =>
+    public void RootElement_NoNodeName_HasTheDefaultNodeName()
     {
         var doc = NewDoc();
         var root = doc.GetXmlElement("e");
         Assert.Equal("UNDEFINED", root.NodeName);
         Assert.Equal("<undefined></undefined>", root.ToString());
         Assert.Same(root, doc.GetXmlElement("e"));
-    });
+    }
 
     [Fact, Covers("X-E7", "Y-7")]
-    public void AttributeEvents_AnyChange_UseMapSemantics() => Stub.Run(() =>
+    [Requires(Feature.Events)]
+    public void AttributeEvents_AnyChange_UseMapSemantics()
     {
         var doc = NewDoc();
         var el = new YXmlElement("p");
@@ -283,10 +294,10 @@ public sealed class XmlTests
         });
         el.RemoveAttribute("a");
         Assert.Equal(new[] { "a:Add:-", "a:Update:1", "a:Update:2;b:Add:-", "a:Delete:4" }, seen);
-    });
+    }
 
     [Fact, Covers("X-E4")]
-    public void FirstChild_DeletedChildren_AreSkipped() => Stub.Run(() =>
+    public void FirstChild_DeletedChildren_AreSkipped()
     {
         var fragment = NewDoc().GetXmlFragment("f");
         var a = new YXmlElement("a");
@@ -297,5 +308,5 @@ public sealed class XmlTests
         fragment.Delete(0);
         Assert.Null(fragment.FirstChild);
         Assert.Equal(0, fragment.Length);
-    });
+    }
 }

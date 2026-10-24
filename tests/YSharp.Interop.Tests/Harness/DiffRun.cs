@@ -76,7 +76,6 @@ public sealed class DiffRun
         var oracle = _host.RunAsync(scriptJson, extras).GetAwaiter().GetResult();
         var sharp = RunSharp(scriptJson);
 
-        if (sharp.Status == SharpStatus.Stub) throw new NotImplementedException(sharp.Message);
         if (sharp.Status == SharpStatus.Hang) throw Fail(FailureReason.SharpFault, scriptJson, oracle.Observations, null, null, "y-sharp hung: " + sharp.Message);
         if (sharp.Status == SharpStatus.Fault) throw Fail(FailureReason.SharpFault, scriptJson, oracle.Observations, null, null, "y-sharp threw " + sharp.Message + Environment.NewLine + sharp.Exception);
 
@@ -256,7 +255,6 @@ public sealed class DiffRun
         Cases++;
         var oracle = _host.RunAsync(script).GetAwaiter().GetResult();
         var sharp = RunSharp(script);
-        if (sharp.Status == SharpStatus.Stub) throw new NotImplementedException(sharp.Message);
         if (sharp.Status is SharpStatus.Hang or SharpStatus.Fault or SharpStatus.ScriptError)
             throw Fail(FailureReason.SharpFault, script, oracle.Observations, null, null, $"y-sharp {sharp.Status} on a mutated update ({kind} at {offset}): {sharp.Message}");
         if (oracle.Misbehaved)

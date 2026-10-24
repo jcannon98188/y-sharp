@@ -4,10 +4,12 @@ using System.Linq;
 using Xunit;
 using YSharp.TestKit.Assertions;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Structs;
 
 /// <summary>Transactions and their cleanup (docs/research/structs.md section J), observed through the public events.</summary>
+[Requires(Feature.Events)]
 public sealed class TransactionTests
 {
     private static List<string> LogEvents(Doc d)
@@ -26,7 +28,8 @@ public sealed class TransactionTests
 
     [Fact]
     [Covers("STR-53", "STR-56")]
-    public void ATransaction_SnapshotsTheStateBefore_FillsTheStateAfter_AndNewItemsContinueTheOwnClock() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void ATransaction_SnapshotsTheStateBefore_FillsTheStateAfter_AndNewItemsContinueTheOwnClock()
     {
         var a = Net.Mk(1);
         var t = a.GetText("t");
@@ -43,11 +46,12 @@ public sealed class TransactionTests
         b.GetText("t").Insert(0, "Y");
         Assert.Equal(new[] { (0L, 1L), (1L, 1L) }, StructsProbe.Of(b, 2).Select(s => (s.Clock, s.Len)));
         Assert.Equal(2L, b.GetStateVector()[2]);
-    });
+    }
 
     [Fact]
     [Covers("STR-54", "STR-58")]
-    public void EventOrder_ForOneTransaction_IsFixed() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.V2)]
+    public void EventOrder_ForOneTransaction_IsFixed()
     {
         var a = Net.Mk(1);
         var t = a.GetText("t");
@@ -68,11 +72,12 @@ public sealed class TransactionTests
             "beforeAllTransactions", "beforeTransaction", "beforeObserverCalls",
             "afterTransaction", "afterTransactionCleanup", "afterAllTransactions",
         }, log);
-    });
+    }
 
     [Fact]
     [Covers("STR-54")]
-    public void ANestedTransact_JoinsTheOuterTransaction_AndKeepsItsOrigin() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void ANestedTransact_JoinsTheOuterTransaction_AndKeepsItsOrigin()
     {
         var a = Net.Mk(1);
         var seen = new List<(object? Origin, bool Local)>();
@@ -83,11 +88,12 @@ public sealed class TransactionTests
 
         Assert.Equal(new (object?, bool)[] { ("outer", true) }, seen);
         Assert.Single(updates);
-    });
+    }
 
     [Fact]
     [Covers("STR-54")]
-    public void ATransactionOpenedByAnObserver_IsQueued_AndRunsAfterTheFirstOnesCleanup() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void ATransactionOpenedByAnObserver_IsQueued_AndRunsAfterTheFirstOnesCleanup()
     {
         var a = Net.Mk(1);
         var t = a.GetText("t");
@@ -112,11 +118,12 @@ public sealed class TransactionTests
 
         Assert.Equal(new[] { "beforeAll", "observer 1", "observer 1 done", "after", "update", "observer 2", "after", "update", "afterAll" }, log);
         Assert.Equal("AB", t.ToString());
-    });
+    }
 
     [Fact]
     [Covers("STR-54", "STR-73")]
-    public void ABodyThatThrows_StillCleansUp_CommitsAndEmitsTheUpdate_ThenPropagates() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void ABodyThatThrows_StillCleansUp_CommitsAndEmitsTheUpdate_ThenPropagates()
     {
         var a = Net.Mk(1);
         var t = a.GetText("t");
@@ -133,11 +140,12 @@ public sealed class TransactionTests
         Assert.Equal("boom", ex.Message);
         Assert.Equal(new[] { "after", "update" }, log);
         Assert.Equal("x", t.ToString());
-    });
+    }
 
     [Fact]
     [Covers("STR-55")]
-    public void ChangedTypes_NewTypesInTheTransaction_AreNotListed() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void ChangedTypes_NewTypesInTheTransaction_AreNotListed()
     {
         var a = Net.Mk(1);
         var arr = a.GetArray("arr");
@@ -156,11 +164,12 @@ public sealed class TransactionTests
         Assert.Equal(2, changed!.Count);
         Assert.Contains((YType)arr, changed);
         Assert.Contains((YType)existing, changed);
-    });
+    }
 
     [Fact]
     [Covers("STR-57")]
-    public void Update_EmptyOrDeleteOnlyTransaction_EmitsNothingOrOnlyTheDeleteSet() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void Update_EmptyOrDeleteOnlyTransaction_EmitsNothingOrOnlyTheDeleteSet()
     {
         var a = Net.Mk(2);
         var t = a.GetText("t");
@@ -174,11 +183,12 @@ public sealed class TransactionTests
         t.Delete(1, 1);
         var update = Assert.Single(updates);
         Assert.Equal("000102010101", Hex.Of(update));            // no structs, one delete range (client 2, clock 1, length 1)
-    });
+    }
 
     [Fact]
     [Covers("STR-58", "STR-60")]
-    public void Cleanup_GcsAndMerges_BeforeAfterTransactionCleanupIsRaised() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void Cleanup_GcsAndMerges_BeforeAfterTransactionCleanupIsRaised()
     {
         var a = Net.Mk(1);
         var t = a.GetText("t");
@@ -194,5 +204,5 @@ public sealed class TransactionTests
         t.Delete(0, 2);
         Assert.Single(StructsProbe.Of(a, 1));
         Assert.Equal(1, StructsProbe.Of(a, 1)[0].Ref);                                         // collected to ContentDeleted by then
-    });
+    }
 }

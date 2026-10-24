@@ -2,10 +2,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Structs;
 
 /// <summary>Client ids in the struct store (quirks Q20, Q21): where they come from and how they compare at the 32-bit extremes.</summary>
+[Requires(Feature.V1)]
 public sealed class ClientIdTests
 {
     private sealed class ScriptedIds : IClientIdGenerator
@@ -18,9 +20,9 @@ public sealed class ClientIdTests
 
     [Fact]
     [Covers("Q20")]
-    public void ClientIds_AreDrawnFromAGenerator_AndAreRegeneratedFromItOnACollision() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void ClientIds_AreDrawnFromAGenerator_AndAreRegeneratedFromItOnACollision()
     {
-        Impl.RequireImplementation();
         var ids = Enumerable.Range(0, 50).Select(_ => new Doc().ClientId).ToList();
         Assert.Equal(ids.Count, ids.Distinct().Count());           // random 32-bit values: 50 draws do not collide
 
@@ -32,11 +34,12 @@ public sealed class ClientIdTests
         Net.Sync(a, b);                                            // a's structs carry b's id: b picks the next generated id
         Assert.Equal(99UL, b.ClientId);
         Assert.Equal(2, generator.Calls);
-    });
+    }
 
     [Fact]
     [Covers("Q21", "STR-02")]
-    public void ClientIds_AtTheExtremesOf32Bits_OrderAndCompareAsUnsignedNumbers() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void ClientIds_AtTheExtremesOf32Bits_OrderAndCompareAsUnsignedNumbers()
     {
         var a = Net.Mk(4294967295);
         var b = Net.Mk(2147483648);
@@ -57,5 +60,5 @@ public sealed class ClientIdTests
             Assert.Equal(new ulong[] { 4294967295, 2147483648, 1 }, StructsProbe.Dump(d).Select(s => s.Client));   // descending, unsigned
             Assert.Equal(2L, d.GetStateVector()[4294967295]);
         }
-    });
+    }
 }

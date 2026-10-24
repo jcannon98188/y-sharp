@@ -3,9 +3,11 @@ using System.IO;
 using System.Linq;
 using Xunit;
 using YSharp.TestKit.Fixtures;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.TestKit;
 
+[LibraryIndependent]
 public sealed class FixtureLoaderTests : IDisposable
 {
     private readonly string _dir = Directory.CreateTempSubdirectory("ysharp-fixtures-").FullName;

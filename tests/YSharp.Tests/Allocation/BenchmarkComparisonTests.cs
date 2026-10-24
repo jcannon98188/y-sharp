@@ -3,10 +3,12 @@ using System.Linq;
 using Xunit;
 using YSharp.Benchmarks.Comparison;
 using YSharp.TestKit.Tiers;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Allocation;
 
 /// <summary>The nightly comparison (ADR 0009): it reports regressions and never fails the build.</summary>
+[LibraryIndependent]
 [Tier(Tier.Gating)]
 public sealed class BenchmarkComparisonTests
 {

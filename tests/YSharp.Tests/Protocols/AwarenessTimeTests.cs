@@ -4,16 +4,18 @@ using Xunit;
 using YSharp.Tests.Codecs;
 using YSharp.TestKit.Time;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Protocols;
 
 /// <summary>The check timer, local renewal and remote expiry (AW-14..21) on a virtual <see cref="TimeProvider"/>; no test waits on a real clock.</summary>
+[Requires(Feature.Awareness)]
 public sealed class AwarenessTimeTests
 {
     private static byte[] U(ulong id, long clock, string json) => AwBytes.Update((id, clock, json));
 
     [Fact, Covers("AW-14")]
-    public void CheckTimer_Default_IsOneTimerWithAPeriodOf3000Milliseconds() => Stub.Run(() =>
+    public void CheckTimer_Default_IsOneTimerWithAPeriodOf3000Milliseconds()
     {
         var clock = new VirtualTimeProvider();
         var counting = new CountingTimeProvider(clock);
@@ -21,10 +23,10 @@ public sealed class AwarenessTimeTests
         var (due, period) = Assert.Single(counting.Created);
         Assert.Equal(TimeSpan.FromMilliseconds(3000), period);
         Assert.Equal(TimeSpan.FromMilliseconds(3000), due);
-    });
+    }
 
     [Fact, Diverges("AW-21", adr: "0014")]
-    public void CheckTimer_IsCreatedThroughTheTimeProvider_AndReleasedOnDispose() => Stub.Run(() =>
+    public void CheckTimer_IsCreatedThroughTheTimeProvider_AndReleasedOnDispose()
     {
         // JS setInterval keeps a Node process alive until destroy(). The port owns one ITimer from the injected TimeProvider and
         // disposes it with the awareness, so nothing outlives Dispose.
@@ -37,10 +39,10 @@ public sealed class AwarenessTimeTests
         rig.Dispose();
         Assert.Single(counting.Created);
         Assert.Equal(1, counting.Disposed);
-    });
+    }
 
     [Fact, Covers("AW-15", "AW-9")]
-    public void LocalState_IsRenewedAsAHeartbeat_OnlyOnceItIs15000MillisecondsOld() => Stub.Run(() =>
+    public void LocalState_IsRenewedAsAHeartbeat_OnlyOnceItIs15000MillisecondsOld()
     {
         using var rig = new AwRig(9);
         rig.Tick(1);
@@ -53,10 +55,10 @@ public sealed class AwarenessTimeTests
         Assert.Equal(new[] { "update@18000 +[] ~[9] -[] origin=local" }, rig.Log(n));
         Assert.Equal(clock + 1, rig.ClockOf(9));
         Assert.Equal(18000, rig.LastUpdatedMs(9));
-    });
+    }
 
     [Fact, Covers("AW-15", "AW-17")]
-    public void LocalRenewal_BoundaryIsInclusive_ExactlyFifteenSecondsRenews() => Stub.Run(() =>
+    public void LocalRenewal_BoundaryIsInclusive_ExactlyFifteenSecondsRenews()
     {
         using var rig = new AwRig(9);
         rig.Awareness.SetLocalState(Js.Obj(("me", 1)));
@@ -65,10 +67,10 @@ public sealed class AwarenessTimeTests
         Assert.Equal(n, rig.Events.Count);
         rig.Tick(1);
         Assert.Equal(new[] { "update@15000 +[] ~[9] -[] origin=local" }, rig.Log(n));
-    });
+    }
 
     [Fact, Covers("AW-16", "AW-17")]
-    public void RemoteClients_AreRemovedAtThirtySecondsInclusive_OnThe3000MillisecondGrid() => Stub.Run(() =>
+    public void RemoteClients_AreRemovedAtThirtySecondsInclusive_OnThe3000MillisecondGrid()
     {
         using var rig = new AwRig(9);
         rig.Apply(U(5, 1, """{"who":"five"}"""));
@@ -86,20 +88,20 @@ public sealed class AwarenessTimeTests
         Assert.Equal(new[] { "change", "update", "change", "update" }, removals.Select(e => e.Name));
         Assert.All(removals, e => Assert.Equal("timeout", e.Origin));
         Assert.Equal(new long[] { 30000, 30000, 33000, 33000 }, removals.Select(e => e.AtMs));
-    });
+    }
 
     [Fact, Covers("AW-16")]
-    public void ClientsExpiringTogether_OnTheSameTick_AreRemovedInOneBatch() => Stub.Run(() =>
+    public void ClientsExpiringTogether_OnTheSameTick_AreRemovedInOneBatch()
     {
         using var rig = new AwRig(9);
         rig.Apply(AwBytes.Update((5, 1, "{}"), (6, 1, "{}")));
         rig.Tick(30000);
         var removal = rig.Events.Where(e => e.Name == "change" && e.Removed.Length > 0).ToList();
         Assert.Equal(new[] { 5UL, 6UL }, Assert.Single(removal).Removed);
-    });
+    }
 
     [Fact, Covers("AW-18", "AW-49")]
-    public void ARemovedRemoteClient_IsNotRemovedAgain_AndKeepsItsTombstoneClock() => Stub.Run(() =>
+    public void ARemovedRemoteClient_IsNotRemovedAgain_AndKeepsItsTombstoneClock()
     {
         using var rig = new AwRig(9);
         rig.Apply(U(5, 1, """{"who":"five"}"""));
@@ -113,10 +115,10 @@ public sealed class AwarenessTimeTests
         rig.Apply(U(5, 2, """{"who":"back"}"""));
         Assert.Equal("""{"who":"back"}""", Js.StateJson(rig.Awareness, 5));
         Assert.Equal(new[] { 5UL }, rig.Events[^1].Updated);
-    });
+    }
 
     [Fact, Covers("AW-19")]
-    public void TheLocalClient_IsNeverExpired_OnlyRenewed() => Stub.Run(() =>
+    public void TheLocalClient_IsNeverExpired_OnlyRenewed()
     {
         using var rig = new AwRig(9);
         rig.Awareness.SetLocalState(Js.Obj(("me", 1)));
@@ -124,10 +126,10 @@ public sealed class AwarenessTimeTests
         Assert.Equal("""{"me":1}""", Js.StateJson(rig.Awareness, 9));
         Assert.DoesNotContain(rig.Events, e => e.Removed.Length > 0);
         Assert.True(rig.ClockOf(9) > 10);
-    });
+    }
 
     [Fact, Covers("AW-20")]
-    public void ANonNullLocalState_AlwaysHasMeta_SoTheTimerCannotFail() => Stub.Run(() =>
+    public void ANonNullLocalState_AlwaysHasMeta_SoTheTimerCannotFail()
     {
         using var rig = new AwRig(9);
         Assert.True(rig.Awareness.Meta.ContainsKey(9));
@@ -137,5 +139,5 @@ public sealed class AwarenessTimeTests
         rig.Awareness.RemoveStates(new ulong[] { 9 }, null);
         Assert.True(rig.Awareness.Meta.ContainsKey(9));
         rig.Tick(120000);
-    });
+    }
 }

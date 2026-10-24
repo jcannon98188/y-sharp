@@ -5,10 +5,12 @@ using Xunit;
 using YSharp.Tests.Codecs;
 using YSharp.TestKit.Traceability;
 using static YSharp.Tests.Types.TypeTestExtensions;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Types;
 
 /// <summary>Transaction lifecycle and observer ordering (TX-*, Q23), after docs/research/types.md section 6.</summary>
+[Requires(Feature.Events)]
 public sealed class TransactionTests
 {
     private static Doc NewDoc(ulong client = 1) => new(new DocOptions { ClientId = client });
@@ -29,7 +31,8 @@ public sealed class TransactionTests
     }
 
     [Fact, Covers("TX-1", "Q23")]
-    public void EventOrder_SingleTransaction_IsTheDocumentedOne() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.V2)]
+    public void EventOrder_SingleTransaction_IsTheDocumentedOne()
     {
         var doc = NewDoc();
         var text = doc.GetText("t");
@@ -48,10 +51,11 @@ public sealed class TransactionTests
                 "afterTransaction", "afterTransactionCleanup", "update", "updateV2", "afterAllTransactions",
             },
             log);
-    });
+    }
 
     [Fact, Covers("TX-2", "Q23")]
-    public void ObserveHandlers_AllChangedTypes_RunBeforeAnyDeepHandler() => Stub.Run(() =>
+    [Requires(Feature.Map)]
+    public void ObserveHandlers_AllChangedTypes_RunBeforeAnyDeepHandler()
     {
         var doc = NewDoc();
         var a = doc.GetMap("a");
@@ -67,10 +71,10 @@ public sealed class TransactionTests
             a.Set("y", 1);
         });
         Assert.Equal(new[] { "observe c", "observe a", "deep c", "deep a" }, log);
-    });
+    }
 
     [Fact, Covers("TX-3")]
-    public void AnEmptyTransaction_EmitsTheLifecycleEvents_ButNoUpdate() => Stub.Run(() =>
+    public void AnEmptyTransaction_EmitsTheLifecycleEvents_ButNoUpdate()
     {
         var doc = NewDoc();
         var log = LogDocEvents(doc);
@@ -78,10 +82,11 @@ public sealed class TransactionTests
         Assert.Equal(
             new[] { "beforeAllTransactions", "beforeTransaction", "beforeObserverCalls", "afterTransaction", "afterTransactionCleanup", "afterAllTransactions" },
             log);
-    });
+    }
 
     [Fact, Covers("TX-4")]
-    public void Transaction_DefaultsToANullOriginAndLocal_AndApplyUpdateIsRemote() => Stub.Run(() =>
+    [Requires(Feature.Text)]
+    public void Transaction_DefaultsToANullOriginAndLocal_AndApplyUpdateIsRemote()
     {
         var doc = NewDoc(1);
         var origins = new List<(object? Origin, bool Local, bool Write)>();
@@ -95,10 +100,11 @@ public sealed class TransactionTests
         Assert.Equal(3, doc.Transact(_ => doc.GetText("t").Length));                      // JS transact returns the callback's value (A4)
         Assert.Equal("seen", doc.Transact(tx => (string)tx.Origin!, "seen"));
         Assert.Equal(7, doc.Transact(5, static (n, _) => n + 2));                          // the state-passing form
-    });
+    }
 
     [Fact, PortOf("y-text.tests.js:testBasicInsertAndDelete", "TX-5")]
-    public void NestedTransact_JoinsTheOuterTransaction_AndTheInnerOriginIsIgnored() => Stub.Run(() =>
+    [Requires(Feature.Text)]
+    public void NestedTransact_JoinsTheOuterTransaction_AndTheInnerOriginIsIgnored()
     {
         var doc = NewDoc();
         var text = doc.GetText("t");
@@ -118,10 +124,11 @@ public sealed class TransactionTests
         Assert.Equal(1, updates);
         Assert.Equal(new object?[] { "outer" }, origins);
         Assert.Equal("abc", text.ToString());
-    });
+    }
 
     [Fact, PortOf("doc.tests.js:testClientIdDuplicateChange", "TX-16")]
-    public void RemoteUpdate_UsingOurClientId_ChangesTheClientId() => Stub.Run(() =>
+    [Requires(Feature.Array)]
+    public void RemoteUpdate_UsingOurClientId_ChangesTheClientId()
     {
         var doc1 = NewDoc();
         doc1.ClientId = 0;
@@ -131,10 +138,11 @@ public sealed class TransactionTests
         doc1.GetArray("a").Insert(0, new YEntry[] { 1, 2 });
         doc2.ApplyUpdate(doc1.EncodeStateAsUpdate());
         Assert.NotEqual(doc1.ClientId, doc2.ClientId);
-    });
+    }
 
     [Fact, Covers("TX-6")]
-    public void MutationsInsideObservers_RunAsFollowUpTransactions_NeverNested() => Stub.Run(() =>
+    [Requires(Feature.Array)]
+    public void MutationsInsideObservers_RunAsFollowUpTransactions_NeverNested()
     {
         var doc = NewDoc();
         var array = doc.GetArray("a");
@@ -165,10 +173,11 @@ public sealed class TransactionTests
         Assert.Equal(
             new[] { "observe:first:1", "after:first", "observe:follow1:2", "after:follow1", "observe:follow2:3", "after:follow2" },
             log);
-    });
+    }
 
     [Fact, Covers("TX-10", "TX-18")]
-    public void Observe_OncePerTransaction_AndEveryAncestorGetsTheDeepEvent() => Stub.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void Observe_OncePerTransaction_AndEveryAncestorGetsTheDeepEvent()
     {
         var doc = NewDoc();
         var root = doc.GetMap("root");
@@ -194,10 +203,11 @@ public sealed class TransactionTests
         Assert.False(counts.ContainsKey("root")); // the root map itself did not change
         // the item's event and the list's event both reach the root's deep observer
         Assert.Equal(new[] { 2 }, deep);
-    });
+    }
 
     [Fact, Covers("Q25", "TX-1")]
-    public void DeepEvents_OfEqualPathLength_KeepTheOrderTheTypesChanged() => Stub.Run(() =>
+    [Requires(Feature.Map)]
+    public void DeepEvents_OfEqualPathLength_KeepTheOrderTheTypesChanged()
     {
         // JS Array.prototype.sort is stable (ES2019); an unstable sort would reorder ties once there are enough of them
         var doc = NewDoc();
@@ -216,10 +226,11 @@ public sealed class TransactionTests
         // the root's own event has the shortest path and comes first; the 40 equal-depth events keep their change order
         Assert.Equal(expected.Count, seen.Count);
         Assert.Equal(expected, seen);
-    });
+    }
 
     [Fact, Covers("TX-11")]
-    public void DeepObserver_NoObserveHandlerOnTheSameType_Works() => Stub.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void DeepObserver_NoObserveHandlerOnTheSameType_Works()
     {
         var doc = NewDoc();
         var map = doc.GetMap("m");
@@ -228,10 +239,11 @@ public sealed class TransactionTests
         map.ObserveDeep((events, _) => calls += events.Count);
         child.Push(new YEntry[] { 1 });
         Assert.Equal(1, calls);
-    });
+    }
 
     [Fact, Covers("TX-12")]
-    public void HandlerListChanges_DuringDispatch_TakeEffectFromTheNextTrigger() => Stub.Run(() =>
+    [Requires(Feature.Array)]
+    public void HandlerListChanges_DuringDispatch_TakeEffectFromTheNextTrigger()
     {
         // JS probe (yjs 13.6.33): a handler removed while dispatching still runs in that dispatch, and one added while dispatching is
         // first called by the next trigger. ADR 0006 CC-13 adopts the same rule.
@@ -251,10 +263,11 @@ public sealed class TransactionTests
         log.Add("--");
         array.Push(new YEntry[] { 2 });
         Assert.Equal(new[] { "h1", "h2", "--", "h1", "h3" }, log);
-    });
+    }
 
     [Fact, Covers("TX-14")]
-    public void RemoteUpdates_RunAsNonLocalTransactions_WithTheGivenOrigin() => Stub.Run(() =>
+    [Requires(Feature.Text)]
+    public void RemoteUpdates_RunAsNonLocalTransactions_WithTheGivenOrigin()
     {
         var net = Net.Init(2);
         var (text0, text1) = (net.Peers[0].Text, net.Peers[1].Text);
@@ -272,10 +285,11 @@ public sealed class TransactionTests
         Assert.True(entry.SameTarget);
         // the delta is relative to the local state before the apply
         Assert.Equal("""[{"retain":5},{"insert":"!"}]""", entry.Delta);
-    });
+    }
 
     [Fact, Covers("TX-15")]
-    public void UpdateEvents_CarryTheBytesOriginAndTransaction_AndFireOnlyForContentChanges() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.Map, Feature.V2)]
+    public void UpdateEvents_CarryTheBytesOriginAndTransaction_AndFireOnlyForContentChanges()
     {
         var doc = NewDoc(5);
         var v1 = new List<(byte[] Bytes, object? Origin, bool SameDoc)>();
@@ -303,10 +317,11 @@ public sealed class TransactionTests
         doc.Update -= counter;
         doc.GetText("t").Insert(2, "c");
         Assert.Equal(1, calls);
-    });
+    }
 
     [Fact, Covers("TX-17")]
-    public void EventData_AfterOutermostTransactionDispatched_IsInvalid() => Stub.Run(() =>
+    [Requires(Feature.Array)]
+    public void EventData_AfterOutermostTransactionDispatched_IsInvalid()
     {
         var doc = NewDoc();
         var array = doc.GetArray("a");
@@ -322,10 +337,11 @@ public sealed class TransactionTests
         array.Push(new YEntry[] { 1 });
         Assert.False(stored!.IsValid);
         Assert.False(storedTx!.IsValid);
-    });
+    }
 
     [Fact, Covers("TX-13")]
-    public void UnobserveDeep_AfterObserveDeep_IsSymmetricalToUnobserve() => Stub.Run(() =>
+    [Requires(Feature.Map)]
+    public void UnobserveDeep_AfterObserveDeep_IsSymmetricalToUnobserve()
     {
         var map = NewDoc().GetMap("m");
         var calls = 0;
@@ -338,5 +354,5 @@ public sealed class TransactionTests
         map.Set("a", 2);
         Assert.Equal(2, calls);
         map.UnobserveDeep(handler);
-    });
+    }
 }

@@ -3,6 +3,7 @@ using Xunit;
 using YSharp.TestKit.Concurrency;
 using YSharp.TestKit.Tiers;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Concurrency;
 
@@ -11,6 +12,7 @@ namespace YSharp.Tests.Concurrency;
 /// thread counts, and both one thread and more threads than cores. The long random-seed soak is in <c>YSharp.Fuzz.Tests</c>. Every failure
 /// prints the seed and each thread's operation log. A single failure is a real bug: no retry, no quarantine.
 /// </summary>
+[Requires(Feature.Concurrency)]
 [Collection(ConcurrencyCollection.Name)]
 [Tier(Tier.Gating)]
 public sealed class StressTests
@@ -21,27 +23,27 @@ public sealed class StressTests
         new() { Seed = Seed, Writers = writers, Readers = readers, OpsPerThread = ops, Implicit = implicitTx };
 
     [Fact, Covers("CC-1", "CC-11")]
-    public void Stress_OneWriterThread_CommitStreamReplaysToTheSameBytes() => Impl.Run(() => StressHarness.RunSharedDoc(Opts(1, 0)).AssertClean());
+    public void Stress_OneWriterThread_CommitStreamReplaysToTheSameBytes()=> StressHarness.RunSharedDoc(Opts(1, 0)).AssertClean();
 
     [Fact, Covers("CC-1", "CC-11")]
-    public void Stress_FewThreads_SerializabilityAndNoTornReads() => Impl.Run(() => StressHarness.RunSharedDoc(Opts(2, 2)).AssertClean());
+    public void Stress_FewThreads_SerializabilityAndNoTornReads()=> StressHarness.RunSharedDoc(Opts(2, 2)).AssertClean();
 
     [Fact, Covers("CC-1", "CC-11")]
     public void Stress_MoreThreadsThanCores_SerializabilityAndNoTornReads() =>
-        Impl.Run(() => StressHarness.RunSharedDoc(Opts(StressOptions.Oversubscribed, 2)).AssertClean());
+        StressHarness.RunSharedDoc(Opts(StressOptions.Oversubscribed, 2)).AssertClean();
 
     [Fact, Covers("CC-8", "CC-11")]
     public void ImplicitTransactions_FromManyThreads_SerializeToo() =>
-        Impl.Run(() => StressHarness.RunSharedDoc(Opts(StressOptions.Oversubscribed, 2, implicitTx: true)).AssertClean());
+        StressHarness.RunSharedDoc(Opts(StressOptions.Oversubscribed, 2, implicitTx: true)).AssertClean();
 
     [Fact, Covers("CC-4")]
     public void ConcurrentReads_LeaveTheStateUnchanged_AndMatchASingleThreadedRead() =>
-        Impl.Run(() => StressHarness.RunReadPurity(Opts(0, StressOptions.Oversubscribed)).AssertClean());
+        StressHarness.RunReadPurity(Opts(0, StressOptions.Oversubscribed)).AssertClean();
 
     [Fact, Covers("CC-8", "CC-11")]
-    public void Stress_DocumentsSyncedAcrossThreads_Converge() => Impl.Run(() => StressHarness.RunConvergence(Opts(4, 0, ops: 80)).AssertClean());
+    public void Stress_DocumentsSyncedAcrossThreads_Converge()=> StressHarness.RunConvergence(Opts(4, 0, ops: 80)).AssertClean();
 
     [Fact, Covers("CC-8")]
     public void Stress_DocumentsSyncedAcrossMoreThreadsThanCores_Converge() =>
-        Impl.Run(() => StressHarness.RunConvergence(Opts(Math.Min(8, StressOptions.Oversubscribed), 0, ops: 60)).AssertClean());
+        StressHarness.RunConvergence(Opts(Math.Min(8, StressOptions.Oversubscribed), 0, ops: 60)).AssertClean();
 }

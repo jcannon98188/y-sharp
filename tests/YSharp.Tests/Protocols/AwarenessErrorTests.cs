@@ -7,16 +7,18 @@ using YSharp.Tests.Codecs;
 using YSharp.TestKit.Fixtures;
 using YSharp.TestKit.Traceability;
 using YSharp.TestKit.Values;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Protocols;
 
 /// <summary>Malformed awareness batches (AW-51), the upstream <c>testAwareness</c> port and the structural-equality case table.</summary>
+[Requires(Feature.Awareness)]
 public sealed class AwarenessErrorTests
 {
     private static string[] StatesOf(AwRig rig) => rig.Awareness.GetStates().Keys.OrderBy(k => k).Select(k => k.ToString()).ToArray();
 
     [Fact, Diverges("AW-51", adr: "0005")]
-    public void ABadBatch_AppliesNothing_AndEmitsNothing() => Stub.Run(() =>
+    public void ABadBatch_AppliesNothing_AndEmitsNothing()
     {
         // JS applies the entries before the failure and emits no event for them; y-sharp rejects the whole batch (ADR 0005).
         var good = AwBytes.Update((11, 1, """{"a":1}"""), (12, 1, """{"a":2}"""), (13, 1, """{"a":3}"""));
@@ -36,11 +38,11 @@ public sealed class AwarenessErrorTests
             Assert.Empty(rig.Events);
             Assert.False(rig.Awareness.Meta.ContainsKey(11), name);
         }
-    });
+    }
 
     [Fact]
     [Covers("AW-51")]
-    public void TheOracleFixture_RecordsThatTheBatchThrew_AndThatItsLeadingEntriesStuck() => Stub.Run(() =>
+    public void TheOracleFixture_RecordsThatTheBatchThrew_AndThatItsLeadingEntriesStuck()
     {
         var fixture = FixtureReplay.Load("awareness/apply-trailing-and-truncated.json");
         var results = fixture.Observations.GetProperty("results").GetProperty("value");
@@ -53,11 +55,12 @@ public sealed class AwarenessErrorTests
         var ctx = ProtocolFixtureTests.Replay(fixture, out _);
         var aw = ProtocolSteps.Of(ctx).Awarenesses["partial"];
         Assert.Equal(new[] { 8UL }, aw.GetStates().Keys.OrderBy(k => k).ToArray());
-    });
+    }
 
     [Fact]
     [PortOf("awareness.test.js:testAwareness", "AW-6", "AW-8", "AW-9", "AW-30", "AW-42", "AW-43", "AW-48", "AW-50")]
-    public void Awareness_TwoInstances_PipeUpdates() => Stub.Run(() =>
+    [Requires(Feature.Events)]
+    public void Awareness_TwoInstances_PipeUpdates()
     {
         using var a1 = new AwRig(0);
         using var a2 = new AwRig(1);
@@ -92,7 +95,7 @@ public sealed class AwarenessErrorTests
         Assert.Single(remote!.Removed);
         Assert.False(a1.Awareness.GetStates().ContainsKey(0));
         Assert.Equal(local!.Removed, remote.Removed);
-    });
+    }
 }
 
 /// <summary>
@@ -100,6 +103,7 @@ public sealed class AwarenessErrorTests
 /// values. The cases live in tools/fixture-gen/scenarios/equality-cases.json, which also drives the Node scenario that generates
 /// fixtures/awareness/structural-equality.json, so the table, the oracle's event log and this test cannot drift apart.
 /// </summary>
+[Requires(Feature.Awareness)]
 public sealed class StructuralEqualityTests
 {
     private sealed record Case(string Name, TaggedValue A, TaggedValue B, bool Equal);
@@ -116,6 +120,7 @@ public sealed class StructuralEqualityTests
     public static System.Collections.Generic.IEnumerable<object[]> Names() => Load().Select(c => new object[] { c.Name });
 
     [Fact, Covers("AW-9")]
+    [LibraryIndependent]
     public void TheCaseTable_Exists_AndCoversEqualAndUnequalPairs()
     {
         var cases = Load();
@@ -128,7 +133,7 @@ public sealed class StructuralEqualityTests
     }
 
     [Theory, MemberData(nameof(Names)), Covers("AW-9", "AW-50")]
-    public void ChangeUpdated_StructurallyEqualStates_UsesDeepEquality(string name) => Stub.Run(() =>
+    public void ChangeUpdated_StructurallyEqualStates_UsesDeepEquality(string name)
     {
         var c = Load().Single(x => x.Name == name);
         using var rig = new AwRig(1);
@@ -139,5 +144,5 @@ public sealed class StructuralEqualityTests
             ? new[] { "update@0 +[] ~[1] -[] origin=local" }
             : new[] { "change@0 +[] ~[1] -[] origin=local", "update@0 +[] ~[1] -[] origin=local" };
         Assert.Equal(expected, rig.Log(n));
-    });
+    }
 }
