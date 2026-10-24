@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Throwaway M0 spike (ADR 0018 spike amendment, TASK-4.3). Deleted once the M2 store passes the harness.
+    The shared content layer lives here. The driver interface and the harness are compiled from
+    tests/YSharp.Tests/Allocation/Spike, so the test project and this project share one copy of each.
+  -->
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <RootNamespace>YSharp.StoreSpike</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <!-- ADR 0018 spike measurement settings: Release, TieredCompilation off, workstation GC. -->
+    <TieredCompilation>false</TieredCompilation>
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+  </PropertyGroup>
+</Project>

@@ -12,4 +12,7 @@
   <Folder Name="/bench/">
     <Project Path="bench/YSharp.Benchmarks/YSharp.Benchmarks.csproj" />
   </Folder>
+  <Folder Name="/spike/">
+    <Project Path="spike/YSharp.StoreSpike/YSharp.StoreSpike.csproj" />
+  </Folder>
 </Solution>
