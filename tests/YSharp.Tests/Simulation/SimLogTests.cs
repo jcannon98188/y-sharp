@@ -37,7 +37,7 @@ public sealed class SimLogTests
 
     [Fact]
     [Covers("SIM-10")]
-    public void RecordingTheSameEventsTwice_GivesTheSameScript()
+    public void Recording_SameEventsTwice_GivesTheSameScript()
     {
         static string Record()
         {

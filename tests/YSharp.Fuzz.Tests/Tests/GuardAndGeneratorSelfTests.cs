@@ -23,7 +23,7 @@ public sealed class GuardAndGeneratorSelfTests
     // ------------------------------------------------------------------ guards
 
     [Fact]
-    public void Guard_ATimeoutIsAHang()
+    public void Guard_Timeout_IsReportedAsAHang()
     {
         var e = Assert.ThrowsAny<XunitException>(() => InputGuard.Run("sleeper", () => Thread.Sleep(5000), TimeSpan.FromMilliseconds(100)));
         Assert.Contains("HANG", e.Message);
@@ -31,7 +31,7 @@ public sealed class GuardAndGeneratorSelfTests
     }
 
     [Fact]
-    public void Guard_AFinishingBodyReturnsItsValueAndMeasures()
+    public void Guard_FinishingBody_ReturnsItsValueAndMeasures()
     {
         var run = InputGuard.Run("alloc", () => new byte[100_000]);
         Assert.Equal(100_000, run.Value.Length);
@@ -39,14 +39,14 @@ public sealed class GuardAndGeneratorSelfTests
     }
 
     [Fact]
-    public void Guard_AnExceptionIsRethrownOnTheCallerWithItsType()
+    public void Guard_ThrowingBody_RethrowsOnTheCallerWithItsType()
     {
         Assert.Throws<NotImplementedException>(() => InputGuard.Run("stub", () => throw new NotImplementedException()));
         Assert.Throws<InvalidOperationException>(() => InputGuard.Run("bug", () => throw new InvalidOperationException("x")));
     }
 
     [Fact]
-    public void Guard_RunsOnASeparateThread()
+    public void Guard_AnyBody_RunsOnASeparateThread()
     {
         var caller = Environment.CurrentManagedThreadId;
         var run = InputGuard.Run("thread", () => (Environment.CurrentManagedThreadId, Thread.CurrentThread.Name));
@@ -55,7 +55,7 @@ public sealed class GuardAndGeneratorSelfTests
     }
 
     [Fact]
-    public void Guard_TheProbeStackIsSmall()
+    public void Guard_ProbeThread_HasASmallStack()
     {
         // not by overflowing it (that would end the process): count how many frames fit before the runtime reports the stack as nearly used
         Assert.Equal(256 * 1024, Budget.ProbeStackBytes);
@@ -77,7 +77,7 @@ public sealed class GuardAndGeneratorSelfTests
         return FramesThatFit(n + 1) + pad[0] * 0;
     }
     [Fact]
-    public void Guard_TheAllocationBoundIsKTimesNPlusC()
+    public void Guard_AllocationBound_IsKTimesNPlusC()
     {
         Assert.Equal(64, Budget.BytesPerInputByte);
         Assert.Equal(1024 * 1024, Budget.ConstantBytes);
@@ -88,14 +88,14 @@ public sealed class GuardAndGeneratorSelfTests
     }
 
     [Fact]
-    public void Guard_AnOverAllocatingBodyIsCaught()
+    public void Guard_OverAllocatingBody_IsCaught()
     {
         var run = InputGuard.Run("hog", () => new byte[8 * 1024 * 1024]);
         Assert.ThrowsAny<XunitException>(() => InputGuard.AssertAllocationWithinBound("hog", run.AllocatedBytes, 16));
     }
 
     [Fact]
-    public void Guard_TheFuzzProcessRunsUnderAHeapHardLimit()
+    public void Guard_FuzzProcess_RunsUnderAHeapHardLimit()
     {
         // runtimeconfig.template.json sets System.GC.HeapHardLimit to a few hundred MB (ADR 0013)
         var limit = AppContext.GetData("System.GC.HeapHardLimit");
@@ -105,7 +105,7 @@ public sealed class GuardAndGeneratorSelfTests
     }
 
     [Fact]
-    public void Candidate_WritesTheFailingInputAsAFile()
+    public void Candidate_FailingInput_IsWrittenAsAFile()
     {
         var dir = Path.Combine(Path.GetTempPath(), "ysharp-candidates-" + Guid.NewGuid().ToString("N"));
         Environment.SetEnvironmentVariable("YSHARP_FUZZ_CANDIDATES", dir);
@@ -147,7 +147,7 @@ public sealed class GuardAndGeneratorSelfTests
     }
 
     [Fact]
-    public void ByteMutator_EveryKindIsApplied()
+    public void ByteMutator_EveryKind_IsApplied()
     {
         var seed = new byte[] { 1, 1, 1, 0, 4, 1, 1, 116, 2, 104, 105, 0 };
         foreach (var kind in Enum.GetValues<MutationKind>())
@@ -158,7 +158,7 @@ public sealed class GuardAndGeneratorSelfTests
     }
 
     [Fact]
-    public void ByteMutator_ShrinkingGoesToTheShortestBytes()
+    public void ByteMutator_Shrinking_GoesToTheShortestBytes()
     {
         var bytes = Enumerable.Range(1, 100).Select(i => (byte)i).ToArray();
         var candidates = ByteMutator.ShrinkBytes(bytes).ToList();
@@ -184,7 +184,7 @@ public sealed class GuardAndGeneratorSelfTests
     [InlineData(Profile.Sem)]
     [InlineData(Profile.Len)]
     [InlineData(Profile.Amp)]
-    public void HostileModels_EveryProfileBuildsBytesInBothFormats(Profile profile)
+    public void HostileModels_EveryProfile_BuildsBytesInBothFormats(Profile profile)
     {
         var lengths = new System.Collections.Generic.List<int>();
         for (var seed = 0; seed < 400; seed++)
@@ -199,7 +199,7 @@ public sealed class GuardAndGeneratorSelfTests
     }
 
     [Fact]
-    public void HostileModels_TheLenProfileClaimsMoreThanItWrites()
+    public void HostileModels_LenProfile_ClaimsMoreThanItWrites()
     {
         var claims = Enumerable.Range(0, 400).Count(s =>
         {
@@ -210,7 +210,7 @@ public sealed class GuardAndGeneratorSelfTests
     }
 
     [Fact]
-    public void HostileModels_ShrinkingRemovesWholeStructsFirstAndNeverGrows()
+    public void HostileModels_Shrinking_RemovesWholeStructsFirstAndNeverGrows()
     {
         var model = HostileModels.Generate(Profile.Ref, 7);
         var structs = model.Model.StructCount;
@@ -230,7 +230,7 @@ public sealed class GuardAndGeneratorSelfTests
     }
 
     [Fact]
-    public void HostileModels_ValidModelsRoundTripThroughTheirOwnExpectation()
+    public void HostileModels_ValidModels_RoundTripThroughTheirOwnExpectation()
     {
         for (var seed = 0; seed < 300; seed++)
         {
@@ -244,7 +244,7 @@ public sealed class GuardAndGeneratorSelfTests
     // ------------------------------------------------------------------ layer 3: ops script and delivery schedules
 
     [Fact]
-    public void OpsLayer_EveryPlanBecomesAScriptTheInterpreterAccepts()
+    public void OpsLayer_EveryPlan_BecomesAScriptTheInterpreterAccepts()
     {
         var registry = StandardSteps.CreateRegistry();
         for (var seed = 0; seed < 300; seed++)
@@ -258,7 +258,7 @@ public sealed class GuardAndGeneratorSelfTests
     }
 
     [Fact]
-    public void OpsLayer_SchedulesReorderDuplicateAndDrop()
+    public void OpsLayer_Schedules_ReorderDuplicateAndDrop()
     {
         var plan = new OpsPlan(2, Array.Empty<Edit>(), 123, Reorder: true, Duplicate: true, Drop: true);
         var (order, late) = OpsLayer.Schedule(plan, 20);
@@ -272,7 +272,7 @@ public sealed class GuardAndGeneratorSelfTests
     }
 
     [Fact]
-    public void FuzzRunner_FixedSeedGivesTheSameCasesTwice()
+    public void FuzzRunner_FixedSeed_GivesTheSameCasesTwice()
     {
         var gen = Gen.Choose(0, int.MaxValue);
         var first = Gen.Sample(gen, 10, 5);
@@ -287,7 +287,7 @@ public sealed class GuardAndGeneratorSelfTests
     }
 
     [Fact]
-    public void FuzzRunner_ShrinksAFailingByteInputToTheShortestFailingBytes()
+    public void FuzzRunner_FailingByteInput_ShrinksToTheShortestFailingBytes()
     {
         // a deliberately wrong property, checked through FsCheck: it must fail and the reported counterexample must be minimal
         var seeds = ByteMutator.Seeds();

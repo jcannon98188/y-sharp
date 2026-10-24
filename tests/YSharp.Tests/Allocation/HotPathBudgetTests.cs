@@ -112,7 +112,7 @@ public sealed class HotPathBudgetTests
     [Theory, Covers("BUD-08")]
     [InlineData(UpdateFormat.V1)]
     [InlineData(UpdateFormat.V2)]
-    public void TryApplyUpdate_StaysWithinItsBudget(UpdateFormat format) => Stub.Run(() =>
+    public void TryApplyUpdate_HotPath_StaysWithinItsBudget(UpdateFormat format) => Stub.Run(() =>
     {
         // Each call applies a new update to the target; the stream is long enough for warm-up, measurement and a diagnostic rerun's start.
         var updates = AllocDocs.UpdateStream(Iterations + Warmup + 8, format);
@@ -144,7 +144,7 @@ public sealed class HotPathBudgetTests
     });
 
     [Fact, Covers("BUD-10")]
-    public void SyncStep1Step2RoundTrip_StaysWithinItsBudget() => Stub.Run(() =>
+    public void SyncStep1Step2RoundTrip_HotPath_StaysWithinItsBudget() => Stub.Run(() =>
     {
         var a = AllocDocs.Populated(clientId: 1);
         var b = AllocDocs.Populated(clientId: 2, chars: 50);
@@ -165,7 +165,7 @@ public sealed class HotPathBudgetTests
     });
 
     [Fact, Covers("BUD-11")]
-    public void AwarenessEncode_StaysWithinItsBudget() => Stub.Run(() =>
+    public void AwarenessEncode_HotPath_StaysWithinItsBudget() => Stub.Run(() =>
     {
         using var awareness = new Awareness(new Doc());
         awareness.SetLocalState(1);
@@ -178,7 +178,7 @@ public sealed class HotPathBudgetTests
     });
 
     [Fact, Covers("BUD-11")]
-    public void AwarenessApply_StaysWithinItsBudget() => Stub.Run(() =>
+    public void AwarenessApply_HotPath_StaysWithinItsBudget() => Stub.Run(() =>
     {
         // A stream of updates with increasing clocks from one peer, so every apply takes the update path rather than being ignored.
         using var source = new Awareness(new Doc(new DocOptions { ClientId = 9 }));

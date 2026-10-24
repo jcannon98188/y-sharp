@@ -18,21 +18,21 @@ public sealed class ProtocolDocsTests
         t.GetMembers(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly).Select(m => m.Name).ToArray();
 
     [Fact, Covers("PR-1")]
-    public void ThereIsNoReadAwarenessMessage_ApplyingAnUpdateIsTheEntryPoint()
+    public void ReadAwarenessMessage_DoesNotExist_ApplyingAnUpdateIsTheEntryPoint()
     {
         Assert.DoesNotContain("ReadAwarenessMessage", PublicMembers(typeof(Awareness)));
         Assert.Contains("TryApplyUpdate", PublicMembers(typeof(Awareness)));
     }
 
     [Fact, Covers("PR-2")]
-    public void TheEnvelopeConstants_AreNotPartOfTheProtocolTypes()
+    public void EnvelopeConstants_ProtocolTypes_AreNotPartOfThem()
     {
         var names = PublicMembers(typeof(YSync)).Concat(PublicMembers(typeof(Awareness))).Concat(PublicMembers(typeof(YAuth)));
         Assert.DoesNotContain(names, n => n.Contains("Envelope", StringComparison.Ordinal) || n.Contains("ProtocolMessageType", StringComparison.Ordinal));
     }
 
     [Fact, Covers("PR-3")]
-    public void TheClockRule_HasTheEqualClockNullExceptionThatTheProseOmits() => Stub.Run(() =>
+    public void ClockRule_EqualClockWithNull_HasTheExceptionTheProseOmits() => Stub.Run(() =>
     {
         using var rig = new AwRig(9);
         rig.Apply(AwBytes.Update((5, 3, """{"a":1}""")));
@@ -41,7 +41,7 @@ public sealed class ProtocolDocsTests
     });
 
     [Fact, Covers("PR-4")]
-    public void ClientsExpireAtExactlyThirtySecondsOnTheCheckGrid_NotAfterMoreThanThirty() => Stub.Run(() =>
+    public void ClientsExpire_OnTheCheckGrid_AtExactlyThirtySecondsNotMoreThanThirty() => Stub.Run(() =>
     {
         using var rig = new AwRig(9);
         rig.Apply(AwBytes.Update((5, 1, "{}")));

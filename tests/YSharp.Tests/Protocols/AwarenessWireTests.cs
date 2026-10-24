@@ -121,7 +121,7 @@ public sealed class AwarenessWireTests
     });
 
     [Fact, Covers("AW-40")]
-    public void IdentityModify_IsByteIdenticalForEncoderOutput() => Stub.Run(() =>
+    public void IdentityModify_EncoderOutput_IsByteIdentical() => Stub.Run(() =>
     {
         using var rig = Populated();
         var source = AwBytes.Encode(rig.Awareness, 2147483648u, 4294967295u, 300, 16384, 1);

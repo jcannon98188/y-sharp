@@ -90,7 +90,7 @@ public sealed class BenchmarkComparisonTests
     }
 
     [Fact]
-    public void BenchmarksProject_HasTheAdr0009Benchmarks()
+    public void BenchmarksProject_AnyBuild_HasTheAdr0009Benchmarks()
     {
         var source = File.ReadAllText(Path.Combine(YSharp.TestKit.Fixtures.RepoRoot.Find(), "bench", "YSharp.Benchmarks", "Benchmarks.cs"));
         foreach (var name in new[] { "ThroughputBenchmarks", "MergeDiffBenchmarks", "BuildLargeDocBenchmarks", "LockCostBenchmarks", "YjsComparisonBenchmarks", "BytesPerItemTable" })

@@ -68,7 +68,7 @@ public sealed class ComponentTests
     // ------------------------------------------------------------------ CC-19
 
     [Fact, Covers("CC-19")]
-    public void Awareness_NeverTakesTheDocLock() => Impl.Run(() =>
+    public void Awareness_AnyOperation_NeverTakesTheDocLock() => Impl.Run(() =>
     {
         var doc = Conc.NewDoc();
         var aware = new Awareness(doc, new VirtualTimeProvider());
@@ -97,7 +97,7 @@ public sealed class ComponentTests
     });
 
     [Fact, Covers("CC-19")]
-    public void TheTimeoutTimer_FiresOnTheThreadThatAdvancesTheInjectedTimeProvider() => Impl.Run(() =>
+    public void TimeoutTimer_InjectedTimeProviderAdvanced_FiresOnTheAdvancingThread() => Impl.Run(() =>
     {
         var time = new VirtualTimeProvider();
         var aware = new Awareness(Conc.NewDoc(1), time);
@@ -169,7 +169,7 @@ public sealed class ComponentTests
     });
 
     [Fact, Covers("CC-20")]
-    public void UndoAndRedo_AreWriteTransactions() => Impl.Run(() =>
+    public void UndoAndRedo_AnyCall_AreWriteTransactions() => Impl.Run(() =>
     {
         var (doc, arr, um) = Undoable();
         using (var reader = Holder.Read(doc))
@@ -184,7 +184,7 @@ public sealed class ComponentTests
     });
 
     [Fact, Covers("CC-20")]
-    public void UndoRunsOnTheCallingThread_AndItsEventsFireThere() => Impl.Run(() =>
+    public void Undo_AnyCall_RunsOnTheCallingThreadAndItsEventsFireThere() => Impl.Run(() =>
     {
         var (doc, _, um) = Undoable();
         var threads = new List<int>();
@@ -196,7 +196,7 @@ public sealed class ComponentTests
     });
 
     [Fact, Covers("CC-20")]
-    public void PermanentUserDataMembers_RunUnderTheDocLock() => Impl.Run(() =>
+    public void PermanentUserDataMembers_AnyCall_RunUnderTheDocLock() => Impl.Run(() =>
     {
         var doc = Conc.NewDoc();
         var pud = new PermanentUserData(doc, new PermanentUserDataOptions { Defer = static f => f() });

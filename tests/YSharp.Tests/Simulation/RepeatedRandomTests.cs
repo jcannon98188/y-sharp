@@ -35,134 +35,134 @@ public sealed class RepeatedRandomTests
 
     // ---- y-map.tests.js: testRepeatGeneratingYmapTests*
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Map + "10", "SIM-13")]
-    public void RepeatGeneratingYmapTests10(uint seed) => Gate(Map + "10", seed);
+    public void Ymap_Repeat10_ConvergesAcrossReplicas(uint seed) => Gate(Map + "10", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Map + "40", "SIM-13")]
-    public void RepeatGeneratingYmapTests40(uint seed) => Gate(Map + "40", seed);
+    public void Ymap_Repeat40_ConvergesAcrossReplicas(uint seed) => Gate(Map + "40", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Map + "42", "SIM-13")]
-    public void RepeatGeneratingYmapTests42(uint seed) => Gate(Map + "42", seed);
+    public void Ymap_Repeat42_ConvergesAcrossReplicas(uint seed) => Gate(Map + "42", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Map + "43", "SIM-13")]
-    public void RepeatGeneratingYmapTests43(uint seed) => Gate(Map + "43", seed);
+    public void Ymap_Repeat43_ConvergesAcrossReplicas(uint seed) => Gate(Map + "43", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Map + "44", "SIM-13")]
-    public void RepeatGeneratingYmapTests44(uint seed) => Gate(Map + "44", seed);
+    public void Ymap_Repeat44_ConvergesAcrossReplicas(uint seed) => Gate(Map + "44", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Map + "45", "SIM-13")]
-    public void RepeatGeneratingYmapTests45(uint seed) => Gate(Map + "45", seed);
+    public void Ymap_Repeat45_ConvergesAcrossReplicas(uint seed) => Gate(Map + "45", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Map + "46", "SIM-13")]
-    public void RepeatGeneratingYmapTests46(uint seed) => Gate(Map + "46", seed);
+    public void Ymap_Repeat46_ConvergesAcrossReplicas(uint seed) => Gate(Map + "46", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up600), MemberType = typeof(SeedLists)), PortOf(Map + "300", "SIM-13")]
-    public void RepeatGeneratingYmapTests300(uint seed) => Gate(Map + "300", seed);
+    public void Ymap_Repeat300_ConvergesAcrossReplicas(uint seed) => Gate(Map + "300", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up600), MemberType = typeof(SeedLists)), PortOf(Map + "400", "SIM-13")]
-    public void RepeatGeneratingYmapTests400(uint seed) => Gate(Map + "400", seed);
+    public void Ymap_Repeat400_ConvergesAcrossReplicas(uint seed) => Gate(Map + "400", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up600), MemberType = typeof(SeedLists)), PortOf(Map + "500", "SIM-13")]
-    public void RepeatGeneratingYmapTests500(uint seed) => Gate(Map + "500", seed);
+    public void Ymap_Repeat500_ConvergesAcrossReplicas(uint seed) => Gate(Map + "500", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up600), MemberType = typeof(SeedLists)), PortOf(Map + "600", "SIM-13")]
-    public void RepeatGeneratingYmapTests600(uint seed) => Gate(Map + "600", seed);
+    public void Ymap_Repeat600_ConvergesAcrossReplicas(uint seed) => Gate(Map + "600", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up1800), MemberType = typeof(SeedLists)), PortOf(Map + "1000", "SIM-13")]
-    public void RepeatGeneratingYmapTests1000(uint seed) => Gate(Map + "1000", seed);
+    public void Ymap_Repeat1000_ConvergesAcrossReplicas(uint seed) => Gate(Map + "1000", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up1800), MemberType = typeof(SeedLists)), PortOf(Map + "1800", "SIM-13")]
-    public void RepeatGeneratingYmapTests1800(uint seed) => Gate(Map + "1800", seed);
+    public void Ymap_Repeat1800_ConvergesAcrossReplicas(uint seed) => Gate(Map + "1800", seed);
 
     // ---- y-array.tests.js: testRepeatGeneratingYarrayTests*
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Array + "6", "SIM-13")]
-    public void RepeatGeneratingYarrayTests6(uint seed) => Gate(Array + "6", seed);
+    public void Yarray_Repeat6_ConvergesAcrossReplicas(uint seed) => Gate(Array + "6", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Array + "40", "SIM-13")]
-    public void RepeatGeneratingYarrayTests40(uint seed) => Gate(Array + "40", seed);
+    public void Yarray_Repeat40_ConvergesAcrossReplicas(uint seed) => Gate(Array + "40", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Array + "42", "SIM-13")]
-    public void RepeatGeneratingYarrayTests42(uint seed) => Gate(Array + "42", seed);
+    public void Yarray_Repeat42_ConvergesAcrossReplicas(uint seed) => Gate(Array + "42", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Array + "43", "SIM-13")]
-    public void RepeatGeneratingYarrayTests43(uint seed) => Gate(Array + "43", seed);
+    public void Yarray_Repeat43_ConvergesAcrossReplicas(uint seed) => Gate(Array + "43", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Array + "44", "SIM-13")]
-    public void RepeatGeneratingYarrayTests44(uint seed) => Gate(Array + "44", seed);
+    public void Yarray_Repeat44_ConvergesAcrossReplicas(uint seed) => Gate(Array + "44", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Array + "45", "SIM-13")]
-    public void RepeatGeneratingYarrayTests45(uint seed) => Gate(Array + "45", seed);
+    public void Yarray_Repeat45_ConvergesAcrossReplicas(uint seed) => Gate(Array + "45", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Array + "46", "SIM-13")]
-    public void RepeatGeneratingYarrayTests46(uint seed) => Gate(Array + "46", seed);
+    public void Yarray_Repeat46_ConvergesAcrossReplicas(uint seed) => Gate(Array + "46", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up600), MemberType = typeof(SeedLists)), PortOf(Array + "300", "SIM-13")]
-    public void RepeatGeneratingYarrayTests300(uint seed) => Gate(Array + "300", seed);
+    public void Yarray_Repeat300_ConvergesAcrossReplicas(uint seed) => Gate(Array + "300", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up600), MemberType = typeof(SeedLists)), PortOf(Array + "400", "SIM-13")]
-    public void RepeatGeneratingYarrayTests400(uint seed) => Gate(Array + "400", seed);
+    public void Yarray_Repeat400_ConvergesAcrossReplicas(uint seed) => Gate(Array + "400", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up600), MemberType = typeof(SeedLists)), PortOf(Array + "500", "SIM-13")]
-    public void RepeatGeneratingYarrayTests500(uint seed) => Gate(Array + "500", seed);
+    public void Yarray_Repeat500_ConvergesAcrossReplicas(uint seed) => Gate(Array + "500", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up600), MemberType = typeof(SeedLists)), PortOf(Array + "600", "SIM-13")]
-    public void RepeatGeneratingYarrayTests600(uint seed) => Gate(Array + "600", seed);
+    public void Yarray_Repeat600_ConvergesAcrossReplicas(uint seed) => Gate(Array + "600", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up1800), MemberType = typeof(SeedLists)), PortOf(Array + "1000", "SIM-13")]
-    public void RepeatGeneratingYarrayTests1000(uint seed) => Gate(Array + "1000", seed);
+    public void Yarray_Repeat1000_ConvergesAcrossReplicas(uint seed) => Gate(Array + "1000", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up1800), MemberType = typeof(SeedLists)), PortOf(Array + "1800", "SIM-13")]
-    public void RepeatGeneratingYarrayTests1800(uint seed) => Gate(Array + "1800", seed);
+    public void Yarray_Repeat1800_ConvergesAcrossReplicas(uint seed) => Gate(Array + "1800", seed);
 
     // ---- y-text.tests.js: testRepeatGenerateTextChanges*
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Text + "5", "SIM-13")]
-    public void RepeatGenerateTextChanges5(uint seed) => Gate(Text + "5", seed);
+    public void Text_Repeat5_ConvergesAcrossReplicas(uint seed) => Gate(Text + "5", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Text + "30", "SIM-13")]
-    public void RepeatGenerateTextChanges30(uint seed) => Gate(Text + "30", seed);
+    public void Text_Repeat30_ConvergesAcrossReplicas(uint seed) => Gate(Text + "30", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Text + "40", "SIM-13")]
-    public void RepeatGenerateTextChanges40(uint seed) => Gate(Text + "40", seed);
+    public void Text_Repeat40_ConvergesAcrossReplicas(uint seed) => Gate(Text + "40", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Text + "50", "SIM-13")]
-    public void RepeatGenerateTextChanges50(uint seed) => Gate(Text + "50", seed);
+    public void Text_Repeat50_ConvergesAcrossReplicas(uint seed) => Gate(Text + "50", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Text + "70", "SIM-13")]
-    public void RepeatGenerateTextChanges70(uint seed) => Gate(Text + "70", seed);
+    public void Text_Repeat70_ConvergesAcrossReplicas(uint seed) => Gate(Text + "70", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Text + "90", "SIM-13")]
-    public void RepeatGenerateTextChanges90(uint seed) => Gate(Text + "90", seed);
+    public void Text_Repeat90_ConvergesAcrossReplicas(uint seed) => Gate(Text + "90", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up600), MemberType = typeof(SeedLists)), PortOf(Text + "300", "SIM-13")]
-    public void RepeatGenerateTextChanges300(uint seed) => Gate(Text + "300", seed);
+    public void Text_Repeat300_ConvergesAcrossReplicas(uint seed) => Gate(Text + "300", seed);
 
     // ---- y-text.tests.js: testRepeatGenerateQuillChanges*
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Quill + "1", "SIM-13")]
-    public void RepeatGenerateQuillChanges1(uint seed) => Gate(Quill + "1", seed);
+    public void Quill_Repeat1_ConvergesAcrossReplicas(uint seed) => Gate(Quill + "1", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Quill + "2", "SIM-13")]
-    public void RepeatGenerateQuillChanges2(uint seed) => Gate(Quill + "2", seed);
+    public void Quill_Repeat2_ConvergesAcrossReplicas(uint seed) => Gate(Quill + "2", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Quill + "3", "SIM-13")]
-    public void RepeatGenerateQuillChanges3(uint seed) => Gate(Quill + "3", seed);
+    public void Quill_Repeat3_ConvergesAcrossReplicas(uint seed) => Gate(Quill + "3", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Quill + "30", "SIM-13")]
-    public void RepeatGenerateQuillChanges30(uint seed) => Gate(Quill + "30", seed);
+    public void Quill_Repeat30_ConvergesAcrossReplicas(uint seed) => Gate(Quill + "30", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Quill + "40", "SIM-13")]
-    public void RepeatGenerateQuillChanges40(uint seed) => Gate(Quill + "40", seed);
+    public void Quill_Repeat40_ConvergesAcrossReplicas(uint seed) => Gate(Quill + "40", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Quill + "70", "SIM-13")]
-    public void RepeatGenerateQuillChanges70(uint seed) => Gate(Quill + "70", seed);
+    public void Quill_Repeat70_ConvergesAcrossReplicas(uint seed) => Gate(Quill + "70", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Quill + "100", "SIM-13")]
-    public void RepeatGenerateQuillChanges100(uint seed) => Gate(Quill + "100", seed);
+    public void Quill_Repeat100_ConvergesAcrossReplicas(uint seed) => Gate(Quill + "100", seed);
 
     [Theory, MemberData(nameof(SeedLists.Up600), MemberType = typeof(SeedLists)), PortOf(Quill + "300", "SIM-13")]
-    public void RepeatGenerateQuillChanges300(uint seed) => Gate(Quill + "300", seed);
+    public void Quill_Repeat300_ConvergesAcrossReplicas(uint seed) => Gate(Quill + "300", seed);
 
     // ---- y-text.tests.js: testInsertAndDeleteAtRandomPositions (2000 operations over 10 seeds; 100000 operations nightly)
     [Theory, MemberData(nameof(SeedLists.Up1800), MemberType = typeof(SeedLists)), PortOf(InsertDelete, "SIM-13")]
-    public void InsertAndDeleteAtRandomPositions(uint seed) => Gate(InsertDelete, seed);
+    public void InsertAndDelete_RandomPositions_MatchesAMirror(uint seed) => Gate(InsertDelete, seed);
 
     // ---- regression seeds: a nightly failure adds its seed to regression-seeds.json and it runs here forever
 

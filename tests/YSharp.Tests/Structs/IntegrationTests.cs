@@ -60,7 +60,7 @@ public sealed class IntegrationTests
 
     [Fact]
     [Covers("STR-14")]
-    public void ResolvingTheOrigin_SplitsTheStructThatContainsIt() => Impl.Run(() =>
+    public void ResolvingTheOrigin_OriginInsideAStruct_SplitsThatStruct() => Impl.Run(() =>
     {
         var a = Net.Mk(1, gc: false);
         var b = Net.Mk(2, gc: false);
@@ -100,7 +100,7 @@ public sealed class IntegrationTests
 
     [Fact]
     [Covers("STR-17")]
-    public void PartiallyKnownStruct_IntegratesOnlyTheUnseenSuffix() => Impl.Run(() =>
+    public void PartiallyKnownStruct_OnIntegration_IntegratesOnlyTheUnseenSuffix() => Impl.Run(() =>
     {
         var a = Net.Mk(1);
         var ups = Net.Capture(a);
@@ -155,7 +155,7 @@ public sealed class IntegrationTests
 
     [Fact]
     [Covers("STR-18", "STR-19", "STR-20", "STR-23")]
-    public void ConflictZoneWithItemsFromAThirdClient_ConvergesUnderEveryDeliveryOrder() => Impl.Run(() =>
+    public void ConflictZone_ItemsFromAThirdClient_ConvergesUnderEveryDeliveryOrder() => Impl.Run(() =>
     {
         // Three clients type at the same place; two of them then type again inside the conflict zone.
         var baseDoc = Net.Mk(1);
@@ -191,7 +191,7 @@ public sealed class IntegrationTests
 
     [Fact]
     [Covers("STR-18")]
-    public void WhenTheNaturalSpotIsAdjacent_NoConflictScanReordersAnything() => Impl.Run(() =>
+    public void NaturalSpot_Adjacent_NoConflictScanReordersAnything() => Impl.Run(() =>
     {
         var a = Net.Mk(2);
         var b = Net.Mk(1);
@@ -227,7 +227,7 @@ public sealed class IntegrationTests
 
     [Fact]
     [Covers("STR-22")]
-    public void ParentLength_CountsOnlyLiveCountableListItems() => Impl.Run(() =>
+    public void ParentLength_DeletedAndUncountableItems_CountsOnlyLiveCountableListItems() => Impl.Run(() =>
     {
         var a = Net.Mk(1);
         var arr = a.GetArray("arr");

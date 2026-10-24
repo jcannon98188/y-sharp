@@ -72,31 +72,31 @@ public sealed class RelativePositionTests
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionCase1", "RP-02", "RP-06")]
-    public void Port_Case1() => Impl.Run(() => CheckRelativePositions(Seq((0, "1"), (0, "abc"), (0, "z"), (0, "y"), (0, "x"))));
+    public void Case1_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() => CheckRelativePositions(Seq((0, "1"), (0, "abc"), (0, "z"), (0, "y"), (0, "x"))));
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionCase2", "RP-02", "RP-06")]
-    public void Port_Case2() => Impl.Run(() => CheckRelativePositions(Seq((0, "abc"))));
+    public void Case2_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() => CheckRelativePositions(Seq((0, "abc"))));
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionCase3", "RP-02", "RP-06")]
-    public void Port_Case3() => Impl.Run(() => CheckRelativePositions(Seq((0, "abc"), (0, "1"), (0, "xyz"))));
+    public void Case3_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() => CheckRelativePositions(Seq((0, "abc"), (0, "1"), (0, "xyz"))));
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionCase4", "RP-02", "RP-06")]
-    public void Port_Case4() => Impl.Run(() => CheckRelativePositions(Seq((0, "1"))));
+    public void Case4_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() => CheckRelativePositions(Seq((0, "1"))));
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionCase5", "RP-02", "RP-06")]
-    public void Port_Case5() => Impl.Run(() => CheckRelativePositions(Seq((0, "2"), (0, "1"))));
+    public void Case5_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() => CheckRelativePositions(Seq((0, "2"), (0, "1"))));
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionCase6", "RP-02", "RP-06")]
-    public void Port_Case6() => Impl.Run(() => CheckRelativePositions(Seq()));
+    public void Case6_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() => CheckRelativePositions(Seq()));
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionCase7", "RP-06", "RP-08")]
-    public void Port_Case7() => Impl.Run(() =>
+    public void Case7_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var docA = new Doc();
         var textA = docA.GetText("text");
@@ -112,7 +112,7 @@ public sealed class RelativePositionTests
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionAssociationDifference", "RP-02", "RP-06", "RP-09")]
-    public void Port_AssociationDifference() => Impl.Run(() =>
+    public void AssociationDifference_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var ydoc = new Doc();
         var ytext = ydoc.GetText();
@@ -131,7 +131,7 @@ public sealed class RelativePositionTests
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionWithUndo", "RP-06", "RP-08")]
-    public void Port_RelativePositionWithUndo() => Impl.Run(() =>
+    public void RelativePositionWithUndo_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var ydoc = new Doc();
         var ytext = ydoc.GetText();
@@ -153,7 +153,7 @@ public sealed class RelativePositionTests
 
     [Fact]
     [Covers("RP-01")]
-    public void Shape_ADecodedPositionHasExactlyTheAnchorItsTagNames() => Impl.Run(() =>
+    public void Shape_DecodedPosition_HasExactlyTheAnchorItsTagNames() => Impl.Run(() =>
     {
         var item = Decode("00010100");
         Assert.Equal(new ItemId(1, 1), item.Item);
@@ -200,7 +200,7 @@ public sealed class RelativePositionTests
 
     [Fact]
     [Covers("RP-02")]
-    public void CreateFromIndex_SkipsDeletedItemsAndFormattingMarkers() => Impl.Run(() =>
+    public void CreateFromIndex_DeletedItemsAndFormattingMarkers_AreSkipped() => Impl.Run(() =>
     {
         var doc = TextDoc("abcd");
         var t = doc.GetText("t");
@@ -247,14 +247,14 @@ public sealed class RelativePositionTests
     [InlineData("02010300")]
     [InlineData("02010301")]
     [Covers("RP-04")]
-    public void Encoding_RoundTripsEveryTagWithAndWithoutNegativeAssociation(string hex) => Impl.Run(() =>
+    public void Encoding_EveryTagWithAndWithoutNegativeAssociation_RoundTrips(string hex) => Impl.Run(() =>
     {
         Assert.Equal(hex, EncodeHex(Decode(hex)));
     });
 
     [Fact]
     [Covers("RP-04")]
-    public void Decoding_AMissingAssociationMeansZero() => Impl.Run(() =>
+    public void Decoding_MissingAssociation_MeansZero() => Impl.Run(() =>
     {
         var item = Decode("000100");
         Assert.Equal(new ItemId(1, 0), item.Item);
@@ -296,7 +296,7 @@ public sealed class RelativePositionTests
 
     [Fact]
     [Covers("RP-05")]
-    public void Json_RoundTripsThroughFromJson() => Impl.Run(() =>
+    public void Json_AnyPosition_RoundTripsThroughFromJson() => Impl.Run(() =>
     {
         var doc = TextDoc("abc");
         var t = doc.GetText("t");
@@ -312,7 +312,7 @@ public sealed class RelativePositionTests
 
     [Fact]
     [Covers("RP-05")]
-    public void Json_AssociationDefaultsToZeroWhenAbsent() => Impl.Run(() =>
+    public void Json_AbsentAssociation_DefaultsToZero() => Impl.Run(() =>
     {
         Assert.True(YValue.TryParseJson(Encoding.UTF8.GetBytes("{\"tname\":\"n\"}"), null, out var parsed).Ok);
         Assert.True(RelativePosition.TryFromJson(parsed, out var back).Ok);
@@ -406,7 +406,7 @@ public sealed class RelativePositionTests
 
     [Fact]
     [Covers("RP-07")]
-    public void Positions_CompareByAnchorsAndAssociation() => Impl.Run(() =>
+    public void Positions_AnyPair_CompareByAnchorsAndAssociation() => Impl.Run(() =>
     {
         var doc = TextDoc("abc");
         var t = doc.GetText("t");
@@ -421,7 +421,7 @@ public sealed class RelativePositionTests
 
     [Fact]
     [Covers("RP-09", "RP-08")]
-    public void Positions_FollowContentThroughConcurrentEditsAndDeletions() => Impl.Run(() =>
+    public void Positions_ConcurrentEditsAndDeletions_FollowContent() => Impl.Run(() =>
     {
         var a = Net.Mk(3);
         var b = Net.Mk(4);

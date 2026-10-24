@@ -19,7 +19,7 @@ public sealed class BudgetTableTests
     public void Table_HasTheStableIds_InOrder() => Assert.Equal(ExpectedIds, AllocationBudgets.All.Select(b => b.Id).ToArray());
 
     [Fact]
-    public void Table_MatchesTheRegistry()
+    public void BudgetTable_EveryRow_MatchesTheRegistry()
     {
         var entries = InventoryLoader.LoadEntries(RepoRoot.Find()).Where(e => e.Id.StartsWith("BUD-", StringComparison.Ordinal)).ToList();
         Assert.Equal(ExpectedIds, entries.Select(e => e.Id).OrderBy(i => i, StringComparer.Ordinal).ToArray());
@@ -27,7 +27,7 @@ public sealed class BudgetTableTests
     }
 
     [Fact]
-    public void ElevenHotPaths_AreBud01To11()
+    public void BudgetTable_ElevenHotPaths_AreBud01To11()
     {
         Assert.Equal(11, AllocationBudgets.HotPaths.Count());
         Assert.Equal(ExpectedIds.Take(11), AllocationBudgets.HotPaths.Select(b => b.Id));
@@ -36,11 +36,11 @@ public sealed class BudgetTableTests
     }
 
     [Fact]
-    public void ZeroPaths_NeverHaveARecordedLimit() =>
+    public void BudgetTable_ZeroPaths_NeverHaveARecordedLimit() =>
         Assert.DoesNotContain(AllocationBudgets.Limits.Keys, k => AllocationBudgets.Get(k.Split(':')[0]).Kind == BudgetKind.Zero);
 
     [Fact]
-    public void RecordedLimits_NameKnownIdsAndParts() =>
+    public void BudgetTable_RecordedLimits_NameKnownIdsAndParts() =>
         Assert.All(AllocationBudgets.Limits, kv =>
         {
             var parts = kv.Key.Split(':');
@@ -58,7 +58,7 @@ public sealed class BudgetTableTests
     }
 
     [Fact]
-    public void PendingBudgets_AreCountedAndNeverExceedTheRegistryPendingCount()
+    public void BudgetTable_PendingBudgets_AreCountedAndNeverExceedTheRegistryPendingCount()
     {
         // Registry entries stay pending until the implementation exists (ADR 0018); the table's pending count is reported, not hidden.
         var pendingIds = AllocationBudgets.All.Where(AllocationBudgets.IsPending).Select(b => b.Id).ToList();
@@ -69,7 +69,7 @@ public sealed class BudgetTableTests
     }
 
     [Fact]
-    public void EveryBudgetId_IsReferencedByATest()
+    public void BudgetTable_EveryBudgetId_IsReferencedByATest()
     {
         var ids = Assembly.GetExecutingAssembly().GetTypes()
             .SelectMany(t => t.GetMethods().Cast<MemberInfo>().Append(t))
@@ -81,7 +81,7 @@ public sealed class BudgetTableTests
     }
 
     [Fact]
-    public void YjsBaseline_ExistsForEveryMemoryWorkload()
+    public void BudgetTable_EveryMemoryWorkload_HasAYjsBaseline()
     {
         foreach (var w in new[] { AllocationBudgets.TextInsert, AllocationBudgets.ArrayPush, AllocationBudgets.MapSet })
         {
@@ -91,7 +91,7 @@ public sealed class BudgetTableTests
     }
 
     [Fact]
-    public void WorkloadSizes_AreTheOnesInAdr0009()
+    public void BudgetTable_WorkloadSizes_AreTheOnesInAdr0009()
     {
         Assert.Equal(1_000_000, MemoryWorkloads.TextInserts);
         Assert.Equal(1_000_000, MemoryWorkloads.ArrayPushes);

@@ -22,7 +22,7 @@ public sealed class TruncationTests
     private static readonly string[] Malformed = { "Malformed" };
 
     [Fact]
-    public void Seeds_AreHarvestedFromTheGeneratedFixtures()
+    public void Seeds_GeneratedFixtures_AreHarvested()
     {
         Assert.True(SeedUpdates.Collect().Count >= 50, "expected at least 50 distinct valid updates in fixtures/");
         Assert.Contains(SeedUpdates.Collect(), s => s.Format == UpdateFormat.V1);

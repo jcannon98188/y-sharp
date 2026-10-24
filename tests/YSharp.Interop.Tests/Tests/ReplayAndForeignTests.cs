@@ -20,7 +20,7 @@ namespace YSharp.Interop.Tests;
 public sealed class ReplayTests(OracleHost host)
 {
     [Fact, Covers("DIFF-06")]
-    public void ReplaySavedScript()
+    public void ReplaySavedScript_WhenEnvVarIsSet_ReplaysIt()
     {
         var path = YSharpEnv.ReplayPath;
         if (path == null) Assert.Skip("Set YSHARP_REPLAY=<path of a saved script> to re-run one failing case.");
@@ -41,7 +41,7 @@ public sealed class ApplyForeignTests
     private static readonly OpsRegistry Registry = SharpSide.CreateRegistry();
 
     [Fact, Covers("DIFF-02")]
-    public void TheStepKind_IsRegisteredWithItsSchemaFields()
+    public void ApplyForeign_StepKind_IsRegisteredWithItsSchemaFields()
     {
         Assert.True(Registry.TryGet("applyForeign", out var def));
         Assert.Equal(new[] { "doc", "bytes" }, def.Required);
@@ -56,11 +56,11 @@ public sealed class ApplyForeignTests
     [Theory, Covers("DIFF-02")]
     [InlineData("""{"schema":1,"replicas":[{"name":"a","clientId":1}],"steps":[{"step":"applyForeign","doc":"a","bytes":{"$":"bytes","hex":"00"},"bogus":1}]}""")]
     [InlineData("""{"schema":1,"replicas":[{"name":"a","clientId":1}],"steps":[{"step":"applyForeign","doc":"a"}]}""")]
-    public void TheInterpreter_RejectsUnknownAndMissingFields(string script) =>
+    public void ApplyForeign_UnknownOrMissingFields_AreRejectedByTheInterpreter(string script) =>
         Assert.Throws<OpsScriptException>(() => OpsScript.Parse(script, Registry));
 
     [Fact, Covers("DIFF-02")]
-    public void ABadEncodingOrBytes_IsAScriptError()
+    public void ApplyForeign_BadEncodingOrBytes_IsAScriptError()
     {
         var bad = SharpSide.Run("""{"schema":1,"replicas":[{"name":"a","clientId":1}],"steps":[{"step":"applyForeign","doc":"a","bytes":{"$":"bytes","hex":"00"},"encoding":"v3"}]}""");
         Assert.Equal(SharpStatus.ScriptError, bad.Status);
@@ -87,7 +87,7 @@ public sealed class ApplyForeignTests
     }
 
     [Fact, Covers("DIFF-02")]
-    public void TheFixture_RecordsTheOraclesOutcomes()
+    public void ApplyForeign_Fixture_RecordsTheOraclesOutcomes()
     {
         var results = Load().Observations.GetProperty("results").GetProperty("value");
         Assert.True(results.GetProperty("duplicate-v1").GetProperty("value").GetProperty("accepted").GetBoolean());

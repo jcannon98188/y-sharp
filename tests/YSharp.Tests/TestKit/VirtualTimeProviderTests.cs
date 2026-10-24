@@ -10,7 +10,7 @@ public class VirtualTimeProviderTests
     private static readonly DateTimeOffset Start = new(2024, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
     [Fact]
-    public void Advance_MovesUtcNowAndTimestamp()
+    public void Advance_Called_MovesUtcNowAndTimestamp()
     {
         var tp = new VirtualTimeProvider(Start);
         var t0 = tp.GetTimestamp();
@@ -20,7 +20,7 @@ public class VirtualTimeProviderTests
     }
 
     [Fact]
-    public void Advance_NeverMovesWithoutCall()
+    public void Advance_NotCalled_NeverMoves()
     {
         var tp = new VirtualTimeProvider(Start);
         Assert.Equal(tp.GetUtcNow(), tp.GetUtcNow());

@@ -13,7 +13,7 @@ namespace YSharp.Tests.Types;
 public sealed class SharedTypeTests
 {
     [Fact, Covers("T-0.1")]
-    public void EachTypeRaisesItsOwnEventClass_AndXmlTextEventsAreTextEvents() => Stub.Run(() =>
+    public void Events_EachType_RaisesItsOwnEventClassAndXmlTextEventsAreTextEvents() => Stub.Run(() =>
     {
         var doc = new Doc(new DocOptions { ClientId = 1 });
         var array = doc.GetArray("a");
@@ -52,7 +52,7 @@ public sealed class SharedTypeTests
     });
 
     [Fact, Covers("T-0.2")]
-    public void Parent_IsNullForRootsAndTheContainerForNestedTypes() => Stub.Run(() =>
+    public void Parent_RootAndNestedTypes_IsNullForRootsAndTheContainerForNested() => Stub.Run(() =>
     {
         var doc = new Doc(new DocOptions { ClientId = 1 });
         var array = doc.GetArray("a");
@@ -194,7 +194,7 @@ public sealed class SharedTypeTests
     });
 
     [Fact, PortOf("y-map.tests.js:testMapHavingIterableAsConstructorParamTests", "T-0.7", "M-10")]
-    public void ConstructorSugar_BuffersInitialContent() => Stub.Run(() =>
+    public void ConstructorSugar_InitialContent_IsBuffered() => Stub.Run(() =>
     {
         var net = Net.Init(1);
         var map0 = net.Peers[0].Map;
@@ -239,7 +239,7 @@ public sealed class SharedTypeTests
     });
 
     [Fact, PortOf("y-array.tests.js:testArrayFrom", "T-0.7")]
-    public void ArrayFrom_BuffersItems() => Stub.Run(() =>
+    public void ArrayFrom_Items_AreBuffered() => Stub.Run(() =>
     {
         var doc1 = new Doc(new DocOptions { ClientId = 1 });
         var db1 = doc1.GetMap("root");
@@ -381,7 +381,7 @@ public sealed class SharedTypeTests
     });
 
     [Fact, Covers("T-0.13")]
-    public void InsertingAnIntegratedType_IsRejected() => Stub.Run(() =>
+    public void Insert_AnAlreadyIntegratedType_IsRejected() => Stub.Run(() =>
     {
         var doc = new Doc(new DocOptions { ClientId = 1 });
         var a = doc.GetArray("a");
@@ -413,7 +413,7 @@ public sealed class SharedTypeTests
     });
 
     [Fact, Covers("Q29", "X-E3")]
-    public void XmlToString_UsesInvariantLowercasingAndOrdinalAttributeOrder() => Stub.Run(() =>
+    public void XmlToString_AnyCulture_UsesInvariantLowercasingAndOrdinalAttributeOrder() => Stub.Run(() =>
     {
         var saved = CultureInfo.CurrentCulture;
         try

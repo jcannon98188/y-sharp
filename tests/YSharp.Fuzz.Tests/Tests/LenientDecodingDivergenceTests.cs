@@ -43,7 +43,7 @@ public sealed class LenientDecodingDivergenceTests
     }
 
     [Fact]
-    public void Q15_TheStoredOracleRecordsJsBeingLenient()
+    public void Q15_StoredOracleOutcomes_RecordJsBeingLenient()
     {
         var cases = Cases();
         Assert.True(cases.Count >= 4, $"expected at least 4 recorded Q15 divergences, found {cases.Count}");

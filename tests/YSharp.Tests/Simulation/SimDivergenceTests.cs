@@ -121,7 +121,7 @@ public sealed class SimDivergenceTests
     [InlineData(false)]
     [InlineData(true)]
     [Covers("SIM-04", "SIM-14")]
-    public void ARunWithEitherEncoding_Converges(bool v2) => Stub.Run(() =>
+    public void Run_EitherEncoding_Converges(bool v2) => Stub.Run(() =>
     {
         // find a seed whose first draw (the coin flip) picks the wanted encoding
         var seed = Enumerable.Range(1, 100).Select(i => (uint)i).First(s => Prng.Bool(Prng.Create(s)) == v2);

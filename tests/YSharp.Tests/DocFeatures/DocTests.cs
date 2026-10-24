@@ -143,7 +143,7 @@ public sealed class DocTests
 
     [Fact]
     [PortOf("doc.tests.js:testGetTypeEmptyId", "DOC-03", "DOC-06")]
-    public void Port_GetTypeEmptyId() => Impl.Run(() =>
+    public void GetTypeEmptyId_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var doc1 = new Doc();
         doc1.GetText("").Insert(0, "h");
@@ -247,7 +247,7 @@ public sealed class DocTests
 
     [Fact]
     [Covers("DOC-09")]
-    public void TransactionEvents_FireInTheDocumentedOrder() => Impl.Run(() =>
+    public void TransactionEvents_AnyTransaction_FireInTheDocumentedOrder() => Impl.Run(() =>
     {
         var doc = Net.Mk(1);
         var log = new List<string>();
@@ -330,7 +330,7 @@ public sealed class DocTests
 
     [Fact]
     [Covers("DOC-10")]
-    public void UpdateEvents_AreNotEncodedWithoutASubscriber() => Impl.Run(() =>
+    public void UpdateEvents_NoSubscriber_AreNotEncoded() => Impl.Run(() =>
     {
         var doc = Net.Mk(1);
         var t = doc.GetText("t");
@@ -369,7 +369,7 @@ public sealed class DocTests
 
     [Fact]
     [Covers("DOC-11")]
-    public void ClientIdRecovery_OnlyHappensWhenTheRemoteUpdateAdvancedOurOwnClock() => Impl.Run(() =>
+    public void ClientIdRecovery_RemoteUpdateAdvancedOurOwnClock_HappensOnlyThen() => Impl.Run(() =>
     {
         var generator = new ScriptedIds(1, 77);
         var b = new Doc(new DocOptions { ClientIdGenerator = generator });
@@ -437,7 +437,7 @@ public sealed class DocTests
 
     [Fact]
     [Covers("DOC-13", "DOC-14")]
-    public void SyncedWhileAlreadyLoaded_DoesNotRaiseLoadedAgain() => Impl.Run(() =>
+    public void Synced_WhileAlreadyLoaded_DoesNotRaiseLoadedAgain() => Impl.Run(() =>
     {
         Impl.RequireImplementation();
         var doc = new Doc();
@@ -471,7 +471,7 @@ public sealed class DocTests
 
     [Fact]
     [Covers("DOC-15")]
-    public void Destroy_TwiceDoesNotThrow() => Impl.Run(() =>
+    public void Destroy_CalledTwice_DoesNotThrow() => Impl.Run(() =>
     {
         var doc = new Doc();
         doc.Destroy();
@@ -497,7 +497,7 @@ public sealed class DocTests
 
     [Fact]
     [Covers("DOC-17")]
-    public void CollectionId_IsInheritedFromTheParentOnlyWhenTheSubdocHasNone() => Impl.Run(() =>
+    public void CollectionId_SubdocHasNone_IsInheritedFromTheParent() => Impl.Run(() =>
     {
         Impl.RequireImplementation();
         var parent = new Doc(new DocOptions { ClientId = 1, CollectionId = "parent-col" });
@@ -510,7 +510,7 @@ public sealed class DocTests
 
     [Fact]
     [Covers("DOC-17")]
-    public void Meta_IsPersistedForSubdocsThroughTheirOptions() => Impl.Run(() =>
+    public void Meta_SubdocWithOptions_IsPersisted() => Impl.Run(() =>
     {
         var parent = Net.Mk(1);
         var sub = new Doc(new DocOptions { Guid = "m", Meta = "meta-value" });
@@ -542,7 +542,7 @@ public sealed class DocTests
 
     [Fact]
     [Covers("DOC-18")]
-    public void EventArguments_AreTheDocAndATransactionBoundToIt() => Impl.Run(() =>
+    public void EventArguments_AnyDocEvent_AreTheDocAndATransactionBoundToIt() => Impl.Run(() =>
     {
         var doc = Net.Mk(1);
         var checkedOnce = false;

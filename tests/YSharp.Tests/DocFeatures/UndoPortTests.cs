@@ -22,7 +22,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testInconsistentFormat", "UM-18")]
-    public void Port_InconsistentFormat() => Impl.Run(() =>
+    public void InconsistentFormat_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         // upstream uses ydoc.get('text', Y.XmlText); the stub has no root XmlText getter, YXmlText only adds XML rendering to YText
         static void TestYjsMerge(Doc ydoc)
@@ -54,7 +54,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testInfiniteCaptureTimeout", "UM-03")]
-    public void Port_InfiniteCaptureTimeout() => Impl.Run(() =>
+    public void InfiniteCaptureTimeout_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var u = Users.Init(3);
         var array0 = u.Array(0);
@@ -68,7 +68,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testEmptyTypeScope", "UM-02", "UM-16")]
-    public void Port_EmptyTypeScope() => Impl.Run(() =>
+    public void EmptyTypeScope_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         // upstream: new UndoManager([], { doc: ydoc }). The stub has no Doc option, so the scope starts with an unrelated type (API gap).
         var ydoc = new Doc();
@@ -82,7 +82,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testGlobalScope", "UM-02")]
-    public void Port_GlobalScope() => Impl.Run(() =>
+    public void GlobalScope_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var ydoc = new Doc();
         var um = new UndoManager(ydoc, Opts());
@@ -94,7 +94,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testTypeScope", "UM-02")]
-    public void Port_TypeScope() => Impl.Run(() =>
+    public void TypeScope_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var u = Users.Init(3);
         var array0 = u.Array(0);
@@ -115,7 +115,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testTrackClass", "UM-01")]
-    public void Port_TrackClass() => Impl.Run(() =>
+    public void TrackClass_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var u = Users.Init(3);
         var text0 = u.Text(0);
@@ -129,7 +129,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testRejectUpdateExample", "UM-01", "UM-17")]
-    public void Port_RejectUpdateExample() => Impl.Run(() =>
+    public void RejectUpdateExample_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var tmpydoc1 = new Doc();
         tmpydoc1.GetArray("restricted").Insert(0, new YEntry[] { 1 });
@@ -168,7 +168,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoText", "UM-10", "UM-20", "UM-05")]
-    public void Port_UndoText() => Impl.Run(() =>
+    public void UndoText_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var u = Users.Init(3);
         var text0 = u.Text(0);
@@ -216,7 +216,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testDoubleUndo", "UM-05", "UM-10")]
-    public void Port_DoubleUndo() => Impl.Run(() =>
+    public void DoubleUndo_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var doc = new Doc();
         var text = doc.GetText();
@@ -232,7 +232,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoInEmbed", "UM-18")]
-    public void Port_UndoInEmbed() => Impl.Run(() =>
+    public void UndoInEmbed_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var u = Users.Init(3);
         var text0 = u.Text(0);
@@ -253,7 +253,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoDeleteTextFormat", "UM-18")]
-    public void Port_UndoDeleteTextFormat() => Impl.Run(() =>
+    public void UndoDeleteTextFormat_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var doc = new Doc();
         var text = doc.GetText();
@@ -283,7 +283,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoMap", "UM-20", "UM-12")]
-    public void Port_UndoMap() => Impl.Run(() =>
+    public void UndoMap_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var u = Users.Init(2);
         var map0 = u.Map(0);
@@ -325,7 +325,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoDeleteInMap", "UM-10", "UM-12")]
-    public void Port_UndoDeleteInMap() => Impl.Run(() =>
+    public void UndoDeleteInMap_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var u = Users.Init(3);
         var map0 = u.Map(0);
@@ -354,7 +354,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testBehaviorOfIgnoreremotemapchangesProperty", "UM-12")]
-    public void Port_BehaviorOfIgnoreRemoteMapChangesProperty() => Impl.Run(() =>
+    public void BehaviorOfIgnoreRemoteMapChangesProperty_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var doc = new Doc();
         var doc2 = new Doc();
@@ -376,7 +376,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoArray", "UM-20", "UM-10")]
-    public void Port_UndoArray() => Impl.Run(() =>
+    public void UndoArray_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var u = Users.Init(3);
         var array0 = u.Array(0);
@@ -429,7 +429,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoDeleteFilter", "UM-10")]
-    public void Port_UndoDeleteFilter() => Impl.Run(() =>
+    public void UndoDeleteFilter_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var u = Users.Init(3);
         var array0 = u.Array(0);
@@ -449,7 +449,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoUntilChangePerformed", "UM-09")]
-    public void Port_UndoUntilChangePerformed() => Impl.Run(() =>
+    public void UndoUntilChangePerformed_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var doc = new Doc();
         var doc2 = new Doc();
@@ -479,7 +479,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoNestedUndoIssue", "UM-10", "UM-11")]
-    public void Port_UndoNestedUndoIssue() => Impl.Run(() =>
+    public void UndoNestedUndoIssue_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var doc = new Doc(new DocOptions { Gc = false });
         var design = doc.GetMap();
@@ -531,7 +531,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testConsecutiveRedoBug", "UM-10", "UM-11")]
-    public void Port_ConsecutiveRedoBug() => Impl.Run(() =>
+    public void ConsecutiveRedoBug_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var doc = new Doc();
         var yRoot = doc.GetMap();
@@ -580,7 +580,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoBlockBug", "UM-10")]
-    public void Port_UndoBlockBug() => Impl.Run(() =>
+    public void UndoBlockBug_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var doc = new Doc(new DocOptions { Gc = false });
         var design = doc.GetMap();
@@ -621,7 +621,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoXml", "UM-18")]
-    public void Port_UndoXml() => Impl.Run(() =>
+    public void UndoXml_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var u = Users.Init(3);
         var xml0 = u.Xml(0);
@@ -647,7 +647,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoXmlBug", "UM-18")]
-    public void Port_UndoXmlBug() => Impl.Run(() =>
+    public void UndoXmlBug_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         const string origin = "origin";
         var doc = new Doc();
@@ -686,7 +686,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testSpecialDeletionCase", "UM-10", "UM-18")]
-    public void Port_SpecialDeletionCase() => Impl.Run(() =>
+    public void SpecialDeletionCase_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         const string origin = "undoable";
         var doc = new Doc();
@@ -714,7 +714,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoSetAttributeAndDeleteSyncsAttributes", "UM-12", "UM-18")]
-    public void Port_UndoSetAttributeAndDeleteSyncsAttributes() => Impl.Run(() =>
+    public void UndoSetAttributeAndDeleteSyncsAttributes_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         // upstream: doc.get('sharedRoot', Y.XmlText); the stub has no root XmlText getter, so the root is a YText holding the YXmlText embed
         var doc = new Doc();
@@ -753,7 +753,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoEvents", "UM-04", "UM-14")]
-    public void Port_UndoEvents() => Impl.Run(() =>
+    public void UndoEvents_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var u = Users.Init(3);
         var text0 = u.Text(0);
@@ -779,7 +779,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoDoingStackItem", "UM-14")]
-    public void Port_UndoDoingStackItem() => Impl.Run(() =>
+    public void UndoDoingStackItem_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var doc = new Doc();
         var text = doc.GetText("text");

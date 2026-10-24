@@ -64,7 +64,7 @@ public sealed class ProtocolFixtureTests
     }
 
     [Theory, MemberData(nameof(Fixtures))]
-    public void Fixture_ReplaysToTheOraclesBytesResultsEventsAndState(string path) => Stub.Run(() =>
+    public void Fixture_EveryStoredScenario_ReplaysToTheOraclesBytesResultsEventsAndState(string path) => Stub.Run(() =>
     {
         var fixture = FixtureReplay.Load(path);
         var ctx = Replay(fixture, out var updates);

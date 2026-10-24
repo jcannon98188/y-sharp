@@ -130,7 +130,7 @@ public sealed class ItemHelperTests
 
     [Fact]
     [Covers("STR-09")]
-    public void FollowRedone_LetsARelativePositionSurviveDeleteAndUndo() => Impl.Run(() =>
+    public void FollowRedone_DeleteAndUndo_LetsARelativePositionSurvive() => Impl.Run(() =>
     {
         var a = Net.Mk(1);
         var t = a.GetText("t");

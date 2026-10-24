@@ -41,7 +41,7 @@ public class TraceabilityGateTests
     }
 
     [Fact]
-    public void Inventory_HasExpectedShape()
+    public void Inventory_AnyArea_HasExpectedShape()
     {
         var root = RepoRoot.Find();
         var entries = InventoryLoader.LoadEntries(root);

@@ -55,7 +55,7 @@ public sealed class SchedulerTests
     }
 
     [Fact, Covers("CC-5")]
-    public void DifferentSeeds_ExploreDifferentSchedules()
+    public void Scheduler_DifferentSeeds_ExploreDifferentSchedules()
     {
         var orders = new HashSet<string>();
         for (uint seed = 1; seed <= 30; seed++)
@@ -69,7 +69,7 @@ public sealed class SchedulerTests
     }
 
     [Fact, Covers("CC-5")]
-    public void Dfs_EnumeratesEveryInterleavingOfTwoThreadsExactlyOnce()
+    public void Scheduler_DfsOnTwoThreads_EnumeratesEveryInterleavingExactlyOnce()
     {
         var seen = new HashSet<string>();
         var runs = 0;
@@ -104,7 +104,7 @@ public sealed class SchedulerTests
     }
 
     [Fact, Covers("CC-5")]
-    public void ABlockedThread_ResumesOnlyOnceItsPredicateHolds()
+    public void Scheduler_BlockedThread_ResumesOnlyOnceItsPredicateHolds()
     {
         for (uint seed = 1; seed <= 20; seed++)
         {
@@ -177,7 +177,7 @@ public sealed class SchedulerTests
     }
 
     [Fact, Covers("CC-5")]
-    public void CallsFromThreadsTheSchedulerDoesNotControl_AreNoOps()
+    public void Scheduler_UncontrolledThreads_AreNoOps()
     {
         var s = new CooperativeScheduler(new SeededChoice(1), "uncontrolled");
         s.Point("main");

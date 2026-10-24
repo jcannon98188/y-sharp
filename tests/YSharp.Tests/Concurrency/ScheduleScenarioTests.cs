@@ -21,10 +21,10 @@ public sealed class ScheduleScenarioTests
     private static void Seeds(Scenario s) => Impl.Run(() => Explorer.RunSeeds(s, Conc.Seeds));
 
     [Fact, Covers("CC-1", "CC-2")]
-    public void WriterPreference_AReaderThatArrivesAfterAWaitingWriterQueuesBehindIt() => Seeds(Scenarios.WriterPreference);
+    public void WriterPreference_ReaderArrivesAfterAWaitingWriter_QueuesBehindIt() => Seeds(Scenarios.WriterPreference);
 
     [Fact, Covers("CC-1", "CC-2")]
-    public void NestedWritesJoin_AndAnotherThreadsTransactionNeverOverlaps() => Seeds(Scenarios.NestedJoinAndExclusion);
+    public void NestedWrites_AnotherThreadsTransaction_NeverOverlapsAndNestedOnesJoin() => Seeds(Scenarios.NestedJoinAndExclusion);
 
     [Fact, Covers("CC-3")]
     public void TheUpgradeIsRejected_InEverySchedule_AndNeverWaitsForItself() => Seeds(Scenarios.UpgradeIsRejected);
@@ -45,7 +45,7 @@ public sealed class ScheduleScenarioTests
     public void TheAwarenessTimer_RacesSetLocalState_WithConsistentStatesAndNoDocLock() => Seeds(Scenarios.AwarenessTimerVsSetState);
 
     [Fact, Covers("CC-20")]
-    public void UndoRacesAnOrdinaryWrite_InEitherOrder() => Seeds(Scenarios.UndoVsWrite);
+    public void Undo_RacesAnOrdinaryWrite_ConvergesInEitherOrder() => Seeds(Scenarios.UndoVsWrite);
 
     [Fact, Covers("CC-3", "CC-17", "CC-2")]
     public void TinyScenarios_AreExploredExhaustively_EveryScheduleOnce() => Impl.Run(() =>
@@ -60,7 +60,7 @@ public sealed class ScheduleScenarioTests
     });
 
     [Fact, Covers("CC-1")]
-    public void EveryContractGuaranteeThatHasAScheduleScenario_IsListed()
+    public void Scenarios_EveryContractGuaranteeWithAScenario_IsListed()
     {
         // the scenario table is the index the matrix is built from; a scenario that names no CC id would be invisible there
         Assert.All(Scenarios.All, s => Assert.NotEmpty(s.Covers));

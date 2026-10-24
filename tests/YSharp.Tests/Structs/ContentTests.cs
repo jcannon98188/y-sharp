@@ -180,7 +180,7 @@ public sealed class ContentTests
 
     [Fact]
     [Covers("STR-45")]
-    public void AdjacentItems_MergeOnlyWithTheSameContentKind() => Impl.Run(() =>
+    public void AdjacentItems_DifferentContentKinds_AreNotMerged() => Impl.Run(() =>
     {
         var a = Net.Mk(1);
         var arr = a.GetArray("arr");

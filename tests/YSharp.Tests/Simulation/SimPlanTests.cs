@@ -63,7 +63,7 @@ public sealed class SimPlanTests
 
     [Theory, MemberData(nameof(Generators))]
     [Covers("SIM-13")]
-    public void Plans_DrawAndProduceExactlyWhatTheNodePortDid(string kind)
+    public void Plans_AnySeed_DrawAndProduceExactlyWhatTheNodePortDid(string kind)
     {
         using var doc = JsonDocument.Parse(File.ReadAllText(GoldensPath));
         var entries = doc.RootElement.GetProperty(kind).EnumerateArray().ToList();

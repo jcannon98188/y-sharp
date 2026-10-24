@@ -94,7 +94,7 @@ public class NodeClientTests
     }
 
     [Fact]
-    public void Availability_ReportsNodeMajorAgainstNvmrc()
+    public void Availability_NodeInstalled_ReportsMajorAgainstNvmrc()
     {
         var reason = NodeAvailability.Check(RepoRoot.Find());
         // Either available (null) or a visible reason; never an exception.
@@ -106,7 +106,7 @@ public class NodeClientTests
     [InlineData("22", "v24.1.0", false)]
     [InlineData("v22.1.0", "v22.9.9", true)]
     [InlineData("lts/*", "v24.0.0", true)]
-    public void NodeVersion_MatchesNvmrcMajor(string nvmrc, string running, bool expected)
+    public void NodeVersion_AnyInstall_MatchesNvmrcMajor(string nvmrc, string running, bool expected)
     {
         Assert.Equal(expected, NodeAvailability.MajorMatches(nvmrc, running));
     }

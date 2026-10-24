@@ -29,7 +29,7 @@ public sealed class TransactionTests
     }
 
     [Fact, Covers("TX-1", "Q23")]
-    public void EventOrder_OfASingleTransaction() => Stub.Run(() =>
+    public void EventOrder_SingleTransaction_IsTheDocumentedOne() => Stub.Run(() =>
     {
         var doc = NewDoc();
         var text = doc.GetText("t");
@@ -51,7 +51,7 @@ public sealed class TransactionTests
     });
 
     [Fact, Covers("TX-2", "Q23")]
-    public void ObserveHandlersOfAllChangedTypes_RunBeforeAnyDeepHandler() => Stub.Run(() =>
+    public void ObserveHandlers_AllChangedTypes_RunBeforeAnyDeepHandler() => Stub.Run(() =>
     {
         var doc = NewDoc();
         var a = doc.GetMap("a");
@@ -122,7 +122,7 @@ public sealed class TransactionTests
     });
 
     [Fact, PortOf("doc.tests.js:testClientIdDuplicateChange", "TX-16")]
-    public void RemoteUpdateUsingOurClientId_ChangesTheClientId() => Stub.Run(() =>
+    public void RemoteUpdate_UsingOurClientId_ChangesTheClientId() => Stub.Run(() =>
     {
         var doc1 = NewDoc();
         doc1.ClientId = 0;
@@ -163,7 +163,7 @@ public sealed class TransactionTests
     });
 
     [Fact, Covers("TX-10", "TX-18")]
-    public void ATypeIsObservedOncePerTransaction_AndEveryAncestorGetsTheDeepEvent() => Stub.Run(() =>
+    public void Observe_OncePerTransaction_AndEveryAncestorGetsTheDeepEvent() => Stub.Run(() =>
     {
         var doc = NewDoc();
         var root = doc.GetMap("root");
@@ -214,7 +214,7 @@ public sealed class TransactionTests
     });
 
     [Fact, Covers("TX-11")]
-    public void ADeepObserver_WorksWithoutAnObserveHandlerOnTheSameType() => Stub.Run(() =>
+    public void DeepObserver_NoObserveHandlerOnTheSameType_Works() => Stub.Run(() =>
     {
         var doc = NewDoc();
         var map = doc.GetMap("m");
@@ -226,7 +226,7 @@ public sealed class TransactionTests
     });
 
     [Fact, Covers("TX-12")]
-    public void HandlerListChangesDuringDispatch_TakeEffectFromTheNextTrigger() => Stub.Run(() =>
+    public void HandlerListChanges_DuringDispatch_TakeEffectFromTheNextTrigger() => Stub.Run(() =>
     {
         // JS probe (yjs 13.6.33): a handler removed while dispatching still runs in that dispatch, and one added while dispatching is
         // first called by the next trigger. ADR 0006 CC-13 adopts the same rule.
@@ -301,7 +301,7 @@ public sealed class TransactionTests
     });
 
     [Fact, Covers("TX-17")]
-    public void EventData_IsValidOnlyWhileTheOutermostTransactionDispatches() => Stub.Run(() =>
+    public void EventData_AfterOutermostTransactionDispatched_IsInvalid() => Stub.Run(() =>
     {
         var doc = NewDoc();
         var array = doc.GetArray("a");
@@ -320,7 +320,7 @@ public sealed class TransactionTests
     });
 
     [Fact, Covers("TX-13")]
-    public void UnobserveDeep_IsSymmetricalToUnobserve() => Stub.Run(() =>
+    public void UnobserveDeep_AfterObserveDeep_IsSymmetricalToUnobserve() => Stub.Run(() =>
     {
         var map = NewDoc().GetMap("m");
         var calls = 0;

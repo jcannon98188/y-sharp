@@ -28,7 +28,7 @@ public sealed class LifecycleTests
     }
 
     [Fact, Covers("CC-15")]
-    public void TheContractIsSyncOnly_NoPublicMemberTakesOrReturnsATask()
+    public void Contract_PublicApi_IsSyncOnlyWithNoTaskMembers()
     {
         bool IsTask(Type t)
         {
@@ -96,7 +96,7 @@ public sealed class LifecycleTests
     });
 
     [Fact, Covers("CC-16")]
-    public void AThrowingReadBody_ReleasesTheReadLock() => Impl.Run(() =>
+    public void ReadBody_Throwing_ReleasesTheReadLock() => Impl.Run(() =>
     {
         var doc = Conc.NewDoc();
         Assert.Throws<InvalidOperationException>(() => doc.ReadTransact(_ => throw new InvalidOperationException("boom")));

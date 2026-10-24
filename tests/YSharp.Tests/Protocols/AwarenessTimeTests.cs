@@ -13,7 +13,7 @@ public sealed class AwarenessTimeTests
     private static byte[] U(uint id, long clock, string json) => AwBytes.Update((id, clock, json));
 
     [Fact, Covers("AW-14")]
-    public void CheckTimer_IsOneTimerWithAPeriodOf3000Milliseconds() => Stub.Run(() =>
+    public void CheckTimer_Default_IsOneTimerWithAPeriodOf3000Milliseconds() => Stub.Run(() =>
     {
         var clock = new VirtualTimeProvider();
         var counting = new CountingTimeProvider(clock);
@@ -89,7 +89,7 @@ public sealed class AwarenessTimeTests
     });
 
     [Fact, Covers("AW-16")]
-    public void ClientsExpiringTogether_AreRemovedInOneBatch() => Stub.Run(() =>
+    public void ClientsExpiringTogether_OnTheSameTick_AreRemovedInOneBatch() => Stub.Run(() =>
     {
         using var rig = new AwRig(9);
         rig.Apply(AwBytes.Update((5, 1, "{}"), (6, 1, "{}")));

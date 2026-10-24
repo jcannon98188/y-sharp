@@ -38,7 +38,7 @@ public class AllocationAssertTests
     }
 
     [Fact]
-    public void Measure_ReportsBytesPerOperation()
+    public void Measure_AnyOperation_ReportsBytesPerOperation()
     {
         var bytes = AllocationAssert.Measure(() => _sink = new byte[1000], iterations: 100);
         Assert.InRange(bytes, 1000, 1100);

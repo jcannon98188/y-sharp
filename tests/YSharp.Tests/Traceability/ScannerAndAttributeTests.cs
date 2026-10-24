@@ -32,7 +32,7 @@ public class ScannerAndAttributeTests
     private static TestTag Sample(string method) => Tags.Single(t => t.Test == "YSharp.Tests.Traceability.SampleTests." + method);
 
     [Fact]
-    public void Covers_IsExposedAsFilterableTrait()
+    public void Covers_Applied_IsExposedAsFilterableTrait()
     {
         var traits = new CoversAttribute("A-1", "A-2").GetTraits().Select(t => (t.Key, t.Value));
         Assert.Equal(new[] { ("Covers", "A-1"), ("Covers", "A-2") }, traits);
@@ -46,7 +46,7 @@ public class ScannerAndAttributeTests
     }
 
     [Fact]
-    public void Scanner_ReadsTagsFromTestMethods()
+    public void Scanner_TaggedTestMethods_AreRead()
     {
         var c = Sample("Covered");
         Assert.Equal(new[] { "ZZ-1", "ZZ-2" }, c.Covers);
@@ -59,13 +59,13 @@ public class ScannerAndAttributeTests
     }
 
     [Fact]
-    public void Scanner_IgnoresUntaggedAndNonTestMethods()
+    public void Scanner_UntaggedAndNonTestMethods_AreIgnored()
     {
         Assert.DoesNotContain(Tags, t => t.Test.EndsWith(".Untagged") || t.Test.EndsWith(".NotATest"));
     }
 
     [Fact]
-    public void RealScan_SkipsSampleClasses()
+    public void RealScan_SampleClasses_AreSkipped()
     {
         var real = TestScanner.Scan(new[] { typeof(SampleTests).Assembly });
         Assert.DoesNotContain(real, t => t.Covers.Any(c => c.StartsWith("ZZ-")));

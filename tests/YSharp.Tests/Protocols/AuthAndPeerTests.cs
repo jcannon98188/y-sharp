@@ -23,7 +23,7 @@ public sealed class AuthTests
         YAuth.TryReadMessage(ref input, doc, (d, r) => calls.Add((d, r)));
 
     [Fact, Covers("AU-1", "AU-2", "AU-7")]
-    public void PermissionDenied_IsTypeZeroThenTheLengthPrefixedUtf8Reason() => Stub.Run(() =>
+    public void PermissionDenied_AnyReason_IsTypeZeroThenTheLengthPrefixedUtf8Reason() => Stub.Run(() =>
     {
         Assert.Equal(new byte[] { 0, 0 }, Denied(""));
         var reason = "zugriff verweigert: ä ✓ \U0001F600";

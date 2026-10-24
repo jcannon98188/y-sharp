@@ -45,7 +45,7 @@ public sealed class MemoryTierTests
 
     [Theory, Covers("BUD-13")]
     [MemberData(nameof(Workloads))]
-    public void BytesPerItem_DoesNotExceedYjs(string workload)
+    public void BytesPerItem_EveryWorkload_DoesNotExceedYjs(string workload)
     {
         GateSlowTier();
         Stub.Run(() =>

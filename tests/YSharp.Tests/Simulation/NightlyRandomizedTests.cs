@@ -43,25 +43,25 @@ public sealed class NightlyRandomizedTests
     public static IEnumerable<object[]> Cases() => SimCases.All.Where(c => !c.Production).Select(c => new object[] { c.Key });
 
     [Theory, MemberData(nameof(Cases))]
-    public void FreshSeeds_TimeBoxed(string key) => Box(key);
+    public void Nightly_FreshSeedsInATimeBox_ConvergeAcrossReplicas(string key) => Box(key);
 
     [Fact, PortOf(Map + "5000", "SIM-13")]
-    public void RepeatGeneratingYmapTests5000() => Box(Map + "5000");
+    public void Ymap_Repeat5000_ConvergesAcrossReplicas() => Box(Map + "5000");
 
     [Fact, PortOf(Map + "10000", "SIM-13")]
-    public void RepeatGeneratingYmapTests10000() => Box(Map + "10000");
+    public void Ymap_Repeat10000_ConvergesAcrossReplicas() => Box(Map + "10000");
 
     [Fact, PortOf(Map + "100000", "SIM-13")]
-    public void RepeatGeneratingYmapTests100000() => Box(Map + "100000");
+    public void Ymap_Repeat100000_ConvergesAcrossReplicas() => Box(Map + "100000");
 
     [Fact, PortOf(Array + "3000", "SIM-13")]
-    public void RepeatGeneratingYarrayTests3000() => Box(Array + "3000");
+    public void Yarray_Repeat3000_ConvergesAcrossReplicas() => Box(Array + "3000");
 
     [Fact, PortOf(Array + "5000", "SIM-13")]
-    public void RepeatGeneratingYarrayTests5000() => Box(Array + "5000");
+    public void Yarray_Repeat5000_ConvergesAcrossReplicas() => Box(Array + "5000");
 
     [Fact, PortOf(Array + "30000", "SIM-13")]
-    public void RepeatGeneratingYarrayTests30000() => Box(Array + "30000");
+    public void Yarray_Repeat30000_ConvergesAcrossReplicas() => Box(Array + "30000");
 
     private static void Box(string key)
     {

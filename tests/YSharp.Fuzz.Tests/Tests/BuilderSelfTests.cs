@@ -14,15 +14,15 @@ public sealed class BuilderSelfTests
     private const string HiV2 = "0000010100000104060374686901020101000001010000";
 
     [Fact]
-    public void V1_WritesTheHiUpdateLikeTheOracle() =>
+    public void Builder_V1HiUpdate_MatchesTheOracleBytes() =>
         Assert.Equal(HiV1, Hex.Of(UpdateBuilder.V1(UpdateBuilder.TextInsert(1, "t", "hi"))));
 
     [Fact]
-    public void V2_WritesTheHiUpdateLikeTheOracle() =>
+    public void Builder_V2HiUpdate_MatchesTheOracleBytes() =>
         Assert.Equal(HiV2, Hex.Of(UpdateBuilder.V2(UpdateBuilder.TextInsert(1, "t", "hi"))));
 
     [Fact]
-    public void V1_WritesTheMapUpdateOfTheEncodingNotes()
+    public void Builder_V1MapUpdate_MatchesTheEncodingNotes()
     {
         // encoding.md 3.6: m.set('k',{a:1}); m.set('s','v'); m.set('k',2) from client 1, the first struct already ContentDeleted
         var model = new UpdateModel(new[]
@@ -56,7 +56,7 @@ public sealed class BuilderSelfTests
     }
 
     [Fact]
-    public void DeleteSet_UsesTheLayoutsOfTheEncodingNotes()
+    public void Builder_DeleteSet_UsesTheLayoutsOfTheEncodingNotes()
     {
         // encoding.md 4.3: client 1 ranges (2,2) and (8,1): V1 ds 01 01 02 02 02 08 01, V2 ds 01 01 02 02 01 04 00
         var model = UpdateModel.Empty.WithDeletes(new DeleteClient(1, new[] { new DeleteRange(2, 2), new DeleteRange(8, 1) }));
@@ -65,7 +65,7 @@ public sealed class BuilderSelfTests
     }
 
     [Fact]
-    public void NestedTypesV1_AgreesWithTheModelWriter() =>
+    public void Builder_NestedTypesV1_AgreesWithTheModelWriter() =>
         Assert.Equal(Hex.Of(UpdateBuilder.V1(UpdateBuilder.NestedTypes(1, 300))), Hex.Of(UpdateBuilder.NestedTypesV1(1, 300)));
 
     [Fact]
@@ -76,7 +76,7 @@ public sealed class BuilderSelfTests
     }
 
     [Fact]
-    public void Frames_MatchTheProtocolLayouts()
+    public void Builder_Frames_MatchTheProtocolLayouts()
     {
         Assert.Equal("000105", Hex.Of(UpdateBuilder.SyncMessage(0, new byte[] { 5 })));
         Assert.Equal("010703027b7d", Hex.Of(UpdateBuilder.AwarenessUpdate((7, 3, "{}"))));

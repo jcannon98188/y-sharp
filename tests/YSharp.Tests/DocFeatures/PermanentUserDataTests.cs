@@ -58,7 +58,7 @@ public sealed class PermanentUserDataTests
 
     [Fact]
     [Covers("PUD-01", "PUD-03", "PUD-06")]
-    public void StorageLayout_IsAUsersMapOfIdsAndV1EncodedDeleteSets() => Impl.Run(() =>
+    public void StorageLayout_AnyUser_IsAUsersMapOfIdsAndV1EncodedDeleteSets() => Impl.Run(() =>
     {
         var timers = new Timers();
         var a = Mk(1);
@@ -81,7 +81,7 @@ public sealed class PermanentUserDataTests
 
     [Fact]
     [Covers("PUD-01", "PUD-03", "PUD-06", "PUD-08", "PUD-09")]
-    public void TwoUsers_SyncTheirStoresAndLookUpEachOthersDeletions() => Impl.Run(() =>
+    public void TwoUsers_AfterSync_LookUpEachOthersDeletions() => Impl.Run(() =>
     {
         var timers = new Timers();
         var a = Mk(1);
@@ -113,7 +113,7 @@ public sealed class PermanentUserDataTests
 
     [Fact]
     [Covers("PUD-03")]
-    public void DeleteSets_AreRecordedOnlyForLocalTransactionsThatDeleteAndPassTheFilter() => Impl.Run(() =>
+    public void DeleteSets_LocalDeletingTransactionsPassingTheFilter_AreRecordedOnlyThen() => Impl.Run(() =>
     {
         var timers = new Timers();
         var a = Mk(1);
@@ -147,7 +147,7 @@ public sealed class PermanentUserDataTests
 
     [Fact]
     [Covers("PUD-02", "PUD-01", "PUD-06", "PUD-08")]
-    public void ConstructingOverExistingData_RebuildsTheLookups() => Impl.Run(() =>
+    public void Constructing_OverExistingData_RebuildsTheLookups() => Impl.Run(() =>
     {
         var timers = new Timers();
         var a = Mk(3);
@@ -171,7 +171,7 @@ public sealed class PermanentUserDataTests
 
     [Fact]
     [Covers("PUD-02")]
-    public void AUsersMapWithAnotherStore_IsUsedInPlaceOfTheDefault() => Impl.Run(() =>
+    public void UsersMap_WithAnotherStore_IsUsedInPlaceOfTheDefault() => Impl.Run(() =>
     {
         var timers = new Timers();
         var a = Mk(1);
@@ -186,7 +186,7 @@ public sealed class PermanentUserDataTests
 
     [Fact]
     [Covers("PUD-04", "PUD-09", "PUD-03")]
-    public void ConcurrentlyCreatedUsers_AreMergedIntoTheWinningEntry() => Impl.Run(() =>
+    public void ConcurrentlyCreatedUsers_OnMerge_AreMergedIntoTheWinningEntry() => Impl.Run(() =>
     {
         var timers = new Timers();
         var a = Mk(1);
@@ -220,7 +220,7 @@ public sealed class PermanentUserDataTests
 
     [Fact]
     [Covers("PUD-05")]
-    public void CallingSetUserMappingTwice_RecordsEveryDeletionTwice() => Impl.Run(() =>
+    public void SetUserMapping_CalledTwice_RecordsEveryDeletionTwice() => Impl.Run(() =>
     {
         var timers = new Timers();
         var a = Mk(1);

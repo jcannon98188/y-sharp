@@ -113,7 +113,7 @@ public sealed class AcquireTests
     // ------------------------------------------------------------------ CC-7 (BUD-01, BUD-02)
 
     [Fact, Covers("CC-7")]
-    public void AnUncontendedAcquireAndRelease_AllocatesNothing() => Impl.Run(() =>
+    public void Acquire_UncontendedAcquireAndRelease_AllocatesNothing() => Impl.Run(() =>
     {
         var doc = Conc.NewDoc();
         AllocationAssert.AtMost("BUD-01", 0, () => doc.Transact(0, static (_, _) => { }));

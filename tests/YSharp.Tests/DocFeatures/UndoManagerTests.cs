@@ -55,7 +55,7 @@ public sealed class UndoManagerTests
 
     [Fact]
     [Covers("UM-01", "UM-20")]
-    public void RemoteEditsInsideAnUndoneRange_RemainWhenTheirOriginIsNotTracked() => Impl.Run(() =>
+    public void UndoManager_RemoteEditsInsideAnUndoneRangeWithUntrackedOrigin_Remain() => Impl.Run(() =>
     {
         var a = Net.Mk(1);
         var b = Net.Mk(2);
@@ -75,7 +75,7 @@ public sealed class UndoManagerTests
 
     [Fact]
     [Covers("UM-01", "UM-16")]
-    public void TrackedOrigins_CanBeChangedAtRuntime() => Impl.Run(() =>
+    public void TrackedOrigins_ChangedAtRuntime_TakeEffect() => Impl.Run(() =>
     {
         var doc = Net.Mk(1);
         var t = doc.GetText("t");
@@ -112,7 +112,7 @@ public sealed class UndoManagerTests
 
     [Fact]
     [Covers("UM-02")]
-    public void CaptureTransaction_CanRejectATransaction() => Impl.Run(() =>
+    public void CaptureTransaction_Predicate_CanRejectATransaction() => Impl.Run(() =>
     {
         var doc = Net.Mk(1);
         var arr = doc.GetArray("a");
@@ -156,7 +156,7 @@ public sealed class UndoManagerTests
 
     [Fact]
     [Covers("UM-03")]
-    public void CaptureTimeout_ZeroNeverMerges() => Impl.Run(() =>
+    public void CaptureTimeout_Zero_NeverMerges() => Impl.Run(() =>
     {
         var doc = Net.Mk(1);
         var arr = doc.GetArray("a");
@@ -169,7 +169,7 @@ public sealed class UndoManagerTests
 
     [Fact]
     [Covers("UM-03")]
-    public void UndoThenRedo_ReturnTheItemToTheUndoStack() => Impl.Run(() =>
+    public void UndoThenRedo_AnyItem_ReturnsTheItemToTheUndoStack() => Impl.Run(() =>
     {
         var clock = new VirtualTimeProvider();
         var doc = Net.Mk(1);
@@ -294,7 +294,7 @@ public sealed class UndoManagerTests
 
     [Fact]
     [Covers("UM-07")]
-    public void KeepAlsoCoversTheParentsOfDeletedNestedTypes() => Impl.Run(() =>
+    public void Keep_DeletedNestedTypes_AlsoCoversTheirParents() => Impl.Run(() =>
     {
         var doc = Net.Mk(1, gc: true);
         var arr = doc.GetArray("a");
@@ -334,7 +334,7 @@ public sealed class UndoManagerTests
 
     [Fact]
     [Covers("UM-08")]
-    public void TheUndoTransaction_HasTheManagerAsItsOrigin() => Impl.Run(() =>
+    public void UndoTransaction_AnyUndo_HasTheManagerAsItsOrigin() => Impl.Run(() =>
     {
         var doc = Net.Mk(1);
         var t = doc.GetText("t");
@@ -350,7 +350,7 @@ public sealed class UndoManagerTests
 
     [Fact]
     [Covers("UM-11")]
-    public void RedoBookkeeping_IsNotSentOverTheWire() => Impl.Run(() =>
+    public void RedoBookkeeping_AfterRedo_IsNotSentOverTheWire() => Impl.Run(() =>
     {
         var a = Net.Mk(1);
         var b = Net.Mk(2);
@@ -397,7 +397,7 @@ public sealed class UndoManagerTests
 
     [Fact]
     [Covers("UM-13")]
-    public void PositionCaches_AreInvalidatedByUndoAndRedo() => Impl.Run(() =>
+    public void PositionCaches_UndoAndRedo_AreInvalidated() => Impl.Run(() =>
     {
         var doc = Net.Mk(1);
         var arr = doc.GetArray("a");
@@ -469,7 +469,7 @@ public sealed class UndoManagerTests
 
     [Fact]
     [Covers("UM-16")]
-    public void AddToScope_DedupesByIdentity() => Impl.Run(() =>
+    public void AddToScope_SameTypeTwice_DedupesByIdentity() => Impl.Run(() =>
     {
         var doc = Net.Mk(1);
         var t = doc.GetText("t");
@@ -501,7 +501,7 @@ public sealed class UndoManagerTests
 
     [Fact]
     [Covers("UM-17")]
-    public void Dispose_StopsCapturing() => Impl.Run(() =>
+    public void Dispose_AfterwardsEdits_AreNoLongerCaptured() => Impl.Run(() =>
     {
         var doc = Net.Mk(1);
         var t = doc.GetText("t");
@@ -514,7 +514,7 @@ public sealed class UndoManagerTests
 
     [Fact]
     [Covers("UM-17")]
-    public void DestroyingTheDoc_DestroysTheManagerToo() => Impl.Run(() =>
+    public void Doc_Destroyed_DestroysTheManagerToo() => Impl.Run(() =>
     {
         var doc = Net.Mk(1);
         var t = doc.GetText("t");
@@ -528,7 +528,7 @@ public sealed class UndoManagerTests
 
     [Fact]
     [Covers("UM-18")]
-    public void UndoOfADeletedNestedType_RecreatesItWithItsContent() => Impl.Run(() =>
+    public void Undo_DeletedNestedType_RecreatesItWithItsContent() => Impl.Run(() =>
     {
         var doc = new Doc(new DocOptions { Gc = false });
         var arr = doc.GetArray("a");
@@ -546,7 +546,7 @@ public sealed class UndoManagerTests
 
     [Fact]
     [Covers("UM-20", "UM-10")]
-    public void UndoDeletesOnlyTheCapturedInsertions_NotTheRemoteOnesInsideThem() => Impl.Run(() =>
+    public void Undo_RemoteInsertionsInsideTheRange_DeletesOnlyTheCapturedOnes() => Impl.Run(() =>
     {
         var u = Users.Init(2);
         var t0 = u.Text(0);

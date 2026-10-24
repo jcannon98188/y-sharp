@@ -97,7 +97,7 @@ public sealed class ArrayTests
     });
 
     [Fact, Diverges("A-7", "0008")]
-    public void A7_IndexerThrowsWhereJsReturnsUndefined() => Stub.Run(() =>
+    public void A7_IndexOutOfRange_IndexerThrowsWhereJsReturnsUndefined() => Stub.Run(() =>
     {
         var array = NewDoc().GetArray("a");
         array.Push(new YEntry[] { 1 });
@@ -109,7 +109,7 @@ public sealed class ArrayTests
     });
 
     [Fact, PortOf("y-array.tests.js:testSlice", "A-8")]
-    public void CopyTo_ReadsRangesLikeSlice() => Stub.Run(() =>
+    public void CopyTo_AnyRange_ReadsLikeSlice() => Stub.Run(() =>
     {
         // JS slice(start, end) has no counterpart: the sketch offers ToArray and CopyTo(start, destination) (API gap).
         var doc1 = NewDoc();
@@ -130,7 +130,7 @@ public sealed class ArrayTests
     });
 
     [Fact, Covers("A-9")]
-    public void NestedTypes_AreReturnedByReference() => Stub.Run(() =>
+    public void NestedTypes_OnRead_AreReturnedByReference() => Stub.Run(() =>
     {
         var array = NewDoc().GetArray("a");
         var map = new YMap();
@@ -202,7 +202,7 @@ public sealed class ArrayTests
     });
 
     [Fact, PortOf("y-array.tests.js:testLengthIssue", "A-14")]
-    public void SearchMarkers_LengthIssue297() => Stub.Run(() =>
+    public void SearchMarkers_LengthIssue297_StaysCorrect() => Stub.Run(() =>
     {
         var doc1 = NewDoc();
         var arr = doc1.GetArray("array");
@@ -229,7 +229,7 @@ public sealed class ArrayTests
     });
 
     [Fact, PortOf("y-array.tests.js:testLengthIssue2", "A-14", "A-2")]
-    public void SearchMarkers_LengthIssue314() => Stub.Run(() =>
+    public void SearchMarkers_LengthIssue314_StaysCorrect() => Stub.Run(() =>
     {
         var doc = NewDoc();
         var next = doc.GetArray();
@@ -258,7 +258,7 @@ public sealed class ArrayTests
     });
 
     [Fact, Covers("A-14")]
-    public void IndexedOperations_MatchANaiveListModel() => Stub.Run(() =>
+    public void IndexedOperations_RandomSequences_MatchANaiveListModel() => Stub.Run(() =>
     {
         var gen = Prng.Create(2024);
         var doc = NewDoc();
@@ -329,7 +329,7 @@ public sealed class ArrayTests
     });
 
     [Fact, Covers("A-17")]
-    public void Indices_CountOnlyLiveElements() => Stub.Run(() =>
+    public void Indices_DeletedElements_CountOnlyLiveElements() => Stub.Run(() =>
     {
         var array = NewDoc().GetArray("a");
         array.Push(new YEntry[] { "a", "b", "c", "d" });
@@ -361,7 +361,7 @@ public sealed class ArrayTests
     });
 
     [Fact, PortOf("y-array.tests.js:testFailsObjectManipulationInDevMode", "A-19")]
-    public void InsertedObjectsAndArrays_AreStoredByValue() => Stub.Run(() =>
+    public void InsertedObjectsAndArrays_OnInsert_AreStoredByValue() => Stub.Run(() =>
     {
         // JS freezes the inserted array and object in dev mode (the test only runs there). y-sharp values are immutable and the
         // document keeps its own copy: there is nothing to freeze, and a later change to the caller's data cannot leak in.
@@ -393,7 +393,7 @@ public sealed class ArrayTests
     // ------------------------------------------------------------------ ports
 
     [Fact, PortOf("y-array.tests.js:testBasicUpdate", "A-1")]
-    public void TestBasicUpdate() => Stub.Run(() =>
+    public void BasicUpdate_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var doc1 = NewDoc(1);
         var doc2 = NewDoc(2);
@@ -404,7 +404,7 @@ public sealed class ArrayTests
     });
 
     [Fact, PortOf("y-array.tests.js:testDeleteInsert", "A-5", "A-6")]
-    public void TestDeleteInsert() => Stub.Run(() =>
+    public void DeleteInsert_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var array0 = net.Peers[0].Array;
@@ -416,7 +416,7 @@ public sealed class ArrayTests
     });
 
     [Fact, PortOf("y-array.tests.js:testInsertThreeElementsTryRegetProperty", "A-10")]
-    public void TestInsertThreeElementsTryRegetProperty() => Stub.Run(() =>
+    public void InsertThreeElementsTryRegetProperty_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         net.Peers[0].Array.Insert(0, new YEntry[] { 1, true, false });
@@ -427,7 +427,7 @@ public sealed class ArrayTests
     });
 
     [Fact, PortOf("y-array.tests.js:testConcurrentInsertWithThreeConflicts", "A-18")]
-    public void TestConcurrentInsertWithThreeConflicts() => Stub.Run(() =>
+    public void ConcurrentInsertWithThreeConflicts_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(3);
         net.Peers[0].Array.Insert(0, new YEntry[] { 0 });
@@ -437,7 +437,7 @@ public sealed class ArrayTests
     });
 
     [Fact, PortOf("y-array.tests.js:testConcurrentInsertDeleteWithThreeConflicts", "A-18")]
-    public void TestConcurrentInsertDeleteWithThreeConflicts() => Stub.Run(() =>
+    public void ConcurrentInsertDeleteWithThreeConflicts_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(3);
         var (array0, array1, array2) = (net.Peers[0].Array, net.Peers[1].Array, net.Peers[2].Array);
@@ -451,7 +451,7 @@ public sealed class ArrayTests
     });
 
     [Fact, PortOf("y-array.tests.js:testInsertionsInLateSync", "A-18")]
-    public void TestInsertionsInLateSync() => Stub.Run(() =>
+    public void InsertionsInLateSync_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(3);
         var (array0, array1, array2) = (net.Peers[0].Array, net.Peers[1].Array, net.Peers[2].Array);
@@ -469,7 +469,7 @@ public sealed class ArrayTests
     });
 
     [Fact, PortOf("y-array.tests.js:testDisconnectReallyPreventsSendingMessages", "A-13")]
-    public void TestDisconnectReallyPreventsSendingMessages() => Stub.Run(() =>
+    public void DisconnectReallyPreventsSendingMessages_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(3);
         var (array0, array1) = (net.Peers[0].Array, net.Peers[1].Array);
@@ -487,7 +487,7 @@ public sealed class ArrayTests
     });
 
     [Fact, PortOf("y-array.tests.js:testDeletionsInLateSync", "A-13")]
-    public void TestDeletionsInLateSync() => Stub.Run(() =>
+    public void DeletionsInLateSync_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var (array0, array1) = (net.Peers[0].Array, net.Peers[1].Array);
@@ -501,7 +501,7 @@ public sealed class ArrayTests
     });
 
     [Fact, PortOf("y-array.tests.js:testInsertThenMergeDeleteOnSync", "A-13")]
-    public void TestInsertThenMergeDeleteOnSync() => Stub.Run(() =>
+    public void InsertThenMergeDeleteOnSync_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var (array0, array1) = (net.Peers[0].Array, net.Peers[1].Array);
@@ -514,7 +514,7 @@ public sealed class ArrayTests
     });
 
     [Fact, PortOf("y-array.tests.js:testGarbageCollector", "A-13")]
-    public void TestGarbageCollector() => Stub.Run(() =>
+    public void GarbageCollector_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(3);
         var array0 = net.Peers[0].Array;
@@ -528,7 +528,7 @@ public sealed class ArrayTests
     });
 
     [Fact, PortOf("y-array.tests.js:testIteratingArrayContainingTypes", "A-12")]
-    public void TestIteratingArrayContainingTypes() => Stub.Run(() =>
+    public void IteratingArrayContainingTypes_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var y = NewDoc();
         var arr = y.GetArray("arr");

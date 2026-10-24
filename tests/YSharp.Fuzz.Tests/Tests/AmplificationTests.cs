@@ -40,7 +40,7 @@ public sealed class AmplificationTests
     });
 
     [Fact, Covers("HOS-AMP", Layer = CoverLayer.Unit)]
-    public void DeleteRangeClaiming2Pow40Clocks_IsBoundedAndKeepsTheDocumentUsable() => Stub.Run(() =>
+    public void DeleteRange_Claiming2Pow40Clocks_IsBoundedAndKeepsTheDocumentUsable() => Stub.Run(() =>
     {
         var before = new[] { HiBytes };
         foreach (var length in new[] { 1UL << 40, (1UL << 53) - 1 })

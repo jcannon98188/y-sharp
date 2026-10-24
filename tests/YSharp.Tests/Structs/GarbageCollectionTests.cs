@@ -176,7 +176,7 @@ public sealed class GarbageCollectionTests
 
     [Fact]
     [Covers("STR-28")]
-    public void MergeWith_RequiresEveryConditionToHold() => Impl.Run(() =>
+    public void MergeWith_AnyCondition_RequiresEveryConditionToHold() => Impl.Run(() =>
     {
         // same client, adjacent ids, origin chain, same deleted state, same content kind: merges
         var ok = Net.Mk(1);
@@ -230,7 +230,7 @@ public sealed class GarbageCollectionTests
 
     [Fact]
     [Covers("GC-10")]
-    public void SnapshotsNeedGcOff_AndTurningItOffLaterDoesNotBringCollectedContentBack() => Impl.Run(() =>
+    public void Snapshots_GcOn_NeedGcOffAndTurningItOffLaterDoesNotBringContentBack() => Impl.Run(() =>
     {
         var on = Net.Mk(1);
         on.GetText("t").Insert(0, "abc");

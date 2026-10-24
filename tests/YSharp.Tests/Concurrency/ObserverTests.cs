@@ -88,7 +88,7 @@ public sealed class ObserverTests
     });
 
     [Fact, Covers("CC-11")]
-    public void ARemoteUpdate_FiresOnTheThreadThatCalledApplyUpdate() => Impl.Run(() =>
+    public void RemoteUpdate_Applied_FiresOnTheThreadThatCalledApplyUpdate() => Impl.Run(() =>
     {
         var source = Conc.NewDoc(9);
         source.GetArray("a").Push(Conc.One);
@@ -131,7 +131,7 @@ public sealed class ObserverTests
     });
 
     [Fact, Covers("CC-12")]
-    public void ObserveAndUnobserve_AreSafeInsideACallback() => Impl.Run(() =>
+    public void ObserveAndUnobserve_InsideACallback_AreSafe() => Impl.Run(() =>
     {
         var doc = Conc.NewDoc();
         var arr = doc.GetArray("a");

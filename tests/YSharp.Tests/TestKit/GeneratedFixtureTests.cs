@@ -27,10 +27,10 @@ public sealed class GeneratedFixtureTests
     private static IEnumerable<string> Files => FixtureLoader.Discover(FixturesDir);
 
     [Fact]
-    public void Fixtures_Exist() => Assert.NotEmpty(Files);
+    public void Fixtures_Generated_Exist() => Assert.NotEmpty(Files);
 
     [Fact]
-    public void EveryFixture_LoadsWithPinnedVersionsAndNvmrcNode()
+    public void Fixtures_EveryOne_LoadWithPinnedVersionsAndNvmrcNode()
     {
         var nvmrcMajor = File.ReadAllText(Path.Combine(Root, ".nvmrc")).Trim().TrimStart('v').Split('.')[0];
         foreach (var path in Files)
@@ -43,7 +43,7 @@ public sealed class GeneratedFixtureTests
     }
 
     [Fact]
-    public void EveryScript_ParsesAndItsValuesAreWellFormedTagged()
+    public void Fixtures_EveryScript_ParsesWithWellFormedTaggedValues()
     {
         var registry = RegistryWithSchemaKinds();
         foreach (var path in Files)
@@ -57,7 +57,7 @@ public sealed class GeneratedFixtureTests
     }
 
     [Fact]
-    public void EveryObservation_HasOnlyReadableTaggedValues()
+    public void Fixtures_EveryObservation_HasOnlyReadableTaggedValues()
     {
         foreach (var path in Files)
         {
@@ -69,7 +69,7 @@ public sealed class GeneratedFixtureTests
     }
 
     [Fact]
-    public void Manifest_ListsEveryFixtureWithItsHash()
+    public void Fixtures_Manifest_ListsEveryFixtureWithItsHash()
     {
         using var doc = JsonDocument.Parse(File.ReadAllText(Path.Combine(FixturesDir, "index.json")));
         var listed = doc.RootElement.GetProperty("fixtures").EnumerateArray()
@@ -84,7 +84,7 @@ public sealed class GeneratedFixtureTests
     }
 
     [Fact]
-    public void MalformedFixtures_RecordOutcomeAndClassification()
+    public void Fixtures_Malformed_RecordOutcomeAndClassification()
     {
         var seen = 0;
         foreach (var path in Files)
@@ -104,7 +104,7 @@ public sealed class GeneratedFixtureTests
     }
 
     [Fact]
-    public void TruncationOutcomes_CoverEveryProperPrefix()
+    public void Fixtures_TruncationOutcomes_CoverEveryProperPrefix()
     {
         var seen = 0;
         foreach (var path in Files)

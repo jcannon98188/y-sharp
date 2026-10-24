@@ -21,25 +21,25 @@ public sealed class WireFixtureTests
     });
 
     [Fact, Covers("ENC-06", "ENC-07", "ENC-72", "Q01", "Q02", "Q03", "Q04", "Q05", "Q06", "Q08")]
-    public void AnyValues_ReplayMatchesTheOracleBytes() => RunWire("encoding/any-values.json");
+    public void WireFixture_AnyValues_ReplayMatchesTheOracleBytes() => RunWire("encoding/any-values.json");
 
     [Fact, Covers("ENC-12", "ENC-75", "Q08", "Q11", "Q28", "Q30")]
-    public void EmbedsAndFormats_ReplayMatchesTheOracleBytes() => RunWire("encoding/embeds-and-formats.json");
+    public void WireFixture_EmbedsAndFormats_ReplayMatchesTheOracleBytes() => RunWire("encoding/embeds-and-formats.json");
 
     [Fact, Covers("ENC-05", "ENC-73", "ENC-28", "Q16", "Q17", "Q18", "Q19")]
     public void Strings_ReplayMatchesTheOracleBytes_AndEveryTruncationFails() => RunWire("encoding/strings-utf16.json", truncation: true);
 
     [Fact, Covers("ENC-02", "ENC-03", "ENC-04", "ENC-08", "ENC-09", "ENC-70", "ENC-71", "ENC-74", "ENC-77", "ENC-78", "ENC-79", "Q12", "Q13", "Q14")]
-    public void IdsClocksLengths_ReplayMatchesTheOracleBytes() => RunWire("encoding/ids-clocks-lengths.json");
+    public void WireFixture_IdsClocksLengths_ReplayMatchesTheOracleBytes() => RunWire("encoding/ids-clocks-lengths.json");
 
     [Fact, Covers("ENC-16", "ENC-17", "ENC-18", "ENC-19", "ENC-20", "ENC-80")]
-    public void DeleteSets_ReplayMatchesTheOracleBytes() => RunWire("encoding/delete-sets.json");
+    public void WireFixture_DeleteSets_ReplayMatchesTheOracleBytes() => RunWire("encoding/delete-sets.json");
 
     [Fact, Covers("ENC-01", "ENC-10", "ENC-11", "ENC-13", "ENC-14", "ENC-15", "ENC-27", "ENC-28", "ENC-76", "ENC-81", "ENC-85", "Q14")]
     public void StructLayouts_ReplayMatchesTheOracleBytes_AndEveryTruncationFails() => RunWire("encoding/struct-layouts.json", truncation: true);
 
     [Fact, Covers("ENC-23", "ENC-24", "ENC-25", "ENC-81", "ENC-82", "ENC-83", "ENC-84")]
-    public void MergeDiffConvertEdges_ReplayMatchesTheOracleBytes() => RunWire("encoding/merge-diff-convert-edges.json");
+    public void WireFixture_MergeDiffConvertEdges_ReplayMatchesTheOracleBytes() => RunWire("encoding/merge-diff-convert-edges.json");
 
     [Fact, Covers("ENC-21", "ENC-23", "ENC-24", "ENC-25")]
     public void MergeDiffConvert_Basic_ReplayMatchesTheOracleBytes() => RunWire("codecs/merge-diff-convert.json");
@@ -48,20 +48,20 @@ public sealed class WireFixtureTests
     public void TextInsertDeleteSync_ReplayMatchesTheOracleBytes_AndEveryTruncationFails() => RunWire("text/insert-delete-sync.json", truncation: true);
 
     [Fact, Covers("ENC-29", "ENC-30", "ENC-31", "ENC-32", "ENC-33", "ENC-34", "ENC-35", "ENC-37", "ENC-38", "ENC-39", "ENC-40", "ENC-41", "ENC-42", "ENC-43", "ENC-45", "ENC-52", "ENC-53", "ENC-54")]
-    public void MalformedV1_FollowsTheStrictDecodingContract() => Stub.Run(() =>
+    public void WireFixture_MalformedV1_FollowsTheStrictDecodingContract() => Stub.Run(() =>
         FixtureReplay.AssertMalformed(FixtureReplay.Load("hostile/malformed-v1-updates.json")));
 
     [Fact, Covers("ENC-54", "ENC-55", "ENC-56")]
-    public void MalformedV2_FollowsTheStrictDecodingContract() => Stub.Run(() =>
+    public void WireFixture_MalformedV2_FollowsTheStrictDecodingContract() => Stub.Run(() =>
         FixtureReplay.AssertMalformed(FixtureReplay.Load("hostile/malformed-v2-updates.json")));
 
     [Fact, Covers("ENC-22", "ENC-36", "ENC-44", "ENC-46", "ENC-47", "ENC-48", "ENC-49", "ENC-50", "ENC-51", "ENC-56",
         "ENC-60", "ENC-61", "ENC-62", "ENC-63", "ENC-64", "ENC-65", "ENC-66", "ENC-67", "ENC-68", "ENC-69", "Q07")]
-    public void MalformedExtras_FollowTheStrictDecodingContract() => Stub.Run(() =>
+    public void WireFixture_MalformedExtras_FollowTheStrictDecodingContract() => Stub.Run(() =>
         FixtureReplay.AssertMalformed(FixtureReplay.Load("hostile/malformed-codec-extras.json")));
 
     [Fact]
-    public void CodecFixtures_AreAllCoveredByATest()
+    public void WireFixture_EveryCodecFixture_IsCoveredByATest()
     {
         // every codec fixture file has a replay above; a new one must add a test here
         var expected = new[]

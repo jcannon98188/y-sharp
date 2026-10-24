@@ -78,7 +78,7 @@ public sealed class DocFeatureFixtureTests
     [Covers("RP-01", "RP-02", "RP-03", "RP-04", "RP-05", "RP-06", "RP-08", "RP-09")]
     [Covers("UM-01", "UM-02", "UM-03", "UM-04", "UM-05", "UM-06", "UM-08", "UM-10", "UM-11", "UM-12", "UM-14", "UM-18", "UM-19", "UM-20")]
     [Covers("PUD-01", "PUD-02", "PUD-03", "PUD-04", "PUD-05", "PUD-06", "PUD-08", "PUD-09")]
-    public void Fixture_ReplaysLikeTheOracle(string name)
+    public void Fixture_EveryStoredScenario_ReplaysLikeTheOracle(string name)
     {
         var fixture = FixtureLoader.Load(Path.Combine(Root, "fixtures", name + ".json"), PinnedVersions.Read(Root));
         Impl.Run(() =>

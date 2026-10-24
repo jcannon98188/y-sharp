@@ -26,11 +26,11 @@ public sealed class DifferentialTests(OracleHost host)
     private static ScriptPlan Generated(int seed) => ScriptPlan.Generate(seed);
 
     [Fact, Covers("DIFF-01", "DIFF-09", "DIFF-10", "ENC-21", "ENC-27", "ENC-74", "SY-14", "Q16")]
-    public void StatelessScripts_ProduceEqualObservations() =>
+    public void Differential_StatelessScripts_ProduceEqualObservations() =>
         DiffProperty.Check(host, "stateless-scripts", ScriptPlan.Arbitrary(), (run, plan) => run.CheckPlan(plan));
 
     [Fact, Covers("DIFF-01", "A-4", "A-5", "M-1", "M-5")]
-    public void ArrayAndMapEdits_ProduceEqualDumps() =>
+    public void Differential_ArrayAndMapEdits_ProduceEqualDumps() =>
         DiffProperty.Check(host, "array-map-edits", ScriptPlan.Arbitrary().Filter(p => p.Edits.Any(e => e.Kind >= EditKind.ArrayInsert)), (run, plan) => run.CheckPlan(plan));
 
     [Fact, Covers("DIFF-03", "SY-14", "SY-17", "SY-18")]
@@ -52,7 +52,7 @@ public sealed class DifferentialTests(OracleHost host)
         }, cases: 60);
 
     [Fact, Covers("DIFF-04", "ENC-21")]
-    public void MutatedValidUpdates_FallIntoAKnownOutcomeClass() =>
+    public void Differential_MutatedValidUpdates_FallIntoAKnownOutcomeClass() =>
         DiffProperty.Check(host, "mutated-updates", MutationInput.Arbitrary(), (run, input) =>
         {
             if (run.CheckPlan(input.Plan) is not { } basis) return;

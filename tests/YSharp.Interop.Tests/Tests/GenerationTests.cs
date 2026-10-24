@@ -18,7 +18,7 @@ public sealed class GenerationTests
     private static readonly OpsRegistry Registry = SharpSide.CreateRegistry();
 
     [Fact, Covers("DIFF-01")]
-    public void Generate_IsDeterministicPerSeed()
+    public void Generate_SameSeed_IsDeterministic()
     {
         for (var seed = 0; seed < 50; seed++)
             Assert.Equal(ScriptPlan.Generate(seed).ToScript().ToJsonString(), ScriptPlan.Generate(seed).ToScript().ToJsonString());
@@ -38,7 +38,7 @@ public sealed class GenerationTests
     }
 
     [Fact, Covers("DIFF-01")]
-    public void Generated_ScriptsDeclareEveryReplicaAndEndWithAFullExchange()
+    public void Generated_Scripts_DeclareEveryReplicaAndEndWithAFullExchange()
     {
         for (var seed = 0; seed < 200; seed++)
         {
@@ -178,7 +178,7 @@ public sealed class GenerationTests
     }
 
     [Fact, Covers("DIFF-04")]
-    public void Mutator_ProducesTheDocumentedMutations()
+    public void Mutator_AnyInput_ProducesTheDocumentedMutations()
     {
         var valid = Enumerable.Range(1, 40).Select(i => (byte)i).ToArray();
         for (var seed = 0; seed < 200; seed++)

@@ -48,7 +48,7 @@ public sealed class ApiStubTests
     }
 
     [Fact]
-    public void IsStub_MatchesTheRealLibrary()
+    public void IsStub_AnyBuild_MatchesTheRealLibrary()
     {
         // Computed once from YValue.Null; agrees with a direct probe of the same member.
         var direct = ApiStub.Detect(() => _ = YValue.Null);

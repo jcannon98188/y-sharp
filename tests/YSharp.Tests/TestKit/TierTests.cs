@@ -7,14 +7,14 @@ namespace YSharp.Tests.TestKit;
 public class TierTests
 {
     [Fact]
-    public void TierAttribute_ExposesTierTrait()
+    public void TierAttribute_Applied_ExposesTierTrait()
     {
         var traits = new TierAttribute(Tier.Nightly).GetTraits();
         Assert.Equal(new[] { ("Tier", "Nightly") }, traits.Select(t => (t.Key, t.Value)));
     }
 
     [Fact]
-    public void NeedsNodeAttribute_ExposesNeedsTrait()
+    public void NeedsNodeAttribute_Applied_ExposesNeedsTrait()
     {
         var traits = new NeedsNodeAttribute().GetTraits();
         Assert.Equal(new[] { ("Needs", "Node") }, traits.Select(t => (t.Key, t.Value)));

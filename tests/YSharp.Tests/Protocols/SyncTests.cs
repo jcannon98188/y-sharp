@@ -64,7 +64,7 @@ public sealed class SyncTests
     });
 
     [Fact, Covers("SY-2")]
-    public void Payloads_AreYjsV1Encodings() => Stub.Run(() =>
+    public void Payloads_AnyMessage_AreYjsV1Encodings() => Stub.Run(() =>
     {
         var doc = SyncSupport.DocWith(1, "hello");
         Assert.Equal(Wire.StateVector(doc), SyncSupport.Split(SyncSupport.Step1(doc)).Payload);
@@ -72,7 +72,7 @@ public sealed class SyncTests
     });
 
     [Fact, Covers("SY-3")]
-    public void WriteStep1_IsTypeZeroThenTheLengthPrefixedStateVector() => Stub.Run(() =>
+    public void WriteStep1_AnyDoc_IsTypeZeroThenTheLengthPrefixedStateVector() => Stub.Run(() =>
     {
         var doc = SyncSupport.DocWith(1, "hello");
         var sv = Wire.StateVector(doc);
@@ -92,7 +92,7 @@ public sealed class SyncTests
     });
 
     [Fact, Covers("SY-5")]
-    public void WriteUpdate_DoesNotValidateTheBytes() => Stub.Run(() =>
+    public void WriteUpdate_InvalidBytes_AreNotValidated() => Stub.Run(() =>
     {
         Assert.Equal(new byte[] { 2, 4, 1, 2, 3, 255 }, SyncSupport.Update(new byte[] { 1, 2, 3, 255 }));
         Assert.Equal(new byte[] { 2, 0 }, SyncSupport.Update(Array.Empty<byte>()));
@@ -146,7 +146,7 @@ public sealed class SyncTests
     });
 
     [Fact, Covers("SY-9")]
-    public void Step2AndUpdate_AreBehaviourallyIdenticalOnReceipt() => Stub.Run(() =>
+    public void Step2AndUpdate_OnReceipt_AreBehaviourallyIdentical() => Stub.Run(() =>
     {
         var source = SyncSupport.DocWith(1, "hello");
         var payload = source.EncodeStateAsUpdate();
@@ -181,7 +181,7 @@ public sealed class SyncTests
     });
 
     [Fact, Covers("SY-12")]
-    public void OnlyStep1_ProducesAReply() => Stub.Run(() =>
+    public void Reply_Step1Received_IsProducedByStep1Only() => Stub.Run(() =>
     {
         var a = SyncSupport.DocWith(1, "hello");
         Assert.Empty(SyncSupport.Read(SyncSupport.DocWith(2), SyncSupport.Step2(a)).Reply);
@@ -221,7 +221,7 @@ public sealed class SyncTests
     });
 
     [Fact, Covers("SY-18")]
-    public void ApplyingTheSameStep2Twice_IsIdempotent() => Stub.Run(() =>
+    public void Step2_AppliedTwice_IsIdempotent() => Stub.Run(() =>
     {
         var a = SyncSupport.DocWith(1, "hello");
         var b = SyncSupport.DocWith(2);

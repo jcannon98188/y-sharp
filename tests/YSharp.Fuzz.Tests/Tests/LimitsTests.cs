@@ -53,14 +53,14 @@ public sealed class LimitsTests
     }
 
     [Fact, Covers("ERR-08", Layer = CoverLayer.Unit)]
-    public void DocOptions_CarryTheLimitsIntoTheDocument() => Stub.Run(() =>
+    public void DocOptions_Limits_AreCarriedIntoTheDocument() => Stub.Run(() =>
     {
         Assert.Equal(Hostile.Tiny, Hostile.NewDoc(Hostile.Tiny).Limits);
         Assert.Equal(YLimits.Default, new Doc().Limits);
     });
 
     [Fact, Covers("HOS-LEN", "ERR-08", Layer = CoverLayer.Unit)]
-    public void Defaults_RejectNothingInTheValidFixtureCorpora() => Stub.Run(() =>
+    public void Defaults_ValidFixtureCorpora_AreNeverRejected() => Stub.Run(() =>
     {
         var failures = new List<string>();
         var seeds = SeedUpdates.Collect();
@@ -100,7 +100,7 @@ public sealed class LimitsTests
     });
 
     [Fact, Covers("HOS-DEEP", "ERR-12", Layer = CoverLayer.Unit)]
-    public void AnyDepth_AlsoAppliesToObjectsAndMixedNesting() => Stub.Run(() =>
+    public void AnyDepth_ObjectsAndMixedNesting_AreAlsoLimited() => Stub.Run(() =>
     {
         // {"a":[{"a":[...]}]} nested past the limit: the depth rule is the container depth, whatever the container kind
         var any = new ByteSink();

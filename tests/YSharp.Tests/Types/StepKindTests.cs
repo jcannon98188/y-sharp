@@ -34,7 +34,7 @@ public sealed class StepKindTests
     private const string Xml = """{"root":"x","kind":"xmlFragment"}""";
 
     [Fact]
-    public void TheCSharpRegistry_AndTheSchemaDeclareTheSameStepKinds()
+    public void StepKinds_CSharpRegistryAndSchema_DeclareTheSameOnes()
     {
         var path = Path.Combine(RepoRoot.Find(), "tools", "fixture-gen", "schema", "ops.schema.json");
         using var schema = JsonDocument.Parse(File.ReadAllText(path));
@@ -57,7 +57,7 @@ public sealed class StepKindTests
     }
 
     [Fact, Covers("E-1")]
-    public void TextInsertEmbed_InsertsAnEmbedWithAttributes() => Stub.Run(() =>
+    public void TextInsertEmbed_WithAttributes_InsertsAnEmbed() => Stub.Run(() =>
     {
         var ctx = Run($$$"""
             [{"step":"text.insert","doc":"a","target":{{{Text}}},"at":0,"value":"ab"},
@@ -67,7 +67,7 @@ public sealed class StepKindTests
     });
 
     [Fact, Covers("T-6", "E-4")]
-    public void TextApplyDelta_AppliesInsertRetainDeleteAndAttributes() => Stub.Run(() =>
+    public void TextApplyDelta_InsertRetainDeleteAndAttributes_AreApplied() => Stub.Run(() =>
     {
         var ctx = Run($$$"""
             [{"step":"text.applyDelta","doc":"a","target":{{{Text}}},"delta":[{"insert":"hello"},{"insert":{"$":"obj","pairs":[["linebreak","s"]]}}]},
@@ -79,7 +79,7 @@ public sealed class StepKindTests
     });
 
     [Fact, Covers("A-9", "T-0.8")]
-    public void ArrayInsertType_InsertsANestedTypeReachableByPath() => Stub.Run(() =>
+    public void ArrayInsertType_NestedType_IsReachableByPath() => Stub.Run(() =>
     {
         var ctx = Run($$$"""
             [{"step":"array.insertType","doc":"a","target":{{{Arr}}},"at":0,"kind":"map"},
@@ -92,7 +92,7 @@ public sealed class StepKindTests
     });
 
     [Fact, Covers("M-12", "T-0.8")]
-    public void MapInsertType_SetsANestedTypeReachableByPath() => Stub.Run(() =>
+    public void MapInsertType_NestedType_IsReachableByPath() => Stub.Run(() =>
     {
         var ctx = Run($$$"""
             [{"step":"map.insertType","doc":"a","target":{{{Map}}},"key":"list","kind":"array"},
@@ -103,7 +103,7 @@ public sealed class StepKindTests
     });
 
     [Fact, Covers("X-E4", "X-E1")]
-    public void XmlInsertAndDelete_BuildAndTrimATree() => Stub.Run(() =>
+    public void XmlInsertAndDelete_AnyTree_BuildAndTrimIt() => Stub.Run(() =>
     {
         var ctx = Run($$$"""
             [{"step":"xml.insert","doc":"a","target":{{{Xml}}},"at":0,"kind":"element","name":"p"},
@@ -118,7 +118,7 @@ public sealed class StepKindTests
     });
 
     [Fact, Covers("X-E2")]
-    public void XmlSetAndRemoveAttribute_WorkOnElementsAndXmlText() => Stub.Run(() =>
+    public void XmlSetAndRemoveAttribute_ElementsAndXmlText_Work() => Stub.Run(() =>
     {
         var ctx = Run($$$"""
             [{"step":"xml.insert","doc":"a","target":{{{Xml}}},"at":0,"kind":"element","name":"div"},
@@ -138,7 +138,7 @@ public sealed class StepKindTests
     });
 
     [Fact, Covers("X-1", "F-1")]
-    public void TextSteps_RunOnAnXmlTextReachedByPath() => Stub.Run(() =>
+    public void TextSteps_XmlTextReachedByPath_Run() => Stub.Run(() =>
     {
         var ctx = Run($$$"""
             [{"step":"xml.insert","doc":"a","target":{{{Xml}}},"at":0,"kind":"text"},
@@ -151,7 +151,7 @@ public sealed class StepKindTests
     });
 
     [Fact, Covers("Y-1")]
-    public void Observe_RecordsEventsInFiringOrder() => Stub.Run(() =>
+    public void Observe_AnyEvents_AreRecordedInFiringOrder() => Stub.Run(() =>
     {
         var ctx = Run($$$"""
             [{"step":"observe","doc":"a","target":{{{Xml}}},"name":"x"},

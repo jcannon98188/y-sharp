@@ -13,7 +13,7 @@ namespace YSharp.Tests.TestKit;
 public sealed class TierEnforcementTests
 {
     [Fact]
-    public void ThisAssembly_NoNodeTestIsGating() =>
+    public void Tiers_ThisAssembly_NoNodeTestIsGating() =>
         Assert.Empty(TierRules.NodeTestsInGatingTier(new[] { typeof(TierEnforcementTests).Assembly }));
 
     [Fact]
@@ -64,7 +64,7 @@ public sealed class TierEnforcementTests
     }
 
     [Fact]
-    public void Rule_FlagsEveryWayANodeTestCanBeGating()
+    public void Rule_NodeTestInAnyGatingForm_IsFlagged()
     {
         var offenders = TierRules.NodeTestsInGatingTier(new[]
         {
@@ -79,6 +79,6 @@ public sealed class TierEnforcementTests
         Assert.Empty(TierRules.NodeTestsInGatingTier(new[] { typeof(SmokeNode), typeof(MethodTierBeatsClassTier), typeof(NodeFreeGating) }));
 
     [Fact]
-    public void Rule_NamesTheOffendingMethod() =>
+    public void Rule_Offender_NamesTheMethod() =>
         Assert.Contains(TierRules.NodeTestsInGatingTier(new[] { typeof(DefaultTierNodeOffender) }), o => o.EndsWith("DefaultTierNodeOffender.Test"));
 }

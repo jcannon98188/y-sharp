@@ -7,5 +7,5 @@ namespace YSharp.Interop.Tests;
 public sealed class TierEnforcementTests
 {
     [Fact]
-    public void NoNodeTestIsGating() => Assert.Empty(TierRules.NodeTestsInGatingTier(new[] { typeof(TierEnforcementTests).Assembly }));
+    public void Tiers_NodeTests_AreNeverGating() => Assert.Empty(TierRules.NodeTestsInGatingTier(new[] { typeof(TierEnforcementTests).Assembly }));
 }

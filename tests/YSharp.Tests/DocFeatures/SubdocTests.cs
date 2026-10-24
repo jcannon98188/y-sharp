@@ -173,7 +173,7 @@ public sealed class SubdocTests
 
     [Fact]
     [Covers("SUB-06")]
-    public void SubdocsEvent_IsNotRaisedWhenNothingChanged() => Impl.Run(() =>
+    public void SubdocsEvent_NothingChanged_IsNotRaised() => Impl.Run(() =>
     {
         var parent = Net.Mk(1);
         var w = new Watch(parent);
@@ -185,7 +185,7 @@ public sealed class SubdocTests
 
     [Fact]
     [PortOf("doc.tests.js:testSubdoc", "SUB-03", "SUB-04", "SUB-06", "SUB-07", "SUB-08", "DOC-12", "DOC-16")]
-    public void Port_Subdoc() => Impl.Run(() =>
+    public void Subdoc_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var doc = new Doc();
         doc.Load();                                                      // doesn't do anything
@@ -325,7 +325,7 @@ public sealed class SubdocTests
 
     [Fact]
     [Covers("SUB-10")]
-    public void Redo_CreatesANewDocWithTheSameGuidAndOptions() => Impl.Run(() =>
+    public void Redo_AfterUndoOfASubdoc_CreatesANewDocWithTheSameGuidAndOptions() => Impl.Run(() =>
     {
         var parent = Net.Mk(1);
         var arr = parent.GetArray("arr");
@@ -349,7 +349,7 @@ public sealed class SubdocTests
 
     [Fact]
     [PortOf("doc.tests.js:testSubdocLoadEdgeCases", "SUB-03", "SUB-04", "SUB-11", "DOC-12")]
-    public void Port_SubdocLoadEdgeCases() => Impl.Run(() =>
+    public void SubdocLoadEdgeCases_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var ydoc = new Doc();
         var yarray = ydoc.GetArray();
@@ -388,7 +388,7 @@ public sealed class SubdocTests
 
     [Fact]
     [PortOf("doc.tests.js:testSubdocLoadEdgeCasesAutoload", "SUB-03", "SUB-11")]
-    public void Port_SubdocLoadEdgeCasesAutoload() => Impl.Run(() =>
+    public void SubdocLoadEdgeCasesAutoload_OracleScenario_BehavesLikeTheOracle() => Impl.Run(() =>
     {
         var ydoc = new Doc();
         var yarray = ydoc.GetArray();
@@ -458,7 +458,7 @@ public sealed class SubdocTests
 
     [Fact]
     [Covers("SUB-13")]
-    public void DestroyingTheParent_DestroysEverySubdoc() => Impl.Run(() =>
+    public void Parent_Destroyed_DestroysEverySubdoc() => Impl.Run(() =>
     {
         var parent = Net.Mk(1);
         var one = Sub("one");

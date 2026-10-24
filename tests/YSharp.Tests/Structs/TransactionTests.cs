@@ -137,7 +137,7 @@ public sealed class TransactionTests
 
     [Fact]
     [Covers("STR-55")]
-    public void ChangedTypes_ListOnlyTypesThatExistedBeforeTheTransaction() => Impl.Run(() =>
+    public void ChangedTypes_NewTypesInTheTransaction_AreNotListed() => Impl.Run(() =>
     {
         var a = Net.Mk(1);
         var arr = a.GetArray("arr");
@@ -160,7 +160,7 @@ public sealed class TransactionTests
 
     [Fact]
     [Covers("STR-57")]
-    public void AnEmptyTransactionEmitsNoUpdate_AndADeleteOnlyOneEmitsTheDeleteSet() => Impl.Run(() =>
+    public void Update_EmptyOrDeleteOnlyTransaction_EmitsNothingOrOnlyTheDeleteSet() => Impl.Run(() =>
     {
         var a = Net.Mk(2);
         var t = a.GetText("t");
@@ -178,7 +178,7 @@ public sealed class TransactionTests
 
     [Fact]
     [Covers("STR-58", "STR-60")]
-    public void CleanupGcsAndMerges_BeforeAfterTransactionCleanupIsRaised() => Impl.Run(() =>
+    public void Cleanup_GcsAndMerges_BeforeAfterTransactionCleanupIsRaised() => Impl.Run(() =>
     {
         var a = Net.Mk(1);
         var t = a.GetText("t");

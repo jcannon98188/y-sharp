@@ -27,7 +27,7 @@ public sealed class ProtocolStepKindTests
     private const string Two = """{"step":"awareness.new","awareness":"a","doc":"ra"},{"step":"awareness.new","awareness":"b","doc":"rb"}""";
 
     [Fact]
-    public void TheProtocolKinds_HaveTheSameFieldsInTheSchemaAndInTheRegistry()
+    public void ProtocolKinds_SchemaAndRegistry_HaveTheSameFields()
     {
         var path = Path.Combine(RepoRoot.Find(), "tools", "fixture-gen", "schema", "ops.schema.json");
         using var schema = JsonDocument.Parse(File.ReadAllText(path));
@@ -47,7 +47,7 @@ public sealed class ProtocolStepKindTests
     }
 
     [Fact, Covers("AW-8", "AW-12")]
-    public void AwarenessSetLocalAndField_SetAndMergeTheLocalState() => Stub.Run(() =>
+    public void AwarenessSetLocalAndField_AnyState_SetAndMergeTheLocalState() => Stub.Run(() =>
     {
         var ctx = Run($$$"""
             [{{{Two}}},
@@ -58,7 +58,7 @@ public sealed class ProtocolStepKindTests
     });
 
     [Fact, Covers("AW-30", "AW-42")]
-    public void AwarenessEncodeAndApplyUpdate_CarryAStateBetweenAwarenesses() => Stub.Run(() =>
+    public void AwarenessEncodeAndApplyUpdate_TwoAwarenesses_CarryAState() => Stub.Run(() =>
     {
         var ctx = Run($$$"""
             [{{{Two}}},
@@ -72,7 +72,7 @@ public sealed class ProtocolStepKindTests
     });
 
     [Fact, Covers("AW-25", "AW-27")]
-    public void AwarenessRemoveStates_RemovesAndReportsTheOrigin() => Stub.Run(() =>
+    public void AwarenessRemoveStates_AnyClients_RemovesAndReportsTheOrigin() => Stub.Run(() =>
     {
         var ctx = Run($$$"""
             [{{{Two}}},
@@ -112,7 +112,7 @@ public sealed class ProtocolStepKindTests
     });
 
     [Fact, Covers("SY-11", "SY-12")]
-    public void SyncRead_RecordsTheTypeTheReplyAndTheBytesConsumed() => Stub.Run(() =>
+    public void SyncRead_AnyMessage_RecordsTheTypeTheReplyAndTheBytesConsumed() => Stub.Run(() =>
     {
         var ctx = Run("""
             [{"step":"text.insert","doc":"ra","target":{"root":"t","kind":"text"},"at":0,"value":"hi"},
@@ -126,7 +126,7 @@ public sealed class ProtocolStepKindTests
     });
 
     [Fact, Covers("AU-2")]
-    public void AuthPermissionDenied_RecordsTheMessage() => Stub.Run(() =>
+    public void AuthPermissionDenied_AnyReason_RecordsTheMessage() => Stub.Run(() =>
     {
         var ctx = Run("""[{"step":"auth.permissionDenied","name":"d","reason":"no"}]""");
         Assert.Equal(new byte[] { 0, 2, (byte)'n', (byte)'o' }, ProtocolSteps.Of(ctx).Results["d"].Bytes);

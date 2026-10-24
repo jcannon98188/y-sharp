@@ -57,7 +57,7 @@ public sealed class AwarenessErrorTests
 
     [Fact]
     [PortOf("awareness.test.js:testAwareness", "AW-6", "AW-8", "AW-9", "AW-30", "AW-42", "AW-43", "AW-48", "AW-50")]
-    public void TestAwareness_TwoInstancesPipeUpdates() => Stub.Run(() =>
+    public void Awareness_TwoInstances_PipeUpdates() => Stub.Run(() =>
     {
         using var a1 = new AwRig(0);
         using var a2 = new AwRig(1);
@@ -128,7 +128,7 @@ public sealed class StructuralEqualityTests
     }
 
     [Theory, MemberData(nameof(Names)), Covers("AW-9", "AW-50")]
-    public void ChangeUpdated_UsesStructuralDeepEquality(string name) => Stub.Run(() =>
+    public void ChangeUpdated_StructurallyEqualStates_UsesDeepEquality(string name) => Stub.Run(() =>
     {
         var c = Load().Single(x => x.Name == name);
         using var rig = new AwRig(1);

@@ -32,7 +32,7 @@ public sealed class LockModelTests
     });
 
     [Fact, Covers("CC-1")]
-    public void AReader_WaitsForAWriter() => Impl.Run(() =>
+    public void Reader_WriterHoldsTheLock_WaitsForTheWriter() => Impl.Run(() =>
     {
         var doc = Conc.NewDoc();
         using var holder = Holder.Write(doc);
@@ -40,7 +40,7 @@ public sealed class LockModelTests
     });
 
     [Fact, Covers("CC-1")]
-    public void AWriter_WaitsForAReader() => Impl.Run(() =>
+    public void Writer_ReaderHoldsTheLock_WaitsForTheReader() => Impl.Run(() =>
     {
         var doc = Conc.NewDoc();
         using var holder = Holder.Read(doc);
@@ -60,7 +60,7 @@ public sealed class LockModelTests
     });
 
     [Fact, Covers("CC-1")]
-    public void ADocumentsLockIsItsOwn_AnotherDocumentIsNotBlocked() => Impl.Run(() =>
+    public void DocumentLock_AnotherDocumentLocked_IsNotBlocked() => Impl.Run(() =>
     {
         var doc = Conc.NewDoc(1);
         var other = Conc.NewDoc(2);
@@ -134,7 +134,7 @@ public sealed class LockModelTests
     });
 
     [Fact, Covers("CC-2")]
-    public void AnotherThread_NeverJoinsATransaction() => Impl.Run(() =>
+    public void Transaction_AnotherThread_NeverJoins() => Impl.Run(() =>
     {
         var doc = Conc.NewDoc();
         using var holder = Holder.Write(doc);
@@ -148,7 +148,7 @@ public sealed class LockModelTests
     });
 
     [Fact, Covers("CC-2")]
-    public void TheOwnerIsTrackedPerThread_AReleasedLockCanBeTakenByAnotherThread() => Impl.Run(() =>
+    public void LockOwner_ReleasedLock_CanBeTakenByAnotherThread() => Impl.Run(() =>
     {
         var doc = Conc.NewDoc();
         doc.Transact(_ => { });
@@ -178,7 +178,7 @@ public sealed class LockModelTests
     }
 
     [Fact, Covers("CC-3")]
-    public void TheScopedForms_RejectTheUpgradeToo() => Impl.Run(() =>
+    public void ScopedForms_ReadToWriteUpgrade_IsRejected() => Impl.Run(() =>
     {
         var doc = Conc.NewDoc();
         Assert.Throws<YConcurrencyException>(() => UpgradeViaScopes(doc));
@@ -222,7 +222,7 @@ public sealed class LockModelTests
     });
 
     [Fact, Covers("CC-4")]
-    public void ReadsThatHappenToRunAtTheSameTime_ReturnWhatASingleThreadedReadReturns() => Impl.Run(() =>
+    public void Reads_RunningAtTheSameTime_ReturnWhatASingleThreadedReadReturns() => Impl.Run(() =>
     {
         var result = StressHarness.RunReadPurity(new StressOptions { Seed = YSharpEnv.Seed ?? 4242, Readers = 4, OpsPerThread = 120 });
         result.AssertClean();
@@ -237,7 +237,7 @@ public sealed class LockModelTests
     };
 
     [Fact, Covers("CC-5")]
-    public void TheLibrarySource_UsesNoLockPrimitiveAScheduleTesterCannotControl()
+    public void LibrarySource_AnyFile_UsesNoLockPrimitiveAScheduleTesterCannotControl()
     {
         // ADR 0006 CC-5 and docs/research/schedule-exploration.md: only Monitor, Interlocked and explicit state; no spin-waiting on internals.
         var root = RepoRoot.Find();
@@ -260,7 +260,7 @@ public sealed class LockModelTests
     }
 
     [Fact, Covers("CC-5")]
-    public void TheCompiledLibrary_HoldsNoFieldOfAnUncontrollableLockType()
+    public void CompiledLibrary_AnyType_HoldsNoFieldOfAnUncontrollableLockType()
     {
         var bad = new List<string>();
         const BindingFlags all = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
@@ -276,7 +276,7 @@ public sealed class LockModelTests
     }
 
     [Fact, Covers("CC-5")]
-    public void TheLockReportsItsTransitions_ToTheScheduleSeam() => Impl.Run(() =>
+    public void Lock_AnyTransition_IsReportedToTheScheduleSeam() => Impl.Run(() =>
     {
         _ = new Doc().GetText("probe");
         Assert.True(ScheduleSeam.IsPresent, "The implementation must expose YSharp.ScheduleSeam (see ScheduleSeam in the TestKit): the lock is only controllable through it.");

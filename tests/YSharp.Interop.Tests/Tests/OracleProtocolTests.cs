@@ -24,7 +24,7 @@ public sealed class AvailabilityTests
     [Theory, Covers("DIFF-08")]
     [InlineData(Tier.Smoke)]
     [InlineData(Tier.Nightly)]
-    public void UsableNode_Runs(Tier tier) => Assert.Equal(AvailabilityAction.Run, Availability.Decide(tier, null, false).Action);
+    public void Node_UsableInstall_Runs(Tier tier) => Assert.Equal(AvailabilityAction.Run, Availability.Decide(tier, null, false).Action);
 
     [Theory, Covers("DIFF-08")]
     [InlineData(Tier.Smoke)]
@@ -39,7 +39,7 @@ public sealed class AvailabilityTests
     [Theory, Covers("DIFF-08")]
     [InlineData(Tier.Smoke)]
     [InlineData(Tier.Nightly)]
-    public void MissingOrWrongNode_FailsInTheDifferentialCiJobs(Tier tier)
+    public void Node_MissingOrWrong_FailsInTheDifferentialCiJobs(Tier tier)
     {
         var d = Availability.Decide(tier, "node is not available (x)", requireNode: true);
         Assert.Equal(AvailabilityAction.Fail, d.Action);
@@ -47,7 +47,7 @@ public sealed class AvailabilityTests
     }
 
     [Fact, Covers("DIFF-08")]
-    public void ANodeThatDoesNotExist_IsReportedWithAReason()
+    public void Node_DoesNotExist_IsReportedWithAReason()
     {
         var reason = NodeAvailability.Check(YSharp.TestKit.Fixtures.RepoRoot.Find(), "definitely-not-a-node-binary");
         Assert.NotNull(reason);
@@ -55,11 +55,11 @@ public sealed class AvailabilityTests
     }
 
     [Fact, Covers("DIFF-08")]
-    public void ANodeOfAnotherMajor_IsReportedAsAMismatch() =>
+    public void Node_AnotherMajor_IsReportedAsAMismatch() =>
         Assert.False(NodeAvailability.MajorMatches("24", "v22.11.0"));
 
     [Fact, Covers("DIFF-09")]
-    public void TheCatalogue_NamesTheOpsTheServerAnswers()
+    public void Catalogue_AnyServer_NamesTheOpsItAnswers()
     {
         Assert.Equal(new[] { "ping", "run", "shutdown" }, Protocol.Ops);
         Assert.All(Protocol.FaultOps, op => Assert.StartsWith("fault.", op));
@@ -86,7 +86,7 @@ public sealed class OracleProtocolTests(OracleHost host)
     }
 
     [Fact, Covers("DIFF-09", "DIFF-08")]
-    public async Task Handshake_AdvertisesTheSchemaVersionsAndTheCatalogue()
+    public async Task Handshake_OnConnect_AdvertisesTheSchemaVersionsAndTheCatalogue()
     {
         using var hello = JsonDocument.Parse(await Ready().HelloAsync());
         var root = hello.RootElement;
@@ -98,7 +98,7 @@ public sealed class OracleProtocolTests(OracleHost host)
     }
 
     [Fact, Covers("DIFF-09")]
-    public async Task Ping_AnswersWithTheRequestCount()
+    public async Task Ping_AnyRequest_AnswersWithTheRequestCount()
     {
         var reply = await Ready().RunRawAsync(Protocol.Ping, JsonDocument.Parse("{}").RootElement);
         Assert.Equal(OracleStatus.Ok, reply.Status);
@@ -106,7 +106,7 @@ public sealed class OracleProtocolTests(OracleHost host)
     }
 
     [Fact, Covers("DIFF-01", "DIFF-09")]
-    public async Task Run_ReturnsTheNamedObservationsOfAFreshReplay()
+    public async Task Run_FreshReplay_ReturnsTheNamedObservations()
     {
         var reply = await Ready().RunAsync(TwoReplicasScript);
         Assert.True(reply.Status == OracleStatus.Ok, reply.Status + ": " + reply.Message);
@@ -119,7 +119,7 @@ public sealed class OracleProtocolTests(OracleHost host)
     }
 
     [Fact, Covers("DIFF-09")]
-    public async Task Run_ExtraObservationsAreOptIn()
+    public async Task Run_ExtraObservations_AreOptIn()
     {
         var plain = await Ready().RunAsync(TwoReplicasScript);
         Assert.False(plain.Observations!.ContainsKey("structs"));
@@ -155,7 +155,7 @@ public sealed class OracleProtocolTests(OracleHost host)
     }
 
     [Fact, Covers("DIFF-10")]
-    public async Task VirtualClock_TickDrivesTimersAndRealTimeDoesNotMatter()
+    public async Task VirtualClock_Tick_DrivesTimersAndRealTimeDoesNotMatter()
     {
         // awareness renews its local state every 15 s of *virtual* time; the response must not depend on how long the request really takes
         const string script = """
@@ -236,7 +236,7 @@ public sealed class OracleFaultTests
     }
 
     [Fact, Covers("DIFF-09")]
-    public async Task FaultOps_AreAbsentUnlessEnabled()
+    public async Task FaultOps_WhenNotEnabled_AreAbsent()
     {
         await using var plain = new OracleHost();
         plain.RequireOrSkip();

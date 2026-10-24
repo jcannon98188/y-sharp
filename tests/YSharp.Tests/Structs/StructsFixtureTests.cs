@@ -28,7 +28,7 @@ public sealed class StructsFixtureTests
         Directory.EnumerateFiles(Dir, "*.json").Select(p => new object[] { Path.GetFileNameWithoutExtension(p) }).OrderBy(x => (string)x[0], StringComparer.Ordinal);
 
     [Fact]
-    public void FixturesExist_AndEveryHeaderCoversRegistryEntriesOfSpec6()
+    public void Fixtures_AnyHeader_ExistAndCoverRegistryEntriesOfSpec6()
     {
         var pinned = PinnedVersions.Read(Root);
         var files = Directory.EnumerateFiles(Dir, "*.json").ToList();
@@ -45,7 +45,7 @@ public sealed class StructsFixtureTests
     [Theory]
     [MemberData(nameof(FixtureNames))]
     [Covers("STR-29", "STR-38", "STR-39", "STR-42", "STR-43", "STR-44", "STR-61", "STR-62", "STR-63", "STR-64", "STR-65", "STR-66", "STR-67", "STR-68", "GC-06", "Q20", "Q21")]
-    public void Fixture_ReplaysLikeTheOracle(string name)
+    public void Fixture_EveryStoredScenario_ReplaysLikeTheOracle(string name)
     {
         var fixture = FixtureLoader.Load(Path.Combine(Dir, name + ".json"), PinnedVersions.Read(Root));
         Impl.Run(() =>

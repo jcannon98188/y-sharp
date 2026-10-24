@@ -56,7 +56,7 @@ public sealed class UpstreamPortTests
     // ------------------------------------------------------------------ encoding.tests.js
 
     [Fact, PortOf("encoding.tests.js:testStructReferences", "ENC-22", "ENC-12")]
-    public void TestStructReferences() => Stub.Run(() =>
+    public void StructReferences_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         // JS asserts the contentRefs table: 11 slots, ref 0 GC, 1 deleted, 2 JSON, 3 binary, 4 string, 5 embed, 6 format, 7 type,
         // 8 any, 9 doc, 10 reserved for Skip. The table is internal, so this checks each slot through the wire: every ref decodes
@@ -86,7 +86,7 @@ public sealed class UpstreamPortTests
     });
 
     [Fact, PortOf("encoding.tests.js:testPermanentUserData", "ENC-21")]
-    public void TestPermanentUserData() => Stub.Run(() =>
+    public void PermanentUserData_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         // JS waits 10 ms so the setTimeout(0) work of PermanentUserData runs; the options seam flushes it synchronously.
         var options = new PermanentUserDataOptions { Defer = flush => flush() };
@@ -112,7 +112,7 @@ public sealed class UpstreamPortTests
     });
 
     [Fact, PortOf("encoding.tests.js:testDiffStateVectorOfUpdateIsEmpty", "ENC-09", "ENC-24")]
-    public void TestDiffStateVectorOfUpdateIsEmpty() => Stub.Run(() =>
+    public void DiffStateVectorOfUpdateIsEmpty_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var ydoc = new Doc();
         byte[]? sv = null;
@@ -124,7 +124,7 @@ public sealed class UpstreamPortTests
     });
 
     [Fact, PortOf("encoding.tests.js:testDiffStateVectorOfUpdateIgnoresSkips", "ENC-09", "ENC-24", "ENC-81")]
-    public void TestDiffStateVectorOfUpdateIgnoresSkips() => Stub.Run(() =>
+    public void DiffStateVectorOfUpdateIgnoresSkips_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var ydoc = new Doc();
         var updates = new List<byte[]>();
@@ -160,7 +160,7 @@ public sealed class UpstreamPortTests
     }
 
     [Fact, PortOf("compatibility.tests.js:testArrayCompatibilityV1", "ENC-21", "ENC-11")]
-    public void TestArrayCompatibilityV1() => Stub.Run(() =>
+    public void ArrayCompatibilityV1_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var block = CompatBlock("testArrayCompatibilityV1");
         var expected = Regex.Match(block, @"JSON\.parse\('(.+)'\)").Groups[1].Value;
@@ -169,7 +169,7 @@ public sealed class UpstreamPortTests
     });
 
     [Fact, PortOf("compatibility.tests.js:testMapDecodingCompatibilityV1", "ENC-21", "ENC-11")]
-    public void TestMapDecodingCompatibilityV1() => Stub.Run(() =>
+    public void MapDecodingCompatibilityV1_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var block = CompatBlock("testMapDecodingCompatibilityV1");
         var expected = Regex.Match(block, @"\(\{(.+)\}\)\r?\n").Groups[1].Value;
@@ -178,7 +178,7 @@ public sealed class UpstreamPortTests
     });
 
     [Fact, PortOf("compatibility.tests.js:testTextDecodingCompatibilityV1", "ENC-21", "ENC-11", "ENC-12")]
-    public void TestTextDecodingCompatibilityV1() => Stub.Run(() =>
+    public void TextDecodingCompatibilityV1_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var block = CompatBlock("testTextDecodingCompatibilityV1");
         var expected = Regex.Match(block, @"const oldVal = (\[.+\])\r?\n").Groups[1].Value;
@@ -228,7 +228,7 @@ public sealed class UpstreamPortTests
     private static string[] ArrayJson(YArray array) => array.ToArray().Select(e => Json(e.Value)).ToArray();
 
     [Fact, PortOf("updates.tests.js:testMergeUpdates", "ENC-23")]
-    public void TestMergeUpdates() => Stub.Run(() =>
+    public void MergeUpdates_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var sim = SimHarness.Init(Prng.Create(1), users: 3);
         var array0 = sim.Users[0].Doc.GetArray("array");
@@ -246,7 +246,7 @@ public sealed class UpstreamPortTests
     });
 
     [Fact, PortOf("updates.tests.js:testKeyEncoding", "ENC-76", "ENC-14")]
-    public void TestKeyEncoding() => Stub.Run(() =>
+    public void KeyEncoding_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var sim = SimHarness.Init(Prng.Create(1), users: 2);
         var text0 = sim.Users[0].Doc.GetText("text");
@@ -320,7 +320,7 @@ public sealed class UpstreamPortTests
     }
 
     [Fact, PortOf("updates.tests.js:testMergeUpdates1", "ENC-23", "ENC-24", "ENC-81")]
-    public void TestMergeUpdates1() => Stub.Run(() =>
+    public void MergeUpdates1_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         foreach (var enc in Encoders())
         {
@@ -339,7 +339,7 @@ public sealed class UpstreamPortTests
     });
 
     [Fact, PortOf("updates.tests.js:testMergeUpdates2", "ENC-23", "ENC-24", "ENC-81")]
-    public void TestMergeUpdates2() => Stub.Run(() =>
+    public void MergeUpdates2_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         foreach (var enc in Encoders())
         {
@@ -358,7 +358,7 @@ public sealed class UpstreamPortTests
     });
 
     [Fact, PortOf("updates.tests.js:testMergePendingUpdates", "ENC-84", "ENC-21", "ENC-23")]
-    public void TestMergePendingUpdates() => Stub.Run(() =>
+    public void MergePendingUpdates_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var yDoc = new Doc();
         var serverUpdates = new List<byte[]>();

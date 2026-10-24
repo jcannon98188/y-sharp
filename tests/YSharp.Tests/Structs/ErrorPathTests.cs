@@ -99,7 +99,7 @@ public sealed class ErrorPathTests
 
     [Fact]
     [Covers("STR-72")]
-    public void SilentlyAcceptedCases_StayAccepted() => Impl.Run(() =>
+    public void SilentlyAcceptedCases_AnyInput_StayAccepted() => Impl.Run(() =>
     {
         var a = Net.Mk(1);
         a.GetText("t").Insert(0, "ab");

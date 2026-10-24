@@ -30,7 +30,7 @@ public sealed class XmlTests
     });
 
     [Fact, Covers("X-E2")]
-    public void Attributes_AreAStringKeyedMapOfAnyValues() => Stub.Run(() =>
+    public void Attributes_AnyElement_AreAStringKeyedMapOfAnyValues() => Stub.Run(() =>
     {
         var doc = NewDoc();
         var fragment = doc.GetXmlFragment("f");
@@ -83,7 +83,7 @@ public sealed class XmlTests
     });
 
     [Fact, PortOf("y-xml.tests.js:testSetProperty", "X-E2", "X-E5")]
-    public void TestSetProperty() => Stub.Run(() =>
+    public void SetProperty_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var (xml0, xml1) = (net.Peers[0].Xml, net.Peers[1].Xml);
@@ -95,7 +95,7 @@ public sealed class XmlTests
     });
 
     [Fact, PortOf("y-xml.tests.js:testHasProperty", "X-E2")]
-    public void TestHasProperty() => Stub.Run(() =>
+    public void HasProperty_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var (xml0, xml1) = (net.Peers[0].Xml, net.Peers[1].Xml);
@@ -111,7 +111,7 @@ public sealed class XmlTests
     });
 
     [Fact, PortOf("y-xml.tests.js:testEvents", "X-E5", "Y-1")]
-    public void TestEvents() => Stub.Run(() =>
+    public void Events_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var (xml0, xml1) = (net.Peers[0].Xml, net.Peers[1].Xml);
@@ -142,7 +142,7 @@ public sealed class XmlTests
     });
 
     [Fact, PortOf("y-xml.tests.js:testTreewalker", "X-E4")]
-    public void TestTreewalker() => Stub.Run(() =>
+    public void Treewalker_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(3);
         var xml0 = net.Peers[0].Xml;
@@ -166,7 +166,7 @@ public sealed class XmlTests
     });
 
     [Fact, PortOf("y-xml.tests.js:testSiblings", "X-E4")]
-    public void TestSiblings() => Stub.Run(() =>
+    public void Siblings_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var ydoc = NewDoc();
         var yxml = ydoc.GetXmlFragment();
@@ -190,7 +190,7 @@ public sealed class XmlTests
     });
 
     [Fact, PortOf("y-xml.tests.js:testInsertafter", "X-E4")]
-    public void TestInsertafter() => Stub.Run(() =>
+    public void Insertafter_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var ydoc = NewDoc();
         var yxml = ydoc.GetXmlFragment();
@@ -222,7 +222,7 @@ public sealed class XmlTests
     });
 
     [Fact, PortOf("y-xml.tests.js:testClone", "X-E6")]
-    public void TestClone() => Stub.Run(() =>
+    public void Clone_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var ydoc = NewDoc();
         var yxml = ydoc.GetXmlFragment();
@@ -239,7 +239,7 @@ public sealed class XmlTests
     });
 
     [Fact, PortOf("y-xml.tests.js:testElement", "X-E8")]
-    public void TestElement() => Stub.Run(() =>
+    public void Element_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var ydoc = NewDoc();
         var yxmlel = ydoc.GetXmlElement();
@@ -252,7 +252,7 @@ public sealed class XmlTests
     });
 
     [Fact, Covers("X-E8")]
-    public void RootElement_HasTheDefaultNodeName() => Stub.Run(() =>
+    public void RootElement_NoNodeName_HasTheDefaultNodeName() => Stub.Run(() =>
     {
         var doc = NewDoc();
         var root = doc.GetXmlElement("e");
@@ -262,7 +262,7 @@ public sealed class XmlTests
     });
 
     [Fact, Covers("X-E7", "Y-7")]
-    public void AttributeEvents_UseMapSemantics() => Stub.Run(() =>
+    public void AttributeEvents_AnyChange_UseMapSemantics() => Stub.Run(() =>
     {
         var doc = NewDoc();
         var el = new YXmlElement("p");
@@ -286,7 +286,7 @@ public sealed class XmlTests
     });
 
     [Fact, Covers("X-E4")]
-    public void FirstChild_SkipsDeletedChildren() => Stub.Run(() =>
+    public void FirstChild_DeletedChildren_AreSkipped() => Stub.Run(() =>
     {
         var fragment = NewDoc().GetXmlFragment("f");
         var a = new YXmlElement("a");

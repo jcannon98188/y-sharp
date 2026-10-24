@@ -26,7 +26,7 @@ public sealed class EventTests
     // ------------------------------------------------------------------ array events
 
     [Fact, PortOf("y-array.tests.js:testInsertAndDeleteEventsForTypes2", "A-E1", "V-8")]
-    public void TestInsertAndDeleteEventsForTypes2() => Stub.Run(() =>
+    public void InsertAndDeleteEventsForTypes2_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var array0 = net.Peers[0].Array;
@@ -40,7 +40,7 @@ public sealed class EventTests
     });
 
     [Fact, PortOf("y-array.tests.js:testChangeEvent", "A-E2", "A-E3", "V-4", "V-6")]
-    public void TestChangeEvent_Array() => Stub.Run(() =>
+    public void ChangeEventArray_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var array0 = net.Peers[0].Array;
@@ -75,7 +75,7 @@ public sealed class EventTests
     });
 
     [Fact, PortOf("y-array.tests.js:testInsertAndDeleteEvents", "A-E1")]
-    public void TestInsertAndDeleteEvents() => Stub.Run(() =>
+    public void InsertAndDeleteEvents_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var array0 = net.Peers[0].Array;
@@ -93,7 +93,7 @@ public sealed class EventTests
     });
 
     [Fact, PortOf("y-array.tests.js:testInsertAndDeleteEventsForTypes", "A-E1")]
-    public void TestInsertAndDeleteEventsForTypes() => Stub.Run(() =>
+    public void InsertAndDeleteEventsForTypes_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var array0 = net.Peers[0].Array;
@@ -108,7 +108,7 @@ public sealed class EventTests
     });
 
     [Fact, Covers("A-E4", "Y-5")]
-    public void InsertThenDeleteInOneTransaction_FiresWithAnEmptyDelta() => Stub.Run(() =>
+    public void InsertThenDelete_InOneTransaction_FiresWithAnEmptyDelta() => Stub.Run(() =>
     {
         var doc = NewDoc();
         var array = doc.GetArray("a");
@@ -123,7 +123,7 @@ public sealed class EventTests
     });
 
     [Fact, Covers("A-E5", "Y-1")]
-    public void ArrayEvents_HaveNoKeys() => Stub.Run(() =>
+    public void ArrayEvents_AnyChange_HaveNoKeys() => Stub.Run(() =>
     {
         var array = NewDoc().GetArray("a");
         var keys = -1;
@@ -133,7 +133,7 @@ public sealed class EventTests
     });
 
     [Fact, PortOf("y-array.tests.js:testEventTargetIsSetCorrectlyOnLocal", "A-E6")]
-    public void TestEventTargetIsSetCorrectlyOnLocal() => Stub.Run(() =>
+    public void EventTargetIsSetCorrectlyOnLocal_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(3);
         var array0 = net.Peers[0].Array;
@@ -146,7 +146,7 @@ public sealed class EventTests
     });
 
     [Fact, PortOf("y-array.tests.js:testEventTargetIsSetCorrectlyOnRemote", "A-E6", "TX-14")]
-    public void TestEventTargetIsSetCorrectlyOnRemote() => Stub.Run(() =>
+    public void EventTargetIsSetCorrectlyOnRemote_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(3);
         var (array0, array1) = (net.Peers[0].Array, net.Peers[1].Array);
@@ -161,7 +161,7 @@ public sealed class EventTests
     });
 
     [Fact, PortOf("y-array.tests.js:testNestedObserverEvents", "A-E7", "TX-6")]
-    public void TestNestedObserverEvents() => Stub.Run(() =>
+    public void NestedObserverEvents_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var array0 = net.Peers[0].Array;
@@ -187,7 +187,7 @@ public sealed class EventTests
     });
 
     [Fact, PortOf("y-array.tests.js:testNewChildDoesNotEmitEventInTransaction", "A-E8", "V-8")]
-    public void TestNewChildDoesNotEmitEventInTransaction() => Stub.Run(() =>
+    public void NewChildDoesNotEmitEventInTransaction_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var array0 = net.Peers[0].Array;
@@ -226,7 +226,7 @@ public sealed class EventTests
     });
 
     [Fact, Covers("A-E10", "TX-12", "TX-13")]
-    public void ObserveAndUnobserve_RegisterHandlersByIdentityAndRemoveAllCopies() => Stub.Run(() =>
+    public void ObserveAndUnobserve_SameHandlerTwice_RegisterByIdentityAndRemoveAllCopies() => Stub.Run(() =>
     {
         var array = NewDoc().GetArray("a");
         var count = 0;
@@ -307,7 +307,7 @@ public sealed class EventTests
     });
 
     [Fact, PortOf("y-array.tests.js:testObservedeepIndexes", "V-2", "TX-19")]
-    public void TestObservedeepIndexes() => Stub.Run(() =>
+    public void ObservedeepIndexes_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var doc = NewDoc();
         var map = doc.GetMap();
@@ -323,7 +323,7 @@ public sealed class EventTests
     });
 
     [Fact, PortOf("y-array.tests.js:testObserveDeepEventOrder", "TX-10", "TX-2")]
-    public void TestObserveDeepEventOrder() => Stub.Run(() =>
+    public void ObserveDeepEventOrder_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var array0 = net.Peers[0].Array;
@@ -346,7 +346,7 @@ public sealed class EventTests
     // ------------------------------------------------------------------ map events
 
     [Fact, PortOf("y-map.tests.js:testThrowsAddAndUpdateAndDeleteEvents", "M-E1", "V-1")]
-    public void TestThrowsAddAndUpdateAndDeleteEvents() => Stub.Run(() =>
+    public void ThrowsAddAndUpdateAndDeleteEvents_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var map0 = net.Peers[0].Map;
@@ -366,7 +366,7 @@ public sealed class EventTests
     });
 
     [Fact, PortOf("y-map.tests.js:testThrowsDeleteEventsOnClear", "M-E1", "M-5")]
-    public void TestThrowsDeleteEventsOnClear() => Stub.Run(() =>
+    public void ThrowsDeleteEventsOnClear_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var map0 = net.Peers[0].Map;
@@ -390,7 +390,7 @@ public sealed class EventTests
     });
 
     [Fact, PortOf("y-map.tests.js:testChangeEvent", "M-E1", "M-E2", "V-5")]
-    public void TestChangeEvent_Map() => Stub.Run(() =>
+    public void ChangeEventMap_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var map0 = net.Peers[0].Map;
@@ -434,7 +434,7 @@ public sealed class EventTests
     });
 
     [Fact, Covers("M-E2", "V-5", "M-E3")]
-    public void KeyChanges_CarryTheValueBeforeTheTransaction() => Stub.Run(() =>
+    public void KeyChanges_AnyChange_CarryTheValueBeforeTheTransaction() => Stub.Run(() =>
     {
         var doc = NewDoc();
         var map = doc.GetMap("m");
@@ -465,7 +465,7 @@ public sealed class EventTests
     });
 
     [Fact, Covers("M-E4")]
-    public void MapEvents_HaveAnEmptyListDelta() => Stub.Run(() =>
+    public void MapEvents_AnyChange_HaveAnEmptyListDelta() => Stub.Run(() =>
     {
         // YMapEvent has no Delta: the sketch exposes list deltas only on YArrayEvent, YTextEvent and YXmlEvent, which is the JS behaviour
         // (the JS delta of a map event is []). Added and deleted item sets are not public either (A-E3).
@@ -478,7 +478,7 @@ public sealed class EventTests
     });
 
     [Fact, PortOf("y-map.tests.js:testMapEventError", "M-E5", "TX-17")]
-    public void TestMapEventError() => Stub.Run(() =>
+    public void MapEventError_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         // JS: the observer is registered but never fires, so event is null and the two accesses trivially fail. The intended
         // behaviour (yjs#539) is that computing changes after the handler fired is an error; this port makes the event really fire.
@@ -501,7 +501,7 @@ public sealed class EventTests
     });
 
     [Fact, PortOf("y-map.tests.js:testYmapEventHasCorrectValueWhenSettingAPrimitive", "M-E2")]
-    public void TestYmapEventHasCorrectValueWhenSettingAPrimitive() => Stub.Run(() =>
+    public void YmapEventHasCorrectValueWhenSettingAPrimitive_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(3);
         var map0 = net.Peers[0].Map;
@@ -519,7 +519,7 @@ public sealed class EventTests
     });
 
     [Fact, PortOf("y-map.tests.js:testYmapEventHasCorrectValueWhenSettingAPrimitiveFromOtherUser", "M-E7", "M-9")]
-    public void TestYmapEventHasCorrectValueWhenSettingAPrimitiveFromOtherUser() => Stub.Run(() =>
+    public void YmapEventHasCorrectValueWhenSettingAPrimitiveFromOtherUser_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(3);
         var (map0, map1) = (net.Peers[0].Map, net.Peers[1].Map);
@@ -541,7 +541,7 @@ public sealed class EventTests
     // ------------------------------------------------------------------ deep observers
 
     [Fact, PortOf("y-map.tests.js:testObserveDeepProperties", "TX-19", "V-2")]
-    public void TestObserveDeepProperties() => Stub.Run(() =>
+    public void ObserveDeepProperties_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(4);
         var (map1, map2, map3) = (net.Peers[1].Map, net.Peers[2].Map, net.Peers[3].Map);
@@ -572,7 +572,7 @@ public sealed class EventTests
     });
 
     [Fact, PortOf("y-map.tests.js:testObserversUsingObservedeep", "TX-19", "V-2")]
-    public void TestObserversUsingObservedeep() => Stub.Run(() =>
+    public void ObserversUsingObservedeep_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var map0 = net.Peers[0].Map;
@@ -592,7 +592,7 @@ public sealed class EventTests
     });
 
     [Fact, PortOf("y-map.tests.js:testPathsOfSiblingEvents", "V-2", "TX-19")]
-    public void TestPathsOfSiblingEvents() => Stub.Run(() =>
+    public void PathsOfSiblingEvents_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var net = Net.Init(2);
         var map0 = net.Peers[0].Map;
@@ -617,7 +617,7 @@ public sealed class EventTests
     });
 
     [Fact, PortOf("y-map.tests.js:testDeepEventPathsWithMultipleDeepObservers", "V-3", "TX-1", "TX-2", "Q23")]
-    public void TestDeepEventPathsWithMultipleDeepObservers() => Stub.Run(() =>
+    public void DeepEventPathsWithMultipleDeepObservers_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         var doc = NewDoc();
         var a = doc.GetMap("a");
@@ -658,7 +658,7 @@ public sealed class EventTests
     });
 
     [Fact, PortOf("y-map.tests.js:testYmapEventExceptionsShouldCompleteTransaction", "M-E6", "TX-7", "Q24"), Diverges("M-E6", "0005"), Diverges("TX-7", "0005"), Diverges("Q24", "0005")]
-    public void TestYmapEventExceptionsShouldCompleteTransaction() => Stub.Run(() =>
+    public void YmapEventExceptionsShouldCompleteTransaction_OracleScenario_BehavesLikeTheOracle() => Stub.Run(() =>
     {
         // JS: both handlers run, the update event and the data commit happen, and the exception (the last one, Q24) is rethrown from
         // map.set. y-sharp (ADR 0005): the same guarantees, but handler exceptions are reported through ObserverFaulted and never unwind
@@ -739,7 +739,7 @@ public sealed class EventTests
     });
 
     [Fact, Covers("V-8", "V-9", "TX-8")]
-    public void Transaction_ListsChangedTypesAndTheirAncestors() => Stub.Run(() =>
+    public void Transaction_NestedChange_ListsChangedTypesAndTheirAncestors() => Stub.Run(() =>
     {
         var doc = NewDoc();
         var root = doc.GetMap("m");
@@ -773,7 +773,7 @@ public sealed class EventTests
     });
 
     [Fact, Covers("Y-1", "Y-3", "Y-7", "X-1")]
-    public void TextEvents_ReportChildListChangesAndAttributeKeys() => Stub.Run(() =>
+    public void TextEvents_ChildAndAttributeChanges_ReportListChangesAndAttributeKeys() => Stub.Run(() =>
     {
         var doc = NewDoc();
         var text = doc.GetText("t");
@@ -823,7 +823,7 @@ public sealed class EventTests
     });
 
     [Fact, Covers("Y-4")]
-    public void ReadingTheTextDeltaInTheHandler_DoesNotChangeTheEncodedState() => Stub.Run(() =>
+    public void TextDelta_ReadInTheHandler_DoesNotChangeTheEncodedState() => Stub.Run(() =>
     {
         // JS computes event.delta lazily and the computation may delete redundant format items. The state a replica ends in must not
         // depend on whether an observer read the delta.

@@ -32,18 +32,18 @@ public class CheckerRuleTests
     }
 
     [Fact]
-    public void DuplicateId_Fails() => Assert.Contains("TR-DUPLICATE-ID", Codes(Input(new[] { E("A-1", "pending"), E("A-1", "pending") })));
+    public void Checker_DuplicateId_Fails() => Assert.Contains("TR-DUPLICATE-ID", Codes(Input(new[] { E("A-1", "pending"), E("A-1", "pending") })));
 
     [Fact]
-    public void UnknownIdInTag_Fails() =>
+    public void Checker_UnknownIdInTag_Fails() =>
         Assert.Contains("TR-UNKNOWN-TAG", Codes(Input(new[] { E("A-1", "pending") }, new[] { T("x", CoverLayer.Unit, "A-2") })));
 
     [Fact]
-    public void RetiredIdInTag_Fails() =>
+    public void Checker_RetiredIdInTag_Fails() =>
         Assert.Contains("TR-UNKNOWN-TAG", Codes(Input(new[] { E("A-1", "retired") }, new[] { T("x", CoverLayer.Unit, "A-1") })));
 
     [Fact]
-    public void UnknownIdInFixtureHeader_Fails()
+    public void Checker_UnknownIdInFixtureHeader_Fails()
     {
         var i = Input(new[] { E("A-1", "pending") });
         i.Fixtures.Add(new FixtureTag("fixtures/a.json", new[] { "NOPE-1" }));
@@ -58,7 +58,7 @@ public class CheckerRuleTests
     }
 
     [Fact]
-    public void DivergeEntry_NeedsDivergesTest()
+    public void Checker_DivergeEntry_NeedsDivergesTest()
     {
         var entry = E("Q17", kind: "diverge");
         Assert.Contains("TR-NO-DIVERGES", Codes(Input(new[] { entry }, new[] { T("x", CoverLayer.Unit, "Q17") })));
@@ -67,14 +67,14 @@ public class CheckerRuleTests
     }
 
     [Fact]
-    public void DeclaredLayerWithoutTest_Fails()
+    public void Checker_DeclaredLayerWithoutTest_Fails()
     {
         var entry = E("A-1", layers: new[] { "unit", "port" });
         Assert.Contains("TR-MISSING-LAYER", Codes(Input(new[] { entry }, new[] { T("x", CoverLayer.Unit, "A-1") })));
     }
 
     [Fact]
-    public void DifferentialAndFuzzLayers_AreReportedNotGated()
+    public void Checker_DifferentialAndFuzzLayers_AreReportedNotGated()
     {
         var entry = E("A-1", layers: new[] { "unit", "differential", "fuzz" });
         var report = TraceabilityChecker.Check(Input(new[] { entry }, new[] { T("x", CoverLayer.Unit, "A-1") }));
@@ -93,7 +93,7 @@ public class CheckerRuleTests
     }
 
     [Fact]
-    public void PortTest_SatisfiesUnitLayer()
+    public void Checker_PortTest_SatisfiesUnitLayer()
     {
         var entry = E("A-1", layers: new[] { "unit" });
         Assert.Empty(Codes(Input(new[] { entry }, new[] { T("x", CoverLayer.Port, "A-1") })));
@@ -118,11 +118,11 @@ public class CheckerRuleTests
     }
 
     [Fact]
-    public void RandomizedLedgerRow_MustBeOwnedBySpec10() =>
+    public void Checker_RandomizedLedgerRow_MustBeOwnedBySpec10() =>
         Assert.Contains("TR-LEDGER-ROW", Codes(Input(new RegistryEntry[0], ledger: new[] { L("y-map.tests.js:testRepeatX", owner: 7, randomized: true) })));
 
     [Fact]
-    public void LedgerOutcome_RequiresItsEvidence()
+    public void Checker_LedgerOutcome_RequiresItsEvidence()
     {
         Assert.Contains("TR-LEDGER-ROW", Codes(Input(new RegistryEntry[0], ledger: new[] { L("a.js:t", outcome: "skipped") })));
         Assert.Contains("TR-LEDGER-ROW", Codes(Input(new RegistryEntry[0], ledger: new[] { L("a.js:t", outcome: "bogus") })));
@@ -133,7 +133,7 @@ public class CheckerRuleTests
     }
 
     [Fact]
-    public void PortOfUnknownLedgerKey_Fails()
+    public void Checker_PortOfUnknownLedgerKey_Fails()
     {
         var tag = new TestTag("x", CoverLayer.Port, new string[0], new string[0], new[] { "nope.js:t" });
         Assert.Contains("TR-UNKNOWN-TAG", Codes(Input(new RegistryEntry[0], new[] { tag }, new[] { L("a.js:t") })));
@@ -150,7 +150,7 @@ public class CheckerRuleTests
     }
 
     [Fact]
-    public void ReleaseGate_RequiresZeroPending()
+    public void Checker_ReleaseGate_RequiresZeroPending()
     {
         var i = Input(new[] { E("A-1", "pending") });
         i.ReleaseGate = true;
@@ -158,7 +158,7 @@ public class CheckerRuleTests
     }
 
     [Fact]
-    public void LockedIdMissing_Fails()
+    public void Checker_LockedIdMissing_Fails()
     {
         var i = Input(new[] { E("A-1", "pending") });
         i.LockedIds = new HashSet<string> { "A-1", "A-2" };
@@ -177,7 +177,7 @@ public class CheckerRuleTests
     }
 
     [Fact]
-    public void Pending_NeedsReasonAndOwner()
+    public void Checker_Pending_NeedsReasonAndOwner()
     {
         var noReason = E("A-1", "pending"); noReason.Note = null; noReason.Ref = null;
         Assert.Contains("TR-PENDING-UNEXPLAINED", Codes(Input(new[] { noReason })));
@@ -190,7 +190,7 @@ public class CheckerRuleTests
     }
 
     [Fact]
-    public void MissingIdLock_Fails()
+    public void Checker_MissingIdLock_Fails()
     {
         var i = Input(new[] { E("A-1", "pending") });
         i.LockedIds = null;
@@ -198,7 +198,7 @@ public class CheckerRuleTests
     }
 
     [Fact]
-    public void MissingHighWaterMark_Fails()
+    public void Checker_MissingHighWaterMark_Fails()
     {
         var i = Input(new[] { E("A-1", "pending") });
         i.PendingMark = null;
@@ -206,7 +206,7 @@ public class CheckerRuleTests
     }
 
     [Fact]
-    public void RegistryIdNotInLock_Fails()
+    public void Checker_RegistryIdNotInLock_Fails()
     {
         var i = Input(new[] { E("A-1", "pending"), E("A-2", "pending") });
         i.LockedIds = new HashSet<string> { "A-1" };
@@ -225,7 +225,7 @@ public class CheckerRuleTests
     }
 
     [Fact]
-    public void SubmoduleSource_MustExist()
+    public void Checker_SubmoduleSource_MustExist()
     {
         var e = E("A-1", "pending"); e.Source = "yjs/src/nope.js:3";
         var i = Input(new[] { e });

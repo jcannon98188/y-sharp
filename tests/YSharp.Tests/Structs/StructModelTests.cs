@@ -109,7 +109,7 @@ public sealed class StructModelTests
 
     [Fact]
     [Covers("STR-06")]
-    public void OriginOfALaterInsert_IsTheLastIdOfTheItemItFollows() => Impl.Run(() =>
+    public void OriginOfALaterInsert_AnyInsert_IsTheLastIdOfTheItemItFollows() => Impl.Run(() =>
     {
         var a = Net.Mk(1);
         var b = Net.Mk(2);
@@ -128,7 +128,7 @@ public sealed class StructModelTests
 
     [Fact]
     [Covers("STR-07")]
-    public void Siblings_SkipDeletedNeighbours() => Impl.Run(() =>
+    public void Siblings_DeletedNeighbours_AreSkipped() => Impl.Run(() =>
     {
         var a = Net.Mk(1);
         var frag = a.GetXmlFragment("x");
@@ -160,7 +160,7 @@ public sealed class StructModelTests
 
     [Fact]
     [Covers("STR-31", "STR-32")]
-    public void ChildrenOfACollectedType_BecomeOneMergedGcStruct() => Impl.Run(() =>
+    public void ChildrenOfACollectedType_AfterGc_BecomeOneMergedGcStruct() => Impl.Run(() =>
     {
         var (a, _) = CollectedMap();
         var s = StructsProbe.Of(a, 1);

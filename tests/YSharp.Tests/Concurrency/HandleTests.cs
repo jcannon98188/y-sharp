@@ -126,7 +126,7 @@ public sealed class HandleTests
     // ------------------------------------------------------------------ CC-9
 
     [Fact, Covers("CC-9")]
-    public void ATransactionObject_IsInvalidOnceItsTransactionEnded() => Impl.Run(() =>
+    public void TransactionObject_AfterItsTransactionEnded_IsInvalid() => Impl.Run(() =>
     {
         var doc = Conc.NewDoc();
         Transaction? captured = null;
@@ -147,7 +147,7 @@ public sealed class HandleTests
     });
 
     [Fact, Covers("CC-9")]
-    public void AnEventObject_IsInvalidOnceDispatchEnded() => Impl.Run(() =>
+    public void EventObject_AfterDispatchEnded_IsInvalid() => Impl.Run(() =>
     {
         var f = new Fixture();
         YEvent? captured = null;
@@ -218,7 +218,7 @@ public sealed class HandleTests
     }
 
     [Fact, Covers("CC-9")]
-    public void ARootCollectionSnapshot_DoesNotChangeWhenAnotherThreadAddsRoots() => Impl.Run(() =>
+    public void RootCollectionSnapshot_AnotherThreadAddsRoots_DoesNotChange() => Impl.Run(() =>
     {
         var doc = Conc.NewDoc();
         doc.GetArray("a");

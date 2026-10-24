@@ -36,7 +36,7 @@ public sealed class UpdateApplicationTests
 
     [Fact]
     [Covers("STR-29")]
-    public void ItemWrite_EmitsParentInfoOnlyWhenBothOriginsAreAbsent() => Impl.Run(() =>
+    public void ItemWrite_BothOriginsAbsent_EmitsParentInfo() => Impl.Run(() =>
     {
         var a = Net.Mk(1);
         a.GetText("t").Insert(0, "abc");
@@ -80,7 +80,7 @@ public sealed class UpdateApplicationTests
 
     [Fact]
     [Covers("STR-34", "STR-31", "GC-06")]
-    public void GcStruct_IsWrittenAsInfoZeroAndALength() => Impl.Run(() =>
+    public void GcStruct_AnyWrite_IsWrittenAsInfoZeroAndALength() => Impl.Run(() =>
     {
         var a = Net.Mk(1);
         var arr = a.GetArray("arr");
@@ -117,7 +117,7 @@ public sealed class UpdateApplicationTests
 
     [Fact]
     [Covers("STR-67")]
-    public void StateAsUpdate_IsTheStructsPlusTheDeleteSetDerivedFromTheStore() => Impl.Run(() =>
+    public void StateAsUpdate_AnyDoc_IsTheStructsPlusTheDeleteSetDerivedFromTheStore() => Impl.Run(() =>
     {
         var a = Net.Mk(1);
         a.GetText("t").Insert(0, "hello");
@@ -128,7 +128,7 @@ public sealed class UpdateApplicationTests
 
     [Fact]
     [Covers("GC-06")]
-    public void TheSameHistory_EncodesDifferentlyWithGcOnAndOff() => Impl.Run(() =>
+    public void SameHistory_GcOnAndOff_EncodesDifferently() => Impl.Run(() =>
     {
         var on = Net.Mk(1, gc: true);
         var off = Net.Mk(1, gc: false);
@@ -149,7 +149,7 @@ public sealed class UpdateApplicationTests
     [InlineData("01 01 05 00 a4 01 00 01 79 00", "xy", "x")]                     // origin present: the parentSub flag (0x20) is ignored, parent inherited
     [InlineData("01 01 05 00 44 01 00 01 79 00", "yx", "x")]                     // right origin only
     [Covers("STR-61")]
-    public void ReadingStructRefs_HonoursEveryInfoBitCombination(string hex, string expected, string existing) => Impl.Run(() =>
+    public void ReadingStructRefs_EveryInfoBitCombination_IsHonoured(string hex, string expected, string existing) => Impl.Run(() =>
     {
         var d = Net.Mk(1);
         if (existing != "") d.GetText("t").Insert(0, existing);
@@ -161,7 +161,7 @@ public sealed class UpdateApplicationTests
 
     [Fact]
     [Covers("STR-61")]
-    public void ReadingStructRefs_GcSkipAndMapEntries() => Impl.Run(() =>
+    public void ReadingStructRefs_GcSkipAndMapEntries_AreRead() => Impl.Run(() =>
     {
         var gc = Net.Mk(1);
         Assert.True(gc.TryApplyUpdate(Hex.Bytes("01010500000300")).Ok);            // GC of length 3 (info 0, length)

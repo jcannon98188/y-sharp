@@ -202,7 +202,7 @@ public sealed class HarnessSelfTests : IDisposable
     }
 
     [Fact, Covers("DIFF-04", "DIFF-05")]
-    public void TruncationSweep_IsBothRejectOrClaimedByTheLenientNormaliser()
+    public void TruncationSweep_EveryCut_IsBothRejectOrClaimedByTheLenientNormaliser()
     {
         var run = NewRun(OracleAsSharp((script, obs) =>
         {
@@ -248,7 +248,7 @@ public sealed class HarnessSelfTests : IDisposable
     }
 
     [Fact, Covers("DIFF-04")]
-    public void BothRejecting_RequiresYSharpToBeUnchanged()
+    public void BothRejecting_OracleAndYSharp_RequiresYSharpToBeUnchanged()
     {
         var run = NewRun(OracleAsSharp((script, obs) =>
         {

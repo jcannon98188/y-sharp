@@ -66,7 +66,7 @@ public sealed class SimGoldenFixtureTests
 
     [Theory, MemberData(nameof(GoldenSet.Names), MemberType = typeof(GoldenSet))]
     [Covers("SIM-10", "SIM-11", "SIM-12", "SIM-13", "SIM-14")]
-    public void Fixture_ReplaysToTheOraclesBytesDumpsAndStructs(string name) => Stub.Run(() =>
+    public void Fixture_EveryStoredScenario_ReplaysToTheOraclesBytesDumpsAndStructs(string name) => Stub.Run(() =>
     {
         var fixture = FixtureReplay.Load(GoldenSet.Path(name));
         var replay = SimSteps.Run(fixture);
@@ -168,7 +168,7 @@ public sealed class DeliverStepTests
 
     [Fact]
     [Covers("SIM-10")]
-    public void TheNewKinds_MatchTheSchemaFieldForField()
+    public void NewStepKinds_SchemaAndRegistry_MatchFieldForField()
     {
         using var schema = JsonDocument.Parse(File.ReadAllText(Path.Combine(RepoRoot.Find(), "tools", "fixture-gen", "schema", "ops.schema.json")));
         var kinds = schema.RootElement.GetProperty("$defs").GetProperty("step").GetProperty("oneOf").EnumerateArray()
@@ -264,7 +264,7 @@ public sealed class DeliverStepTests
 
     [Fact]
     [Covers("SIM-13")]
-    public void TextInsertEmbedType_InsertsASharedTypeAsAnEmbed() => Stub.Run(() =>
+    public void TextInsertEmbedType_SharedType_IsInsertedAsAnEmbed() => Stub.Run(() =>
     {
         var r = Run(Script(Insert("a", 0, "ab") + """
             ,{"step":"text.insertEmbedType","doc":"a","target":{"root":"t","kind":"text"},"at":1,"kind":"map","init":{"$":"obj","pairs":[["k","v"]]}}
@@ -287,7 +287,7 @@ public sealed class DeepObserverFixtureTests
 
     [Fact]
     [Covers("Q25", "TX-1")]
-    public void DeepObserverFixture_ReplaysInTheOraclesEventOrder() => Stub.Run(() =>
+    public void DeepObserverFixture_Replay_FollowsTheOraclesEventOrder() => Stub.Run(() =>
     {
         var fixture = FixtureReplay.Load(Path1);
         var replay = SimSteps.Run(fixture);
@@ -298,7 +298,7 @@ public sealed class DeepObserverFixtureTests
 
     [Fact]
     [Covers("Q25")]
-    public void TheOracleOrder_IsPathLengthThenChangeOrder()
+    public void OracleOrder_DeepEvents_IsPathLengthThenChangeOrder()
     {
         // what the fixture pins, read straight from the oracle's observation (runs without an implementation)
         var fixture = FixtureReplay.Load(Path1);

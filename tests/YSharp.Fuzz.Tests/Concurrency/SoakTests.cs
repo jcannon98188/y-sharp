@@ -42,22 +42,22 @@ public sealed class SoakTests
     }
 
     [Fact, Covers("CC-1", "CC-11")]
-    public void Serializability_OneThread() => Soak(StressHarness.RunSharedDoc, 1, 0);
+    public void Serializability_OneThread_HoldsUnderSoak() => Soak(StressHarness.RunSharedDoc, 1, 0);
 
     [Fact, Covers("CC-1", "CC-11")]
-    public void SerializabilityAndTornReads_MoreThreadsThanCores() => Soak(StressHarness.RunSharedDoc, StressOptions.Oversubscribed, 4);
+    public void SerializabilityAndTornReads_SoakWithMoreThreadsThanCores_MoreThreadsThanCores() => Soak(StressHarness.RunSharedDoc, StressOptions.Oversubscribed, 4);
 
     [Fact, Covers("CC-8")]
-    public void ImplicitTransactions_MoreThreadsThanCores() => Soak(StressHarness.RunSharedDoc, StressOptions.Oversubscribed, 4, implicitTx: true);
+    public void ImplicitTransactions_MoreThreadsThanCores_StaySerializable() => Soak(StressHarness.RunSharedDoc, StressOptions.Oversubscribed, 4, implicitTx: true);
 
     [Fact, Covers("CC-4")]
-    public void ReadPurity_MoreThreadsThanCores() => Soak(StressHarness.RunReadPurity, 0, StressOptions.Oversubscribed);
+    public void ReadPurity_MoreThreadsThanCores_HoldsUnderSoak() => Soak(StressHarness.RunReadPurity, 0, StressOptions.Oversubscribed);
 
     [Fact, Covers("CC-8", "CC-11")]
-    public void Convergence_MoreThreadsThanCores() => Soak(StressHarness.RunConvergence, Math.Min(8, StressOptions.Oversubscribed), 0, ops: 150);
+    public void Convergence_MoreThreadsThanCores_HoldsUnderSoak() => Soak(StressHarness.RunConvergence, Math.Min(8, StressOptions.Oversubscribed), 0, ops: 150);
 
     [Fact, Covers("CC-2", "CC-3", "CC-12", "CC-17", "CC-18", "CC-19", "CC-20")]
-    public void ScheduleScenarios_WithManyRandomSeeds()
+    public void ScheduleScenarios_Soak_WithManyRandomSeeds()
     {
         NightlyGate.Require();
         Stub.Run(() =>

@@ -26,7 +26,7 @@ public sealed class ComparatorTests
         """.Replace("@UPDATE@", updateHex).Replace("@INSERT@", docInsert))!.AsObject();
 
     [Fact, Covers("DIFF-01")]
-    public void EqualObservations_HaveNoDifference() => Assert.Null(ObservationDiff.Find(Observations(), Observations()));
+    public void Comparator_EqualObservations_HaveNoDifference() => Assert.Null(ObservationDiff.Find(Observations(), Observations()));
 
     [Fact, Covers("DIFF-06")]
     public void DifferentBytes_AreReportedAtTheFirstDifferingOffset_WithHexAround()
@@ -41,7 +41,7 @@ public sealed class ComparatorTests
     }
 
     [Fact, Covers("DIFF-06")]
-    public void ADifferentDoc_IsReportedAsAPathIntoTheDump()
+    public void Comparator_DifferentDoc_IsReportedAsAPathIntoTheDump()
     {
         var d = ObservationDiff.Find(Observations(docInsert: "hi"), Observations(docInsert: "ho"));
         Assert.NotNull(d);
@@ -103,7 +103,7 @@ public sealed class ComparatorTests
     }
 
     [Fact, Covers("DIFF-03")]
-    public void Convergence_FlagsAReplicaThatDiffersFromTheFirst()
+    public void Comparator_ReplicaDiffersFromTheFirst_IsFlaggedByConvergence()
     {
         var obs = Observations();
         var docs = (JsonObject)obs["doc"]!["value"]!;
@@ -129,14 +129,14 @@ public sealed class ComparatorTests
     [InlineData(false, false, OutcomeClass.BothReject)]
     [InlineData(true, false, OutcomeClass.SharpRejectsOracleAccepts)]
     [InlineData(false, true, OutcomeClass.OracleRejectsSharpAccepts)]
-    public void Classify_NamesTheFourOutcomeClasses(bool oracle, bool sharp, OutcomeClass expected) =>
+    public void Comparator_FourOutcomeClasses_AreNamed(bool oracle, bool sharp, OutcomeClass expected) =>
         Assert.Equal(expected, Normalisers.Classify(oracle, sharp));
 
     private static MutationCase Case(MutationKind kind, bool oracle, bool sharp, bool unchanged = true, int validLength = 20, int mutatedLength = 12) =>
         new(UpdateFormat.V1, new byte[validLength], new byte[mutatedLength], kind, mutatedLength, oracle, sharp, unchanged);
 
     [Fact, Covers("DIFF-05")]
-    public void LenientTruncation_ClaimsExactlyTheDocumentedDifference()
+    public void Normaliser_LenientTruncation_ClaimsExactlyTheDocumentedDifference()
     {
         var n = new LenientTruncationNormaliser();
         Assert.True(n.Claims(Case(MutationKind.Truncate, oracle: true, sharp: false)));
@@ -149,7 +149,7 @@ public sealed class ComparatorTests
     }
 
     [Fact, Covers("DIFF-05")]
-    public void EveryNormaliser_NamesRegisteredInventoryEntries()
+    public void Normaliser_EveryOne_NamesRegisteredInventoryEntries()
     {
         var ids = InventoryLoader.LoadEntries(RepoRoot.Find()).Select(e => e.Id).ToHashSet();
         Assert.NotEmpty(Normalisers.Registered);
@@ -209,7 +209,7 @@ public sealed class ReportingTests : IDisposable
     [InlineData(FailureReason.SharpFault, "ysharp-fault")]
     [InlineData(FailureReason.OracleMisbehaved, "oracle-misbehaved")]
     [InlineData(FailureReason.OutcomeClass, "outcome-class")]
-    public void TheReasonIsNamedInTheHeaderAndTheFileName(FailureReason reason, string name)
+    public void Candidate_Reason_IsNamedInTheHeaderAndTheFileName(FailureReason reason, string name)
     {
         var saved = Reporting.Save(_dir, Script, null, reason, "p", null, 0, "m");
         Assert.Contains(name, Path.GetFileName(saved.Path));
@@ -218,7 +218,7 @@ public sealed class ReportingTests : IDisposable
     }
 
     [Fact, Covers("DIFF-06")]
-    public void ReplayInput_AcceptsACandidateOrABareScript()
+    public void ReplayInput_CandidateOrBareScript_IsAccepted()
     {
         var saved = Reporting.Save(_dir, Script, Obs(), FailureReason.Mismatch, "p", null, 1, "m");
         var bare = Path.Combine(_dir, "bare.json");
@@ -228,7 +228,7 @@ public sealed class ReportingTests : IDisposable
     }
 
     [Fact, Covers("DIFF-06")]
-    public void SavingTheSameScriptTwice_OverwritesOneFile()
+    public void Candidate_SavingTheSameScriptTwice_OverwritesOneFile()
     {
         var a = Reporting.Save(_dir, Script, null, FailureReason.Mismatch, "p", null, 1, "m");
         var b = Reporting.Save(_dir, Script, null, FailureReason.Mismatch, "p", null, 2, "m");
@@ -237,7 +237,7 @@ public sealed class ReportingTests : IDisposable
     }
 
     [Fact, Covers("DIFF-06")]
-    public void TheReport_CarriesSeedShrunkScriptBothObservationSetsAndTheFirstDifference()
+    public void Report_AnyFailure_CarriesSeedShrunkScriptBothObservationSetsAndTheFirstDifference()
     {
         var saved = Reporting.Save(_dir, Script, Obs(), FailureReason.Mismatch, "stateless-scripts", "1,2", 7, "m");
         var data = new FailureData(FailureReason.Mismatch, "stateless-scripts", "1,2", 7, "2 replicas, 1 edits", Script, Obs(), Obs(),
@@ -292,7 +292,7 @@ public sealed class SharpSideGuardTests
     }
 
     [Fact, Covers("DIFF-07")]
-    public void AStackOverflowGuard_DeepRecursionRunsOnALargeStack()
+    public void StackOverflowGuard_DeepRecursion_RunsOnALargeStack()
     {
         int Depth(int n) => n == 0 ? 0 : 1 + Depth(n - 1);
         var reply = SharpSide.RunGuarded(() => new JsonObject { ["d"] = Depth(50_000) }, TimeSpan.FromSeconds(10));
@@ -307,7 +307,7 @@ public sealed class SharpSideGuardTests
     }
 
     [Fact, Covers("DIFF-01")]
-    public void TheApiStub_IsReportedSoTheTestSkips()
+    public void ApiStub_WhileUnimplemented_IsReportedSoTheTestSkips()
     {
         var reply = SharpSide.Run(ScriptPlanScript());
         // before the implementation exists the stub throws NotImplementedException (ADR 0019); after, the script runs

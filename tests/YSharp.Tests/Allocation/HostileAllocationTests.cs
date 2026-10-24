@@ -40,11 +40,11 @@ public sealed class HostileAllocationTests
     }
 
     [Fact]
-    public void Corpus_IsNotEmpty() => Assert.NotEmpty(CorpusInputs());
+    public void Corpus_HostileFixtures_IsNotEmpty() => Assert.NotEmpty(CorpusInputs());
 
     [Theory, Covers("BUD-12")]
     [MemberData(nameof(Corpus))]
-    public void HostileInput_AllocatesAtMostKTimesNPlusAFixedAmount(string file, string name, UpdateFormat format, byte[] input)
+    public void HostileInput_AnyMalformedCase_AllocatesAtMostKTimesNPlusAFixedAmount(string file, string name, UpdateFormat format, byte[] input)
     {
 #if DEBUG
         Assert.Skip("Allocation tests run only in Release (ADR 0009).");

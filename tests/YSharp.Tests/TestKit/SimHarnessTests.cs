@@ -70,7 +70,7 @@ public class SimHarnessTests
 
     [Fact]
     [Covers("SIM-13")]
-    public void ChooseNetworkAction_MatchesJsDrawOrderAndShortCircuit()
+    public void ChooseNetworkAction_AnyDraw_MatchesJsDrawOrderAndShortCircuit()
     {
         // 0.02*101 = 2.02 -> 2 (<=2): disconnect when the bool draw is >= 0.5, else reconnect
         var g1 = new ScriptedPrng(0.02, 0.9);
@@ -106,7 +106,7 @@ public class SimHarnessTests
 
     [Fact]
     [Covers("SIM-10")]
-    public void PayloadCounters_AreFreshPerConnector()
+    public void PayloadCounters_NewConnector_AreFresh()
     {
         var a = new PayloadCounters();
         Assert.Equal(0, a.NextUniqueNumber());

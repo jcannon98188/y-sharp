@@ -56,7 +56,7 @@ public sealed class TypeFixtureTests
     }
 
     [Theory, MemberData(nameof(TypeFixtures))]
-    public void Fixture_ReplaysToTheOraclesBytesDumpsAndEvents(string path) => Stub.Run(() =>
+    public void Fixture_EveryStoredScenario_ReplaysToTheOraclesBytesDumpsAndEvents(string path) => Stub.Run(() =>
     {
         var fixture = FixtureReplay.Load(path);
         var replay = Replay(fixture);

@@ -21,13 +21,13 @@ public sealed class StressTests
         new() { Seed = Seed, Writers = writers, Readers = readers, OpsPerThread = ops, Implicit = implicitTx };
 
     [Fact, Covers("CC-1", "CC-11")]
-    public void OneWriterThread_CommitStreamReplaysToTheSameBytes() => Impl.Run(() => StressHarness.RunSharedDoc(Opts(1, 0)).AssertClean());
+    public void Stress_OneWriterThread_CommitStreamReplaysToTheSameBytes() => Impl.Run(() => StressHarness.RunSharedDoc(Opts(1, 0)).AssertClean());
 
     [Fact, Covers("CC-1", "CC-11")]
-    public void SerializabilityAndNoTornReads_WithFewThreads() => Impl.Run(() => StressHarness.RunSharedDoc(Opts(2, 2)).AssertClean());
+    public void Stress_FewThreads_SerializabilityAndNoTornReads() => Impl.Run(() => StressHarness.RunSharedDoc(Opts(2, 2)).AssertClean());
 
     [Fact, Covers("CC-1", "CC-11")]
-    public void SerializabilityAndNoTornReads_WithMoreThreadsThanCores() =>
+    public void Stress_MoreThreadsThanCores_SerializabilityAndNoTornReads() =>
         Impl.Run(() => StressHarness.RunSharedDoc(Opts(StressOptions.Oversubscribed, 2)).AssertClean());
 
     [Fact, Covers("CC-8", "CC-11")]
@@ -39,9 +39,9 @@ public sealed class StressTests
         Impl.Run(() => StressHarness.RunReadPurity(Opts(0, StressOptions.Oversubscribed)).AssertClean());
 
     [Fact, Covers("CC-8", "CC-11")]
-    public void DocumentsSyncedAcrossThreads_Converge() => Impl.Run(() => StressHarness.RunConvergence(Opts(4, 0, ops: 80)).AssertClean());
+    public void Stress_DocumentsSyncedAcrossThreads_Converge() => Impl.Run(() => StressHarness.RunConvergence(Opts(4, 0, ops: 80)).AssertClean());
 
     [Fact, Covers("CC-8")]
-    public void DocumentsSyncedAcrossMoreThreadsThanCores_Converge() =>
+    public void Stress_DocumentsSyncedAcrossMoreThreadsThanCores_Converge() =>
         Impl.Run(() => StressHarness.RunConvergence(Opts(Math.Min(8, StressOptions.Oversubscribed), 0, ops: 60)).AssertClean());
 }

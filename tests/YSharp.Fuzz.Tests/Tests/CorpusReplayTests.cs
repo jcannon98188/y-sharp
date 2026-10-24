@@ -56,7 +56,7 @@ public sealed class CorpusReplayTests
         CorpusRunner.ReplayAll(CorpusFiles.LoadAll()));
 
     [Fact]
-    public void Corpus_EveryHostileClassWithStoredBytesHasAFile()
+    public void Corpus_EveryHostileClassWithStoredBytes_HasAFile()
     {
         var all = CorpusFiles.LoadAll();
         foreach (var hosClass in ClassesWithStoredCases)
@@ -83,7 +83,7 @@ public sealed class CorpusReplayTests
     }
 
     [Fact]
-    public void Corpus_FilesAreAllHostileFixturesOrKnownLegacyOnes()
+    public void Corpus_FilesInTheFolder_AreHostileFixturesOrKnownLegacyOnes()
     {
         // the folder holds the Spec 5 malformed files (ENC-*) and the Spec 11 class files; anything else needs a deliberate decision
         var names = CorpusFiles.Files().Select(Path.GetFileName).ToHashSet();
@@ -93,7 +93,7 @@ public sealed class CorpusReplayTests
     }
 
     [Fact]
-    public void Corpus_OracleOutcomesAreRecordedForEveryUpdateCase()
+    public void Corpus_EveryUpdateCase_HasARecordedOracleOutcome()
     {
         // ADR 0011 / 0013: the stored oracle outcome table is what the smoke and nightly comparison reads; update cases must carry one
         foreach (var c in CorpusFiles.LoadAll().Where(c => c.Api == "update"))

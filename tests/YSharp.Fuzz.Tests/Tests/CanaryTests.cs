@@ -14,11 +14,11 @@ public sealed class CanaryTests
     // ------------------------------------------------------------------ the harness itself (runs on the stub)
 
     [Fact]
-    public void Canary_ReportsACleanRunAsPassed() =>
+    public void Canary_CleanRun_IsReportedAsPassed() =>
         Assert.Equal(CanaryVerdict.Passed, CanaryHost.Run("selftest-ok").Verdict);
 
     [Fact]
-    public void Canary_ReportsARealStackOverflowByName()
+    public void Canary_RealStackOverflow_IsReportedByName()
     {
         var run = CanaryHost.Run("selftest-overflow", timeout: TimeSpan.FromSeconds(60));
         Assert.True(run.Verdict == CanaryVerdict.StackOverflow, $"expected StackOverflow, got {run}");
@@ -39,7 +39,7 @@ public sealed class CanaryTests
     [InlineData(134, "", "Stack overflow.\n   at X", CanaryVerdict.StackOverflow)]
     [InlineData(unchecked((int)0xC00000FD), "", "", CanaryVerdict.StackOverflow)]
     [InlineData(139, "", "", CanaryVerdict.Crashed)]
-    public void Classify_MapsExitCodesAndOutput(int exit, string stdout, string stderr, CanaryVerdict expected) =>
+    public void Canary_ExitCodesAndOutput_AreClassified(int exit, string stdout, string stderr, CanaryVerdict expected) =>
         Assert.Equal(expected, CanaryHost.Classify(exit, stdout, stderr).Verdict);
 
     // ------------------------------------------------------------------ HOS-DEEP document depth (1M)

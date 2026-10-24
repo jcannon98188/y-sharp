@@ -12,11 +12,11 @@ public sealed class AwarenessStateTests
     private static YValue Obj(string k, YValue v) => Js.Obj((k, v));
 
     [Fact, Covers("AW-1")]
-    public void OutdatedTimeout_Is30000Milliseconds() => Stub.Run(() =>
+    public void OutdatedTimeout_Default_Is30000Milliseconds() => Stub.Run(() =>
         Assert.Equal(TimeSpan.FromMilliseconds(30000), Awareness.OutdatedTimeout));
 
     [Fact, Covers("AW-2")]
-    public void Events_CanBeSubscribedAndUnsubscribed() => Stub.Run(() =>
+    public void Events_SubscribeThenUnsubscribe_StopsDelivery() => Stub.Run(() =>
     {
         using var rig = new AwRig();
         var calls = 0;
@@ -51,7 +51,7 @@ public sealed class AwarenessStateTests
     });
 
     [Fact, Covers("AW-5")]
-    public void StateValues_AreSeenByPeersAsTheirJsonRoundTrip() => Stub.Run(() =>
+    public void StateValues_SeenByPeers_AreTheirJsonRoundTrip() => Stub.Run(() =>
     {
         using var a = new AwRig(1);
         using var b = new AwRig(2);
@@ -72,7 +72,7 @@ public sealed class AwarenessStateTests
     });
 
     [Fact, Covers("AW-7")]
-    public void LocalState_IsNullAfterRemoval() => Stub.Run(() =>
+    public void LocalState_AfterRemoval_IsNull() => Stub.Run(() =>
     {
         using var rig = new AwRig();
         Assert.Equal("{}", Js.Json(rig.Awareness.LocalState));
@@ -162,7 +162,7 @@ public sealed class AwarenessStateTests
     });
 
     [Fact, Covers("AW-13")]
-    public void GetStates_ReturnsTheSameContentEachTime() => Stub.Run(() =>
+    public void GetStates_CalledRepeatedly_ReturnsTheSameContent() => Stub.Run(() =>
     {
         using var rig = new AwRig(1);
         rig.Apply(AwBytes.Update((5, 1, """{"a":1}""")));
@@ -190,7 +190,7 @@ public sealed class AwarenessStateTests
     });
 
     [Fact, Covers("AW-23")]
-    public void DestroyingTheDoc_DestroysTheAwareness() => Stub.Run(() =>
+    public void Doc_Destroyed_DestroysTheAwareness() => Stub.Run(() =>
     {
         using var rig = new AwRig(4);
         rig.Awareness.SetLocalState(Obj("here", true));
@@ -201,7 +201,7 @@ public sealed class AwarenessStateTests
     });
 
     [Fact, Diverges("AW-24", adr: "0014")]
-    public void Dispose_IsIdempotent() => Stub.Run(() =>
+    public void Dispose_CalledTwice_IsIdempotent() => Stub.Run(() =>
     {
         // JS destroy() run twice emits the removal path again and bumps the clock (see AW-10). Dispose does nothing the second time.
         using var rig = new AwRig(4);
@@ -265,7 +265,7 @@ public sealed class AwarenessStateTests
     });
 
     [Fact, Covers("AW-29")]
-    public void RemoveStates_ProducesNoDocumentUpdate() => Stub.Run(() =>
+    public void RemoveStates_AnyClients_ProducesNoDocumentUpdate() => Stub.Run(() =>
     {
         using var rig = new AwRig(9);
         var updates = 0;

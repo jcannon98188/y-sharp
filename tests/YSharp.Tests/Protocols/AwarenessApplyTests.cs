@@ -72,7 +72,7 @@ public sealed class AwarenessApplyTests
     });
 
     [Fact, Covers("AW-46")]
-    public void ARemoteUpdate_MayOverwriteTheLocalState() => Stub.Run(() =>
+    public void RemoteUpdate_ForTheLocalClient_MayOverwriteTheLocalState() => Stub.Run(() =>
     {
         using var rig = new AwRig(9);
         rig.Awareness.SetLocalState(Js.Obj(("me", 1)));
@@ -95,7 +95,7 @@ public sealed class AwarenessApplyTests
     });
 
     [Fact, Covers("AW-48")]
-    public void Classification_FollowsTheDocumentedOrder() => Stub.Run(() =>
+    public void Classification_AnyUpdate_FollowsTheDocumentedOrder() => Stub.Run(() =>
     {
         using var rig = new AwRig(9);
         // unknown + state: added; unknown + null: nowhere
