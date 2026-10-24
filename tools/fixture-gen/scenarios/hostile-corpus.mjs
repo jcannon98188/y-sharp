@@ -106,7 +106,8 @@ const clockCases = [
   c('zero-length-deleted', upd([blk(1, 0, [item('01', vu(0))])])),
   c('client-2-pow-31', upd([blk(2 ** 31, 0, [textS('x')])]), { expect: ['ok'] }),
   c('client-2-pow-32-minus-1', upd([blk(2 ** 32 - 1, 0, [textS('x')])]), { expect: ['ok'] }),
-  c('client-2-pow-32', upd([blk(2 ** 32, 0, [textS('x')])]), { expect: REJ }),
+  c('client-2-pow-32', upd([blk(2 ** 32, 0, [textS('x')])]), { expect: ['ok'] }),
+  c('client-2-pow-53-minus-1', upd([blk(2n ** 53n - 1n, 0, [textS('x')])]), { expect: ['ok'] }),
   c('client-2-pow-53', upd([blk(2n ** 53n, 0, [textS('x')])]), { expect: REJ }),
   c('skip-then-string-gap', upd([blk(1, 0, [skip(3), textS('x')])]), { expect: ANY })
 ]

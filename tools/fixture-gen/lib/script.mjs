@@ -6,6 +6,7 @@ export const text = root => ({ root, kind: 'text' })
 export const array = root => ({ root, kind: 'array' })
 export const map = root => ({ root, kind: 'map' })
 export const xmlFragment = root => ({ root, kind: 'xmlFragment' })
+export const xmlText = root => ({ root, kind: 'xmlText' })
 export const replica = (name, clientId, gc) => (gc === undefined ? { name, clientId } : { name, clientId, gc })
 
 export const normalizeStep = s => {

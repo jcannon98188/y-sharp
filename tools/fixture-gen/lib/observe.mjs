@@ -43,7 +43,8 @@ const rootDump = (doc, name, kind) => dumpType({
   text: () => doc.getText(name),
   array: () => doc.getArray(name),
   map: () => doc.getMap(name),
-  xmlFragment: () => doc.getXmlFragment(name)
+  xmlFragment: () => doc.getXmlFragment(name),
+  xmlText: () => doc.get(name, Y.XmlText)
 }[kind]())
 
 /** Typed tree of every root in sorted root-name order, as ordered pairs. */

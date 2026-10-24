@@ -1,0 +1,118 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["AW-34"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"rb","clientId":1099511627776}],
+    "steps": [
+      {"step":"awareness.new","awareness":"b","doc":"rb"},
+      {"step":"awareness.setLocal","awareness":"b","state":{"$":"obj","pairs":[["name","wide"]]}},
+      {
+        "step": "awareness.applyUpdate",
+        "awareness": "b",
+        "bytes": {"$":"bytes","hex":"02ffffffffffffff0f070c7b226d6178223a747275657d808080801001046e756c6c"},
+        "origin": "r"
+      },
+      {
+        "step": "awareness.encode",
+        "name": "all",
+        "awareness": "b",
+        "clients": [1099511627776,9007199254740991,4294967296]
+      }
+    ]
+  },
+  "observations": {
+    "updates": {"api":"Doc.on('update'), Doc.on('updateV2')","value":{"rb":{"v1":[],"v2":[]}}},
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "rb": {
+          "v1": {"full":{"$":"bytes","hex":"0000"},"diff":{}},
+          "v2": {"full":{"$":"bytes","hex":"00000000000001000000000000"},"diff":{}}
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {"rb":{"v1":{"$":"bytes","hex":"00"},"v2":{"$":"bytes","hex":"00"}}}
+    },
+    "doc": {"api":"toDelta, toArray, entries, getAttributes walk of every root","value":{"rb":[]}},
+    "events": {
+      "api": "AbstractType.observe",
+      "value": [
+        {
+          "observer": "b",
+          "event": "change",
+          "at": 0,
+          "added": [],
+          "updated": [1099511627776],
+          "removed": [],
+          "origin": "local"
+        },
+        {
+          "observer": "b",
+          "event": "update",
+          "at": 0,
+          "added": [],
+          "updated": [1099511627776],
+          "removed": [],
+          "origin": "local"
+        },
+        {
+          "observer": "b",
+          "event": "change",
+          "at": 0,
+          "added": [9007199254740991],
+          "updated": [],
+          "removed": [],
+          "origin": "r"
+        },
+        {
+          "observer": "b",
+          "event": "update",
+          "at": 0,
+          "added": [9007199254740991],
+          "updated": [],
+          "removed": [],
+          "origin": "r"
+        }
+      ]
+    },
+    "results": {
+      "api": "encodeAwarenessUpdate",
+      "value": {
+        "all": {
+          "api": "encodeAwarenessUpdate",
+          "bytes": {
+            "$": "bytes",
+            "hex": "03808080808020010f7b226e616d65223a2277696465227dffffffffffffff0f070c7b226d6178223a747275657d808080801001046e756c6c"
+          },
+          "threw": false
+        }
+      }
+    },
+    "awareness": {
+      "api": "Awareness.clientID, getStates, meta (lastUpdated is ms since the first awareness was created)",
+      "value": {
+        "b": {
+          "clientId": 1099511627776,
+          "states": [
+            [1099511627776,{"$":"obj","pairs":[["name","wide"]]}],
+            [9007199254740991,{"$":"obj","pairs":[["max",true]]}]
+          ],
+          "meta": [
+            [4294967296,{"clock":1,"lastUpdated":0}],
+            [1099511627776,{"clock":1,"lastUpdated":0}],
+            [9007199254740991,{"clock":7,"lastUpdated":0}]
+          ]
+        }
+      }
+    }
+  }
+}

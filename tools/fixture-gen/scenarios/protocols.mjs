@@ -228,6 +228,20 @@ export default [
   },
   {
     area: 'awareness',
+    name: 'client-ids-53-bit',
+    covers: ['AW-34'],
+    script: {
+      replicas: [replica('rb', 1099511627776)],
+      steps: [
+        newAw('b', 'rb'),
+        setLocal('b', { name: 'wide' }),
+        apply('b', au([[9007199254740991, 7, { max: true }], [4294967296, 1, null]]), 'r'),
+        encode('all', 'b', [1099511627776, 9007199254740991, 4294967296])
+      ]
+    }
+  },
+  {
+    area: 'awareness',
     name: 'encode-wire-vectors',
     covers: ['AW-5', 'AW-30', 'AW-31', 'AW-32', 'AW-33', 'AW-34', 'AW-35'],
     script: {

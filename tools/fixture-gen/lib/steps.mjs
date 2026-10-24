@@ -62,7 +62,8 @@ const rootGetters = {
   text: (d, n) => d.getText(n),
   array: (d, n) => d.getArray(n),
   map: (d, n) => d.getMap(n),
-  xmlFragment: (d, n) => d.getXmlFragment(n)
+  xmlFragment: (d, n) => d.getXmlFragment(n),
+  xmlText: (d, n) => d.get(n, Y.XmlText)
 }
 
 const resolveRoot = (doc, r) => {

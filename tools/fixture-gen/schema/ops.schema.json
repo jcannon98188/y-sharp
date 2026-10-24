@@ -48,7 +48,7 @@
         "clientId": {
           "type": "integer",
           "minimum": 0,
-          "maximum": 4294967295
+          "maximum": 9007199254740991
         },
         "gc": {
           "type": "boolean"
@@ -71,7 +71,8 @@
             "text",
             "array",
             "map",
-            "xmlFragment"
+            "xmlFragment",
+            "xmlText"
           ]
         }
       },
@@ -256,7 +257,7 @@
             "clientId": {
               "type": "integer",
               "minimum": 0,
-              "maximum": 4294967295
+              "maximum": 9007199254740991
             },
             "gc": {
               "type": "boolean"
@@ -505,7 +506,7 @@
             "clientId": {
               "type": "integer",
               "minimum": 0,
-              "maximum": 4294967295
+              "maximum": 9007199254740991
             }
           },
           "required": [
@@ -735,7 +736,7 @@
             "clientId": {
               "type": "integer",
               "minimum": 0,
-              "maximum": 4294967295
+              "maximum": 9007199254740991
             },
             "description": {
               "type": "string"
@@ -767,7 +768,7 @@
               "items": {
                 "type": "integer",
                 "minimum": 0,
-                "maximum": 4294967295
+                "maximum": 9007199254740991
               }
             },
             "deletedIds": {

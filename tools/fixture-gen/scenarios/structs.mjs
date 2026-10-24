@@ -477,5 +477,20 @@ export default [
         ...all3('a', 'b', 'c')
       ]
     }
+  },
+  {
+    area: 'structs',
+    name: 'client-id-53-bit',
+    covers: ['Q21', 'STR-02'],
+    observe: ['structs', 'ds'],
+    script: {
+      replicas: [replica('a', 9007199254740991), replica('b', 1099511627776), replica('c', 4294967296)],
+      steps: [
+        ins('a', 0, 'A'), ins('b', 0, 'B'), ins('c', 0, 'C'),
+        ...all3('a', 'b', 'c'),
+        ins('a', 1, 'x'), del('b', 0, 1), ins('c', 1, 'z'),
+        ...all3('a', 'b', 'c')
+      ]
+    }
   }
 ]

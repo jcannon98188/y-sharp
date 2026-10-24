@@ -1,6 +1,6 @@
 // Spec 7 (TASK-2.7): shared types and events. Text formatting and deltas, array and map details, XML trees and attributes,
 // observer and transaction ordering. Registry prefixes: T-0, A, A-E, M, M-E, T, F, E, D, X, Y, X-E, V, TX and the quirks Q23, Q26, Q27.
-import { replica, text, array, map, xmlFragment } from '../lib/script.mjs'
+import { replica, text, array, map, xmlFragment, xmlText } from '../lib/script.mjs'
 
 const sync = (from, to) => ({ step: 'sync', from, to })
 const both = (a, b) => [sync(a, b), sync(b, a)]
@@ -8,6 +8,7 @@ const t = text('t')
 const arr = array('arr')
 const m = map('m')
 const x = xmlFragment('x')
+const xt = xmlText('xt')
 
 const tins = (doc, at, value, attributes, target = t) => ({ step: 'text.insert', doc, target, at, value, ...(attributes ? { attributes } : {}) })
 const tfmt = (doc, at, len, attributes, target = t) => ({ step: 'text.format', doc, target, at, len, attributes })
@@ -397,6 +398,25 @@ export default [
           steps: [mset('b', 'one', 'remote', [arr, 0]), tdel('b', 0, 1)]
         },
         sync('b', 'a')
+      ]
+    }
+  },
+  {
+    area: 'xml',
+    name: 'xml-text-root',
+    covers: ['X-1', 'F-5'],
+    observe: ['structs', 'ds'],
+    script: {
+      replicas: [replica('a', 61), replica('b', 62)],
+      steps: [
+        tins('a', 0, 'AB', { em: {}, strong: {} }, xt),
+        tins('a', 2, 'C', { em: {} }, xt),
+        tfmt('a', 1, 1, { strong: null }, xt),
+        { step: 'xml.setAttribute', doc: 'a', target: xt, name: 'k', value: 1 },
+        sync('a', 'b'),
+        tins('b', 0, 'z', undefined, xt),
+        tdel('a', 1, 1, xt),
+        ...both('a', 'b')
       ]
     }
   }

@@ -77,6 +77,14 @@
       "bytes": 4981
     },
     {
+      "path": "awareness/client-ids-53-bit.json",
+      "area": "awareness",
+      "name": "client-ids-53-bit",
+      "covers": ["AW-34"],
+      "sha256": "094a5c404fe5b411dfa88b3af2beee33f40f3fc29d41f552f5cab95804884b71",
+      "bytes": 3475
+    },
+    {
       "path": "awareness/constructor-state.json",
       "area": "awareness",
       "name": "constructor-state",
@@ -317,8 +325,8 @@
       "area": "hostile",
       "name": "hos-clock",
       "covers": ["HOS-CLOCK","ERR-21"],
-      "sha256": "2237245176c2206453669f90794f73ee4a4f80470f74c2c0b431cffa6bd6e509",
-      "bytes": 9764
+      "sha256": "0f10b5da8b8c749b10114c82dcdb5d35ead68cb39afb7f91657ee549dc55a9e5",
+      "bytes": 10197
     },
     {
       "path": "hostile/hos-len.json",
@@ -672,6 +680,14 @@
       "covers": ["SNAP-05","SNAP-06","SNAP-07","SNAP-01"],
       "sha256": "ded70b5b07722935232cb873499e1dc00d7756cb65da0810508d62f1699b37f8",
       "bytes": 7031
+    },
+    {
+      "path": "structs/client-id-53-bit.json",
+      "area": "structs",
+      "name": "client-id-53-bit",
+      "covers": ["Q21","STR-02"],
+      "sha256": "bf0065c1c6d796f8a1307df322dec90da4625e75f1d29febbe104c65e2048010",
+      "bytes": 14416
     },
     {
       "path": "structs/client-id-collision.json",
@@ -1168,6 +1184,14 @@
       "covers": ["X-1","F-1","E-1","T-5","Y-2"],
       "sha256": "1607d0c6b8aa06681284fde0cf3dea9aeecc2efe893e838aaeb82939f1a5ceb9",
       "bytes": 22370
+    },
+    {
+      "path": "xml/xml-text-root.json",
+      "area": "xml",
+      "name": "xml-text-root",
+      "covers": ["X-1","F-5"],
+      "sha256": "12981c2d1e25b87b6ad1a0d2f758ba19d3e6674464b419caaae5be43cb2d7dbc",
+      "bytes": 15739
     }
   ]
 }
