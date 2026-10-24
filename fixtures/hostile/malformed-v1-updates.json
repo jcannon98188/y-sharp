@@ -133,7 +133,8 @@
           "pendingDs": false,
           "sv": {"$":"bytes","hex":"018080808080808080800102"},
           "doc": [["t",{"kind":"text","delta":[{"insert":"hi"}]}]],
-          "classification": "match"
+          "classification": "diverge",
+          "divergence": "Q12"
         },
         {
           "name": "content-ref-11",

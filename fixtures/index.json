@@ -159,8 +159,8 @@
         "ENC-53",
         "ENC-54"
       ],
-      "sha256": "ec4f70ca1b2c4d41f8337470f2d214ba02bc9124bced41b51eb9ba7c8c0211f0",
-      "bytes": 10398
+      "sha256": "bb5f900e6824ff7eb97324032de6fb69e672dbb2fc567958b6517668b17d06b4",
+      "bytes": 10431
     },
     {
       "path": "hostile/malformed-v2-updates.json",
