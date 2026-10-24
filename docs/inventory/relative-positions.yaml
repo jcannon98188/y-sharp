@@ -9,7 +9,7 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:88"
 
 - id: RP-02
@@ -19,7 +19,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:89"
 
 - id: RP-03
@@ -29,7 +29,7 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:94"
 
 - id: RP-04
@@ -39,7 +39,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:95"
 
 - id: RP-05
@@ -49,7 +49,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:96"
   note: "Candidate divergence in the research note; decide under ADR 0003."
 
@@ -60,7 +60,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:97"
 
 - id: RP-07
@@ -70,7 +70,7 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:106"
 
 - id: RP-08
@@ -80,7 +80,7 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:107"
 
 - id: RP-09
@@ -90,5 +90,5 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:108"

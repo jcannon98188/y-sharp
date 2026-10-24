@@ -45,11 +45,12 @@ defineStep({
     globalThis.setInterval = (fn, ms) => ctx.addTimer(fn, ms)
     let a
     try { a = new awarenessProtocol.Awareness(ctx.doc(s.doc)) } finally { globalThis.setInterval = realSet }
+    ctx.awarenessEpoch ??= ctx.now
     registry(ctx).set(s.awareness, a)
-    const log = event => (c, origin) => ctx.events.push({ observer: s.awareness, event, at: ctx.now, added: c.added, updated: c.updated, removed: c.removed, origin: tag(origin) })
+    const log = event => (c, origin) => ctx.events.push({ observer: s.awareness, event, at: ctx.now - ctx.awarenessEpoch, added: c.added, updated: c.updated, removed: c.removed, origin: tag(origin) })
     a.on('change', log('change'))
     a.on('update', log('update'))
-    a.on('destroy', () => ctx.events.push({ observer: s.awareness, event: 'destroy', at: ctx.now }))
+    a.on('destroy', () => ctx.events.push({ observer: s.awareness, event: 'destroy', at: ctx.now - ctx.awarenessEpoch }))
   }
 })
 defineStep({

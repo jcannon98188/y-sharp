@@ -82,7 +82,7 @@
       }
     },
     "awareness": {
-      "api": "Awareness.clientID, getStates, meta",
+      "api": "Awareness.clientID, getStates, meta (lastUpdated is ms since the first awareness was created)",
       "value": {
         "b": {
           "clientId": 9,

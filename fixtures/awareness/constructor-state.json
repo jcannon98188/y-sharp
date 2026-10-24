@@ -29,7 +29,7 @@
     },
     "doc": {"api":"toDelta, toArray, entries, getAttributes walk of every root","value":{"ra":[]}},
     "awareness": {
-      "api": "Awareness.clientID, getStates, meta",
+      "api": "Awareness.clientID, getStates, meta (lastUpdated is ms since the first awareness was created)",
       "value": {"a":{"clientId":7,"states":[[7,{"$":"obj","pairs":[]}]],"meta":[[7,{"clock":0,"lastUpdated":0}]]}}
     }
   }

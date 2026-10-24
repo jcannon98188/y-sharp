@@ -1,0 +1,132 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["UM-05","UM-04"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":4}],
+    "steps": [
+      {"step":"undo.create","doc":"a","name":"um","scope":[{"root":"t","kind":"text"}],"captureTimeout":0},
+      {"step":"text.insert","doc":"a","target":{"root":"t","kind":"text"},"at":0,"value":"one"},
+      {"step":"text.insert","doc":"a","target":{"root":"t","kind":"text"},"at":3,"value":"two"},
+      {"step":"undo.undo","name":"um","as":"u1"},
+      {"step":"text.insert","doc":"a","target":{"root":"t","kind":"text"},"at":3,"value":"three"},
+      {"step":"undo.redo","name":"um","as":"r1"},
+      {"step":"undo.undo","name":"um","as":"u2"},
+      {"step":"undo.undo","name":"um","as":"u3"},
+      {"step":"undo.undo","name":"um","as":"u4"}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [
+            {"$":"bytes","hex":"0101040004010174036f6e6500"},
+            {"$":"bytes","hex":"010104038404020374776f00"},
+            {"$":"bytes","hex":"000104010303"},
+            {"$":"bytes","hex":"0101040684040505746872656500"},
+            {"$":"bytes","hex":"000104010605"},
+            {"$":"bytes","hex":"000104010003"}
+          ],
+          "v2": [
+            {"$":"bytes","hex":"00000104000001040704746f6e6501030101000001010000"},
+            {"$":"bytes","hex":"00000244000104000184050374776f0300000001010300"},
+            {"$":"bytes","hex":"0000000000000100000000000104010302"},
+            {"$":"bytes","hex":"0000024400010a000184070574687265650500000001010600"},
+            {"$":"bytes","hex":"0000000000000100000000000104010604"},
+            {"$":"bytes","hex":"0000000000000100000000000104010002"}
+          ]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {"full":{"$":"bytes","hex":"01010400040101740b6f6e6574776f7468726565010401000b"},"diff":{}},
+          "v2": {
+            "full": {"$":"bytes","hex":"00000104000001040f0c746f6e6574776f7468726565010b01010000010100010401000a"},
+            "diff": {}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {"a":{"v1":{"$":"bytes","hex":"01040b"},"v2":{"$":"bytes","hex":"01040b"}}}
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {"a":[["t",{"kind":"text","delta":[]}]]}
+    },
+    "events": {
+      "api": "AbstractType.observe",
+      "value": [
+        {"observer":"um","type":"stack-item-added","kind":"undo"},
+        {"observer":"um","type":"stack-item-added","kind":"undo"},
+        {"observer":"um","type":"stack-item-added","kind":"redo"},
+        {"observer":"um","type":"stack-item-popped","kind":"undo"},
+        {"observer":"um","type":"stack-cleared","undoStackCleared":false,"redoStackCleared":true},
+        {"observer":"um","type":"stack-item-added","kind":"undo"},
+        {"observer":"um","type":"stack-item-added","kind":"redo"},
+        {"observer":"um","type":"stack-item-popped","kind":"undo"},
+        {"observer":"um","type":"stack-item-added","kind":"redo"},
+        {"observer":"um","type":"stack-item-popped","kind":"undo"}
+      ]
+    },
+    "results": {
+      "api": "UndoManager.undo, undoStack.length, redoStack.length, UndoManager.redo, undoStack.length, redoStack.length",
+      "value": {
+        "u1": {
+          "api": "UndoManager.undo, undoStack.length, redoStack.length",
+          "value": {"popped":true,"undoStack":1,"redoStack":1}
+        },
+        "r1": {
+          "api": "UndoManager.redo, undoStack.length, redoStack.length",
+          "value": {"popped":false,"undoStack":2,"redoStack":0}
+        },
+        "u2": {
+          "api": "UndoManager.undo, undoStack.length, redoStack.length",
+          "value": {"popped":true,"undoStack":1,"redoStack":1}
+        },
+        "u3": {
+          "api": "UndoManager.undo, undoStack.length, redoStack.length",
+          "value": {"popped":true,"undoStack":0,"redoStack":2}
+        },
+        "u4": {
+          "api": "UndoManager.undo, undoStack.length, redoStack.length",
+          "value": {"popped":false,"undoStack":0,"redoStack":2}
+        }
+      }
+    },
+    "structs": {
+      "api": "doc.store.clients",
+      "value": {
+        "a": [
+          [
+            4,
+            [
+              {
+                "id": [4,0],
+                "len": 11,
+                "kind": "item",
+                "parent": "t",
+                "content": {"ref":4,"value":"onetwothree"},
+                "deleted": true,
+                "keep": true
+              }
+            ]
+          ]
+        ]
+      }
+    },
+    "ds": {"api":"Y.createDeleteSetFromStructStore","value":{"a":[[4,[[0,11]]]]}}
+  }
+}

@@ -7,6 +7,7 @@ import { tag } from './tagged.mjs'
 /** A value as it appears in a dump: a tagged value, or a typed dump for a shared type. */
 export const yvalueOut = v => {
   if (v instanceof Y.AbstractType) return dumpType(v)
+  if (v instanceof Y.Doc) return { kind: 'subdoc', guid: v.guid }
   if (Array.isArray(v)) return v.map(yvalueOut)
   return tag(v)
 }
@@ -139,17 +140,18 @@ export const observe = (ctx, roots, extra = []) => {
   if (ctx.results.size) {
     obs.results = {
       api: Array.from(new Set(Array.from(ctx.results.values(), r => r.api))).join(', '),
-      value: Object.fromEntries(Array.from(ctx.results, ([n, r]) => [n, { api: r.api, ...(r.bytes ? { bytes: bytes(r.bytes) } : {}), ...(r.extra ?? {}) }]))
+      value: Object.fromEntries(Array.from(ctx.results, ([n, r]) => [n, r.value === undefined ? { api: r.api, ...(r.bytes ? { bytes: bytes(r.bytes) } : {}), ...(r.extra ?? {}) } : { api: r.api, value: r.value }]))
     }
   }
   if (ctx.awarenesses?.size) {
     const byId = (a, b) => a[0] - b[0]
+    const rel = ms => ms - ctx.awarenessEpoch
     obs.awareness = {
-      api: 'Awareness.clientID, getStates, meta',
+      api: 'Awareness.clientID, getStates, meta (lastUpdated is ms since the first awareness was created)',
       value: Object.fromEntries(Array.from(ctx.awarenesses, ([n, a]) => [n, {
         clientId: a.clientID,
         states: Array.from(a.getStates(), ([id, st]) => [id, tag(st)]).sort(byId),
-        meta: Array.from(a.meta, ([id, m]) => [id, { clock: m.clock, lastUpdated: m.lastUpdated }]).sort(byId)
+        meta: Array.from(a.meta, ([id, m]) => [id, { clock: m.clock, lastUpdated: rel(m.lastUpdated) }]).sort(byId)
       }]))
     }
   }

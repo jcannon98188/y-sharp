@@ -79,9 +79,9 @@ public class OpsScriptTests
     public void Parse_AreaRegisteredStepKind_IsAcceptedWithoutChangingTheCore()
     {
         var reg = StandardSteps.CreateRegistry();
-        reg.Register(new StepDefinition("snapshot.take", required: new[] { "doc", "name" }, optional: Array.Empty<string>(), run: (_, _) => { }));
-        var s = OpsScript.Parse(Script("{\"step\":\"snapshot.take\",\"doc\":\"a\",\"name\":\"s1\"}"), reg);
-        Assert.Equal("snapshot.take", s.Steps.Last().Kind);
+        reg.Register(new StepDefinition("example.area", required: new[] { "doc", "name" }, optional: Array.Empty<string>(), run: (_, _) => { }));
+        var s = OpsScript.Parse(Script("{\"step\":\"example.area\",\"doc\":\"a\",\"name\":\"s1\"}"), reg);
+        Assert.Equal("example.area", s.Steps.Last().Kind);
     }
 
     [Fact]
