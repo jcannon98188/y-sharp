@@ -111,7 +111,7 @@
   wire: false
   quirk: [Q10]
   owner: 7
-  status: pending
+  status: active
   ref: "quirks.md:142"
   note: "Proposal in the quirk register: diverge, by construction. Needs a recorded decision (ADR 0003) and a [Diverges] test."
 

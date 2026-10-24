@@ -97,7 +97,8 @@
   module: y-map
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: skipped
+  reason: "Only checks the JS type assumptions of values(), entries() and keys() and logs them; it has no assertions. Key order is covered by the M-6 and Q26 tests."
 
 - key: y-map.tests.js:testMapEventError
   file: yjs/tests/y-map.tests.js
@@ -105,7 +106,7 @@
   module: y-map
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testMapHavingIterableAsConstructorParamTests
   file: yjs/tests/y-map.tests.js
@@ -113,7 +114,7 @@
   module: y-map
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testBasicMapTests
   file: yjs/tests/y-map.tests.js
@@ -121,7 +122,7 @@
   module: y-map
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testGetAndSetOfMapProperty
   file: yjs/tests/y-map.tests.js
@@ -129,7 +130,7 @@
   module: y-map
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testYmapSetsYmap
   file: yjs/tests/y-map.tests.js
@@ -137,7 +138,7 @@
   module: y-map
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testYmapSetsYarray
   file: yjs/tests/y-map.tests.js
@@ -145,7 +146,7 @@
   module: y-map
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testGetAndSetOfMapPropertySyncs
   file: yjs/tests/y-map.tests.js
@@ -153,7 +154,7 @@
   module: y-map
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testGetAndSetOfMapPropertyWithConflict
   file: yjs/tests/y-map.tests.js
@@ -161,7 +162,7 @@
   module: y-map
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testSizeAndDeleteOfMapProperty
   file: yjs/tests/y-map.tests.js
@@ -169,7 +170,7 @@
   module: y-map
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testGetAndSetAndDeleteOfMapProperty
   file: yjs/tests/y-map.tests.js
@@ -177,7 +178,7 @@
   module: y-map
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testSetAndClearOfMapProperties
   file: yjs/tests/y-map.tests.js
@@ -185,7 +186,7 @@
   module: y-map
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testSetAndClearOfMapPropertiesWithConflicts
   file: yjs/tests/y-map.tests.js
@@ -193,7 +194,7 @@
   module: y-map
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testGetAndSetOfMapPropertyWithThreeConflicts
   file: yjs/tests/y-map.tests.js
@@ -201,7 +202,7 @@
   module: y-map
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testGetAndSetAndDeleteOfMapPropertyWithThreeConflicts
   file: yjs/tests/y-map.tests.js
@@ -209,7 +210,7 @@
   module: y-map
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testObserveDeepProperties
   file: yjs/tests/y-map.tests.js
@@ -217,7 +218,7 @@
   module: y-map
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testObserversUsingObservedeep
   file: yjs/tests/y-map.tests.js
@@ -225,7 +226,7 @@
   module: y-map
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testPathsOfSiblingEvents
   file: yjs/tests/y-map.tests.js
@@ -233,7 +234,7 @@
   module: y-map
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testDeepEventPathsWithMultipleDeepObservers
   file: yjs/tests/y-map.tests.js
@@ -241,7 +242,7 @@
   module: y-map
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testThrowsAddAndUpdateAndDeleteEvents
   file: yjs/tests/y-map.tests.js
@@ -249,7 +250,7 @@
   module: y-map
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testThrowsDeleteEventsOnClear
   file: yjs/tests/y-map.tests.js
@@ -257,7 +258,7 @@
   module: y-map
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testChangeEvent
   file: yjs/tests/y-map.tests.js
@@ -265,7 +266,7 @@
   module: y-map
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testYmapEventExceptionsShouldCompleteTransaction
   file: yjs/tests/y-map.tests.js
@@ -273,7 +274,7 @@
   module: y-map
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testYmapEventHasCorrectValueWhenSettingAPrimitive
   file: yjs/tests/y-map.tests.js
@@ -281,7 +282,7 @@
   module: y-map
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testYmapEventHasCorrectValueWhenSettingAPrimitiveFromOtherUser
   file: yjs/tests/y-map.tests.js
@@ -289,7 +290,7 @@
   module: y-map
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testRepeatGeneratingYmapTests10
   file: yjs/tests/y-map.tests.js
@@ -425,7 +426,7 @@
   module: y-array
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testFailsObjectManipulationInDevMode
   file: yjs/tests/y-array.tests.js
@@ -433,7 +434,7 @@
   module: y-array
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testSlice
   file: yjs/tests/y-array.tests.js
@@ -441,7 +442,7 @@
   module: y-array
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testArrayFrom
   file: yjs/tests/y-array.tests.js
@@ -449,7 +450,7 @@
   module: y-array
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testLengthIssue
   file: yjs/tests/y-array.tests.js
@@ -457,7 +458,7 @@
   module: y-array
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testLengthIssue2
   file: yjs/tests/y-array.tests.js
@@ -465,7 +466,7 @@
   module: y-array
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testDeleteInsert
   file: yjs/tests/y-array.tests.js
@@ -473,7 +474,7 @@
   module: y-array
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testInsertThreeElementsTryRegetProperty
   file: yjs/tests/y-array.tests.js
@@ -481,7 +482,7 @@
   module: y-array
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testConcurrentInsertWithThreeConflicts
   file: yjs/tests/y-array.tests.js
@@ -489,7 +490,7 @@
   module: y-array
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testConcurrentInsertDeleteWithThreeConflicts
   file: yjs/tests/y-array.tests.js
@@ -497,7 +498,7 @@
   module: y-array
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testInsertionsInLateSync
   file: yjs/tests/y-array.tests.js
@@ -505,7 +506,7 @@
   module: y-array
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testDisconnectReallyPreventsSendingMessages
   file: yjs/tests/y-array.tests.js
@@ -513,7 +514,7 @@
   module: y-array
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testDeletionsInLateSync
   file: yjs/tests/y-array.tests.js
@@ -521,7 +522,7 @@
   module: y-array
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testInsertThenMergeDeleteOnSync
   file: yjs/tests/y-array.tests.js
@@ -529,7 +530,7 @@
   module: y-array
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testInsertAndDeleteEvents
   file: yjs/tests/y-array.tests.js
@@ -537,7 +538,7 @@
   module: y-array
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testNestedObserverEvents
   file: yjs/tests/y-array.tests.js
@@ -545,7 +546,7 @@
   module: y-array
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testInsertAndDeleteEventsForTypes
   file: yjs/tests/y-array.tests.js
@@ -553,7 +554,7 @@
   module: y-array
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testObserveDeepEventOrder
   file: yjs/tests/y-array.tests.js
@@ -561,7 +562,7 @@
   module: y-array
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testObservedeepIndexes
   file: yjs/tests/y-array.tests.js
@@ -569,7 +570,7 @@
   module: y-array
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testChangeEvent
   file: yjs/tests/y-array.tests.js
@@ -577,7 +578,7 @@
   module: y-array
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testInsertAndDeleteEventsForTypes2
   file: yjs/tests/y-array.tests.js
@@ -585,7 +586,7 @@
   module: y-array
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testNewChildDoesNotEmitEventInTransaction
   file: yjs/tests/y-array.tests.js
@@ -593,7 +594,7 @@
   module: y-array
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testGarbageCollector
   file: yjs/tests/y-array.tests.js
@@ -601,7 +602,7 @@
   module: y-array
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testEventTargetIsSetCorrectlyOnLocal
   file: yjs/tests/y-array.tests.js
@@ -609,7 +610,7 @@
   module: y-array
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testEventTargetIsSetCorrectlyOnRemote
   file: yjs/tests/y-array.tests.js
@@ -617,7 +618,7 @@
   module: y-array
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testIteratingArrayContainingTypes
   file: yjs/tests/y-array.tests.js
@@ -625,7 +626,7 @@
   module: y-array
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-array.tests.js:testRepeatGeneratingYarrayTests6
   file: yjs/tests/y-array.tests.js
@@ -761,7 +762,7 @@
   module: y-text
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testDeltaBug2
   file: yjs/tests/y-text.tests.js
@@ -769,7 +770,7 @@
   module: y-text
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testDeltaAfterConcurrentFormatting
   file: yjs/tests/y-text.tests.js
@@ -777,7 +778,7 @@
   module: y-text
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testBasicInsertAndDelete
   file: yjs/tests/y-text.tests.js
@@ -785,7 +786,7 @@
   module: y-text
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testBasicFormat
   file: yjs/tests/y-text.tests.js
@@ -793,7 +794,7 @@
   module: y-text
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testFalsyFormats
   file: yjs/tests/y-text.tests.js
@@ -801,7 +802,7 @@
   module: y-text
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testMultilineFormat
   file: yjs/tests/y-text.tests.js
@@ -809,7 +810,7 @@
   module: y-text
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testNotMergeEmptyLinesFormat
   file: yjs/tests/y-text.tests.js
@@ -817,7 +818,7 @@
   module: y-text
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testPreserveAttributesThroughDelete
   file: yjs/tests/y-text.tests.js
@@ -825,7 +826,7 @@
   module: y-text
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testGetDeltaWithEmbeds
   file: yjs/tests/y-text.tests.js
@@ -833,7 +834,7 @@
   module: y-text
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testTypesAsEmbed
   file: yjs/tests/y-text.tests.js
@@ -841,7 +842,7 @@
   module: y-text
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testSnapshot
   file: yjs/tests/y-text.tests.js
@@ -849,7 +850,7 @@
   module: y-text
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testSnapshotDeleteAfter
   file: yjs/tests/y-text.tests.js
@@ -857,7 +858,7 @@
   module: y-text
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testToJson
   file: yjs/tests/y-text.tests.js
@@ -865,7 +866,7 @@
   module: y-text
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testToDeltaEmbedAttributes
   file: yjs/tests/y-text.tests.js
@@ -873,7 +874,7 @@
   module: y-text
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testToDeltaEmbedNoAttributes
   file: yjs/tests/y-text.tests.js
@@ -881,7 +882,7 @@
   module: y-text
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testFormattingRemoved
   file: yjs/tests/y-text.tests.js
@@ -889,7 +890,7 @@
   module: y-text
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testFormattingRemovedInMidText
   file: yjs/tests/y-text.tests.js
@@ -897,7 +898,7 @@
   module: y-text
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testFormattingDeltaUnnecessaryAttributeChange
   file: yjs/tests/y-text.tests.js
@@ -905,7 +906,7 @@
   module: y-text
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testInsertAndDeleteAtRandomPositions
   file: yjs/tests/y-text.tests.js
@@ -921,7 +922,7 @@
   module: y-text
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testBestCase
   file: yjs/tests/y-text.tests.js
@@ -929,7 +930,8 @@
   module: y-text
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: skipped
+  reason: "Builds Item objects directly and prints timings; it has no assertions and needs internals the API does not expose. Timing belongs to the benchmarks (Spec 14)."
 
 - key: y-text.tests.js:testLargeFragmentedDocument
   file: yjs/tests/y-text.tests.js
@@ -937,7 +939,8 @@
   module: y-text
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: skipped
+  reason: "Timing-only test (measureTime), no assertions. Large fragmented documents are measured by the benchmarks (Spec 14)."
 
 - key: y-text.tests.js:testIncrementalUpdatesPerformanceOnLargeFragmentedDocument
   file: yjs/tests/y-text.tests.js
@@ -945,7 +948,8 @@
   module: y-text
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: skipped
+  reason: "Timing-only test (measureTime), no assertions. Merge and apply throughput is measured by the benchmarks (Spec 14)."
 
 - key: y-text.tests.js:testSplitSurrogateCharacter
   file: yjs/tests/y-text.tests.js
@@ -953,7 +957,7 @@
   module: y-text
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testSearchMarkerBug1
   file: yjs/tests/y-text.tests.js
@@ -961,7 +965,7 @@
   module: y-text
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testFormattingBug
   file: yjs/tests/y-text.tests.js
@@ -969,7 +973,7 @@
   module: y-text
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testDeleteFormatting
   file: yjs/tests/y-text.tests.js
@@ -977,7 +981,7 @@
   module: y-text
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-text.tests.js:testRepeatGenerateTextChanges5
   file: yjs/tests/y-text.tests.js
@@ -1114,7 +1118,8 @@
   module: y-xml
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: skipped
+  reason: "Checks JS/TypeScript typings of getAttribute and getAttributes and logs the result; C# has static types and the test has no assertions."
 
 - key: y-xml.tests.js:testSetProperty
   file: yjs/tests/y-xml.tests.js
@@ -1122,7 +1127,7 @@
   module: y-xml
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-xml.tests.js:testHasProperty
   file: yjs/tests/y-xml.tests.js
@@ -1130,7 +1135,7 @@
   module: y-xml
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-xml.tests.js:testEvents
   file: yjs/tests/y-xml.tests.js
@@ -1138,7 +1143,7 @@
   module: y-xml
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-xml.tests.js:testTreewalker
   file: yjs/tests/y-xml.tests.js
@@ -1146,7 +1151,7 @@
   module: y-xml
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-xml.tests.js:testYtextAttributes
   file: yjs/tests/y-xml.tests.js
@@ -1154,7 +1159,7 @@
   module: y-xml
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-xml.tests.js:testSiblings
   file: yjs/tests/y-xml.tests.js
@@ -1162,7 +1167,7 @@
   module: y-xml
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-xml.tests.js:testInsertafter
   file: yjs/tests/y-xml.tests.js
@@ -1170,7 +1175,7 @@
   module: y-xml
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-xml.tests.js:testClone
   file: yjs/tests/y-xml.tests.js
@@ -1178,7 +1183,7 @@
   module: y-xml
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-xml.tests.js:testFormattingBug
   file: yjs/tests/y-xml.tests.js
@@ -1186,7 +1191,7 @@
   module: y-xml
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: y-xml.tests.js:testElement
   file: yjs/tests/y-xml.tests.js
@@ -1194,7 +1199,7 @@
   module: y-xml
   randomized: false
   owner: 7
-  outcome: pending
+  outcome: ported
 
 - key: encoding.tests.js:testStructReferences
   file: yjs/tests/encoding.tests.js

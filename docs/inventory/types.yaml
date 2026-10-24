@@ -9,7 +9,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:32"
 
 - id: T-0.2
@@ -19,7 +19,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:34"
 
 - id: T-0.3
@@ -29,7 +29,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:35"
 
 - id: T-0.4
@@ -39,7 +39,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:42"
 
 - id: T-0.5
@@ -49,7 +49,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:50"
 
 - id: T-0.6
@@ -59,7 +59,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:53"
 
 - id: T-0.7
@@ -69,7 +69,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:56"
 
 - id: T-0.8
@@ -79,7 +79,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:59"
 
 - id: T-0.9
@@ -89,7 +89,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:61"
 
 - id: T-0.10
@@ -99,7 +99,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:68"
 
 - id: T-0.11
@@ -109,7 +109,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:74"
 
 - id: T-0.12
@@ -119,7 +119,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:78"
 
 - id: T-0.13
@@ -129,7 +129,7 @@
   layers: [unit]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:80"
   note: "Undefined in Yjs; y-sharp defines its own behaviour (ADR 0005), excluded from the differential."
 
@@ -140,7 +140,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:94"
 
 - id: A-2
@@ -150,7 +150,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:95"
 
 - id: A-3
@@ -160,7 +160,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:96"
 
 - id: A-4
@@ -170,7 +170,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:98"
 
 - id: A-5
@@ -180,7 +180,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:99"
 
 - id: A-6
@@ -190,18 +190,20 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:102"
 
 - id: A-7
   title: "get(i) out of range returns undefined (no throw) (AT:618-634)"
   source: "yjs/src/types/AbstractType.js:618"
-  kind: match
+  kind: diverge
   layers: [unit, differential]
   wire: false
+  adr: ["0008"]
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:103"
+  note: "ADR 0008: the indexer throws ArgumentOutOfRangeException where JS get(i) returns undefined; the [Diverges] test shows the JS behaviour."
 
 - id: A-8
   title: "slice(start,end)"
@@ -210,7 +212,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:104"
 
 - id: A-9
@@ -220,7 +222,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:108"
 
 - id: A-10
@@ -230,7 +232,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:109"
 
 - id: A-11
@@ -240,7 +242,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:111"
 
 - id: A-12
@@ -250,7 +252,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:112"
 
 - id: A-13
@@ -260,7 +262,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:114"
 
 - id: A-14
@@ -270,7 +272,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:116"
 
 - id: A-15
@@ -280,7 +282,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:119"
 
 - id: A-16
@@ -290,7 +292,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:120"
 
 - id: A-17
@@ -300,7 +302,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:122"
 
 - id: A-18
@@ -310,7 +312,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:123"
 
 - id: A-19
@@ -320,7 +322,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:125"
 
 - id: A-20
@@ -330,7 +332,7 @@
   layers: [unit]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:128"
   note: "Undefined in Yjs; y-sharp defines its own behaviour (ADR 0005), excluded from the differential."
 
@@ -341,7 +343,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:134"
 
 - id: A-E2
@@ -351,7 +353,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:135"
 
 - id: A-E3
@@ -361,7 +363,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:141"
 
 - id: A-E4
@@ -371,7 +373,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:143"
 
 - id: A-E5
@@ -381,7 +383,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:146"
 
 - id: A-E6
@@ -391,7 +393,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:147"
 
 - id: A-E7
@@ -401,7 +403,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:149"
 
 - id: A-E8
@@ -411,7 +413,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:151"
 
 - id: A-E9
@@ -421,7 +423,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:154"
 
 - id: A-E10
@@ -431,7 +433,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:156"
 
 - id: M-1
@@ -441,7 +443,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:171"
 
 - id: M-2
@@ -451,7 +453,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:173"
 
 - id: M-3
@@ -461,7 +463,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:174"
 
 - id: M-4
@@ -471,7 +473,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:175"
 
 - id: M-5
@@ -481,7 +483,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:177"
 
 - id: M-6
@@ -491,7 +493,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:179"
 
 - id: M-7
@@ -501,7 +503,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:183"
 
 - id: M-8
@@ -511,7 +513,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:184"
 
 - id: M-9
@@ -521,7 +523,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:187"
 
 - id: M-10
@@ -531,7 +533,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:189"
 
 - id: M-11
@@ -541,7 +543,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:190"
 
 - id: M-12
@@ -551,7 +553,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:193"
 
 - id: M-E1
@@ -561,7 +563,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:199"
 
 - id: M-E2
@@ -571,7 +573,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:202"
 
 - id: M-E3
@@ -581,7 +583,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:210"
 
 - id: M-E4
@@ -591,7 +593,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:211"
 
 - id: M-E5
@@ -601,18 +603,20 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:212"
 
 - id: M-E6
   title: "Exceptions in observers"
   source: "yjs/src/utils/Transaction.js:267"
-  kind: match
+  kind: diverge
   layers: [unit, port, differential]
   wire: false
+  adr: ["0005"]
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:215"
+  note: "ADR 0005: handler exceptions are contained and reported through Doc.ObserverFaulted; JS rethrows from the outermost mutating call. All handlers run, the data commits and update is emitted in both."
 
 - id: M-E7
   title: "Map event after a remote update carries target = local type (UT testEventTargetIsSetCorrectlyOnRemote for..."
@@ -621,7 +625,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:220"
 
 - id: T-1
@@ -631,7 +635,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:239"
 
 - id: T-2
@@ -641,7 +645,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:241"
 
 - id: T-3
@@ -651,7 +655,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:242"
 
 - id: T-4
@@ -661,7 +665,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:244"
 
 - id: T-5
@@ -671,7 +675,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:245"
 
 - id: T-6
@@ -681,7 +685,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:249"
 
 - id: T-7
@@ -691,7 +695,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:252"
 
 - id: T-8
@@ -701,7 +705,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:254"
 
 - id: T-9
@@ -711,7 +715,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:255"
 
 - id: F-1
@@ -721,7 +725,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:262"
 
 - id: F-2
@@ -731,7 +735,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:265"
 
 - id: F-3
@@ -741,7 +745,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:268"
 
 - id: F-4
@@ -751,7 +755,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:270"
 
 - id: F-5
@@ -761,7 +765,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:271"
 
 - id: F-6
@@ -771,7 +775,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:274"
 
 - id: F-7
@@ -781,7 +785,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:276"
 
 - id: F-8
@@ -791,7 +795,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:279"
 
 - id: F-9
@@ -801,7 +805,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:283"
 
 - id: E-1
@@ -811,7 +815,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:288"
 
 - id: E-2
@@ -821,7 +825,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:290"
 
 - id: E-3
@@ -831,7 +835,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:292"
 
 - id: E-4
@@ -841,7 +845,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:293"
 
 - id: E-5
@@ -851,7 +855,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:295"
 
 - id: E-6
@@ -861,7 +865,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:296"
 
 - id: D-1
@@ -871,7 +875,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:300"
 
 - id: D-2
@@ -881,7 +885,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:304"
 
 - id: D-3
@@ -891,7 +895,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:305"
 
 - id: D-4
@@ -901,7 +905,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:307"
 
 - id: X-1
@@ -911,7 +915,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:311"
 
 - id: X-2
@@ -921,7 +925,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:313"
 
 - id: Y-1
@@ -931,7 +935,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:317"
 
 - id: Y-2
@@ -941,7 +945,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:318"
 
 - id: Y-3
@@ -951,7 +955,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:320"
 
 - id: Y-4
@@ -961,7 +965,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:321"
 
 - id: Y-5
@@ -971,7 +975,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:324"
 
 - id: Y-6
@@ -981,7 +985,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:325"
 
 - id: Y-7
@@ -991,7 +995,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:326"
 
 - id: X-E1
@@ -1001,7 +1005,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:351"
 
 - id: X-E2
@@ -1011,7 +1015,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:352"
 
 - id: X-E3
@@ -1021,7 +1025,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:354"
 
 - id: X-E4
@@ -1031,7 +1035,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:357"
 
 - id: X-E5
@@ -1041,7 +1045,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:359"
 
 - id: X-E6
@@ -1051,7 +1055,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:361"
 
 - id: X-E7
@@ -1061,7 +1065,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:362"
 
 - id: X-E8
@@ -1071,7 +1075,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:363"
 
 - id: V-1
@@ -1081,7 +1085,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:390"
 
 - id: V-2
@@ -1091,7 +1095,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:391"
 
 - id: V-3
@@ -1101,7 +1105,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:394"
 
 - id: V-4
@@ -1111,7 +1115,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:398"
 
 - id: V-5
@@ -1121,7 +1125,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:399"
 
 - id: V-6
@@ -1131,7 +1135,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:400"
 
 - id: V-7
@@ -1141,7 +1145,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:402"
 
 - id: V-8
@@ -1151,7 +1155,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:403"
 
 - id: V-9
@@ -1161,7 +1165,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:405"
 
 - id: TX-1
@@ -1171,7 +1175,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:429"
 
 - id: TX-2
@@ -1181,7 +1185,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:432"
 
 - id: TX-3
@@ -1191,7 +1195,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:433"
 
 - id: TX-4
@@ -1201,7 +1205,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:434"
 
 - id: TX-5
@@ -1211,7 +1215,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:436"
 
 - id: TX-6
@@ -1221,18 +1225,20 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:437"
 
 - id: TX-7
   title: "Exceptions: see M-E6. A throwing handler: remaining handlers and post-processing still execute; the first..."
   source: "yjs/src/utils/Transaction.js:434"
-  kind: match
+  kind: diverge
   layers: [unit, differential]
   wire: false
+  adr: ["0005"]
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:440"
+  note: "See M-E6 (ADR 0005): same guarantees as JS, but the exception does not unwind through Transact or the mutating call."
 
 - id: TX-8
   title: "transaction.changed"
@@ -1241,7 +1247,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:442"
 
 - id: TX-9
@@ -1251,7 +1257,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:444"
 
 - id: TX-10
@@ -1261,7 +1267,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:446"
 
 - id: TX-11
@@ -1271,7 +1277,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:448"
 
 - id: TX-12
@@ -1281,7 +1287,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:449"
 
 - id: TX-13
@@ -1291,7 +1297,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:451"
 
 - id: TX-14
@@ -1301,7 +1307,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:452"
 
 - id: TX-15
@@ -1311,7 +1317,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:454"
 
 - id: TX-16
@@ -1321,7 +1327,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:455"
 
 - id: TX-17
@@ -1331,7 +1337,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:456"
 
 - id: TX-18
@@ -1341,7 +1347,7 @@
   layers: [unit, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:460"
 
 - id: TX-19
@@ -1351,5 +1357,5 @@
   layers: [unit, port, differential]
   wire: false
   owner: 7
-  status: pending
+  status: active
   ref: "types.md:462"

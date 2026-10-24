@@ -44,7 +44,7 @@
   wire: false
   quirk: [Q23, Q25, Q26]
   owner: 7
-  status: pending
+  status: active
   ref: "quirks.md:284"
 
 - id: Q24
@@ -55,7 +55,7 @@
   wire: false
   quirk: [Q24]
   owner: 7
-  status: pending
+  status: active
   ref: "quirks.md:294"
   note: "Proposal in the quirk register: diverge deliberately, narrow. Needs a recorded decision (ADR 0003) and a [Diverges] test."
 
@@ -78,7 +78,7 @@
   wire: true
   quirk: [Q08, Q23, Q26]
   owner: 7
-  status: pending
+  status: active
   ref: "quirks.md:314"
 
 - id: Q27
@@ -89,7 +89,7 @@
   wire: true
   quirk: [Q27]
   owner: 7
-  status: pending
+  status: active
   ref: "quirks.md:324"
 
 - id: Q28
@@ -111,5 +111,5 @@
   wire: false
   quirk: [Q29]
   owner: 7
-  status: pending
+  status: active
   ref: "quirks.md:344"
