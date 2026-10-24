@@ -33,8 +33,8 @@ public sealed class GuardAndGeneratorSelfTests
     [Fact]
     public void Guard_AFinishingBodyReturnsItsValueAndMeasures()
     {
-        var run = InputGuard.Run("alloc", () => new byte[100_000].Length);
-        Assert.Equal(100_000, run.Value);
+        var run = InputGuard.Run("alloc", () => new byte[100_000]);
+        Assert.Equal(100_000, run.Value.Length);
         Assert.InRange(run.AllocatedBytes, 100_000, 400_000);
     }
 

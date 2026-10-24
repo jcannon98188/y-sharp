@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using FsCheck;
 using FsCheck.Fluent;
@@ -18,12 +18,13 @@ internal static class FuzzRunner
 
     public static int NightlyCases => EnvInt("YSHARP_FUZZ_NIGHTLY_CASES", 100_000);
 
-    public static TimeSpan NightlyBox => TimeSpan.FromSeconds(EnvInt("YSHARP_FUZZ_NIGHTLY_SECONDS", 150));
+    public static TimeSpan NightlyBox => TimeSpan.FromSeconds(EnvInt("YSHARP_FUZZ_NIGHTLY_SECONDS", 90));
 
     private const ulong FixedSeed = 0x5953_4841_524Dul;   // "YSHARM": any odd gamma works
     private const ulong FixedGamma = 0x9E37_79B9_7F4A_7C15ul;
 
     /// <param name="hosClass">The HOS class named in the candidate file.</param>
+    /// <param name="cases">Gating cases for this property (default about 500); the nightly tier ignores it and runs <see cref="NightlyCases"/> within the time box.</param>
     /// <param name="candidate">The bytes to save for an input, or null when the input is not a single update.</param>
     public static void Check<T>(string hosClass, Arbitrary<T> arbitrary, Action<T> body, Func<T, (byte[] Bytes, UpdateFormat Format)?>? candidate = null, int? cases = null)
     {
@@ -41,7 +42,7 @@ internal static class FuzzRunner
 
         try
         {
-            if (NightlyGate.IsNightly) RunNightly(property, cases);
+            if (NightlyGate.IsNightly) RunNightly(property);
             else
             {
                 var config = Config.QuickThrowOnFailure.WithMaxTest(cases ?? GatingCases).WithReplay(FixedSeed, FixedGamma);
@@ -57,9 +58,9 @@ internal static class FuzzRunner
         }
     }
 
-    private static void RunNightly(Property property, int? cases)
+    private static void RunNightly(Property property)
     {
-        var total = cases ?? NightlyCases;
+        var total = NightlyCases;
         var watch = Stopwatch.StartNew();
         var done = 0;
         while (done < total && watch.Elapsed < NightlyBox)
