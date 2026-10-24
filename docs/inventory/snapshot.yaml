@@ -9,7 +9,7 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:74"
 
 - id: SNAP-02
@@ -19,7 +19,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:75"
 
 - id: SNAP-03
@@ -29,7 +29,7 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:76"
 
 - id: SNAP-04
@@ -39,7 +39,7 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:77"
   note: "Candidate divergence in the research note; decide under ADR 0003."
 
@@ -50,7 +50,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:78"
 
 - id: SNAP-06
@@ -60,7 +60,7 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:79"
 
 - id: SNAP-07
@@ -70,7 +70,7 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:80"
 
 - id: SNAP-08
@@ -80,7 +80,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:81"
 
 - id: SNAP-09
@@ -90,7 +90,7 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:82"
 
 - id: SNAP-10
@@ -100,7 +100,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:83"
 
 - id: SNAP-11
@@ -110,5 +110,5 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:84"

@@ -9,7 +9,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:49"
 
 - id: UM-02
@@ -19,7 +19,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:50"
 
 - id: UM-03
@@ -29,7 +29,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:51"
 
 - id: UM-04
@@ -39,7 +39,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:52"
 
 - id: UM-05
@@ -49,7 +49,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:53"
 
 - id: UM-06
@@ -59,7 +59,7 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:54"
 
 - id: UM-07
@@ -69,7 +69,7 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:55"
 
 - id: UM-08
@@ -79,7 +79,7 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:56"
 
 - id: UM-09
@@ -89,7 +89,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:57"
 
 - id: UM-10
@@ -99,7 +99,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:58"
 
 - id: UM-11
@@ -109,7 +109,7 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:59"
 
 - id: UM-12
@@ -119,7 +119,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:60"
 
 - id: UM-13
@@ -129,7 +129,7 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:61"
 
 - id: UM-14
@@ -139,7 +139,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:62"
 
 - id: UM-15
@@ -149,7 +149,7 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:63"
 
 - id: UM-16
@@ -159,7 +159,7 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:64"
 
 - id: UM-17
@@ -169,7 +169,7 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:65"
 
 - id: UM-18
@@ -179,7 +179,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:66"
 
 - id: UM-19
@@ -189,7 +189,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:67"
 
 - id: UM-20
@@ -199,5 +199,5 @@
   layers: [unit, port, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:68"

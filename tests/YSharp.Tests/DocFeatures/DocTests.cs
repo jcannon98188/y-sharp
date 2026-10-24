@@ -28,6 +28,7 @@ public sealed class DocTests
     [Covers("DOC-01")]
     public void Constructor_Defaults_AreGcOnAutoLoadOffShouldLoadOnAndEmptyCollections() => Impl.Run(() =>
     {
+        Impl.RequireImplementation();
         var doc = new Doc();
         Assert.True(doc.Gc);
         Assert.False(doc.IsLoaded);
@@ -437,6 +438,7 @@ public sealed class DocTests
     [Covers("DOC-13", "DOC-14")]
     public void SyncedWhileAlreadyLoaded_DoesNotRaiseLoadedAgain() => Impl.Run(() =>
     {
+        Impl.RequireImplementation();
         var doc = new Doc();
         var loaded = 0;
         doc.Loaded += _ => loaded++;

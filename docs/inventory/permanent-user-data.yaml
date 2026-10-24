@@ -9,7 +9,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:114"
 
 - id: PUD-02
@@ -19,7 +19,7 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:115"
 
 - id: PUD-03
@@ -29,7 +29,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:116"
 
 - id: PUD-04
@@ -39,7 +39,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:117"
 
 - id: PUD-05
@@ -49,7 +49,7 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:118"
   note: "Candidate divergence in the research note; decide under ADR 0003."
 
@@ -60,18 +60,18 @@
   layers: [unit, port, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:119"
 
 - id: PUD-07
   title: "Key deletion edge"
   source: "docs/research/doc-features.md:120"
-  kind: match
+  kind: diverge
   layers: [unit, differential]
   wire: false
   adr: ["0003"]
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:120"
 
 - id: PUD-08
@@ -81,7 +81,7 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:121"
 
 - id: PUD-09
@@ -91,5 +91,5 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:122"

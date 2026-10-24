@@ -249,6 +249,36 @@ public sealed class PermanentUserDataTests
         Assert.Equal("y", pud.GetUserByClientId(1));
     });
 
+    [Fact]
+    [PortOf("encoding.tests.js:testPermanentUserData", "PUD-04", "PUD-06")]
+    public void Port_PermanentUserData_ThirdDocWithTheSameDescriptionAfterASync() => Impl.Run(() =>
+    {
+        var timers = new Timers();
+        var ydoc1 = new Doc();
+        var ydoc2 = new Doc();
+        var pd1 = new PermanentUserData(ydoc1, timers.Options());
+        var pd2 = new PermanentUserData(ydoc2, timers.Options());
+        pd1.SetUserMapping(ydoc1, ydoc1.ClientId, "user a");
+        pd2.SetUserMapping(ydoc2, ydoc2.ClientId, "user b");
+        ydoc1.GetText().Insert(0, "xhi");
+        ydoc1.GetText().Delete(0, 1);
+        ydoc2.GetText().Insert(0, "hxxi");
+        ydoc2.GetText().Delete(1, 2);
+        timers.Flush();
+        ydoc2.ApplyUpdate(ydoc1.EncodeStateAsUpdate());
+        ydoc1.ApplyUpdate(ydoc2.EncodeStateAsUpdate());
+        Assert.Equal("user b", pd1.GetUserByClientId(ydoc2.ClientId));
+
+        // now sync a third doc with the same description as doc1 and then create PermanentUserData
+        var ydoc3 = new Doc();
+        ydoc3.ApplyUpdate(ydoc1.EncodeStateAsUpdate());
+        var pd3 = new PermanentUserData(ydoc3, timers.Options());
+        pd3.SetUserMapping(ydoc3, ydoc3.ClientId, "user a");
+        timers.Flush();
+        Assert.Equal("user a", pd3.GetUserByClientId(ydoc3.ClientId));
+        Assert.Equal("user a", pd3.GetUserByClientId(ydoc1.ClientId));
+    });
+
     // ------------------------------------------------------------------ PUD-07
 
     [Fact]

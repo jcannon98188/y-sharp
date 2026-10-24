@@ -9,7 +9,7 @@
   module: doc
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: doc.tests.js:testOriginInTransaction
   file: yjs/tests/doc.tests.js
@@ -17,7 +17,7 @@
   module: doc
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: doc.tests.js:testClientIdDuplicateChange
   file: yjs/tests/doc.tests.js
@@ -25,7 +25,7 @@
   module: doc
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: doc.tests.js:testGetTypeEmptyId
   file: yjs/tests/doc.tests.js
@@ -33,7 +33,7 @@
   module: doc
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: doc.tests.js:testToJSON
   file: yjs/tests/doc.tests.js
@@ -41,7 +41,7 @@
   module: doc
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: doc.tests.js:testSubdoc
   file: yjs/tests/doc.tests.js
@@ -49,7 +49,7 @@
   module: doc
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: doc.tests.js:testSubdocLoadEdgeCases
   file: yjs/tests/doc.tests.js
@@ -57,7 +57,7 @@
   module: doc
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: doc.tests.js:testSubdocLoadEdgeCasesAutoload
   file: yjs/tests/doc.tests.js
@@ -65,7 +65,7 @@
   module: doc
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: doc.tests.js:testSubdocsUndo
   file: yjs/tests/doc.tests.js
@@ -73,7 +73,7 @@
   module: doc
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: doc.tests.js:testLoadDocsEvent
   file: yjs/tests/doc.tests.js
@@ -81,7 +81,7 @@
   module: doc
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: doc.tests.js:testSyncDocsEvent
   file: yjs/tests/doc.tests.js
@@ -89,7 +89,7 @@
   module: doc
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: y-map.tests.js:testIterators
   file: yjs/tests/y-map.tests.js
@@ -1241,7 +1241,7 @@
   module: undo-redo
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: undo-redo.tests.js:testInfiniteCaptureTimeout
   file: yjs/tests/undo-redo.tests.js
@@ -1249,7 +1249,7 @@
   module: undo-redo
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: undo-redo.tests.js:testUndoText
   file: yjs/tests/undo-redo.tests.js
@@ -1257,7 +1257,7 @@
   module: undo-redo
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: undo-redo.tests.js:testEmptyTypeScope
   file: yjs/tests/undo-redo.tests.js
@@ -1265,7 +1265,7 @@
   module: undo-redo
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: undo-redo.tests.js:testRejectUpdateExample
   file: yjs/tests/undo-redo.tests.js
@@ -1273,7 +1273,7 @@
   module: undo-redo
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: undo-redo.tests.js:testGlobalScope
   file: yjs/tests/undo-redo.tests.js
@@ -1281,7 +1281,7 @@
   module: undo-redo
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: undo-redo.tests.js:testDoubleUndo
   file: yjs/tests/undo-redo.tests.js
@@ -1289,7 +1289,7 @@
   module: undo-redo
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: undo-redo.tests.js:testUndoMap
   file: yjs/tests/undo-redo.tests.js
@@ -1297,7 +1297,7 @@
   module: undo-redo
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: undo-redo.tests.js:testUndoArray
   file: yjs/tests/undo-redo.tests.js
@@ -1305,7 +1305,7 @@
   module: undo-redo
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: undo-redo.tests.js:testUndoXml
   file: yjs/tests/undo-redo.tests.js
@@ -1313,7 +1313,7 @@
   module: undo-redo
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: undo-redo.tests.js:testUndoEvents
   file: yjs/tests/undo-redo.tests.js
@@ -1321,7 +1321,7 @@
   module: undo-redo
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: undo-redo.tests.js:testTrackClass
   file: yjs/tests/undo-redo.tests.js
@@ -1329,7 +1329,7 @@
   module: undo-redo
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: undo-redo.tests.js:testTypeScope
   file: yjs/tests/undo-redo.tests.js
@@ -1337,7 +1337,7 @@
   module: undo-redo
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: undo-redo.tests.js:testUndoInEmbed
   file: yjs/tests/undo-redo.tests.js
@@ -1345,7 +1345,7 @@
   module: undo-redo
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: undo-redo.tests.js:testUndoDeleteFilter
   file: yjs/tests/undo-redo.tests.js
@@ -1353,7 +1353,7 @@
   module: undo-redo
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: undo-redo.tests.js:testUndoUntilChangePerformed
   file: yjs/tests/undo-redo.tests.js
@@ -1361,7 +1361,7 @@
   module: undo-redo
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: undo-redo.tests.js:testUndoNestedUndoIssue
   file: yjs/tests/undo-redo.tests.js
@@ -1369,7 +1369,7 @@
   module: undo-redo
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: undo-redo.tests.js:testConsecutiveRedoBug
   file: yjs/tests/undo-redo.tests.js
@@ -1377,7 +1377,7 @@
   module: undo-redo
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: undo-redo.tests.js:testUndoXmlBug
   file: yjs/tests/undo-redo.tests.js
@@ -1385,7 +1385,7 @@
   module: undo-redo
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: undo-redo.tests.js:testUndoBlockBug
   file: yjs/tests/undo-redo.tests.js
@@ -1393,7 +1393,7 @@
   module: undo-redo
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: undo-redo.tests.js:testUndoDeleteTextFormat
   file: yjs/tests/undo-redo.tests.js
@@ -1401,7 +1401,7 @@
   module: undo-redo
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: undo-redo.tests.js:testBehaviorOfIgnoreremotemapchangesProperty
   file: yjs/tests/undo-redo.tests.js
@@ -1409,7 +1409,7 @@
   module: undo-redo
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: undo-redo.tests.js:testSpecialDeletionCase
   file: yjs/tests/undo-redo.tests.js
@@ -1417,7 +1417,7 @@
   module: undo-redo
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: undo-redo.tests.js:testUndoDeleteInMap
   file: yjs/tests/undo-redo.tests.js
@@ -1425,7 +1425,7 @@
   module: undo-redo
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: undo-redo.tests.js:testUndoDoingStackItem
   file: yjs/tests/undo-redo.tests.js
@@ -1433,7 +1433,7 @@
   module: undo-redo
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: undo-redo.tests.js:testUndoSetAttributeAndDeleteSyncsAttributes
   file: yjs/tests/undo-redo.tests.js
@@ -1441,7 +1441,7 @@
   module: undo-redo
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: compatibility.tests.js:testArrayCompatibilityV1
   file: yjs/tests/compatibility.tests.js
@@ -1476,7 +1476,7 @@
   module: snapshot
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: snapshot.tests.js:testBasicXmlAttributes
   file: yjs/tests/snapshot.tests.js
@@ -1484,7 +1484,7 @@
   module: snapshot
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: snapshot.tests.js:testBasicRestoreSnapshot
   file: yjs/tests/snapshot.tests.js
@@ -1492,7 +1492,7 @@
   module: snapshot
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: snapshot.tests.js:testEmptyRestoreSnapshot
   file: yjs/tests/snapshot.tests.js
@@ -1500,7 +1500,7 @@
   module: snapshot
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: snapshot.tests.js:testRestoreSnapshotWithSubType
   file: yjs/tests/snapshot.tests.js
@@ -1508,7 +1508,7 @@
   module: snapshot
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: snapshot.tests.js:testRestoreDeletedItem1
   file: yjs/tests/snapshot.tests.js
@@ -1516,7 +1516,7 @@
   module: snapshot
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: snapshot.tests.js:testRestoreLeftItem
   file: yjs/tests/snapshot.tests.js
@@ -1524,7 +1524,7 @@
   module: snapshot
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: snapshot.tests.js:testDeletedItemsBase
   file: yjs/tests/snapshot.tests.js
@@ -1532,7 +1532,7 @@
   module: snapshot
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: snapshot.tests.js:testDeletedItems2
   file: yjs/tests/snapshot.tests.js
@@ -1540,7 +1540,7 @@
   module: snapshot
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: snapshot.tests.js:testDependentChanges
   file: yjs/tests/snapshot.tests.js
@@ -1548,7 +1548,7 @@
   module: snapshot
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: snapshot.tests.js:testContainsUpdate
   file: yjs/tests/snapshot.tests.js
@@ -1556,7 +1556,7 @@
   module: snapshot
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: snapshot.tests.js:testContainsUpdate2
   file: yjs/tests/snapshot.tests.js
@@ -1564,7 +1564,7 @@
   module: snapshot
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: updates.tests.js:testMergeUpdates
   file: yjs/tests/updates.tests.js
@@ -1624,7 +1624,7 @@
   module: relativePositions
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: relativePositions.tests.js:testRelativePositionCase2
   file: yjs/tests/relativePositions.tests.js
@@ -1632,7 +1632,7 @@
   module: relativePositions
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: relativePositions.tests.js:testRelativePositionCase3
   file: yjs/tests/relativePositions.tests.js
@@ -1640,7 +1640,7 @@
   module: relativePositions
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: relativePositions.tests.js:testRelativePositionCase4
   file: yjs/tests/relativePositions.tests.js
@@ -1648,7 +1648,7 @@
   module: relativePositions
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: relativePositions.tests.js:testRelativePositionCase5
   file: yjs/tests/relativePositions.tests.js
@@ -1656,7 +1656,7 @@
   module: relativePositions
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: relativePositions.tests.js:testRelativePositionCase6
   file: yjs/tests/relativePositions.tests.js
@@ -1664,7 +1664,7 @@
   module: relativePositions
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: relativePositions.tests.js:testRelativePositionCase7
   file: yjs/tests/relativePositions.tests.js
@@ -1672,7 +1672,7 @@
   module: relativePositions
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: relativePositions.tests.js:testRelativePositionAssociationDifference
   file: yjs/tests/relativePositions.tests.js
@@ -1680,7 +1680,7 @@
   module: relativePositions
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: relativePositions.tests.js:testRelativePositionWithUndo
   file: yjs/tests/relativePositions.tests.js
@@ -1688,7 +1688,7 @@
   module: relativePositions
   randomized: false
   owner: 8
-  outcome: pending
+  outcome: ported
 
 - key: awareness.test.js:testAwareness
   file: y-protocols/awareness.test.js

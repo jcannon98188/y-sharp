@@ -9,7 +9,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:30"
 
 - id: SUB-02
@@ -19,7 +19,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:31"
 
 - id: SUB-03
@@ -29,7 +29,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:32"
 
 - id: SUB-04
@@ -39,7 +39,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:33"
 
 - id: SUB-05
@@ -49,7 +49,7 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:34"
 
 - id: SUB-06
@@ -59,7 +59,7 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:35"
 
 - id: SUB-07
@@ -69,7 +69,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:36"
 
 - id: SUB-08
@@ -79,7 +79,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:37"
 
 - id: SUB-09
@@ -89,7 +89,7 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:38"
 
 - id: SUB-10
@@ -99,7 +99,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:39"
 
 - id: SUB-11
@@ -109,7 +109,7 @@
   layers: [unit, port, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:40"
 
 - id: SUB-12
@@ -119,7 +119,7 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:41"
 
 - id: SUB-13
@@ -129,7 +129,7 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:42"
 
 - id: SUB-14
@@ -139,5 +139,5 @@
   layers: [unit, differential]
   wire: false
   owner: 8
-  status: pending
+  status: active
   ref: "doc-features.md:43"
