@@ -201,7 +201,7 @@ public static class StandardSteps
         }));
 
         r.Register(new StepDefinition("text.insert", new[] { "doc", "target", "at", "value" }, new[] { "attributes" }, (ctx, s) =>
-            YTxt(ctx, s).Insert(s.Int("at"), s.String("value"), s.Has("attributes") ? s.Tagged("attributes").ToYValue() : default)));
+            YTxt(ctx, s).Insert(s.Int("at"), TextValue(s), s.Has("attributes") ? s.Tagged("attributes").ToYValue() : default)));
         r.Register(new StepDefinition("text.delete", new[] { "doc", "target", "at", "len" }, System.Array.Empty<string>(), (ctx, s) =>
             YTxt(ctx, s).Delete(s.Int("at"), s.Int("len"))));
         r.Register(new StepDefinition("text.format", new[] { "doc", "target", "at", "len", "attributes" }, System.Array.Empty<string>(), (ctx, s) =>
@@ -235,6 +235,10 @@ public static class StandardSteps
 
     private static YMap YMp(OpsContext ctx, OpsStep s) =>
         Target(ctx, s) as YMap ?? throw new OpsScriptException($"{s.Kind}: target is not a map.");
+
+    /// <summary>Insert text is a plain string, or a tagged <c>str</c> when it holds a lone surrogate (ADR 0011).</summary>
+    private static string TextValue(OpsStep s) =>
+        s.Tagged("value") is { Kind: TaggedKind.String } v ? v.String : throw new OpsScriptException($"{s.Kind}: 'value' must be a string.");
 
     private static YEntry[] Entries(OpsStep s)
     {
