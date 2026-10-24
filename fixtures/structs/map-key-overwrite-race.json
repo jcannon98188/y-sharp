@@ -1,0 +1,233 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["STR-21","STR-22","STR-23","STR-25"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":1},{"name":"b","clientId":2}],
+    "steps": [
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"k","value":"a1"},
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"k","value":"a2"},
+      {"step":"map.set","doc":"b","target":{"root":"m","kind":"map"},"key":"k","value":"b1"},
+      {"step":"map.set","doc":"b","target":{"root":"m","kind":"map"},"key":"other","value":1},
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"sync","from":"b","to":"a"},
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"sync","from":"b","to":"a"},
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"k","value":"a3"},
+      {"step":"map.delete","doc":"b","target":{"root":"m","kind":"map"},"key":"other"},
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"sync","from":"b","to":"a"}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [
+            {"$":"bytes","hex":"010101002801016d016b017702613100"},
+            {"$":"bytes","hex":"01010101a8010001770261320101010001"},
+            {"$":"bytes","hex":"010202002801016d016b01770262312801016d056f74686572017d010101010101"},
+            {"$":"bytes","hex":"01010102a8020001770261330102010001"},
+            {"$":"bytes","hex":"000102010101"}
+          ],
+          "v2": [
+            {"$":"bytes","hex":"000001010000012805026d6b410001010001010101007702613100"},
+            {"$":"bytes","hex":"000002410001000001a8010000000101010101770261320101010000"},
+            {
+              "$": "bytes",
+              "hex": "00000102000001280c086d6b6d6f74686572410105010100024100010200770262317d010101010100"
+            },
+            {"$":"bytes","hex":"000002010201000001a8010000000101010102770261330102010000"},
+            {"$":"bytes","hex":"0000000000000100000000000102010100"}
+          ]
+        },
+        "b": {
+          "v1": [
+            {"$":"bytes","hex":"010102002801016d016b017702623100"},
+            {"$":"bytes","hex":"010102012801016d056f74686572017d0100"},
+            {"$":"bytes","hex":"010101002101016d016b020101010002"},
+            {"$":"bytes","hex":"000102010101"},
+            {"$":"bytes","hex":"01010102a8020001770261330102010001"}
+          ],
+          "v2": [
+            {"$":"bytes","hex":"000001020000012805026d6b410001010001010101007702623100"},
+            {"$":"bytes","hex":"000001020000012809066d6f74686572010501010001010101017d0100"},
+            {"$":"bytes","hex":"000001010000012105026d6b410001010001020101000101010001"},
+            {"$":"bytes","hex":"0000000000000100000000000102010100"},
+            {"$":"bytes","hex":"000002010201000001a8010000000101010102770261330102010000"}
+          ]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "020202002101016d016b012101016d056f74686572010201002101016d016b02a802000177026133020201000201010002"
+            },
+            "diff": {"b":{"$":"bytes","hex":"00020201000201010002"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "000003020102010000032102a8100a6d6b6d6f746865726d6b41010541000101000441000201020200020077026133020201000101010001"
+            },
+            "diff": {"b":{"$":"bytes","hex":"000000000000010000000000020201000101010001"}}
+          }
+        },
+        "b": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "020202002101016d016b012101016d056f74686572010201002101016d016b02a802000177026133020201000201010002"
+            },
+            "diff": {"a":{"$":"bytes","hex":"00020201000201010002"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "000003020102010000032102a8100a6d6b6d6f746865726d6b41010541000101000441000201020200020077026133020201000101010001"
+            },
+            "diff": {"a":{"$":"bytes","hex":"000000000000010000000000020201000101010001"}}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {
+        "a": {"v1":{"$":"bytes","hex":"0202020103"},"v2":{"$":"bytes","hex":"0202020103"}},
+        "b": {"v1":{"$":"bytes","hex":"0202020103"},"v2":{"$":"bytes","hex":"0202020103"}}
+      }
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {"a":[["m",{"kind":"map","pairs":[["k","a3"]]}]],"b":[["m",{"kind":"map","pairs":[["k","a3"]]}]]}
+    },
+    "structs": {
+      "api": "doc.store.clients",
+      "value": {
+        "a": [
+          [
+            2,
+            [
+              {
+                "id": [2,0],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "k",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [2,1],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "other",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              }
+            ]
+          ],
+          [
+            1,
+            [
+              {
+                "id": [1,0],
+                "len": 2,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "k",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [1,2],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,0],
+                "parent": "m",
+                "parentSub": "k",
+                "content": {"ref":8,"value":["a3"]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ],
+        "b": [
+          [
+            2,
+            [
+              {
+                "id": [2,0],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "k",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [2,1],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "other",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              }
+            ]
+          ],
+          [
+            1,
+            [
+              {
+                "id": [1,0],
+                "len": 2,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "k",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [1,2],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,0],
+                "parent": "m",
+                "parentSub": "k",
+                "content": {"ref":8,"value":["a3"]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ]
+      }
+    },
+    "ds": {
+      "api": "Y.createDeleteSetFromStructStore",
+      "value": {"a":[[1,[[0,2]]],[2,[[0,2]]]],"b":[[1,[[0,2]]],[2,[[0,2]]]]}
+    }
+  }
+}

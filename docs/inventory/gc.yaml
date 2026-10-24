@@ -9,7 +9,7 @@
   layers: [unit, differential]
   wire: false
   owner: 6
-  status: pending
+  status: active
   ref: "doc-features.md:126"
 
 - id: GC-02
@@ -19,7 +19,7 @@
   layers: [unit, differential]
   wire: false
   owner: 6
-  status: pending
+  status: active
   ref: "doc-features.md:127"
 
 - id: GC-03
@@ -29,7 +29,7 @@
   layers: [unit, differential]
   wire: false
   owner: 6
-  status: pending
+  status: active
   ref: "doc-features.md:128"
 
 - id: GC-04
@@ -39,7 +39,7 @@
   layers: [unit, differential]
   wire: false
   owner: 6
-  status: pending
+  status: active
   ref: "doc-features.md:129"
 
 - id: GC-05
@@ -49,7 +49,7 @@
   layers: [unit, differential]
   wire: false
   owner: 6
-  status: pending
+  status: active
   ref: "doc-features.md:130"
 
 - id: GC-06
@@ -59,7 +59,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 6
-  status: pending
+  status: active
   ref: "doc-features.md:131"
 
 - id: GC-07
@@ -69,7 +69,7 @@
   layers: [unit, differential]
   wire: false
   owner: 6
-  status: pending
+  status: active
   ref: "doc-features.md:132"
 
 - id: GC-08
@@ -79,7 +79,7 @@
   layers: [unit, differential]
   wire: false
   owner: 6
-  status: pending
+  status: active
   ref: "doc-features.md:133"
 
 - id: GC-09
@@ -89,7 +89,7 @@
   layers: [unit, differential]
   wire: false
   owner: 6
-  status: pending
+  status: active
   ref: "doc-features.md:134"
 
 - id: GC-10
@@ -99,15 +99,15 @@
   layers: [unit, differential]
   wire: false
   owner: 6
-  status: pending
+  status: active
   ref: "doc-features.md:135"
 
 - id: GC-11
   title: "Test helper"
   source: "docs/research/doc-features.md:136"
   kind: match
-  layers: [unit, port, differential]
+  layers: [unit, differential]
   wire: false
   owner: 6
-  status: pending
+  status: active
   ref: "doc-features.md:136"

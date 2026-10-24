@@ -274,6 +274,230 @@
       "bytes": 21246
     },
     {
+      "path": "structs/client-id-collision.json",
+      "area": "structs",
+      "name": "client-id-collision",
+      "covers": ["STR-68","Q20"],
+      "sha256": "4474369e5900e2245f9c533651d8e368ff406258ceb7faf291012dcf183cf2fb",
+      "bytes": 3214
+    },
+    {
+      "path": "structs/client-id-extremes.json",
+      "area": "structs",
+      "name": "client-id-extremes",
+      "covers": ["Q21","STR-02","STR-18","STR-20"],
+      "sha256": "c666044265f3ce7b99c5502c02a1ddbd374a4d37a6d20244fad34329866606f8",
+      "bytes": 14546
+    },
+    {
+      "path": "structs/conflict-interleave-three-clients.json",
+      "area": "structs",
+      "name": "conflict-interleave-three-clients",
+      "covers": ["STR-18","STR-19","STR-20","STR-23"],
+      "sha256": "46f742927a2221ebe5a91a33ffc8c89f8cf84fc773a60d7a5ba5d9c949623460",
+      "bytes": 14717
+    },
+    {
+      "path": "structs/conflict-null-origin.json",
+      "area": "structs",
+      "name": "conflict-null-origin",
+      "covers": ["STR-18","STR-19","STR-20","STR-21"],
+      "sha256": "185d0d48d6efe8983e9ced0f9e1feb62880fe8580de52cfc1931a163ba5d0d59",
+      "bytes": 8920
+    },
+    {
+      "path": "structs/conflict-same-origin-high-client-first-writer.json",
+      "area": "structs",
+      "name": "conflict-same-origin-high-client-first-writer",
+      "covers": ["STR-18","STR-19","STR-20"],
+      "sha256": "87af4afde68366f236f5b98e955615d9736e13edf8708bca22a6843a433ba63d",
+      "bytes": 6459
+    },
+    {
+      "path": "structs/conflict-same-origin-low-client-left.json",
+      "area": "structs",
+      "name": "conflict-same-origin-low-client-left",
+      "covers": ["STR-18","STR-19","STR-20"],
+      "sha256": "9ac53c1633812c2af0519a341b9007b4d939cbb01bb5c7ee9800a4983b22ed67",
+      "bytes": 6459
+    },
+    {
+      "path": "structs/content-kinds.json",
+      "area": "structs",
+      "name": "content-kinds",
+      "covers": ["STR-30","STR-40","STR-42","STR-44"],
+      "sha256": "7cefdc6c8f52ecef207e1dd6c7e72441c3b80fcf2c1fc5e958e767cdeb98c12e",
+      "bytes": 15934
+    },
+    {
+      "path": "structs/delete-gc-off.json",
+      "area": "structs",
+      "name": "delete-gc-off",
+      "covers": ["STR-26","STR-60","GC-01","GC-06","GC-08"],
+      "sha256": "dce801d793ddca71e49855220db64e064bd99dd5850e43672445d025a09b5a51",
+      "bytes": 7425
+    },
+    {
+      "path": "structs/delete-gc-on.json",
+      "area": "structs",
+      "name": "delete-gc-on",
+      "covers": ["STR-26","STR-27","STR-58","STR-59","GC-01","GC-02","GC-03","GC-04","GC-06","GC-08"],
+      "sha256": "ee77f3c03957c2c821d05ed1d53378699241cf96535af7d84fb845d29ebcca15",
+      "bytes": 7249
+    },
+    {
+      "path": "structs/diff-starts-mid-item.json",
+      "area": "structs",
+      "name": "diff-starts-mid-item",
+      "covers": ["STR-17","STR-29","STR-34","STR-66"],
+      "sha256": "10360ca79ac5f344acd4b1cf82be33a72a99f850ca5a68e1bde5c747fff3b822",
+      "bytes": 6232
+    },
+    {
+      "path": "structs/gc-mixed-replicas.json",
+      "area": "structs",
+      "name": "gc-mixed-replicas",
+      "covers": ["GC-01","GC-06","GC-10"],
+      "sha256": "70cc3d43664244c8693826dc803b2b86da755772e89d96c9b42fbe03ae10dc1b",
+      "bytes": 5137
+    },
+    {
+      "path": "structs/golden-single-insert.json",
+      "area": "structs",
+      "name": "golden-single-insert",
+      "covers": ["STR-01","STR-02","STR-04","STR-08","STR-29","STR-56","STR-66","STR-67"],
+      "sha256": "efe50748c1cf403b1b28b50b9ce4f90cfd646976f17e696797b7c6160a4b4e37",
+      "bytes": 3271
+    },
+    {
+      "path": "structs/map-key-overwrite-race.json",
+      "area": "structs",
+      "name": "map-key-overwrite-race",
+      "covers": ["STR-21","STR-22","STR-23","STR-25"],
+      "sha256": "696f283828d5f6cb87c1aa87b687ad389134ac2f4d92a23527acec4e098aa2e3",
+      "bytes": 8051
+    },
+    {
+      "path": "structs/merge-adjacent-structs.json",
+      "area": "structs",
+      "name": "merge-adjacent-structs",
+      "covers": ["STR-28","STR-45","STR-60","GC-08"],
+      "sha256": "c579196256d3b24545ab7b5caa1749f1d10b24ac4a004ccaf29b3474788ec923",
+      "bytes": 9693
+    },
+    {
+      "path": "structs/nested-type-delete-gc-off.json",
+      "area": "structs",
+      "name": "nested-type-delete-gc-off",
+      "covers": ["STR-42","GC-04"],
+      "sha256": "b0b0ba4c27ca8bae0d8c22d78c4378e8725acc20039ca1f5aeddd3e3016921ca",
+      "bytes": 4735
+    },
+    {
+      "path": "structs/nested-type-delete.json",
+      "area": "structs",
+      "name": "nested-type-delete",
+      "covers": ["STR-27","STR-42","STR-44","GC-04"],
+      "sha256": "a5d16841fe2c851f45b1215cd07b46ff9cb70750b4e8ccbf3705e571b860890f",
+      "bytes": 7359
+    },
+    {
+      "path": "structs/orphan-child-gc-off-keeps-hidden.json",
+      "area": "structs",
+      "name": "orphan-child-gc-off-keeps-hidden",
+      "covers": ["STR-15","GC-07"],
+      "sha256": "ef3de177f37da612e79083fdb92aac6a5aefc05a419bc04d61d561e7147d4aeb",
+      "bytes": 4513
+    },
+    {
+      "path": "structs/orphan-child-of-collected-type.json",
+      "area": "structs",
+      "name": "orphan-child-of-collected-type",
+      "covers": ["STR-15","STR-24","GC-07"],
+      "sha256": "28a59404ee1f8e4cc9b63176363d91eb4f02641c9a5b40a3974a5f9843b24de8",
+      "bytes": 4509
+    },
+    {
+      "path": "structs/pending-chain-permutations.json",
+      "area": "structs",
+      "name": "pending-chain-permutations",
+      "covers": ["STR-13","STR-61","STR-62","STR-63","STR-64","STR-67"],
+      "sha256": "346470090d805c41d5a7604b41e355e5c980bf15cec5f3ff4f6d14bf88655cdd",
+      "bytes": 8880
+    },
+    {
+      "path": "structs/pending-delete-set-before-structs.json",
+      "area": "structs",
+      "name": "pending-delete-set-before-structs",
+      "covers": ["STR-64","STR-65"],
+      "sha256": "fd0b1286c22939c73e8616583d781d62bf7c074a36b562b91d848351034d3651",
+      "bytes": 5995
+    },
+    {
+      "path": "structs/pending-never-completed.json",
+      "area": "structs",
+      "name": "pending-never-completed",
+      "covers": ["STR-13","STR-61","STR-62","STR-63","STR-64","STR-67"],
+      "sha256": "6c744dd8961f2b7ce2877492fc13537e6fb06d09028e8cf87461abae1356b00a",
+      "bytes": 2690
+    },
+    {
+      "path": "structs/pending-two-missing-clients.json",
+      "area": "structs",
+      "name": "pending-two-missing-clients",
+      "covers": ["STR-13","STR-62","STR-63","STR-64"],
+      "sha256": "ba2114a07740012d8d127cfae1561993443dce033c5b5fe260e9aee198e825bf",
+      "bytes": 6384
+    },
+    {
+      "path": "structs/skip-in-merged-update.json",
+      "area": "structs",
+      "name": "skip-in-merged-update",
+      "covers": ["STR-37","STR-38","STR-39"],
+      "sha256": "616f3a3b6c8cb52dfaa5f5a9fddcf3478442a6d1364a1dba3ef1eef0977e1ac0",
+      "bytes": 5063
+    },
+    {
+      "path": "structs/split-delete-merge.json",
+      "area": "structs",
+      "name": "split-delete-merge",
+      "covers": ["STR-10","STR-11","STR-26","STR-28","STR-45","STR-48","STR-49","STR-51","STR-60","STR-65","GC-08"],
+      "sha256": "29d93df566d3efe06f23ccd990f4075fd9c7b2ba3832e97e07d2d9c923755501",
+      "bytes": 6469
+    },
+    {
+      "path": "structs/subdoc-content.json",
+      "area": "structs",
+      "name": "subdoc-content",
+      "covers": ["STR-43","STR-44"],
+      "sha256": "64407bf04763ad844ed6420851b894d4d27737dd280b21d1aeda68ea47895757",
+      "bytes": 5101
+    },
+    {
+      "path": "structs/surrogate-split-at-boundary.json",
+      "area": "structs",
+      "name": "surrogate-split-at-boundary",
+      "covers": ["STR-41"],
+      "sha256": "07f34ece41355b7e5dc02d6001422e3194696ad33c1f8fdf9cfe12e1f63682e4",
+      "bytes": 5087
+    },
+    {
+      "path": "structs/surrogate-split-gc-off.json",
+      "area": "structs",
+      "name": "surrogate-split-gc-off",
+      "covers": ["STR-41","STR-11"],
+      "sha256": "40ab354dbf2fc05f5de8aa4d8c8a98333a4cdb4f63e91747c44d8a3ad49950e0",
+      "bytes": 5212
+    },
+    {
+      "path": "structs/update-events-and-empty-transactions.json",
+      "area": "structs",
+      "name": "update-events-and-empty-transactions",
+      "covers": ["STR-53","STR-54","STR-57"],
+      "sha256": "c56dc86e193e7e7bb0b1e7f5ac19a41cc2a6307cd085dc1ffb67e4aeedba0a51",
+      "bytes": 3345
+    },
+    {
       "path": "text/apply-delta-edges.json",
       "area": "text",
       "name": "apply-delta-edges",
