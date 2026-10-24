@@ -20,7 +20,7 @@ jobs:
         working-directory: tools/fixture-gen
         run: npm ci --no-audit --no-fund
       - run: dotnet build YSharp.slnx -c Release
-      - name: Test (Nightly tier: slow differential, fuzz, soak, slow memory)
+      - name: Test (Nightly tier, slow differential, fuzz, soak, slow memory)
         env:
           YSHARP_TIER: Nightly
           YSHARP_REQUIRE_NODE: "1"
