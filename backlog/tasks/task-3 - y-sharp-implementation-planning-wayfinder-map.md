@@ -4,7 +4,7 @@ title: 'y-sharp implementation planning: wayfinder map'
 status: To Do
 assignee: []
 created_date: '2026-10-24 16:51'
-updated_date: '2026-10-24 17:06'
+updated_date: '2026-10-24 17:13'
 labels:
   - 'wayfinder:map'
 dependencies: []
@@ -34,6 +34,7 @@ A spec-ready **y-sharp implementation plan** in Backlog: a parent task whose chi
 - [Research: test surface by entry point](TASK-3.2): skip is one global probe; nearly everything needs V1 apply and transactions; doc features and YValue fit no ADR 0018 milestone (`docs/research/test-surface.md`).
 - [Research: Yjs and Yrs struct layout and the baseline workloads](TASK-3.3): Yjs figures are bytes per op; array needs a dense 8-byte chunked column; "item" and the steady-state mix are undefined (`docs/research/storage-layout.md`).
 - [Milestone boundaries and order](TASK-3.4): M0 spike and M1 values in parallel, then M2 core (store, integrate, transactions and lock, V1), then a fan-out of M3 V2, M4 types and events, M5 doc features and M6 protocols, closing with M7 integration and release (ADR 0018 amendment).
+- [Skip gating once the stub starts disappearing](TASK-3.9): declared spec-sized feature gates replace the global stub probe; tests whose features have not landed skip before running, the checker rejects untagged tests, NotImplementedException always fails; built by an M0 spec that blocks M1 (ADR 0020).
 
 ## Not yet specified
 

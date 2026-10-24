@@ -4,7 +4,7 @@ title: Package the map into the implementation plan
 status: To Do
 assignee: []
 created_date: '2026-10-24 16:52'
-updated_date: '2026-10-24 17:00'
+updated_date: '2026-10-24 17:13'
 labels:
   - 'wayfinder:grilling'
 dependencies:
@@ -34,3 +34,9 @@ Turn the resolved map into the plan under TASK-4: Backlog milestones, session-si
 - [ ] #2 Every handoff section-7 item is scheduled in a plan task
 - [ ] #3 TASK-2.2 and TASK-2 are closed with a pointer to the absorbing plan task
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+From TASK-3.9 (ADR 0020): the plan must define the feature list (one feature per spec, each milestone a set of features). Its first spec, "Feature gates", goes in M0 and blocks M1.
+<!-- SECTION:NOTES:END -->

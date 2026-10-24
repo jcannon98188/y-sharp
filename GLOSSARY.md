@@ -40,6 +40,10 @@
 
 **Registry entry** — One assertable behaviour in the behaviour inventory, with a permanent ID.
 
+**Feature** — A capability of the library the size of one implementation spec, such as text or V2 encoding. A test names the features it needs and is skipped until they have landed.
+
+**Landed feature** — A feature whose implementation is in, so the tests that need it must pass. A missing implementation there is a failure, not a skip.
+
 **Pending entry** — A registry entry whose tests have not been written yet; allowed during build-up and counted, never growing.
 
 **Ops script** — The declarative list of steps in a fixture that both the oracle and y-sharp replay to reach the same document.
