@@ -31,6 +31,29 @@ Compaction of fragmented chunks and a fixed per-item byte count are not requirem
 ## How the budgets gate implementation
 
 1. **Spike gate (M0).** Before decode and integrate are built on a store, a spike of the chosen storage model runs the three slow-tier workloads (1M text inserts, 1M array pushes, 100k map keys) and the steady-state check (zero gen2 collections, no LOH growth over 100k edits). Bytes per item must be at or below the Yjs figure. The choice between object-per-item and indexed arenas is recorded in a follow-up ADR with those measurements. Nothing builds on a store that fails.
-2. **Milestone gate.** The milestones are: store and integrate, V1 codec, V2 codec, shared types, transactions and events, awareness and sync. A milestone is done only when its hot paths from ADR 0009 are in `AllocationBudgets` with measured values (plus 25%), the zero-byte paths read 0, and the slow memory tier is green. Budgets only move down after that.
+2. **Milestone gate.** The milestones are listed under "Amendment: milestone boundaries and order" below. They replace the original list (store and integrate, V1 codec, V2 codec, shared types, transactions and events, awareness and sync). A milestone is done only when its hot paths from ADR 0009 are in `AllocationBudgets` with measured values (plus 25%), the zero-byte paths read 0, and its memory gate is green. Budgets only move down after that.
 3. **Pending hot paths.** A hot path whose milestone is still open may be pending. Pending paths are counted and the count never grows, like pending registry entries (ADR 0010). No milestone closes with a pending path of its own.
 4. **Layout changes.** Changing the storage model after M0 reruns the spike workloads and is a reviewed change with a reason.
+
+## Amendment: milestone boundaries and order
+
+Decided with the owner (TASK-3.4), from `docs/research/test-surface.md`. The gate rules above are unchanged; the milestone boundaries and order change. The original order did not work. Almost every structure test reaches integrate through V1 `ApplyUpdate`. Every mutator runs in a transaction that takes the document lock (ADR 0006 CC-8), but shared types came before transactions. Values and doc features had no milestone.
+
+| Milestone | Depends on | Owns (registry prefixes) | Test files that turn green | Budgets it closes | Seams it provides |
+|---|---|---|---|---|---|
+| **M0** Storage spike | none | none | none (private harness) | none; records the spike figures | none |
+| **M1** Values and errors | none (runs alongside M0) | `V`, `Q` value, string and varint quirks, the value-level `ERR` entries | `Codecs/JsonTests`, `ValueQuirkTests`, `StringQuirkTests`, TestKit self-tests that touch `YValue` | BUD-03 | none |
+| **M2** Core: store, integrate, transactions, V1 | M0, M1 | `STR`, `GC`, `ENC` V1 entries, `Q` client-id quirks, decode `ERR` and `HOS` for V1 | `Structs/*` (except V2 cases), `Codecs/UpdateLayoutTests`, `UpdateFunctionTests` and `MalformedInputTests` (V1), `UpstreamPortTests` (V1) | BUD-06; records the V1 value of BUD-08 | `DumpStructs`, `HasPending`, `InjectInvariantViolation`, `ScheduleSeam` (the lock reports through it) |
+| **M3** V2 codec | M2 | `ENC` V2 entries, `TryConvert` | V2 cases of the codec and structure files, `Codecs/WireFixtureTests` once M4 has landed | BUD-08 | none |
+| **M4** Shared types and events | M2 | `T`, `A`, `M`, `X`, `Y`, `E`, `F`, `D`, `TX`, observer-fault `ERR` | `Types/*`, `Concurrency/ObserverTests`; `TypeFixtureTests` once M3 has landed | BUD-01, 02, 04, 05, 07, 09, 13, 14 | `YText.CleanupFormatting` |
+| **M5** Doc features | M3, M4 | `DOC`, `UM`, `SNAP`, `RP`, `SUB`, `PUD` | `DocFeatures/*` | none | `DocSeams` members (`ShouldLoad`, `AutoLoad`, `CollectionId`, `Meta`, `CollectGarbage`, `SignalLoaded`, `SignalSynced`), `UndoSeams` members |
+| **M6** Protocols | M1, M2 | `AW`, `SY`, `AU`, `PR` | `Protocols/*` (`ProtocolFixtureTests` once M4 has landed) | BUD-10, BUD-11 | none |
+| **M7** Integration and release | all | `SIM`, `DIFF`, `CC`, `HOS` (full), BUD-12 | `Simulation/*`, `Concurrency/*` scenarios and stress, `YSharp.Fuzz.Tests`, `YSharp.Interop.Tests`, `Allocation/HostileAllocationTests` | BUD-12; the release gate (zero pending, zero skips) | `ISimInternals` |
+
+- **Order.** M0 and M1 run in parallel. M2 is sequential. After M2 the work fans out: M3, M4 and M6 run in parallel, and M5 follows M3 and M4. M7 closes. A test that needs two milestones turns green when the later one lands.
+- **The lock lands in M2.** Every entry point acquires it, and adding it later would touch all of them. M2 builds the simple form. The CC scenario, stress and soak tests close in M7.
+- **Events belong to shared types (M4).** The type tests observe events, so types cannot close without them. `UpdateV2` event tests close when M3 lands too.
+- **BUD-08 stays one entry.** M3 owns it. M2 records the V1 figure as soon as it is measurable, and M3 closes the entry with both figures. It is not split, because a new pending entry would breach the high-water mark.
+- **The memory gate depends on the milestone.** M1 has no store and no memory gate. M2 and M3 rerun the M0 spike's private-harness workloads against the real store, so the spike harness is kept. From M4 onwards, when the public workloads in `Allocation/MemoryWorkloads.cs` can run, the slow memory tier is the gate.
+- **Hostile input closes as it goes.** Each codec or protocol milestone makes its own decode-side hostile tests pass. M7 owns the full fuzz, canary and BUD-12 runs over every decoder.
+- The per-ID split inside a prefix (for example V1 versus V2 `ENC` entries) is made when the plan is packaged (TASK-3.8), from the registry `layers` and the test files.

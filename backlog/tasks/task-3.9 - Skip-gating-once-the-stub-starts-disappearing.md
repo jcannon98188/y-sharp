@@ -4,6 +4,7 @@ title: Skip gating once the stub starts disappearing
 status: To Do
 assignee: []
 created_date: '2026-10-24 17:00'
+updated_date: '2026-10-24 17:05'
 labels:
   - 'wayfinder:grilling'
 dependencies: []
@@ -27,3 +28,9 @@ ordinal: 52000
 - [ ] #1 The per-area or per-milestone skip mechanism is decided
 - [ ] #2 Which plan spec changes it, and when, is decided
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+TASK-3.4 fixed milestones M0-M7 (ADR 0018 amendment), so the gate can be per milestone. M1 (values) is the first to land code and runs alongside M0.
+<!-- SECTION:NOTES:END -->

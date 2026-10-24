@@ -4,7 +4,7 @@ title: M0 spike design
 status: To Do
 assignee: []
 created_date: '2026-10-24 16:52'
-updated_date: '2026-10-24 17:00'
+updated_date: '2026-10-24 17:05'
 labels:
   - 'wayfinder:grilling'
 dependencies:
@@ -35,4 +35,6 @@ What exactly does the M0 spike build and measure for each of the two storage mod
 
 <!-- SECTION:NOTES:BEGIN -->
 From the research: the spike must name the unit of "bytes per item" (per op vs per struct; they diverge 1M:1 for the array workload), define the 100k steady-state edit mix ADR 0009 leaves open, and meet 8.31 B/op for array pushes (needs a homogeneous 8-byte chunked column). The spike needs a private harness; the public API cannot drive the workloads before types and transactions exist. See docs/research/storage-layout.md sections 4-5.
+
+Decided in TASK-3.4: the spike's private harness is kept. M2 and M3 rerun it against the real store as their memory gate (ADR 0018 amendment).
 <!-- SECTION:NOTES:END -->
