@@ -13,6 +13,9 @@ public sealed record ReplicaSpec(string Name, uint ClientId, bool Gc);
 /// <summary>An observer firing recorded under the <c>events</c> observation, in firing order.</summary>
 public sealed record ObservedEvent(string Observer, string EventType);
 
+/// <summary>The recorded outcome of a named <c>applyForeign</c> step (ADR 0012): whether the update was accepted, and in which format.</summary>
+public sealed record ForeignOutcome(UpdateFormat Format, bool Accepted);
+
 /// <summary>Mutable state of one script run: replicas, captured update bytes, recorded events and the virtual clock.</summary>
 public sealed class OpsContext
 {
@@ -31,6 +34,9 @@ public sealed class OpsContext
     public Dictionary<string, List<byte[]>> Updates { get; } = new(StringComparer.Ordinal);
 
     public List<ObservedEvent> Events { get; } = new();
+
+    /// <summary>Outcomes of named <c>applyForeign</c> steps, in script order (the <c>results</c> observation, ADR 0012).</summary>
+    public Dictionary<string, ForeignOutcome> ForeignOutcomes { get; } = new(StringComparer.Ordinal);
 
     public Func<OpsContext, ReplicaSpec, Doc> DocFactory { get; set; } = DefaultDocFactory;
     public Action<Doc, object?, Action> TransactRunner { get; set; } = (doc, origin, body) => doc.Transact(_ => body(), origin);
@@ -192,6 +198,28 @@ public static class StandardSteps
             var bytes = s.Tagged("bytes");
             if (bytes.Kind != TaggedKind.Bytes) throw new OpsScriptException("applyUpdate: 'bytes' must be tagged bytes.");
             ctx.Doc(s.String("doc")).ApplyUpdate(bytes.Bytes, null, format);
+        }));
+        // ADR 0012: bytes another implementation produced. Origin "foreign". Unnamed: a rejected update throws (a script error on the
+        // oracle side). Named: the outcome is recorded (ctx.ForeignOutcomes) so the harness can classify mutated updates.
+        r.Register(new StepDefinition("applyForeign", new[] { "doc", "bytes" }, new[] { "encoding", "name" }, (ctx, s) =>
+        {
+            var format = (s.OptString("encoding") ?? "v1") switch
+            {
+                "v1" => UpdateFormat.V1,
+                "v2" => UpdateFormat.V2,
+                var e => throw new OpsScriptException($"applyForeign: unknown encoding '{e}'."),
+            };
+            var bytes = s.Tagged("bytes");
+            if (bytes.Kind != TaggedKind.Bytes) throw new OpsScriptException("applyForeign: 'bytes' must be tagged bytes.");
+            var doc = ctx.Doc(s.String("doc"));
+            var name = s.OptString("name");
+            if (name == null)
+            {
+                doc.ApplyUpdate(bytes.Bytes, "foreign", format);
+                return;
+            }
+            if (ctx.ForeignOutcomes.ContainsKey(name)) throw new OpsScriptException($"applyForeign: result '{name}' is recorded twice.");
+            ctx.ForeignOutcomes[name] = new ForeignOutcome(format, doc.TryApplyUpdate(bytes.Bytes, "foreign", format).Ok);
         }));
         r.Register(new StepDefinition("observe", new[] { "doc", "target", "name" }, System.Array.Empty<string>(), (ctx, s) =>
         {

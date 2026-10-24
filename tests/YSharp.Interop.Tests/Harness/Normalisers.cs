@@ -1,0 +1,81 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace YSharp.Interop;
+
+/// <summary>How a mutation changed a valid update.</summary>
+public enum MutationKind { Truncate, FlipByte, DeleteByte, InsertByte }
+
+/// <summary>
+/// One mutated-update case after both implementations ran it: the bytes, what the mutation was, and whether each side accepted them.
+/// Acceptance of a named <c>applyForeign</c> step is the observable (ADR 0012 "Compared": the outcome class of a mutated valid update).
+/// </summary>
+public sealed record MutationCase(UpdateFormat Format, byte[] Valid, byte[] Mutated, MutationKind Kind, int Offset, bool OracleAccepted, bool SharpAccepted, bool SharpUnchanged);
+
+/// <summary>The classes a mutated valid update falls into (ADR 0012).</summary>
+public enum OutcomeClass
+{
+    /// <summary>Both accept; the state must then be equal.</summary>
+    BothAccept,
+
+    /// <summary>Both reject; y-sharp must also be unchanged (atomic decode, ADR 0005).</summary>
+    BothReject,
+
+    /// <summary>The oracle accepts, y-sharp rejects: only legal as a recorded divergence claimed by a normaliser.</summary>
+    SharpRejectsOracleAccepts,
+
+    /// <summary>The oracle rejects, y-sharp accepts: always a bug.</summary>
+    OracleRejectsSharpAccepts,
+}
+
+/// <summary>
+/// A per-divergence normaliser (ADR 0012 "Generation"): it names the registry IDs of the recorded divergence it covers and decides whether a
+/// case is exactly the documented difference. The divergence-targeting generator applies it and asserts the difference exactly; the default
+/// generator never reaches it, so any mismatch outside is a bug. Adding a divergence to the differential is: register an entry in the
+/// inventory, add a normaliser here, add a targeting generator case.
+/// </summary>
+public interface IDivergenceNormaliser
+{
+    /// <summary>Stable key of the normaliser.</summary>
+    string Key { get; }
+
+    /// <summary>The recorded divergences (registry IDs, ADR 0003/0005) this normaliser stands for.</summary>
+    IReadOnlyList<string> RegistryIds { get; }
+
+    string Description { get; }
+
+    /// <summary>True when <paramref name="c"/> is exactly the documented difference (not merely "some difference").</summary>
+    bool Claims(MutationCase c);
+}
+
+/// <summary>JS decodes past the end of a truncated update where y-sharp reports a decode error (EOF is always an error, ADR 0005).</summary>
+public sealed class LenientTruncationNormaliser : IDivergenceNormaliser
+{
+    public string Key => "lenient-truncation";
+
+    public IReadOnlyList<string> RegistryIds { get; } = new[] { "ENC-60", "ENC-62", "ENC-64", "ENC-65", "ENC-67", "ENC-68" };
+
+    public string Description =>
+        "A proper prefix of a valid update that the oracle's lenient readers accept (readUint8/readVarInt/Rle/UintOptRle/IntDiffOptRle/StringDecoder return a default at EOF) is rejected by y-sharp without changing the document.";
+
+    public bool Claims(MutationCase c) =>
+        c.Kind == MutationKind.Truncate && c.Mutated.Length < c.Valid.Length && c.OracleAccepted && !c.SharpAccepted && c.SharpUnchanged;
+}
+
+public static class Normalisers
+{
+    /// <summary>Every divergence the live differential knows. A divergence nobody registered here is reported as a bug.</summary>
+    public static readonly IReadOnlyList<IDivergenceNormaliser> Registered = new IDivergenceNormaliser[] { new LenientTruncationNormaliser() };
+
+    public static OutcomeClass Classify(bool oracleAccepted, bool sharpAccepted) =>
+        (oracleAccepted, sharpAccepted) switch
+        {
+            (true, true) => OutcomeClass.BothAccept,
+            (false, false) => OutcomeClass.BothReject,
+            (true, false) => OutcomeClass.SharpRejectsOracleAccepts,
+            _ => OutcomeClass.OracleRejectsSharpAccepts,
+        };
+
+    public static IDivergenceNormaliser? Claim(MutationCase c) => Registered.FirstOrDefault(n => n.Claims(c));
+}

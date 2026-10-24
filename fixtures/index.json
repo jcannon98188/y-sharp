@@ -181,6 +181,14 @@
       "bytes": 6724
     },
     {
+      "path": "differential/apply-foreign.json",
+      "area": "differential",
+      "name": "apply-foreign",
+      "covers": ["DIFF-02","ENC-21"],
+      "sha256": "bcbab81d4de1800377f0319d2d7fb7dca4994273b10a3847dd9c7f24e9e6131f",
+      "bytes": 6736
+    },
+    {
       "path": "doc/root-type-promotion-from-update.json",
       "area": "doc",
       "name": "root-type-promotion-from-update",

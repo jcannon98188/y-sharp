@@ -2,8 +2,6 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
-    <!-- Empty shell until its spec lands; zero tests is not a failure. -->
-    <TestingPlatformCommandLineArguments>--ignore-exit-code 8</TestingPlatformCommandLineArguments>
     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
   </PropertyGroup>
@@ -14,5 +12,17 @@
   <ItemGroup>
     <ProjectReference Include="..\YSharp.TestKit\YSharp.TestKit.csproj" />
     <ProjectReference Include="..\..\src\YSharp\YSharp.csproj" />
+  </ItemGroup>
+  <!--
+    The C# interpreter's step kinds and the typed dump writers are owned by the area specs and live in YSharp.Tests as internal support code.
+    The differential harness needs the same kinds (ADR 0012: one vocabulary, two interpreters) and the same dump shape, so it compiles those
+    support files in rather than copying them: a fix to a step or a dump reaches both projects. No test class is linked.
+  -->
+  <ItemGroup>
+    <Compile Include="..\YSharp.Tests\Codecs\CodecSupport.cs" Link="Linked\CodecSupport.cs" />
+    <Compile Include="..\YSharp.Tests\Codecs\FixtureReplay.cs" Link="Linked\FixtureReplay.cs" />
+    <Compile Include="..\YSharp.Tests\Types\TypeDump.cs" Link="Linked\TypeDump.cs" />
+    <Compile Include="..\YSharp.Tests\Types\TypeSteps.cs" Link="Linked\TypeSteps.cs" />
+    <Compile Include="..\YSharp.Tests\Simulation\SimSteps.cs" Link="Linked\SimSteps.cs" />
   </ItemGroup>
 </Project>

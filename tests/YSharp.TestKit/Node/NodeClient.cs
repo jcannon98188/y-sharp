@@ -57,6 +57,9 @@ public sealed class NodeClient : IAsyncDisposable
     public NodeClient(NodeClientOptions options) => _options = options;
 
     public string? NodeVersion { get; private set; }
+
+    /// <summary>The raw handshake line of the current child (carries the oracle versions and op list in the differential harness).</summary>
+    public string? HelloLine { get; private set; }
     public int RestartCount { get; private set; }
 
     public async Task StartAsync()
@@ -94,6 +97,7 @@ public sealed class NodeClient : IAsyncDisposable
             throw new NodeRequestException("Timed out waiting for the node handshake.");
         }
         if (hello == null) throw new NodeRequestException("Node exited before the handshake.");
+        HelloLine = hello;
         using (var h = JsonDocument.Parse(hello))
         {
             var root = h.RootElement;
