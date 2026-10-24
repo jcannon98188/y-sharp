@@ -10,7 +10,7 @@
   wire: true
   quirk: [Q12, Q20]
   owner: 6
-  status: pending
+  status: active
   ref: "quirks.md:254"
 
 - id: Q21
@@ -21,7 +21,7 @@
   wire: true
   quirk: [Q12, Q21]
   owner: 6
-  status: pending
+  status: active
   ref: "quirks.md:264"
 
 - id: Q22
@@ -34,7 +34,7 @@
   owner: 6
   status: pending
   ref: "quirks.md:274"
-  note: "Proposal in the quirk register: diverge internally, match observably. Needs a recorded decision (ADR 0003) and a [Diverges] test."
+  note: "Pending (owner: spec 6). Proposal in the quirk register: diverge internally, match observably. Needs a recorded decision (ADR 0003) and a [Diverges] test, so it stays pending until that ADR exists; no new test can be written first."
 
 - id: Q23
   title: "Observer and event ordering"
@@ -69,6 +69,7 @@
   owner: 6
   status: pending
   ref: "quirks.md:304"
+  note: "Pending (owner: spec 6). The only observable effect is the order of deep-observer events with equal path lengths (JS sorts by path length, stably), which needs the observeDeep tests of spec 7 (types); struct integration and the delete-set sort have no ties to assert."
 
 - id: Q26
   title: "Map iteration and for...in order"
