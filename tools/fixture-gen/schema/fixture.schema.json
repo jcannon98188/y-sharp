@@ -9,7 +9,7 @@
       "type": "object",
       "properties": {
         "schema": { "const": 1 },
-        "covers": { "type": "array", "items": { "type": "string", "pattern": "^[A-Z]+-[A-Z0-9.]+$" }, "minItems": 1, "uniqueItems": true },
+        "covers": { "type": "array", "items": { "type": "string", "pattern": "^(?:Q[0-9]{2}|[A-Z]+-[A-Z0-9.]+)$" }, "minItems": 1, "uniqueItems": true },
         "versions": {
           "type": "object",
           "properties": { "yjs": { "type": "string" }, "lib0": { "type": "string" }, "y-protocols": { "type": "string" } },

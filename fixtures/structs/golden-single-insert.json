@@ -1,0 +1,104 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["STR-01","STR-02","STR-04","STR-08","STR-29","STR-56","STR-66","STR-67"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":1},{"name":"b","clientId":2}],
+    "steps": [
+      {"step":"text.insert","doc":"a","target":{"root":"t","kind":"text"},"at":0,"value":"abc"},
+      {"step":"sync","from":"a","to":"b"}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [{"$":"bytes","hex":"01010100040101740361626300"}],
+          "v2": [{"$":"bytes","hex":"000001010000010407047461626301030101000001010000"}]
+        },
+        "b": {
+          "v1": [{"$":"bytes","hex":"01010100040101740361626300"}],
+          "v2": [{"$":"bytes","hex":"000001010000010407047461626301030101000001010000"}]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {"full":{"$":"bytes","hex":"01010100040101740361626300"},"diff":{"b":{"$":"bytes","hex":"0000"}}},
+          "v2": {
+            "full": {"$":"bytes","hex":"000001010000010407047461626301030101000001010000"},
+            "diff": {"b":{"$":"bytes","hex":"00000000000001000000000000"}}
+          }
+        },
+        "b": {
+          "v1": {"full":{"$":"bytes","hex":"01010100040101740361626300"},"diff":{"a":{"$":"bytes","hex":"0000"}}},
+          "v2": {
+            "full": {"$":"bytes","hex":"000001010000010407047461626301030101000001010000"},
+            "diff": {"a":{"$":"bytes","hex":"00000000000001000000000000"}}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {
+        "a": {"v1":{"$":"bytes","hex":"010103"},"v2":{"$":"bytes","hex":"010103"}},
+        "b": {"v1":{"$":"bytes","hex":"010103"},"v2":{"$":"bytes","hex":"010103"}}
+      }
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {
+        "a": [["t",{"kind":"text","delta":[{"insert":"abc"}]}]],
+        "b": [["t",{"kind":"text","delta":[{"insert":"abc"}]}]]
+      }
+    },
+    "structs": {
+      "api": "doc.store.clients",
+      "value": {
+        "a": [
+          [
+            1,
+            [
+              {
+                "id": [1,0],
+                "len": 3,
+                "kind": "item",
+                "parent": "t",
+                "content": {"ref":4,"value":"abc"},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ],
+        "b": [
+          [
+            1,
+            [
+              {
+                "id": [1,0],
+                "len": 3,
+                "kind": "item",
+                "parent": "t",
+                "content": {"ref":4,"value":"abc"},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ]
+      }
+    },
+    "ds": {"api":"Y.createDeleteSetFromStructStore","value":{"a":[],"b":[]}}
+  }
+}

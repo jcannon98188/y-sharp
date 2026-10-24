@@ -1,0 +1,173 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["STR-64","STR-65"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"d","clientId":10},{"name":"e","clientId":11}],
+    "steps": [
+      {"step":"observe","doc":"d","target":{"root":"t","kind":"text"},"name":"watch-d"},
+      {"step":"observe","doc":"e","target":{"root":"t","kind":"text"},"name":"watch-e"},
+      {"step":"applyUpdate","doc":"d","bytes":{"$":"bytes","hex":"000101010102"}},
+      {"step":"applyUpdate","doc":"d","bytes":{"$":"bytes","hex":"0101010284010102636400"}},
+      {"step":"applyUpdate","doc":"d","bytes":{"$":"bytes","hex":"010101000401017402616200"}},
+      {"step":"applyUpdate","doc":"e","bytes":{"$":"bytes","hex":"010101000401017402616200"}},
+      {"step":"applyUpdate","doc":"e","bytes":{"$":"bytes","hex":"000101010102"}},
+      {"step":"applyUpdate","doc":"e","bytes":{"$":"bytes","hex":"0101010284010102636400"}}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "d": {
+          "v1": [{"$":"bytes","hex":"010301000401017401618101000284010201640101010102"}],
+          "v2": [{"$":"bytes","hex":"0000024101020004000504008100840603746164410101010001020103000101010101"}]
+        },
+        "e": {
+          "v1": [
+            {"$":"bytes","hex":"010101000401017402616200"},
+            {"$":"bytes","hex":"000101010101"},
+            {"$":"bytes","hex":"010201028101010184010201640101010201"}
+          ],
+          "v2": [
+            {"$":"bytes","hex":"0000010100000104060374616201020101000001010000"},
+            {"$":"bytes","hex":"0000000000000100000000000101010100"},
+            {"$":"bytes","hex":"0000024101020300000381008403016401000001010102020101010200"}
+          ]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "d": {
+          "v1": {
+            "full": {"$":"bytes","hex":"010301000401017401618101000284010201640101010102"},
+            "diff": {"e":{"$":"bytes","hex":"000101010102"}}
+          },
+          "v2": {
+            "full": {"$":"bytes","hex":"0000024101020004000504008100840603746164410101010001020103000101010101"},
+            "diff": {"e":{"$":"bytes","hex":"0000000000000100000000000101010101"}}
+          }
+        },
+        "e": {
+          "v1": {
+            "full": {"$":"bytes","hex":"010301000401017401618101000284010201640101010102"},
+            "diff": {"d":{"$":"bytes","hex":"000101010102"}}
+          },
+          "v2": {
+            "full": {"$":"bytes","hex":"0000024101020004000504008100840603746164410101010001020103000101010101"},
+            "diff": {"d":{"$":"bytes","hex":"0000000000000100000000000101010101"}}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {
+        "d": {"v1":{"$":"bytes","hex":"010104"},"v2":{"$":"bytes","hex":"010104"}},
+        "e": {"v1":{"$":"bytes","hex":"010104"},"v2":{"$":"bytes","hex":"010104"}}
+      }
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {
+        "d": [["t",{"kind":"text","delta":[{"insert":"ad"}]}]],
+        "e": [["t",{"kind":"text","delta":[{"insert":"ad"}]}]]
+      }
+    },
+    "events": {
+      "api": "AbstractType.observe",
+      "value": [
+        {"observer":"watch-d","type":"YTextEvent","delta":[{"insert":"ad"}]},
+        {"observer":"watch-e","type":"YTextEvent","delta":[{"insert":"ab"}]},
+        {"observer":"watch-e","type":"YTextEvent","delta":[{"retain":1},{"delete":1}]},
+        {"observer":"watch-e","type":"YTextEvent","delta":[{"retain":1},{"insert":"d"}]}
+      ]
+    },
+    "structs": {
+      "api": "doc.store.clients",
+      "value": {
+        "d": [
+          [
+            1,
+            [
+              {
+                "id": [1,0],
+                "len": 1,
+                "kind": "item",
+                "parent": "t",
+                "content": {"ref":4,"value":"a"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,1],
+                "len": 2,
+                "kind": "item",
+                "origin": [1,0],
+                "parent": "t",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [1,3],
+                "len": 1,
+                "kind": "item",
+                "origin": [1,2],
+                "parent": "t",
+                "content": {"ref":4,"value":"d"},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ],
+        "e": [
+          [
+            1,
+            [
+              {
+                "id": [1,0],
+                "len": 1,
+                "kind": "item",
+                "parent": "t",
+                "content": {"ref":4,"value":"a"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,1],
+                "len": 2,
+                "kind": "item",
+                "origin": [1,0],
+                "parent": "t",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [1,3],
+                "len": 1,
+                "kind": "item",
+                "origin": [1,2],
+                "parent": "t",
+                "content": {"ref":4,"value":"d"},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ]
+      }
+    },
+    "ds": {"api":"Y.createDeleteSetFromStructStore","value":{"d":[[1,[[1,2]]]],"e":[[1,[[1,2]]]]}}
+  }
+}

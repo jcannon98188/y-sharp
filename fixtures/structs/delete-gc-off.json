@@ -1,0 +1,214 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["STR-26","STR-60","GC-01","GC-06","GC-08"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":1,"gc":false},{"name":"b","clientId":2,"gc":false}],
+    "steps": [
+      {"step":"text.insert","doc":"a","target":{"root":"t","kind":"text"},"at":0,"value":"hello world"},
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"text.delete","doc":"b","target":{"root":"t","kind":"text"},"at":0,"len":6},
+      {"step":"sync","from":"b","to":"a"},
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"k","value":1},
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"k","value":2},
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"k","value":3},
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"sync","from":"b","to":"a"}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [
+            {"$":"bytes","hex":"01010100040101740b68656c6c6f20776f726c6400"},
+            {"$":"bytes","hex":"000101010006"},
+            {"$":"bytes","hex":"0101010b2801016d016b017d0100"},
+            {"$":"bytes","hex":"0101010ca8010b017d020101010b01"},
+            {"$":"bytes","hex":"0101010da8010c017d030101010c01"}
+          ],
+          "v2": [
+            {"$":"bytes","hex":"00000101000001040f0c7468656c6c6f20776f726c64010b0101000001010000"},
+            {"$":"bytes","hex":"0000000000000100000000000101010005"},
+            {"$":"bytes","hex":"000001010000012805026d6b4100010100010101010b7d0100"},
+            {"$":"bytes","hex":"000002410001160001a801000000010101010c7d020101010b00"},
+            {"$":"bytes","hex":"000002410001180001a801000000010101010d7d030101010c00"}
+          ]
+        },
+        "b": {
+          "v1": [
+            {"$":"bytes","hex":"01010100040101740b68656c6c6f20776f726c6400"},
+            {"$":"bytes","hex":"000101010006"},
+            {"$":"bytes","hex":"0102010b2801016d016b027d017d02a8010c017d030101010b02"}
+          ],
+          "v2": [
+            {"$":"bytes","hex":"00000101000001040f0c7468656c6c6f20776f726c64010b0101000001010000"},
+            {"$":"bytes","hex":"0000000000000100000000000101010005"},
+            {"$":"bytes","hex":"0000024100011800032800a805026d6b410001010002020101020b7d017d027d030101010b01"}
+          ]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "01040100040101740668656c6c6f2084010505776f726c642801016d016b027d017d02a8010c017d0301010200060b02"
+            },
+            "diff": {"b":{"$":"bytes","hex":"0001010200060b02"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "0000024101020a0e0007040084002800a8140e7468656c6c6f20776f726c646d6b01060541000101000202010104007d017d027d0301010200050501"
+            },
+            "diff": {"b":{"$":"bytes","hex":"00000000000001000000000001010200050501"}}
+          }
+        },
+        "b": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "01040100040101740668656c6c6f2084010505776f726c642801016d016b027d017d02a8010c017d0301010200060b02"
+            },
+            "diff": {"a":{"$":"bytes","hex":"0001010200060b02"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "0000024101020a0e0007040084002800a8140e7468656c6c6f20776f726c646d6b01060541000101000202010104007d017d027d0301010200050501"
+            },
+            "diff": {"a":{"$":"bytes","hex":"00000000000001000000000001010200050501"}}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {
+        "a": {"v1":{"$":"bytes","hex":"01010e"},"v2":{"$":"bytes","hex":"01010e"}},
+        "b": {"v1":{"$":"bytes","hex":"01010e"},"v2":{"$":"bytes","hex":"01010e"}}
+      }
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {
+        "a": [["m",{"kind":"map","pairs":[["k",3]]}],["t",{"kind":"text","delta":[{"insert":"world"}]}]],
+        "b": [["m",{"kind":"map","pairs":[["k",3]]}],["t",{"kind":"text","delta":[{"insert":"world"}]}]]
+      }
+    },
+    "structs": {
+      "api": "doc.store.clients",
+      "value": {
+        "a": [
+          [
+            1,
+            [
+              {
+                "id": [1,0],
+                "len": 6,
+                "kind": "item",
+                "parent": "t",
+                "content": {"ref":4,"value":"hello "},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [1,6],
+                "len": 5,
+                "kind": "item",
+                "origin": [1,5],
+                "parent": "t",
+                "content": {"ref":4,"value":"world"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,11],
+                "len": 2,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "k",
+                "content": {"ref":8,"value":[1,2]},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [1,13],
+                "len": 1,
+                "kind": "item",
+                "origin": [1,12],
+                "parent": "m",
+                "parentSub": "k",
+                "content": {"ref":8,"value":[3]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ],
+        "b": [
+          [
+            1,
+            [
+              {
+                "id": [1,0],
+                "len": 6,
+                "kind": "item",
+                "parent": "t",
+                "content": {"ref":4,"value":"hello "},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [1,6],
+                "len": 5,
+                "kind": "item",
+                "origin": [1,5],
+                "parent": "t",
+                "content": {"ref":4,"value":"world"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,11],
+                "len": 2,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "k",
+                "content": {"ref":8,"value":[1,2]},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [1,13],
+                "len": 1,
+                "kind": "item",
+                "origin": [1,12],
+                "parent": "m",
+                "parentSub": "k",
+                "content": {"ref":8,"value":[3]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ]
+      }
+    },
+    "ds": {
+      "api": "Y.createDeleteSetFromStructStore",
+      "value": {"a":[[1,[[0,6],[11,2]]]],"b":[[1,[[0,6],[11,2]]]]}
+    }
+  }
+}
