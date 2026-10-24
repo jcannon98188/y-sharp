@@ -33,7 +33,10 @@ public sealed class Awareness : IDisposable
     public void Dispose() => throw Sketch.NI;
 
     public void RemoveStates(ReadOnlySpan<uint> clients, object? origin) => throw Sketch.NI;
-    public void EncodeUpdate(IBufferWriter<byte> writer, ReadOnlySpan<uint> clients = default) => throw Sketch.NI;   // empty = all
+    public void EncodeUpdate(IBufferWriter<byte> writer) => throw Sketch.NI;   // every client with a live state
+    /// Entries in the order given, duplicates written twice, an empty list is the single byte 0 (AW-31). An id with no meta fails (AW-32, ADR 0014).
+    /// `states` substitutes the state map but not the meta (AW-33).
+    public YStatus TryEncodeUpdate(IBufferWriter<byte> writer, ReadOnlySpan<uint> clients, IReadOnlyDictionary<uint, YValue>? states = null) => throw Sketch.NI;
     public ApplyResult TryApplyUpdate(ReadOnlySpan<byte> update, object? origin) => throw Sketch.NI;
     public static YStatus TryModifyUpdate(ReadOnlySpan<byte> update, Func<YValue, YValue> modify, IBufferWriter<byte> output) => throw Sketch.NI;
 }
@@ -55,7 +58,7 @@ public static class YSync
     public static void WriteStep2(IBufferWriter<byte> writer, Doc doc, ReadOnlySpan<byte> targetStateVector = default) => throw Sketch.NI;
     public static void WriteUpdate(IBufferWriter<byte> writer, ReadOnlySpan<byte> update) => throw Sketch.NI;
     /// Reads one message from the front of `input`; unknown type or truncation is an error result, never an exception (ADR 0005).
-    public static YStatus TryReadMessage(ref ReadOnlySpan<byte> input, IBufferWriter<byte> reply, Doc doc, object? origin, out SyncReadResult result) { result = default; throw Sketch.NI; }
+    public static YStatus TryReadMessage(ref ReadOnlySpan<byte> input, IBufferWriter<byte> reply, Doc doc, object? origin, out SyncReadResult result, Action<YError>? errorHandler = null) { result = default; throw Sketch.NI; }
 }
 
 public static class YAuth
