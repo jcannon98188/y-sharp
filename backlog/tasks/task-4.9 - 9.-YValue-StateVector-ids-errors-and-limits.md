@@ -1,10 +1,10 @@
 ---
 id: TASK-4.9
 title: '9. YValue, StateVector, ids, errors and limits'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-10-24 19:41'
-updated_date: '2026-10-24 21:10'
+updated_date: '2026-10-24 21:20'
 labels:
   - spec
   - 'model:sonnet'
@@ -32,18 +32,18 @@ Read first: `docs/handoff-implementation-planning.md`, ADRs 0005, 0006, 0008, 00
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Every test whose required features have all landed passes, and no test requiring this spec's features skips
-- [ ] #2 This spec's features are added to `Features.Landed`
-- [ ] #3 The traceability gate passes and no pending registry entry is added
-- [ ] #4 BUD-03 reads 0 bytes and its entry is active
+- [x] #1 Every test whose required features have all landed passes, and no test requiring this spec's features skips
+- [x] #2 This spec's features are added to `Features.Landed`
+- [x] #3 The traceability gate passes and no pending registry entry is added
+- [x] #4 BUD-03 reads 0 bytes and its entry is active
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `dotnet build YSharp.slnx` has 0 warnings
-- [ ] #2 `dotnet test --solution YSharp.slnx` is green in Debug and in Release
-- [ ] #3 Fixture drift check (`npm run check` in `tools/fixture-gen`) is clean
-- [ ] #4 ADR 0022 followed: suite changes in separate `suite:` commits, a Suite changes list in the notes, no open owner decision
+- [x] #1 `dotnet build YSharp.slnx` has 0 warnings
+- [x] #2 `dotnet test --solution YSharp.slnx` is green in Debug and in Release
+- [x] #3 Fixture drift check (`npm run check` in `tools/fixture-gen`) is clean
+- [x] #4 ADR 0022 followed: suite changes in separate `suite:` commits, a Suite changes list in the notes, no open owner decision
 <!-- DOD:END -->
 
 ## Comments
@@ -61,3 +61,9 @@ created: 2026-10-24 21:10
 Owner confirmed both feature-gate edits (ValueQuirkTests gate; BUD-03 test move).
 ---
 <!-- COMMENTS:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Implemented on the impl/task-4 integration branch and merged; verified by the implementer with a 0-warning build, green Debug and Release test runs, clean fixture drift check and the traceability gate (see PR #1 and the task comments).
+<!-- SECTION:FINAL_SUMMARY:END -->
