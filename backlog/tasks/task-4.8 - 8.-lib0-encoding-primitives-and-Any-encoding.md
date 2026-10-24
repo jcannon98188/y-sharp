@@ -4,7 +4,7 @@ title: 8. lib0 encoding primitives and Any encoding
 status: To Do
 assignee: []
 created_date: '2026-10-24 19:41'
-updated_date: '2026-10-24 19:42'
+updated_date: '2026-10-24 20:45'
 labels:
   - spec
   - 'model:sonnet'
@@ -45,3 +45,13 @@ Read first: `docs/handoff-implementation-planning.md`, ADRs 0005, 0006, 0008, 00
 - [ ] #3 Fixture drift check (`npm run check` in `tools/fixture-gen`) is clean
 - [ ] #4 ADR 0022 followed: suite changes in separate `suite:` commits, a Suite changes list in the notes, no open owner decision
 <!-- DOD:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: @orchestrator
+created: 2026-10-24 20:45
+---
+Note: implemented in namespace YSharp.Lib0 rather than YSharp.Encoding (ADR 0021) because YSharp.Encoding shadows System.Text.Encoding in existing TestKit/fuzz code. Later specs use YSharp.Lib0; ADR 0021 text may need updating.
+---
+<!-- COMMENTS:END -->

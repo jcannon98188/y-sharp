@@ -9,7 +9,6 @@ using YSharp.Tests.Simulation;
 using YSharp.Tests.Types;
 using YSharp.TestKit.Ops;
 using YSharp.TestKit.Values;
-using YSharp.TestKit.Stubs;
 
 namespace YSharp.Interop;
 
@@ -20,14 +19,12 @@ public enum SharpStatus
     /// <summary>The interpreter refused the script (<see cref="OpsScriptException"/>): the script is invalid, not y-sharp.</summary>
     ScriptError,
 
-    /// <summary>y-sharp threw something else, or hit the stub (<see cref="NotImplementedException"/>): y-sharp's fault.</summary>
+    /// <summary>y-sharp threw something else (including <see cref="NotImplementedException"/>): y-sharp's fault.</summary>
     Fault,
 
     /// <summary>y-sharp did not finish within the per-case timeout (ADR 0012 "Hangs"): y-sharp's fault, never the oracle's.</summary>
     Hang,
 
-    /// <summary>The API stub answered (<see cref="NotImplementedException"/>); the test skips (ADR 0019).</summary>
-    Stub,
 }
 
 public sealed record SharpReply(SharpStatus Status, JsonObject? Observations, string? Message, Exception? Exception = null);
@@ -62,7 +59,6 @@ public static class SharpSide
         {
             try { result = new SharpReply(SharpStatus.Ok, work(), null); }
             catch (OpsScriptException ex) { result = new SharpReply(SharpStatus.ScriptError, null, ex.Message, ex); }
-            catch (NotImplementedException ex) when (ApiStub.IsStub) { result = new SharpReply(SharpStatus.Stub, null, ex.Message, ex); }
             catch (Exception ex) { result = new SharpReply(SharpStatus.Fault, null, $"{ex.GetType().Name}: {ex.Message}", ex); }
         }, 16 * 1024 * 1024) { IsBackground = true, Name = "y-sharp differential case" };
         thread.Start();

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using Xunit;
 using YSharp.TestKit.Concurrency;
-using YSharp.TestKit.Stubs;
 
 namespace YSharp.Tests.Concurrency;
 
@@ -15,20 +14,6 @@ namespace YSharp.Tests.Concurrency;
 public sealed class ConcurrencyCollection
 {
     public const string Name = "Concurrency";
-}
-
-/// <summary>
-/// Spec 12 tests assert against y-sharp, which is still the API stub (ADR 0019). Every body goes through <see cref="Run"/>: while the stub
-/// throws <see cref="NotImplementedException"/> the test is skipped visibly, and the moment the implementation exists the same assertions run.
-/// </summary>
-internal static class Impl
-{
-    public static void Run(Action body)
-    {
-        // Probe first: work on other threads would otherwise see the stub's exception only there.
-        ApiStub.SkipIfStub();
-        ApiStub.Run(body);
-    }
 }
 
 /// <summary>A body running on its own thread, so a test can see whether it is blocked and what it ended with.</summary>

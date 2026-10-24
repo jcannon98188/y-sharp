@@ -2,6 +2,7 @@ using System.Linq;
 using System.Reflection;
 using Xunit;
 using YSharp.TestKit.Tiers;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.TestKit;
 
@@ -10,6 +11,7 @@ namespace YSharp.Tests.TestKit;
 /// ([Tier] on a method, class or assembly; absent means Gating). The interop and fuzz projects hold the same one-line check over their
 /// own assemblies; this class checks this assembly and proves the rule can fail.
 /// </summary>
+[LibraryIndependent]
 public sealed class TierEnforcementTests
 {
     [Fact]

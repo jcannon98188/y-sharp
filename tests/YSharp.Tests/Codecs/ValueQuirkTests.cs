@@ -4,6 +4,7 @@ using System.Linq;
 using Xunit;
 using YSharp.TestKit.Traceability;
 using YSharp.TestKit.Assertions;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Codecs;
 
@@ -12,6 +13,7 @@ namespace YSharp.Tests.Codecs;
 /// pinned Node; the whole-fixture replays are in <see cref="WireFixtureTests"/>. Each test builds a client-1 document with one
 /// <c>m.k</c> value and compares the Any payload inside the V1 update, or decodes a hand-built payload.
 /// </summary>
+[Requires(Feature.Values)]
 public sealed class ValueQuirkTests
 {
     private static string AnyHex(YValue v) => Hex.Of(Wire.AnyPayloadOfMapSet(v));
@@ -30,20 +32,20 @@ public sealed class ValueQuirkTests
     [Theory, Covers("Q01", "ENC-06", "ENC-72")]
     [MemberData(nameof(NumberTagTable))]
     public void Q01_NumberTag_IsChosenFromTheValue(double value, string expected) =>
-        Stub.Run(() => Assert.Equal(expected, AnyHex(value)));
+        Assert.Equal(expected, AnyHex(value));
 
     [Fact, Covers("Q01")]
     public void Q01_IntAndDoubleOfTheSameValue_EncodeIdentically() =>
-        Stub.Run(() => Assert.Equal(AnyHex(1), AnyHex(1.0)));
+        Assert.Equal(AnyHex(1), AnyHex(1.0));
 
     [Fact, Covers("Q01")]
-    public void Q01_ForeignTags_AreCanonicalisedOnReencode() => Stub.Run(() =>
+    public void Q01_ForeignTags_AreCanonicalisedOnReencode()
     {
         // float64 1.0 and float32 5.0 as another encoder may write them; re-encoding picks the tag from the value.
         Assert.Equal("7d01", Reencode("7b3ff0000000000000"));
         Assert.Equal("7d05", Reencode("7c40a00000"));
         Assert.Equal("7d01", Reencode("7d01"));
-    });
+    }
 
     [Theory, Covers("Q02", "ENC-72")]
     [InlineData(2147483647.0, "7dbfffffff0f")]
@@ -51,10 +53,10 @@ public sealed class ValueQuirkTests
     [InlineData(-2147483648.0, "7ccf000000")]
     [InlineData(2147483648.0, "7c4f000000")]
     public void Q02_IntegerCutoff_Is2Pow31Minus1_SoInt32MinimumIsFloat32(double value, string expected) =>
-        Stub.Run(() => Assert.Equal(expected, AnyHex(value)));
+        Assert.Equal(expected, AnyHex(value));
 
     [Fact, Covers("Q03", "ENC-03")]
-    public void Q03_NegativeZero_IsPreserved_AndPositiveZeroIsNot() => Stub.Run(() =>
+    public void Q03_NegativeZero_IsPreserved_AndPositiveZeroIsNot()
     {
         Assert.Equal("7d40", AnyHex(-0.0));
         Assert.Equal("7d00", AnyHex(0.0));
@@ -62,10 +64,10 @@ public sealed class ValueQuirkTests
         Assert.True(back.TryGetNumber(out var d));
         Assert.True(double.IsNegative(d) && d == 0);
         Assert.NotEqual((YValue)0.0, (YValue)(-0.0));   // wire equality tells +0 from -0
-    });
+    }
 
     [Fact, Covers("Q04", "ENC-06")]
-    public void Q04_NaN_IsNormalisedToTheV8Pattern_AndInfinitiesAreFloat32() => Stub.Run(() =>
+    public void Q04_NaN_IsNormalisedToTheV8Pattern_AndInfinitiesAreFloat32()
     {
         Assert.Equal("7b7ff8000000000000", AnyHex(double.NaN));
         Assert.Equal("7b7ff8000000000000", AnyHex(BitConverter.Int64BitsToDouble(unchecked((long)0xFFF8000000000000UL))));
@@ -73,10 +75,10 @@ public sealed class ValueQuirkTests
         Assert.Equal("7cff800000", AnyHex(double.NegativeInfinity));
         Assert.Equal("7b7ff8000000000000", Reencode("7bfff8000000000001"));   // any NaN decodes, the canonical one is written
         Assert.Equal((YValue)double.NaN, (YValue)double.NaN);               // wire equality: NaN equals NaN
-    });
+    }
 
     [Fact, Covers("Q05", "ENC-06")]
-    public void Q05_BigInt_HasItsOwnTag_AndNeverMeetsNumber() => Stub.Run(() =>
+    public void Q05_BigInt_HasItsOwnTag_AndNeverMeetsNumber()
     {
         Assert.Equal("7a7fffffffffffffff", AnyHex(YValue.BigInt(long.MaxValue)));
         Assert.Equal("7a8000000000000000", AnyHex(YValue.BigInt(long.MinValue)));
@@ -86,10 +88,11 @@ public sealed class ValueQuirkTests
         var decoded = Wire.ValueOfMapKey(Wire.DocWithAny(Hex.Bytes("7a0000000000000005")));
         Assert.Equal(YValueKind.BigInt, decoded.Kind);
         Assert.True(decoded.TryGetBigInt(out var l) && l == 5);
-    });
+    }
 
     [Fact, Covers("Q06")]
-    public void Q06_Undefined_IsADistinctCaseFromNull_AndIsStoredInAMap() => Stub.Run(() =>
+    [Requires(Feature.Map)]
+    public void Q06_Undefined_IsADistinctCaseFromNull_AndIsStoredInAMap()
     {
         Assert.Equal("7f", AnyHex(YValue.Undefined));
         Assert.Equal("7e", AnyHex(YValue.Null));
@@ -101,10 +104,10 @@ public sealed class ValueQuirkTests
         Assert.True(map.Has("u"));                                 // live although it reads back as undefined (T-0.11)
         Assert.True(map.TryGet("u", out var e) && e.Value.Kind == YValueKind.Undefined);
         Assert.False(map.Has("absent"));
-    });
+    }
 
     [Fact, Diverges("Q07", adr: "0003"), Covers("ENC-07")]
-    public void Q07_WriteAnyFlattening_CannotBeProducedAndDecodesAsEmptyObject() => Stub.Run(() =>
+    public void Q07_WriteAnyFlattening_CannotBeProducedAndDecodesAsEmptyObject()
     {
         // JS: new Date(0), new Map() and an ArrayBuffer all reach the wire as the empty object 7600. y-sharp has nine value cases
         // and no constructor for them, so the flattening cannot happen; the bytes still decode.
@@ -113,10 +116,10 @@ public sealed class ValueQuirkTests
         Assert.True(decoded.TryGetObject(out var obj));
         Assert.Equal(0, obj.Count);
         Assert.Equal("7600", AnyHex(YValue.Object(Array.Empty<KeyValuePair<string, YValue>>())));
-    });
+    }
 
     [Fact, Covers("Q08")]
-    public void Q08_ObjectKeys_ArrayIndexKeysFirstThenInsertionOrder() => Stub.Run(() =>
+    public void Q08_ObjectKeys_ArrayIndexKeysFirstThenInsertionOrder()
     {
         var members = new[] { "b", "2", "a", "1", "01", "4294967294", "4294967295" }
             .Select((k, i) => new KeyValuePair<string, YValue>(k, i + 1)).ToArray();
@@ -128,10 +131,10 @@ public sealed class ValueQuirkTests
         Assert.True(view.TryGetObject(out var obj));
         Assert.Equal("b", obj[0].Key);
         Assert.Equal("760401317d0401327d0201627d0101617d03", Reencode(wireOrder));
-    });
+    }
 
     [Fact, Diverges("Q09", adr: "0003")]
-    public void Q09_ProtoKey_IsAnOrdinaryKey_AndDuplicatesKeepFirstPositionLastValue() => Stub.Run(() =>
+    public void Q09_ProtoKey_IsAnOrdinaryKey_AndDuplicatesKeepFirstPositionLastValue()
     {
         // JS: obj["__proto__"] = {...} sets the prototype and the own key vanishes. y-sharp keeps it (no prototype in C#).
         var proto = Wire.ValueOfMapKey(Wire.DocWithAny(Hex.Bytes("7601" + "095f5f70726f746f5f5f" + "7601" + "0161" + "7d01")));
@@ -146,10 +149,10 @@ public sealed class ValueQuirkTests
         Assert.Equal("a", d[0].Key);
         Assert.Equal(3.0, d[0].Value.AsNumber());
         Assert.Equal("b", d[1].Key);
-    });
+    }
 
     [Fact, Covers("ENC-07", "ENC-72")]
-    public void Enc07_EveryAnyTag_RoundTripsThroughDecodeAndEncode() => Stub.Run(() =>
+    public void Enc07_EveryAnyTag_RoundTripsThroughDecodeAndEncode()
     {
         var items = new YValue[]
         {
@@ -161,7 +164,7 @@ public sealed class ValueQuirkTests
         Assert.Equal(expected, AnyHex(value));
         Assert.Equal(expected, Reencode(expected));
         Assert.Equal(value, Wire.ValueOfMapKey(Wire.DocWithAny(Hex.Bytes(expected))));
-    });
+    }
 
     [Theory, Covers("ENC-03", "ENC-72")]
     [InlineData(63.0, "7d3f")]
@@ -173,19 +176,20 @@ public sealed class ValueQuirkTests
     [InlineData(-8192.0, "7dc08001")]
     [InlineData(1000000000.0, "7d80a8d6b907")]
     public void Enc03_VarInt_IsSignMagnitudeWithSixBitFirstGroup(double value, string expected) =>
-        Stub.Run(() => Assert.Equal(expected, AnyHex(value)));
+        Assert.Equal(expected, AnyHex(value));
 
     [Fact, Covers("ENC-04", "ENC-06")]
-    public void Enc04_FixedWidthFloats_AreBigEndian_AndForeignWidthsDecode() => Stub.Run(() =>
+    public void Enc04_FixedWidthFloats_AreBigEndian_AndForeignWidthsDecode()
     {
         Assert.Equal("7b40091eb851eb851f", AnyHex(3.14));
         Assert.Equal("7c47c35040", AnyHex(100000.5));
         Assert.Equal(1.5, Wire.ValueOfMapKey(Wire.DocWithAny(Hex.Bytes("7b3ff8000000000000"))).AsNumber());   // float64 on the wire
         Assert.Equal(1.5, Wire.ValueOfMapKey(Wire.DocWithAny(Hex.Bytes("7c3fc00000"))).AsNumber());           // float32
-    });
+    }
 
     [Fact, Covers("ENC-05")]
-    public void Enc05_VarString_IsLengthPrefixedUtf8_AndBinaryIsLengthPrefixedBytes() => Stub.Run(() =>
+    [Requires(Feature.Text)]
+    public void Enc05_VarString_IsLengthPrefixedUtf8_AndBinaryIsLengthPrefixedBytes()
     {
         Assert.Equal("77026162", AnyHex("ab"));
         Assert.Equal("7700", AnyHex(""));
@@ -193,10 +197,10 @@ public sealed class ValueQuirkTests
         var doc = Wire.NewDoc();
         doc.GetText("t").Insert(0, "é");      // two UTF-8 bytes, one UTF-16 unit
         Assert.Equal("010101000401017402c3a900", Hex.Of(Wire.Encode(doc)));
-    });
+    }
 
     [Fact, Covers("Q31"), Diverges("Q31", adr: "0003")]
-    public void Q31_Buffers_AreCopiedOnConstruction_AndOnDecode() => Stub.Run(() =>
+    public void Q31_Buffers_AreCopiedOnConstruction_AndOnDecode()
     {
         var source = new byte[] { 1, 2, 3 };
         var value = YValue.Bytes(source);
@@ -215,5 +219,5 @@ public sealed class ValueQuirkTests
         var transferred = YValue.BytesOwned(owned);     // the explicit transfer factory is the one way to share memory
         Assert.True(transferred.TryGetBytes(out var t));
         Assert.Equal(new byte[] { 4, 5 }, t.ToArray());
-    });
+    }
 }

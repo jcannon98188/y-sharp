@@ -5,6 +5,7 @@ using System.Linq;
 using Xunit;
 using YSharp.TestKit.Assertions;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Structs;
 
@@ -12,6 +13,7 @@ namespace YSharp.Tests.Structs;
 /// Struct encoding, update application, pending structs and delete sets (docs/research/structs.md sections E4, F4, G3, K).
 /// Hex goldens are the bytes the pinned Yjs produces for the same document history.
 /// </summary>
+[Requires(Feature.V1)]
 public sealed class UpdateApplicationTests
 {
     private static string Text(Doc d) => d.GetText("t").ToString();
@@ -36,7 +38,8 @@ public sealed class UpdateApplicationTests
 
     [Fact]
     [Covers("STR-29")]
-    public void ItemWrite_BothOriginsAbsent_EmitsParentInfo() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.V2)]
+    public void ItemWrite_BothOriginsAbsent_EmitsParentInfo()
     {
         var a = Net.Mk(1);
         a.GetText("t").Insert(0, "abc");
@@ -52,11 +55,12 @@ public sealed class UpdateApplicationTests
         b.GetText("t").Insert(0, "Y");     // right origin only
         Assert.Equal("01010200840102015800", Hex.Of(ups[0]));
         Assert.Equal("01010201440100015900", Hex.Of(ups[1]));
-    });
+    }
 
     [Fact]
     [Covers("STR-29")]
-    public void ItemWrite_AMapEntryWritesItsKeyOnlyWithNullOrigins_AnOverwriteInheritsIt() => Impl.Run(() =>
+    [Requires(Feature.Map)]
+    public void ItemWrite_AMapEntryWritesItsKeyOnlyWithNullOrigins_AnOverwriteInheritsIt()
     {
         var a = Net.Mk(1);
         var ups = Net.Capture(a);
@@ -64,11 +68,12 @@ public sealed class UpdateApplicationTests
         a.GetMap("m").Set("k", 2);
         Assert.Equal("010101002801016d016b017d0100", Hex.Of(ups[0]));       // info 0x28: parentSub bit, parent root "m", key "k"
         Assert.Equal("01010101a80100017d020101010001", Hex.Of(ups[1]));     // info 0xa8: origin present, so neither parent nor key is written
-    });
+    }
 
     [Fact]
     [Covers("STR-29", "STR-34", "STR-17")]
-    public void WritingFromAStateVectorInsideAnItem_StartsMidItem_WithASyntheticOrigin() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.V2)]
+    public void WritingFromAStateVectorInsideAnItem_StartsMidItem_WithASyntheticOrigin()
     {
         var a = Net.Mk(1);
         a.GetText("t").Insert(0, "he");
@@ -76,11 +81,12 @@ public sealed class UpdateApplicationTests
         var sv = Hex.Bytes("010102");            // the peer knows two characters of client 1
         Assert.Equal("01010102840101036c6c6f00", Hex.Of(a.EncodeStateAsUpdate(sv)));
         Assert.Equal("0000024100010200018405036c6c6f0300000001010200", Hex.Of(a.EncodeStateAsUpdate(sv, UpdateFormat.V2)));
-    });
+    }
 
     [Fact]
     [Covers("STR-34", "STR-31", "GC-06")]
-    public void GcStruct_AnyWrite_IsWrittenAsInfoZeroAndALength() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Map, Feature.V2)]
+    public void GcStruct_AnyWrite_IsWrittenAsInfoZeroAndALength()
     {
         var a = Net.Mk(1);
         var arr = a.GetArray("arr");
@@ -93,11 +99,12 @@ public sealed class UpdateApplicationTests
         Assert.Equal("010201000101036172720100020101010003", Hex.Of(a.EncodeStateAsUpdate()));
         // V2 writes the GC length through the RLE-encoded length column.
         Assert.Equal("000001010000030100000503617272030101000201020102000101010002", Hex.Of(a.EncodeStateAsUpdate(default, UpdateFormat.V2)));
-    });
+    }
 
     [Fact]
     [Covers("STR-66")]
-    public void WritingAState_OmitsClientsThePeerHasInFull_AndWritesTheRestInDescendingClientOrder() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void WritingAState_OmitsClientsThePeerHasInFull_AndWritesTheRestInDescendingClientOrder()
     {
         var x = Net.Mk(9);
         foreach (var id in new ulong[] { 1, 2, 3 })
@@ -113,22 +120,24 @@ public sealed class UpdateApplicationTests
         Assert.Equal("0201030004010174016301020004010174016200", Hex.Of(x.EncodeStateAsUpdate(Net.StateVector(y))));   // clients 3 and 2; client 1 omitted
         Assert.Equal("0301030004010174016301020004010174016201010004010174016100", Hex.Of(x.EncodeStateAsUpdate()));
         Assert.Equal("0000", Hex.Of(x.EncodeStateAsUpdate(Net.StateVector(x))));                                          // nothing to send: zero clients, empty delete set
-    });
+    }
 
     [Fact]
     [Covers("STR-67")]
-    public void StateAsUpdate_AnyDoc_IsTheStructsPlusTheDeleteSetDerivedFromTheStore() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.V2)]
+    public void StateAsUpdate_AnyDoc_IsTheStructsPlusTheDeleteSetDerivedFromTheStore()
     {
         var a = Net.Mk(1);
         a.GetText("t").Insert(0, "hello");
         a.GetText("t").Delete(1, 3);
         Assert.Equal("0103010004010174016881010003840103016f0101010103", Hex.Of(a.EncodeStateAsUpdate()));
         Assert.Equal("000002410102000600050400810084060374686f410101010001030103000101010102", Hex.Of(a.EncodeStateAsUpdate(default, UpdateFormat.V2)));
-    });
+    }
 
     [Fact]
     [Covers("GC-06")]
-    public void SameHistory_GcOnAndOff_EncodesDifferently() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void SameHistory_GcOnAndOff_EncodesDifferently()
     {
         var on = Net.Mk(1, gc: true);
         var off = Net.Mk(1, gc: false);
@@ -140,7 +149,7 @@ public sealed class UpdateApplicationTests
         Assert.Equal("0103010004010174016881010003840103016f0101010103", Hex.Of(on.EncodeStateAsUpdate()));       // ContentDeleted: ref 1 + length
         Assert.Equal("0103010004010174016884010003656c6c840103016f0101010103", Hex.Of(off.EncodeStateAsUpdate())); // the deleted text is still written
         Assert.Equal(Text(on), Text(off));
-    });
+    }
 
     // ------------------------------------------------------------------ reading
 
@@ -149,7 +158,8 @@ public sealed class UpdateApplicationTests
     [InlineData("01 01 05 00 a4 01 00 01 79 00", "xy", "x")]                     // origin present: the parentSub flag (0x20) is ignored, parent inherited
     [InlineData("01 01 05 00 44 01 00 01 79 00", "yx", "x")]                     // right origin only
     [Covers("STR-61")]
-    public void ReadingStructRefs_EveryInfoBitCombination_IsHonoured(string hex, string expected, string existing) => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void ReadingStructRefs_EveryInfoBitCombination_IsHonoured(string hex, string expected, string existing)
     {
         var d = Net.Mk(1);
         if (existing != "") d.GetText("t").Insert(0, existing);
@@ -157,11 +167,12 @@ public sealed class UpdateApplicationTests
         Assert.True(result.Ok);
         Assert.Equal(expected, Text(d));
         Assert.Equal(1L, d.GetStateVector()[5]);
-    });
+    }
 
     [Fact]
     [Covers("STR-61")]
-    public void ReadingStructRefs_GcSkipAndMapEntries_AreRead() => Impl.Run(() =>
+    [Requires(Feature.Map)]
+    public void ReadingStructRefs_GcSkipAndMapEntries_AreRead()
     {
         var gc = Net.Mk(1);
         Assert.True(gc.TryApplyUpdate(Hex.Bytes("01010500000300")).Ok);            // GC of length 3 (info 0, length)
@@ -180,11 +191,12 @@ public sealed class UpdateApplicationTests
         Assert.Equal(0L, skip.GetStateVector()[5]);                                          // the item waits behind the skipped range
         Assert.Empty(StructsProbe.Of(skip, 5));
         Assert.Equal("0101050204010174017900", Hex.Of(skip.EncodeStateAsUpdate()));         // the Skip itself is not kept
-    });
+    }
 
     [Fact]
     [Covers("STR-62")]
-    public void ReapplyingAnUpdate_IsANoOp_NoEventsNoStateChange() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void ReapplyingAnUpdate_IsANoOp_NoEventsNoStateChange()
     {
         var a = Net.Mk(1);
         a.GetText("t").Insert(0, "ab");
@@ -200,11 +212,11 @@ public sealed class UpdateApplicationTests
         Assert.Single(events);
         Assert.Equal(state, Hex.Of(d.EncodeStateAsUpdate()));
         Assert.Equal("ab", Text(d));
-    });
+    }
 
     [Fact]
     [Covers("STR-62", "STR-64")]
-    public void CausallyDependentUpdates_ConvergeUnderEveryDeliveryOrder_AndLeaveNothingPending() => Impl.Run(() =>
+    public void CausallyDependentUpdates_ConvergeUnderEveryDeliveryOrder_AndLeaveNothingPending()
     {
         var (u1, u2, u3) = Chain();
         var orders = new[] { new[] { u1, u2, u3 }, new[] { u1, u3, u2 }, new[] { u2, u1, u3 }, new[] { u2, u3, u1 }, new[] { u3, u1, u2 }, new[] { u3, u2, u1 } };
@@ -218,11 +230,12 @@ public sealed class UpdateApplicationTests
             states.Add(Hex.Of(d.EncodeStateAsUpdate()));
         }
         Assert.Single(states);
-    });
+    }
 
     [Fact]
     [Covers("STR-63", "STR-64", "STR-52")]
-    public void WhenOneStructWaits_EarlierStructsOfTheUpdateStillIntegrate_AndTheRestIsKeptAsPending() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.UpdateFunctions)]
+    public void WhenOneStructWaits_EarlierStructsOfTheUpdateStillIntegrate_AndTheRestIsKeptAsPending()
     {
         var x = Net.Mk(1);
         var y = Net.Mk(2);
@@ -256,11 +269,12 @@ public sealed class UpdateApplicationTests
         Assert.Equal("ABWC", Text(downstream));
         Assert.Equal("ABWC", Text(d));
         Assert.False(StructsProbe.HasPending(d));
-    });
+    }
 
     [Fact]
     [Covers("STR-64")]
-    public void IndependentPendingUpdates_AreMergedIntoOnePendingState_AndEachRetriesWhenItsDependencyArrives() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void IndependentPendingUpdates_AreMergedIntoOnePendingState_AndEachRetriesWhenItsDependencyArrives()
     {
         var x = Net.Mk(1);
         var y = Net.Mk(2);
@@ -294,11 +308,12 @@ public sealed class UpdateApplicationTests
         g.ApplyUpdate(uc[0]);
         Assert.Equal("ABce", Text(g));
         Assert.False(StructsProbe.HasPending(g));
-    });
+    }
 
     [Fact]
     [Covers("STR-65")]
-    public void DeleteSet_ArrivingBeforeTheStructsItRefersTo_IsHeldAndAppliedLater() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void DeleteSet_ArrivingBeforeTheStructsItRefersTo_IsHeldAndAppliedLater()
     {
         var a = Net.Mk(1);
         var ups = Net.Capture(a);
@@ -323,11 +338,12 @@ public sealed class UpdateApplicationTests
         e.ApplyUpdate(ups[1]);
         Assert.Equal("ad", Text(e));
         Assert.Equal(new[] { (0L, 1L, false), (1L, 2L, true), (3L, 1L, false) }, StructsProbe.Of(e, 1).Select(s => (s.Clock, s.Len, s.Deleted)));
-    });
+    }
 
     [Fact]
     [Covers("STR-65")]
-    public void ReapplyingADeleteSet_ForAlreadyDeletedRanges_ChangesNothing() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void ReapplyingADeleteSet_ForAlreadyDeletedRanges_ChangesNothing()
     {
         var a = Net.Mk(1);
         var ups = Net.Capture(a);
@@ -341,11 +357,12 @@ public sealed class UpdateApplicationTests
         d.ApplyUpdate(ups[1]);
         Assert.Single(events);
         Assert.Equal("ac", Text(d));
-    });
+    }
 
     [Fact]
     [Covers("STR-68")]
-    public void AStructFromAPeerUsingMyClientId_ChangesMyClientId_AfterTheTransaction() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void AStructFromAPeerUsingMyClientId_ChangesMyClientId_AfterTheTransaction()
     {
         var a = Net.Mk(1);
         var b = Net.Mk(1);                       // the same client id on purpose
@@ -358,5 +375,5 @@ public sealed class UpdateApplicationTests
         Net.Sync(b, a);
         Assert.Equal("abcZ", Text(a));
         Assert.Equal(new[] { b.ClientId, 1UL }, StructsProbe.Dump(a).Select(c => c.Client));
-    });
+    }
 }

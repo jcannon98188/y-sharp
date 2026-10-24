@@ -4,6 +4,7 @@ using Xunit;
 using YSharp.TestKit.Concurrency;
 using YSharp.TestKit.Tiers;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Concurrency;
 
@@ -14,11 +15,12 @@ namespace YSharp.Tests.Concurrency;
 /// with thousands of random seeds in the nightly tier (<c>YSharp.Fuzz.Tests</c>). They need the schedule seam in the implementation
 /// (<see cref="ScheduleSeam"/>); until the implementation exists they skip with the rest.
 /// </summary>
+[Requires(Feature.Concurrency)]
 [Collection(ConcurrencyCollection.Name)]
 [Tier(Tier.Gating)]
 public sealed class ScheduleScenarioTests
 {
-    private static void Seeds(Scenario s) => Impl.Run(() => Explorer.RunSeeds(s, Conc.Seeds));
+    private static void Seeds(Scenario s)=> Explorer.RunSeeds(s, Conc.Seeds);
 
     [Fact, Covers("CC-1", "CC-2")]
     public void WriterPreference_ReaderArrivesAfterAWaitingWriter_QueuesBehindIt() => Seeds(Scenarios.WriterPreference);
@@ -36,9 +38,11 @@ public sealed class ScheduleScenarioTests
     public void Destroy_RacesAWrite_BothCompleteAndTheDocumentStillAcceptsAcquires() => Seeds(Scenarios.DestroyVsWrite);
 
     [Fact, Covers("CC-18")]
+    [Requires(Feature.Subdocs)]
     public void TheSubdocHierarchy_ParentBeforeChild_NeverDeadlocks() => Seeds(Scenarios.SubdocHierarchy);
 
     [Fact, Covers("CC-18")]
+    [Requires(Feature.Subdocs)]
     public void TheAbbaCase_ChildThenParent_IsRejectedInEverySchedule_NotAHang() => Seeds(Scenarios.SubdocAbba);
 
     [Fact, Covers("CC-19", "CC-11")]
@@ -48,7 +52,7 @@ public sealed class ScheduleScenarioTests
     public void Undo_RacesAnOrdinaryWrite_ConvergesInEitherOrder() => Seeds(Scenarios.UndoVsWrite);
 
     [Fact, Covers("CC-3", "CC-17", "CC-2")]
-    public void TinyScenarios_AreExploredExhaustively_EveryScheduleOnce() => Impl.Run(() =>
+    public void TinyScenarios_AreExploredExhaustively_EveryScheduleOnce()
     {
         foreach (var scenario in Scenarios.Exhaustive)
         {
@@ -57,9 +61,10 @@ public sealed class ScheduleScenarioTests
             if (!exhausted)
                 Assert.Fail($"{scenario.Name}: not exhausted after {ran} schedules; shrink the scenario or raise the cap.");
         }
-    });
+    }
 
     [Fact, Covers("CC-1")]
+    [LibraryIndependent]
     public void Scenarios_EveryContractGuaranteeWithAScenario_IsListed()
     {
         // the scenario table is the index the matrix is built from; a scenario that names no CC id would be invisible there

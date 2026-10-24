@@ -2,9 +2,11 @@ using System;
 using Xunit;
 using Xunit.Sdk;
 using YSharp.TestKit.Assertions;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.TestKit;
 
+[LibraryIndependent]
 public class DiffAssertionTests
 {
     [Fact]

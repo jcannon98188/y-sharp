@@ -7,6 +7,7 @@ using YSharp.TestKit.Time;
 using YSharp.TestKit.Traceability;
 using YSharp.Tests.Structs;
 using static YSharp.Tests.DocFeatures.Ds;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.DocFeatures;
 
@@ -14,6 +15,7 @@ namespace YSharp.Tests.DocFeatures;
 /// UndoManager behaviour (UM-01..UM-20, docs/research/doc-features.md section 3) beyond the upstream ports. Expected values come from running the
 /// same operations on the pinned Yjs; the oracle fixtures under <c>fixtures/undo</c> replay the same behaviour end to end.
 /// </summary>
+[Requires(Feature.Undo)]
 public sealed class UndoManagerTests
 {
     private static void Wait(VirtualTimeProvider clock, int ms) => clock.Advance(TimeSpan.FromMilliseconds(ms));
@@ -22,7 +24,8 @@ public sealed class UndoManagerTests
 
     [Fact]
     [Covers("UM-01")]
-    public void TrackedOrigins_TheCallersSetIsMutated_ItGainsTheManagerAndLosesItOnDispose() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void TrackedOrigins_TheCallersSetIsMutated_ItGainsTheManagerAndLosesItOnDispose()
     {
         var doc = Net.Mk(1);
         var set = Origins("x");
@@ -32,11 +35,12 @@ public sealed class UndoManagerTests
         um.Dispose();
         Assert.DoesNotContain(um, set);
         Assert.Single(set);
-    });
+    }
 
     [Fact]
     [Covers("UM-01")]
-    public void TrackedOrigins_DefaultToNull_SoRemoteUpdatesWithoutAnOriginAreCapturedToo() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void TrackedOrigins_DefaultToNull_SoRemoteUpdatesWithoutAnOriginAreCapturedToo()
     {
         var a = Net.Mk(1);
         var b = Net.Mk(2);
@@ -51,11 +55,12 @@ public sealed class UndoManagerTests
         Assert.Single(um.UndoStack);
         um.Undo();
         Assert.Equal("", ta.ToString());                           // the remote characters were part of the captured change
-    });
+    }
 
     [Fact]
     [Covers("UM-01", "UM-20")]
-    public void UndoManager_RemoteEditsInsideAnUndoneRangeWithUntrackedOrigin_Remain() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void UndoManager_RemoteEditsInsideAnUndoneRangeWithUntrackedOrigin_Remain()
     {
         var a = Net.Mk(1);
         var b = Net.Mk(2);
@@ -71,11 +76,12 @@ public sealed class UndoManagerTests
         Assert.Equal("X", ta.ToString());
         um.Redo();
         Assert.Equal("aXbc", ta.ToString());
-    });
+    }
 
     [Fact]
     [Covers("UM-01", "UM-16")]
-    public void TrackedOrigins_ChangedAtRuntime_TakeEffect() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void TrackedOrigins_ChangedAtRuntime_TakeEffect()
     {
         var doc = Net.Mk(1);
         var t = doc.GetText("t");
@@ -90,13 +96,14 @@ public sealed class UndoManagerTests
         um.StopCapturing();
         doc.Transact(_ => t.Insert(3, "d"), "y");
         Assert.Single(um.UndoStack);                               // untracked again
-    });
+    }
 
     // ------------------------------------------------------------------ UM-02 scope
 
     [Fact]
     [Covers("UM-02")]
-    public void Scope_ChangesToANestedTypeCountForAnAncestorScope_AndUnrelatedRootsDoNot() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void Scope_ChangesToANestedTypeCountForAnAncestorScope_AndUnrelatedRootsDoNot()
     {
         var doc = Net.Mk(1);
         var arr = doc.GetArray("a");
@@ -108,11 +115,12 @@ public sealed class UndoManagerTests
         Assert.Equal(2, um.UndoStack.Count);
         other.Push(new YEntry[] { 1 });
         Assert.Equal(2, um.UndoStack.Count);
-    });
+    }
 
     [Fact]
     [Covers("UM-02")]
-    public void CaptureTransaction_Predicate_CanRejectATransaction() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void CaptureTransaction_Predicate_CanRejectATransaction()
     {
         var doc = Net.Mk(1);
         var arr = doc.GetArray("a");
@@ -122,13 +130,14 @@ public sealed class UndoManagerTests
         doc.Transact(_ => arr.Push(new YEntry[] { 2 }), "skip");
         doc.Transact(_ => arr.Push(new YEntry[] { 3 }));
         Assert.Equal(2, um.UndoStack.Count);
-    });
+    }
 
     // ------------------------------------------------------------------ UM-03 capture merging (virtual clock)
 
     [Fact]
     [Covers("UM-03")]
-    public void CaptureTimeout_MergesChangesCloserThanTheTimeout_AndStopCapturingStartsANewItem() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void CaptureTimeout_MergesChangesCloserThanTheTimeout_AndStopCapturingStartsANewItem()
     {
         var clock = new VirtualTimeProvider();
         var doc = Net.Mk(1);
@@ -152,11 +161,12 @@ public sealed class UndoManagerTests
         Assert.Equal("abc", t.ToString());
         um.Undo();
         Assert.Equal("", t.ToString());
-    });
+    }
 
     [Fact]
     [Covers("UM-03")]
-    public void CaptureTimeout_Zero_NeverMerges() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void CaptureTimeout_Zero_NeverMerges()
     {
         var doc = Net.Mk(1);
         var arr = doc.GetArray("a");
@@ -165,11 +175,12 @@ public sealed class UndoManagerTests
         arr.Push(new YEntry[] { 2 });
         arr.Push(new YEntry[] { 3 });
         Assert.Equal(3, um.UndoStack.Count);
-    });
+    }
 
     [Fact]
     [Covers("UM-03")]
-    public void UndoThenRedo_AnyItem_ReturnsTheItemToTheUndoStack() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void UndoThenRedo_AnyItem_ReturnsTheItemToTheUndoStack()
     {
         var clock = new VirtualTimeProvider();
         var doc = Net.Mk(1);
@@ -182,13 +193,14 @@ public sealed class UndoManagerTests
         um.Redo();
         Assert.Equal("ab", t.ToString());
         Assert.Equal(2, um.UndoStack.Count);
-    });
+    }
 
     // ------------------------------------------------------------------ UM-04 events
 
     [Fact]
     [Covers("UM-04")]
-    public void StackItemEvents_DistinguishNewItemsFromMergedOnes_AndCarryOriginAndChangedTypes() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void StackItemEvents_DistinguishNewItemsFromMergedOnes_AndCarryOriginAndChangedTypes()
     {
         var doc = Net.Mk(1);
         var t = doc.GetText("t");
@@ -212,13 +224,14 @@ public sealed class UndoManagerTests
         Assert.Equal("popped:undo:True", log[3]);
         Assert.StartsWith("added:undo:", log[4]);
         Assert.Equal("popped:redo:True", log[5]);
-    });
+    }
 
     // ------------------------------------------------------------------ UM-05 redo stack
 
     [Fact]
     [Covers("UM-05")]
-    public void ATrackedUserChange_ClearsTheRedoStack_AndUndoSeparatesConsecutiveItems() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void ATrackedUserChange_ClearsTheRedoStack_AndUndoSeparatesConsecutiveItems()
     {
         var doc = Net.Mk(1);
         var t = doc.GetText("t");
@@ -232,11 +245,12 @@ public sealed class UndoManagerTests
         Assert.Equal(2, um.UndoStack.Count);
         Assert.Empty(um.RedoStack);
         Assert.False(um.CanRedo);
-    });
+    }
 
     [Fact]
     [Covers("UM-05")]
-    public void Undo_StopsCapturing_SoTheNextChangeAfterAnUndoIsAFreshItem() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void Undo_StopsCapturing_SoTheNextChangeAfterAnUndoIsAFreshItem()
     {
         var doc = Net.Mk(1);
         var t = doc.GetText("t");
@@ -251,13 +265,14 @@ public sealed class UndoManagerTests
         um.StopCapturing();
         t.Insert(2, "e");
         Assert.Equal(2, um.UndoStack.Count);
-    });
+    }
 
     // ------------------------------------------------------------------ UM-06, UM-07
 
     [Fact]
     [Covers("UM-06")]
-    public void StackItem_RecordsInsertionsAndDeletionsAsDeleteSets_AndKeepsCallerMeta() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void StackItem_RecordsInsertionsAndDeletionsAsDeleteSets_AndKeepsCallerMeta()
     {
         var doc = Net.Mk(1);
         var t = doc.GetText("t");
@@ -272,11 +287,12 @@ public sealed class UndoManagerTests
         Assert.False(item.Deletions.Contains(new ItemId(1, 1)));
         item.Meta["owner"] = "me";
         Assert.Equal("me", um.UndoStack[0].Meta["owner"]);
-    });
+    }
 
     [Fact]
     [Covers("UM-07")]
-    public void DeletedItemsInScope_AreKeptFromGc_UntilClearIsCalled() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void DeletedItemsInScope_AreKeptFromGc_UntilClearIsCalled()
     {
         var doc = Net.Mk(1, gc: true);
         var t = doc.GetText("t");
@@ -290,11 +306,12 @@ public sealed class UndoManagerTests
         var after = StructsProbe.Of(doc, 1).Single();
         Assert.False(after.Keep);                                   // un-kept, but only a later deletion touching it will collect it (GC-02)
         Assert.Equal(4, after.Ref);
-    });
+    }
 
     [Fact]
     [Covers("UM-07")]
-    public void Keep_DeletedNestedTypes_AlsoCoversTheirParents() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void Keep_DeletedNestedTypes_AlsoCoversTheirParents()
     {
         var doc = Net.Mk(1, gc: true);
         var arr = doc.GetArray("a");
@@ -306,13 +323,14 @@ public sealed class UndoManagerTests
         Assert.All(StructsProbe.Of(doc, 1), s => Assert.True(s.Keep && s.Deleted));
         um.Undo();
         Assert.Equal("[]", J(arr));                                  // inserted and deleted inside one stack item: nothing to restore
-    });
+    }
 
     // ------------------------------------------------------------------ UM-08
 
     [Fact]
     [Covers("UM-08")]
-    public void UndoRedo_ReturnTheStackItemOrNull_AndCanUndoCanRedoFollowTheStacks() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void UndoRedo_ReturnTheStackItemOrNull_AndCanUndoCanRedoFollowTheStacks()
     {
         var doc = Net.Mk(1);
         var t = doc.GetText("t");
@@ -330,11 +348,12 @@ public sealed class UndoManagerTests
         Assert.True(um.CanRedo);
         Assert.NotNull(um.Redo());
         Assert.Equal("a", t.ToString());
-    });
+    }
 
     [Fact]
     [Covers("UM-08")]
-    public void UndoTransaction_AnyUndo_HasTheManagerAsItsOrigin() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Events)]
+    public void UndoTransaction_AnyUndo_HasTheManagerAsItsOrigin()
     {
         var doc = Net.Mk(1);
         var t = doc.GetText("t");
@@ -344,13 +363,14 @@ public sealed class UndoManagerTests
         t.Observe((_, tx) => seen = tx.Origin);
         um.Undo();
         Assert.Same(um, seen);
-    });
+    }
 
     // ------------------------------------------------------------------ UM-11
 
     [Fact]
     [Covers("UM-11")]
-    public void RedoBookkeeping_AfterRedo_IsNotSentOverTheWire() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void RedoBookkeeping_AfterRedo_IsNotSentOverTheWire()
     {
         var a = Net.Mk(1);
         var b = Net.Mk(2);
@@ -365,13 +385,14 @@ public sealed class UndoManagerTests
         Net.Both(a, b);
         Assert.Equal("abc", b.GetText("t").ToString());
         HexAssert.Equal(a.EncodeStateAsUpdate(), b.EncodeStateAsUpdate(), "replicas encode identically; redone and keep are runtime-only");
-    });
+    }
 
     // ------------------------------------------------------------------ UM-12
 
     [Fact]
     [Covers("UM-12")]
-    public void RedoingAMapEntry_IsANoOpWhenARemoteValueIsNewer_UnlessRemoteChangesAreIgnored() => Impl.Run(() =>
+    [Requires(Feature.Map, Feature.Events)]
+    public void RedoingAMapEntry_IsANoOpWhenARemoteValueIsNewer_UnlessRemoteChangesAreIgnored()
     {
         foreach (var (ignore, expected, popped) in new[] { (true, 2.0, true), (false, 4.0, false) })
         {
@@ -391,13 +412,14 @@ public sealed class UndoManagerTests
             Assert.Equal(expected, Get(map1, "x").Value.AsNumber());
             Assert.Equal(expected, Get(map2, "x").Value.AsNumber());
         }
-    });
+    }
 
     // ------------------------------------------------------------------ UM-13
 
     [Fact]
     [Covers("UM-13")]
-    public void PositionCaches_UndoAndRedo_AreInvalidated() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void PositionCaches_UndoAndRedo_AreInvalidated()
     {
         var doc = Net.Mk(1);
         var arr = doc.GetArray("a");
@@ -413,13 +435,14 @@ public sealed class UndoManagerTests
         Assert.Equal(0, arr[0].Value.AsNumber());
         Assert.Equal(50, arr[50].Value.AsNumber());
         Assert.Equal(99, arr[99].Value.AsNumber());
-    });
+    }
 
     // ------------------------------------------------------------------ UM-14
 
     [Fact]
     [Covers("UM-14")]
-    public void PoppedEvent_FiresAfterTheTransaction_WithTheManagerAsOriginAndTheStackItemMeta() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Events)]
+    public void PoppedEvent_FiresAfterTheTransaction_WithTheManagerAsOriginAndTheStackItemMeta()
     {
         var doc = Net.Mk(1);
         var t = doc.GetText("t");
@@ -436,13 +459,14 @@ public sealed class UndoManagerTests
         Assert.Contains(t, popped.ChangedParentTypes);
         Assert.Same(um, popped.Origin);
         Assert.False(popped.IsRedo);
-    });
+    }
 
     // ------------------------------------------------------------------ UM-15
 
     [Fact]
     [Covers("UM-15")]
-    public void Clear_ActsOnlyOnNonEmptyStacks_AndReportsTheRequestedFlags() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void Clear_ActsOnlyOnNonEmptyStacks_AndReportsTheRequestedFlags()
     {
         var doc = Net.Mk(1);
         var t = doc.GetText("t");
@@ -463,13 +487,14 @@ public sealed class UndoManagerTests
         Assert.Empty(um.RedoStack);
         um.Clear(undo: false, redo: true);                           // redo stack already empty
         Assert.Equal(2, cleared.Count);
-    });
+    }
 
     // ------------------------------------------------------------------ UM-16
 
     [Fact]
     [Covers("UM-16")]
-    public void AddToScope_SameTypeTwice_DedupesByIdentity() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Array)]
+    public void AddToScope_SameTypeTwice_DedupesByIdentity()
     {
         var doc = Net.Mk(1);
         var t = doc.GetText("t");
@@ -482,11 +507,12 @@ public sealed class UndoManagerTests
         um2.AddToScope(t);
         t.Insert(1, "b");
         Assert.Single(um2.UndoStack);
-    });
+    }
 
     [Fact]
     [Covers("UM-16")]
-    public void AddToScope_ATypeOfAnotherDoc_IsAcceptedButItsChangesAreNeverSeen() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void AddToScope_ATypeOfAnotherDoc_IsAcceptedButItsChangesAreNeverSeen()
     {
         var d1 = Net.Mk(1);
         var d2 = Net.Mk(2);
@@ -495,13 +521,14 @@ public sealed class UndoManagerTests
         d1.GetArray("a").Push(new YEntry[] { 1 });
         d2.GetArray("b").Push(new YEntry[] { 2 });
         Assert.Single(um.UndoStack);
-    });
+    }
 
     // ------------------------------------------------------------------ UM-17
 
     [Fact]
     [Covers("UM-17")]
-    public void Dispose_AfterwardsEdits_AreNoLongerCaptured() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void Dispose_AfterwardsEdits_AreNoLongerCaptured()
     {
         var doc = Net.Mk(1);
         var t = doc.GetText("t");
@@ -510,11 +537,12 @@ public sealed class UndoManagerTests
         um.Dispose();
         doc.Transact(_ => t.Insert(1, "b"), "x");
         Assert.Single(um.UndoStack);
-    });
+    }
 
     [Fact]
     [Covers("UM-17")]
-    public void Doc_Destroyed_DestroysTheManagerToo() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void Doc_Destroyed_DestroysTheManagerToo()
     {
         var doc = Net.Mk(1);
         var t = doc.GetText("t");
@@ -522,13 +550,14 @@ public sealed class UndoManagerTests
         var um = Um(t, trackedOrigins: set);
         doc.Destroy();
         Assert.DoesNotContain(um, set);
-    });
+    }
 
     // ------------------------------------------------------------------ UM-18, UM-20
 
     [Fact]
     [Covers("UM-18")]
-    public void Undo_DeletedNestedType_RecreatesItWithItsContent() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void Undo_DeletedNestedType_RecreatesItWithItsContent()
     {
         var doc = new Doc(new DocOptions { Gc = false });
         var arr = doc.GetArray("a");
@@ -542,11 +571,11 @@ public sealed class UndoManagerTests
         Assert.Equal("[{\"k\":\"v\"}]", J(arr));
         um.Redo();
         Assert.Equal("[]", J(arr));
-    });
+    }
 
     [Fact]
     [Covers("UM-20", "UM-10")]
-    public void Undo_RemoteInsertionsInsideTheRange_DeletesOnlyTheCapturedOnes() => Impl.Run(() =>
+    public void Undo_RemoteInsertionsInsideTheRange_DeletesOnlyTheCapturedOnes()
     {
         var u = Users.Init(2);
         var t0 = u.Text(0);
@@ -560,5 +589,5 @@ public sealed class UndoManagerTests
         u.SyncAll();
         Assert.Equal("X", t0.ToString());
         Assert.Equal("X", t1.ToString());
-    });
+    }
 }

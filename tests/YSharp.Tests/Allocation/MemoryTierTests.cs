@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Xunit;
 using YSharp.TestKit.Tiers;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Allocation;
 
@@ -12,6 +13,7 @@ namespace YSharp.Tests.Allocation;
 /// collection. Each test writes its measured numbers to <c>TestResults/memory/</c> and the test output, so the counts are reported
 /// even when the budget holds. Half of Yjs's figure is a goal, not an assertion; pause time is not measured here.
 /// </summary>
+[Requires(Feature.Text, Feature.Array, Feature.Map)]
 [Collection("Allocation")]
 [Tier(Tier.Nightly)]
 public sealed class MemoryTierTests
@@ -48,7 +50,6 @@ public sealed class MemoryTierTests
     public void BytesPerItem_EveryWorkload_DoesNotExceedYjs(string workload)
     {
         GateSlowTier();
-        Stub.Run(() =>
         {
             var yjs = MemoryWorkloads.YjsBytesPerItem(workload)
                       ?? throw new InvalidOperationException("bench/yjs-memory/yjs-bytes-per-item.json is missing; run node --expose-gc bench/yjs-memory/measure.mjs");
@@ -67,14 +68,13 @@ public sealed class MemoryTierTests
                 ["goalBytesPerItem"] = yjs / 2, ["withinCeiling"] = perItem <= yjs,
             });
             Assert.True(perItem <= yjs, $"BUD-13: {workload} uses {perItem:F2} bytes per item, Yjs used {yjs:F2} on the same workload.");
-        });
+        }
     }
 
     [Fact, Covers("BUD-14")]
     public void SteadyStateEdits_CauseNoGen2Collections_AndNoLohGrowth()
     {
         GateSlowTier();
-        Stub.Run(() =>
         {
             const int edits = 100_000;
             var doc = MemoryWorkloads.SteadyStateStart();
@@ -98,6 +98,6 @@ public sealed class MemoryTierTests
             });
             Assert.True(gen2 == 0, $"BUD-14: {gen2} gen2 collections during {edits} steady-state edits; the budget is zero.");
             Assert.True(lohGrowth <= AllocationBudgets.LohAllowanceBytes, $"BUD-14: the large object heap grew by {lohGrowth} bytes; the allowance is {AllocationBudgets.LohAllowanceBytes}.");
-        });
+        }
     }
 }

@@ -1,6 +1,7 @@
 using System.Linq;
 using Xunit;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Codecs;
 
@@ -10,15 +11,16 @@ namespace YSharp.Tests.Codecs;
 /// <c>doc</c>, <c>structs</c> and <c>ds</c> dumps are compared by the type areas (specs 6 and 7), which own the readers for them.
 /// The tags repeat each fixture header's <c>covers</c>, so a fixture that gains an ID without a test shows up in review.
 /// </summary>
+[Requires(Feature.V1)]
 public sealed class WireFixtureTests
 {
-    private static void RunWire(string path, bool truncation = false) => Stub.Run(() =>
+    private static void RunWire(string path, bool truncation = false)
     {
         var fixture = FixtureReplay.Load(path);
         var replay = FixtureReplay.Run(fixture);
         FixtureReplay.AssertWire(fixture, replay);
         if (truncation) FixtureReplay.AssertTruncation(fixture, replay);
-    });
+    }
 
     [Fact, Covers("ENC-06", "ENC-07", "ENC-72", "Q01", "Q02", "Q03", "Q04", "Q05", "Q06", "Q08")]
     public void WireFixture_AnyValues_ReplayMatchesTheOracleBytes() => RunWire("encoding/any-values.json");
@@ -48,19 +50,17 @@ public sealed class WireFixtureTests
     public void TextInsertDeleteSync_ReplayMatchesTheOracleBytes_AndEveryTruncationFails() => RunWire("text/insert-delete-sync.json", truncation: true);
 
     [Fact, Covers("ENC-29", "ENC-30", "ENC-31", "ENC-32", "ENC-33", "ENC-34", "ENC-35", "ENC-37", "ENC-38", "ENC-39", "ENC-40", "ENC-41", "ENC-42", "ENC-43", "ENC-45", "ENC-52", "ENC-53", "ENC-54")]
-    public void WireFixture_MalformedV1_FollowsTheStrictDecodingContract() => Stub.Run(() =>
-        FixtureReplay.AssertMalformed(FixtureReplay.Load("hostile/malformed-v1-updates.json")));
+    public void WireFixture_MalformedV1_FollowsTheStrictDecodingContract()=> FixtureReplay.AssertMalformed(FixtureReplay.Load("hostile/malformed-v1-updates.json"));
 
     [Fact, Covers("ENC-54", "ENC-55", "ENC-56")]
-    public void WireFixture_MalformedV2_FollowsTheStrictDecodingContract() => Stub.Run(() =>
-        FixtureReplay.AssertMalformed(FixtureReplay.Load("hostile/malformed-v2-updates.json")));
+    public void WireFixture_MalformedV2_FollowsTheStrictDecodingContract()=> FixtureReplay.AssertMalformed(FixtureReplay.Load("hostile/malformed-v2-updates.json"));
 
     [Fact, Covers("ENC-22", "ENC-36", "ENC-44", "ENC-46", "ENC-47", "ENC-48", "ENC-49", "ENC-50", "ENC-51", "ENC-56",
         "ENC-60", "ENC-61", "ENC-62", "ENC-63", "ENC-64", "ENC-65", "ENC-66", "ENC-67", "ENC-68", "ENC-69", "Q07")]
-    public void WireFixture_MalformedExtras_FollowTheStrictDecodingContract() => Stub.Run(() =>
-        FixtureReplay.AssertMalformed(FixtureReplay.Load("hostile/malformed-codec-extras.json")));
+    public void WireFixture_MalformedExtras_FollowTheStrictDecodingContract()=> FixtureReplay.AssertMalformed(FixtureReplay.Load("hostile/malformed-codec-extras.json"));
 
     [Fact]
+    [LibraryIndependent]
     public void WireFixture_EveryCodecFixture_IsCoveredByATest()
     {
         // every codec fixture file has a replay above; a new one must add a test here

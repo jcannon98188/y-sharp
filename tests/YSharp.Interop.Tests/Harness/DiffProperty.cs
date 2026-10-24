@@ -6,7 +6,6 @@ using FsCheck;
 using FsCheck.Fluent;
 using Xunit;
 using YSharp.TestKit.Tiers;
-using YSharp.TestKit.Stubs;
 
 namespace YSharp.Interop;
 
@@ -37,12 +36,6 @@ public static class DiffProperty
     public static DiffSummary Check<T>(OracleHost host, string property, Arbitrary<T> arbitrary, Action<DiffRun, T> body, int? cases = null, string? directory = null, bool ignoreTier = false, Func<DiffRun>? runFactory = null, bool? nightly = null, TimeSpan? box = null)
     {
         host.RequireOrSkip(ignoreTier);
-
-        // y-sharp may still be the stub: probe one generated case first so that the run skips instead of failing inside FsCheck
-        var probe = runFactory?.Invoke() ?? new DiffRun(host, property, directory);
-        try { body(probe, Gen.Sample(arbitrary.Generator, 1, 8)[0]); }
-        catch (NotImplementedException) when (ApiStub.IsStub) { Assert.Skip(ApiStub.Reason); }
-        catch (DifferentialFailure) { /* reported with its seed and shrunk by the real run below */ }
 
         var run = runFactory?.Invoke() ?? new DiffRun(host, property, directory);
         var seeds = new List<string>();

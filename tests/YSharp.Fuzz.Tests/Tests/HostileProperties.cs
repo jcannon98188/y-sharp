@@ -10,6 +10,7 @@ using YSharp.Fuzz.Generators;
 using YSharp.Fuzz.Guards;
 using YSharp.TestKit.Tiers;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Fuzz.Tests;
 
@@ -18,6 +19,7 @@ namespace YSharp.Fuzz.Tests;
 /// properties per hostile class. Gating runs a fixed seed and about 500 cases per property; the nightly tier runs random seeds with a
 /// time box. These are the <c>fuzz</c> layer of each HOS entry; the deterministic replays are in <see cref="CorpusReplayTests"/>.
 /// </summary>
+[Requires(Feature.Fuzz)]
 public sealed class HostileProperties
 {
     private static readonly string[] AnyOutcome = { "ok", "Malformed", "LimitExceeded", "Rejected" };
@@ -83,6 +85,7 @@ public sealed class HostileProperties
         FuzzRunner.Check("HOS-AMP", HostileModels.Layer(Profile.Amp), (ModelInput i) => Hostile(i.ToString(), i.Bytes, i.Format, AnyOutcome), Candidate, cases: 200);
 
     [Fact, Covers("HOS-TRUNC", "ERR-03")]
+    [Requires(Feature.Text)]
     public void Builder_ValidModels_EveryTruncationIsMalformed_AndTheWholeDecodesToTheModel() =>
         FuzzRunner.Check("HOS-TRUNC", HostileModels.ValidLayer(), (ValidInput v) =>
         {
@@ -103,6 +106,7 @@ public sealed class HostileProperties
     // ------------------------------------------------------------------ layer 3: ops script with delivery-schedule mutation
 
     [Fact, Covers("HOS-REF", "HOS-AMP")]
+    [Requires(Feature.Text, Feature.Array, Feature.Map)]
     public void OpsScript_MutatedDeliverySchedules_ConvergeOnceEveryUpdateHasArrived() =>
         FuzzRunner.Check("HOS-REF", OpsLayer.Layer(), (OpsPlan plan) =>
         {
@@ -130,6 +134,7 @@ public sealed class HostileProperties
     // ------------------------------------------------------------------ protocol frames
 
     [Fact, Covers("HOS-PROTO")]
+    [Requires(Feature.Awareness, Feature.Sync)]
     public void ProtocolFrames_MutatedSyncAndAwarenessMessages_AreContained() =>
         FuzzRunner.Check("HOS-PROTO", ByteMutator.Layer(ByteMutator.Seeds(256)), (RawInput i) =>
         {

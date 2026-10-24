@@ -8,10 +8,12 @@ using System.Threading;
 using Xunit;
 using YSharp.TestKit.Fixtures;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Interop.Tests;
 
 /// <summary>Equivalence of observations and the first-difference report (ADR 0012 "Compared", "Reporting"). No Node needed.</summary>
+[LibraryIndependent]
 public sealed class ComparatorTests
 {
     private static JsonNode Bytes(string hex) => JsonNode.Parse($"{{\"$\":\"bytes\",\"hex\":\"{hex}\"}}")!;
@@ -171,6 +173,7 @@ public sealed class ComparatorTests
 }
 
 /// <summary>Candidates, reports and replay input (ADR 0012 "Reporting"). No Node needed.</summary>
+[LibraryIndependent]
 public sealed class ReportingTests : IDisposable
 {
     private readonly string _dir = Path.Combine(Path.GetTempPath(), "ysharp-reporting-" + Guid.NewGuid().ToString("N"));
@@ -270,6 +273,7 @@ public sealed class ReportingTests : IDisposable
 }
 
 /// <summary>The y-sharp side's case timeout and error mapping (ADR 0012 "Hangs"). No Node needed.</summary>
+[LibraryIndependent]
 public sealed class SharpSideGuardTests
 {
     [Fact, Covers("DIFF-07")]
@@ -307,11 +311,10 @@ public sealed class SharpSideGuardTests
     }
 
     [Fact, Covers("DIFF-01")]
-    public void ApiStub_WhileUnimplemented_IsReportedSoTheTestSkips()
+    public void AGeneratedScript_IsAcceptedByTheInterpreter_NeverReportedAsAScriptError()
     {
         var reply = SharpSide.Run(ScriptPlanScript());
-        // before the implementation exists the stub throws NotImplementedException (ADR 0019); after, the script runs
-        Assert.True(reply.Status is SharpStatus.Stub or SharpStatus.Ok, $"{reply.Status}: {reply.Message}");
+        Assert.NotEqual(SharpStatus.ScriptError, reply.Status);   // Ok once the library works; a Fault only while it does not
     }
 
     private static string ScriptPlanScript() => Generation.ScriptPlan.Generate(3).ToScript().ToJsonString();

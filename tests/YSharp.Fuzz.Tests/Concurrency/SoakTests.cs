@@ -4,6 +4,7 @@ using Xunit;
 using YSharp.TestKit.Concurrency;
 using YSharp.TestKit.Tiers;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Fuzz.Concurrency;
 
@@ -19,6 +20,7 @@ public sealed class SoakCollection
 /// random seeds (the non-gating systematic exploration). Runs only when <c>YSHARP_TIER=Nightly</c>. The start seed is printed in every
 /// failure; <c>YSHARP_SEED</c> pins it. A single failure is a real bug: no retry.
 /// </summary>
+[Requires(Feature.Concurrency)]
 [Collection(SoakCollection.Name)]
 [Tier(Tier.Nightly)]
 public sealed class SoakTests
@@ -30,7 +32,6 @@ public sealed class SoakTests
     private static void Soak(Func<StressOptions, StressResult> run, int writers, int readers, bool implicitTx = false, int ops = 400)
     {
         NightlyGate.Require();
-        Stub.Run(() =>
         {
             var clock = Stopwatch.StartNew();
             var seed = StartSeed;
@@ -38,7 +39,7 @@ public sealed class SoakTests
             {
                 run(new StressOptions { Seed = seed++, Writers = writers, Readers = readers, Implicit = implicitTx, OpsPerThread = ops }).AssertClean();
             } while (clock.Elapsed.TotalSeconds < Seconds);
-        });
+        }
     }
 
     [Fact, Covers("CC-1", "CC-11")]
@@ -60,7 +61,6 @@ public sealed class SoakTests
     public void ScheduleScenarios_Soak_WithManyRandomSeeds()
     {
         NightlyGate.Require();
-        Stub.Run(() =>
         {
             var start = StartSeed;
             foreach (var scenario in Scenarios.All)
@@ -69,6 +69,6 @@ public sealed class SoakTests
                 for (uint i = 0; (clock.Elapsed.TotalSeconds < Seconds / 2 || i < 200) && i <= 20000; i++)
                     Explorer.RunSeeds(scenario, new[] { start + i });
             }
-        });
+        }
     }
 }

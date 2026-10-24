@@ -4,25 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using Xunit;
-using YSharp.TestKit.Stubs;
 
 namespace YSharp.Tests.Structs;
-
-/// <summary>
-/// Spec 6 tests assert against y-sharp, which is still the API stub (ADR 0019). Every body goes through
-/// <see cref="Impl.Run"/>: while the stub throws <see cref="NotImplementedException"/> the test is skipped visibly, and
-/// the moment the implementation exists the same assertions run for real.
-/// </summary>
-internal static class Impl
-{
-    public static void Run(Action body)
-    {
-        ApiStub.Run(body);
-    }
-
-    /// <summary>For tests whose first calls would work on the stub (plain properties): fails over to a skip until the implementation exists.</summary>
-    public static void RequireImplementation() => ApiStub.SkipIfStub();
-}
 
 /// <summary>
 /// Reads the struct store through the internal seam of Spec 6 (ADR 0015, 0016): <c>internal string Doc.DumpStructs()</c> returns the

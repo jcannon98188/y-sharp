@@ -42,6 +42,9 @@ public sealed class LedgerRow
 /// <summary>What one C# test declares through <see cref="CoversAttribute"/>, <see cref="PortOfAttribute"/> and <see cref="DivergesAttribute"/>.</summary>
 public sealed record TestTag(string Test, CoverLayer Layer, IReadOnlyList<string> Covers, IReadOnlyList<string> Diverges, IReadOnlyList<string> PortOf);
 
+/// <summary>What a test declares for the feature gates (ADR 0020): the features it requires (names of <c>Feature</c>) and whether it is marked library-independent.</summary>
+public sealed record TestGate(string Test, IReadOnlyList<string> Requires, bool LibraryIndependent);
+
 /// <summary>The <c>covers</c> list in a fixture header.</summary>
 public sealed record FixtureTag(string Path, IReadOnlyList<string> Covers);
 
@@ -69,6 +72,10 @@ public sealed class TraceabilityInput
     public List<LedgerRow> Ledger { get; set; } = new();
     public List<TestTag> Tests { get; set; } = new();
     public List<FixtureTag> Fixtures { get; set; } = new();
+    /// <summary>Every test with its feature requirement (ADR 0020). A test with no requirement must be marked library-independent.</summary>
+    public List<TestGate> Gates { get; set; } = new();
+    /// <summary>The features that have landed (<c>Features.Landed</c>); only reported in the matrix.</summary>
+    public List<string> Landed { get; set; } = new();
     /// <summary>Ledger keys of the tests found in the pinned upstream sources; null skips the gap check.</summary>
     public HashSet<string>? UpstreamKeys { get; set; }
     /// <summary>The committed pending high-water mark. Null (file missing) fails the gate.</summary>
@@ -86,6 +93,7 @@ public sealed class TraceabilityReport
     public List<MatrixRow> Matrix { get; } = new();
     public int PendingEntries { get; set; }
     public int PendingLedgerRows { get; set; }
+    public List<string> Landed { get; set; } = new();
 }
 
 /// <summary>The ADR 0010 check, as a pure function over the registry, ledger and the tags found in tests and fixtures.</summary>
@@ -141,6 +149,11 @@ public static class TraceabilityChecker
         foreach (var f in input.Fixtures)
             foreach (var id in f.Covers.Distinct())
                 if (!Live(id)) Fail("TR-UNKNOWN-TAG", $"Fixture {f.Path} covers {id}, which is {(byId.ContainsKey(id) ? "retired" : "not in the registry")}.");
+
+        // Feature gates (ADR 0020): every test that touches the library declares what it needs.
+        r.Landed = input.Landed.ToList();
+        foreach (var g in input.Gates.Where(g => g.Requires.Count == 0 && !g.LibraryIndependent))
+            Fail("TR-NO-FEATURE", $"Test {g.Test} has no feature requirement; add [Requires(Feature.X)] (on the method or the class) or mark it [LibraryIndependent] (ADR 0020).");
 
         // Coverage maps.
         var testsFor = new Dictionary<string, List<TestTag>>(StringComparer.Ordinal);

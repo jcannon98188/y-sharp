@@ -6,6 +6,7 @@ using Xunit;
 using YSharp.TestKit.Concurrency;
 using YSharp.TestKit.Tiers;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Concurrency;
 
@@ -15,6 +16,7 @@ namespace YSharp.Tests.Concurrency;
 /// part of that guarantee: a seed replays a schedule exactly, DFS enumerates all of them, and a deadlock is reported rather than hung.
 /// Tier: gating. Seeds: fixed per test.
 /// </summary>
+[LibraryIndependent]
 [Collection(ConcurrencyCollection.Name)]
 [Tier(Tier.Gating)]
 public sealed class SchedulerTests

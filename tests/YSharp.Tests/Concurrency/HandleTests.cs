@@ -7,10 +7,12 @@ using System.Threading;
 using Xunit;
 using YSharp.TestKit.Tiers;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Concurrency;
 
 /// <summary>CC-8, CC-9 and CC-10: thread-safe handles, views that do not outlive their transaction, lock-free options. Tier: gating. No seeds.</summary>
+[Requires(Feature.Concurrency)]
 [Collection(ConcurrencyCollection.Name)]
 [Tier(Tier.Gating)]
 public sealed class HandleTests
@@ -69,27 +71,28 @@ public sealed class HandleTests
     // ------------------------------------------------------------------ CC-8
 
     [Theory, MemberData(nameof(ReadMembers)), Covers("CC-8")]
-    public void AReadMember_CalledOutsideATransaction_TakesAnImplicitReadTransaction(string member) => Impl.Run(() =>
+    public void AReadMember_CalledOutsideATransaction_TakesAnImplicitReadTransaction(string member)
     {
         var f = new Fixture();
         using (var writer = Holder.Write(f.Doc))
             Conc.AssertWaitsFor(writer, f.Member(member), member + " while a writer held the lock");
         using var reader = Holder.Read(f.Doc);
         Conc.AssertDoesNotWait(f.Member(member), member + " while only a reader held the lock");
-    });
+    }
 
     [Theory, MemberData(nameof(WriteMembers)), Covers("CC-8")]
-    public void AWriteMember_CalledOutsideATransaction_TakesAnImplicitWriteTransaction(string member) => Impl.Run(() =>
+    public void AWriteMember_CalledOutsideATransaction_TakesAnImplicitWriteTransaction(string member)
     {
         var f = new Fixture();
         using (var reader = Holder.Read(f.Doc))
             Conc.AssertWaitsFor(reader, f.Member(member), member + " while a reader held the lock");
         using var writer = Holder.Write(f.Doc);
         Conc.AssertWaitsFor(writer, f.Member(member), member + " while a writer held the lock");
-    });
+    }
 
     [Fact, Covers("CC-8")]
-    public void AnExplicitTransact_BatchesCalls_AnImplicitOneDoesNot() => Impl.Run(() =>
+    [Requires(Feature.Events)]
+    public void AnExplicitTransact_BatchesCalls_AnImplicitOneDoesNot()
     {
         var f = new Fixture();
         var updates = 0;
@@ -105,10 +108,10 @@ public sealed class HandleTests
             f.Text.Insert(0, "y");
         });
         Assert.Equal(1, updates);
-    });
+    }
 
     [Fact, Covers("CC-8")]
-    public void EveryPublicMember_OfTheSharedTypes_IsCallableFromAnyThread_NoThreadAffinityIsEnforced() => Impl.Run(() =>
+    public void EveryPublicMember_OfTheSharedTypes_IsCallableFromAnyThread_NoThreadAffinityIsEnforced()
     {
         var f = new Fixture();
         // a document created on this thread is used, read and written from another, with no explicit transaction
@@ -121,12 +124,12 @@ public sealed class HandleTests
             Assert.Equal("!hello", f.Text.ToString());
             f.Doc.ApplyUpdate(f.RemoteUpdate);
         }, "calls from a second thread");
-    });
+    }
 
     // ------------------------------------------------------------------ CC-9
 
     [Fact, Covers("CC-9")]
-    public void TransactionObject_AfterItsTransactionEnded_IsInvalid() => Impl.Run(() =>
+    public void TransactionObject_AfterItsTransactionEnded_IsInvalid()
     {
         var doc = Conc.NewDoc();
         Transaction? captured = null;
@@ -146,10 +149,11 @@ public sealed class HandleTests
             Assert.False(tx.IsWrite);
         });
         Assert.False(captured!.IsValid);
-    });
+    }
 
     [Fact, Covers("CC-9")]
-    public void EventObject_AfterDispatchEnded_IsInvalid() => Impl.Run(() =>
+    [Requires(Feature.Events)]
+    public void EventObject_AfterDispatchEnded_IsInvalid()
     {
         var f = new Fixture();
         YEvent? captured = null;
@@ -163,10 +167,11 @@ public sealed class HandleTests
         Assert.False(captured!.IsValid);
         Assert.Throws<YLifetimeException>(() => captured.Target);
         Assert.Throws<YLifetimeException>(() => captured.Transaction);
-    });
+    }
 
     [Fact, Covers("CC-9")]
-    public void ALiveCollection_CapturedInsideATransaction_ThrowsOnceItEnded() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void ALiveCollection_CapturedInsideATransaction_ThrowsOnceItEnded()
     {
         var doc = Conc.NewDoc();
         var arr = doc.GetArray("a");
@@ -180,10 +185,10 @@ public sealed class HandleTests
         doc.GetMap("other").Set("k", 1);   // a later transaction changes other types
         Assert.Throws<YLifetimeException>(() => changed!.Count);
         Assert.Throws<YLifetimeException>(() => changed!.Count());
-    });
+    }
 
     [Fact, Covers("CC-9")]
-    public void AnEnumerator_OutsideATransaction_SnapshotsAndHoldsNoLock() => Impl.Run(() =>
+    public void AnEnumerator_OutsideATransaction_SnapshotsAndHoldsNoLock()
     {
         var f = new Fixture();
         var enumerator = f.Arr.GetEnumerator();
@@ -194,20 +199,21 @@ public sealed class HandleTests
         while (enumerator.MoveNext()) seen++;
         Assert.Equal(3, seen);
         Assert.Equal(6, f.Arr.Length);
-    });
+    }
 
     [Fact, Covers("CC-9")]
-    public void AnEnumerator_TakenInsideATransaction_ThrowsAfterItEnded() => Impl.Run(() =>
+    public void AnEnumerator_TakenInsideATransaction_ThrowsAfterItEnded()
     {
         var f = new Fixture();
         ListEnumerator enumerator = default;
         f.Doc.Transact(_ => enumerator = f.Arr.GetEnumerator());
         f.Arr.Push(Conc.One);
         Assert.Throws<YLifetimeException>(() => enumerator.MoveNext());
-    });
+    }
 
     [Fact, Covers("CC-9")]
-    public void RootCollectionSnapshot_AnotherThreadAddsRoots_DoesNotChange() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void RootCollectionSnapshot_AnotherThreadAddsRoots_DoesNotChange()
     {
         var doc = Conc.NewDoc();
         doc.GetArray("a");
@@ -216,12 +222,12 @@ public sealed class HandleTests
         Conc.AssertDoesNotWait(() => doc.GetMap("later"), "adding a root type");
         Assert.Equal(before, share.Count);
         Assert.Equal(before + 1, doc.Share.Count);
-    });
+    }
 
     // ------------------------------------------------------------------ CC-10
 
     [Fact, Covers("CC-10")]
-    public void Options_AreReadWithoutTheDocumentLock_WhileAWriterHoldsIt() => Impl.Run(() =>
+    public void Options_AreReadWithoutTheDocumentLock_WhileAWriterHoldsIt()
     {
         var doc = new Doc(new DocOptions { ClientId = 77, Guid = "guid-1", Gc = false, ShouldLoad = false });
         using var holder = Holder.Write(doc);
@@ -241,10 +247,11 @@ public sealed class HandleTests
         holder.Release();
         using var reader = Holder.Read(doc);
         Conc.AssertDoesNotWait(() => GC.KeepAlive(doc.ClientId), "reading ClientId while a reader held the lock");
-    });
+    }
 
     [Fact, Covers("CC-10")]
-    public void Options_AreReadLockFree_FromManyThreadsWhileWritersRun() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void Options_AreReadLockFree_FromManyThreadsWhileWritersRun()
     {
         var doc = new Doc(new DocOptions { ClientId = 5, Guid = "g" });
         using var stop = new ManualResetEventSlim(false);
@@ -264,5 +271,5 @@ public sealed class HandleTests
         foreach (var r in readers) r.Join();
         stop.Set();
         writer.Join();
-    });
+    }
 }

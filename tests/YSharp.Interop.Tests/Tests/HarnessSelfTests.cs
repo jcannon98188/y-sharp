@@ -8,6 +8,7 @@ using YSharp.Interop.Generation;
 using YSharp.TestKit.Fixtures;
 using YSharp.TestKit.Tiers;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Interop.Tests;
 
@@ -16,6 +17,7 @@ namespace YSharp.Interop.Tests;
 /// optionally tampered with or made to hang. They prove the generator's scripts run on the real oracle, that a planted difference is
 /// found, shrunk, reported and saved, and that the hang, crash and misbehaviour rules hold. Smoke tier (needs Node).
 /// </summary>
+[LibraryIndependent]
 [NeedsNode]
 [Tier(Tier.Smoke)]
 public sealed class HarnessSelfTests : IDisposable
@@ -137,7 +139,7 @@ public sealed class HarnessSelfTests : IDisposable
         DiffRun? last = null;
         var ex = Assert.ThrowsAny<Exception>(() => DiffProperty.Check(_host, "planted-map-bug", ScriptPlan.Arbitrary(), (run, plan) => run.CheckPlan(plan),
             cases: 200, directory: _dir, ignoreTier: true, runFactory: () => last = new DiffRun(_host, "planted-map-bug", _dir) { SharpOverride = planted }));
-        Assert.Contains("Differential failure (Mismatch) in planted-map-bug", ex.Message);
+        Assert.True(ex.Message.Contains("Differential failure (Mismatch) in planted-map-bug", StringComparison.Ordinal), ex.ToString());
         Assert.Contains("FsCheck replay:", ex.Message);
         Assert.Contains("fixture candidate:", ex.Message);
         Assert.Contains("YSHARP_REPLAY=", ex.Message);

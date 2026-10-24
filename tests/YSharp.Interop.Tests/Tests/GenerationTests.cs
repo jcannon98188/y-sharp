@@ -6,6 +6,7 @@ using Xunit;
 using YSharp.Interop.Generation;
 using YSharp.TestKit.Ops;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Interop.Tests;
 
@@ -13,6 +14,7 @@ namespace YSharp.Interop.Tests;
 /// The FsCheck script generator (ADR 0012 "Generation") needs no Node: it must produce scripts both interpreters accept, deterministically
 /// per seed, and shrink to smaller valid scripts. These run in every tier.
 /// </summary>
+[LibraryIndependent]
 public sealed class GenerationTests
 {
     private static readonly OpsRegistry Registry = SharpSide.CreateRegistry();

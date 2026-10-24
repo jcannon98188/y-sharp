@@ -7,6 +7,7 @@ using Xunit;
 using YSharp.TestKit.Fixtures;
 using YSharp.TestKit.Tiers;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Allocation;
 
@@ -15,6 +16,7 @@ namespace YSharp.Tests.Allocation;
 /// hostile corpus (<c>fixtures/hostile</c>, <c>malformed</c> observations). The fuzz project asserts it on every generated input.
 /// A violation is a crash-safety bug. k and the fixed amount are recorded with the other bounded limits (<see cref="AllocationBudgets"/>).
 /// </summary>
+[Requires(Feature.Fuzz)]
 [Collection("Allocation")]
 [Tier(Tier.Gating)]
 public sealed class HostileAllocationTests
@@ -40,6 +42,7 @@ public sealed class HostileAllocationTests
     }
 
     [Fact]
+    [LibraryIndependent]
     public void Corpus_HostileFixtures_IsNotEmpty() => Assert.NotEmpty(CorpusInputs());
 
     [Theory, Covers("BUD-12")]
@@ -49,7 +52,6 @@ public sealed class HostileAllocationTests
 #if DEBUG
         Assert.Skip("Allocation tests run only in Release (ADR 0009).");
 #endif
-        Stub.Run(() =>
         {
             var b = AllocationBudgets.Get("BUD-12");
             Func<string, long> limit = p => b.LimitOf(p) ?? -1;
@@ -66,6 +68,6 @@ public sealed class HostileAllocationTests
 
             var allowed = limit("k") * input.Length + limit("fixed");
             Assert.True(allocated <= allowed, $"BUD-12: {file}/{name}: {input.Length} bytes allocated {allocated}, allowed {allowed} (k={limit("k")}, fixed={limit("fixed")}). This is a crash-safety bug (ADR 0005).");
-        });
+        }
     }
 }

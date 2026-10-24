@@ -4,6 +4,7 @@ using System.Linq;
 using Xunit;
 using YSharp.TestKit.Traceability;
 using YSharp.TestKit.Assertions;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Codecs;
 
@@ -12,6 +13,7 @@ namespace YSharp.Tests.Codecs;
 /// below was produced by Yjs 13.6.33 / lib0 0.2.99 on the pinned Node for the same edits made by client 1 (or the clients named);
 /// <see cref="WireFixtureTests"/> replays the larger generated families.
 /// </summary>
+[Requires(Feature.V1)]
 public sealed class UpdateLayoutTests
 {
     private const string HiV1 = "010101000401017402686900";
@@ -34,7 +36,8 @@ public sealed class UpdateLayoutTests
     // ------------------------------------------------------------------ buffers and primitives
 
     [Fact, Covers("ENC-01")]
-    public void Enc01_EncoderBuffer_GrowsPastItsInitialSize_WithoutCorruptingTheUpdate() => Stub.Run(() =>
+    [Requires(Feature.Text)]
+    public void Enc01_EncoderBuffer_GrowsPastItsInitialSize_WithoutCorruptingTheUpdate()
     {
         var doc = Wire.NewDoc();
         var text = doc.GetText("t");
@@ -46,7 +49,7 @@ public sealed class UpdateLayoutTests
         var peer = new Doc();
         peer.ApplyUpdate(update);
         Assert.Equal(text.ToString(), peer.GetText("t").ToString());
-    });
+    }
 
     [Theory, Covers("ENC-02", "ENC-71", "ENC-70")]
     [InlineData(127UL, 3, "017f03")]
@@ -54,16 +57,16 @@ public sealed class UpdateLayoutTests
     [InlineData(4294967295UL, 16384, "01ffffffff0f808001")]
     [InlineData(1099511627776UL, 1, "0180808080802001")]          // 2^40: past 32 bits, still a 53-bit client id (A1)
     [InlineData(9007199254740991UL, 1, "01ffffffffffffff0f01")]   // 2^53-1
-    public void Enc02_VarUint_ClientsAndClocksAtTheByteBoundaries(ulong client, int length, string expectedSv) => Stub.Run(() =>
+    public void Enc02_VarUint_ClientsAndClocksAtTheByteBoundaries(ulong client, int length, string expectedSv)
     {
         var doc = ClientText(client, new string('x', length));
         Assert.Equal(expectedSv, Hex.Of(Wire.StateVector(doc)));
         var decoded = StateVector.Decode(Hex.Bytes(expectedSv));
         Assert.Equal((long)length, decoded[client]);
-    });
+    }
 
     [Fact, Covers("ENC-02", "Q12"), Diverges("Q12", adr: "0003")]
-    public void Enc02_VarUint_AcceptsOverlongForms_AndRejectsValuesAbove2Pow53Minus1() => Stub.Run(() =>
+    public void Enc02_VarUint_AcceptsOverlongForms_AndRejectsValuesAbove2Pow53Minus1()
     {
         Assert.Equal(1L, StateVector.Decode(Hex.Bytes("01 01 81 00"))[1]);                      // overlong 1, accepted as in JS
         Assert.Equal(0L, StateVector.Decode(Hex.Bytes("01 01 80 00"))[1]);
@@ -72,10 +75,11 @@ public sealed class UpdateLayoutTests
         Assert.Throws<YDecodeException>(() => StateVector.Decode(Hex.Bytes("01 01 80 80 80 80 80 80 80 10")));
         Assert.Throws<YDecodeException>(() => StateVector.Decode(Hex.Bytes("01 01 ff ff ff ff ff ff ff ff 7f")));
         Assert.Throws<YDecodeException>(() => StateVector.Decode(Hex.Bytes("01 01 80 80 80 80 80 80 80 80 80 80 00")));   // 11 groups
-    });
+    }
 
     [Fact, Covers("ENC-09", "ENC-74")]
-    public void Enc09_StateVector_ListsClientsInDescendingOrder_AndIsTheSameForBothFormats() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.V2)]
+    public void Enc09_StateVector_ListsClientsInDescendingOrder_AndIsTheSameForBothFormats()
     {
         var a = ClientText(5, "ab");
         var b = Wire.NewDoc(300);
@@ -93,12 +97,13 @@ public sealed class UpdateLayoutTests
         var encoded = new System.Buffers.ArrayBufferWriter<byte>();
         decoded.Encode(encoded);
         Assert.Equal("02ac02030502", Hex.Of(encoded.WrittenSpan));
-    });
+    }
 
     // ------------------------------------------------------------------ update skeleton and struct layout
 
     [Fact, Covers("ENC-10", "ENC-11", "ENC-15", "ENC-77", "ENC-79")]
-    public void Enc10_WorkedExample_TextHi_IsTheDocumentedV1AndV2Bytes() => Stub.Run(() =>
+    [Requires(Feature.V2)]
+    public void Enc10_WorkedExample_TextHi_IsTheDocumentedV1AndV2Bytes()
     {
         var doc = ClientText(1, "hi");
         Assert.Equal(HiV1, V1(doc));
@@ -106,18 +111,20 @@ public sealed class UpdateLayoutTests
         var cols = V2Columns.Split(Wire.Encode(doc, UpdateFormat.V2));
         Assert.Equal("04", Hex.Of(cols.Info));                    // ENC-77: one info run, the final count is omitted
         Assert.Equal("01010000", Hex.Of(cols.Rest));              // ENC-79: numClients, numStructs, startClock and the empty delete set are raw
-    });
+    }
 
     [Fact, Covers("ENC-10", "ENC-14")]
-    public void Enc10_EmptyDocument_IsTwoZeroBytesInV1_AndThirteenInV2() => Stub.Run(() =>
+    [Requires(Feature.V2)]
+    public void Enc10_EmptyDocument_IsTwoZeroBytesInV1_AndThirteenInV2()
     {
         var doc = Wire.NewDoc();
         Assert.Equal("0000", V1(doc));
         Assert.Equal("00000000000001000000000000", V2(doc));
-    });
+    }
 
     [Fact, Covers("ENC-11", "ENC-15", "ENC-14")]
-    public void Enc11_WorkedExample_MapWithOverwrite_UsesParentSubAndOriginFlags() => Stub.Run(() =>
+    [Requires(Feature.Map, Feature.V2)]
+    public void Enc11_WorkedExample_MapWithOverwrite_UsesParentSubAndOriginFlags()
     {
         var doc = Wire.NewDoc();
         var map = doc.GetMap("m");
@@ -126,10 +133,11 @@ public sealed class UpdateLayoutTests
         map.Set("k", 2);
         Assert.Equal("010301002101016d016b012801016d017301770176a80100017d020101010001", V1(doc));
         Assert.Equal("00000241000100000521002800a807046d6b6d7341020101000241010103007701767d020101010000", V2(doc));
-    });
+    }
 
     [Fact, Covers("ENC-11", "ENC-12", "ENC-13")]
-    public void Enc12_ContentKinds_String_Format_Embed_Binary_Type_Any_Deleted() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Text, Feature.Array, Feature.Map)]
+    public void Enc12_ContentKinds_String_Format_Embed_Binary_Type_Any_Deleted()
     {
         var doc = Wire.NewDoc();
         var text = doc.GetText("t");
@@ -161,20 +169,22 @@ public sealed class UpdateLayoutTests
         var allGone = ClientText(1, "abc");
         allGone.GetText("t").Delete(0, 3);
         Assert.Equal("0101010001010174030101010003", V1(allGone));
-    });
+    }
 
     [Fact, Covers("ENC-12", "ENC-22")]
-    public void Enc12_LegacyContentJson_DecodesAndIsWrittenBackAsContentJson() => Stub.Run(() =>
+    [Requires(Feature.Array)]
+    public void Enc12_LegacyContentJson_DecodesAndIsWrittenBackAsContentJson()
     {
         const string legacy = "0101010002010161020131013200";           // ContentJSON (ref 2) ["1","2"] in root array "a"
         var doc = new Doc();
         doc.ApplyUpdate(Hex.Bytes(legacy));
         Assert.Equal(YValue.Array(new YValue[] { 1, 2 }), doc.GetArray("a").ToJson());
         Assert.Equal(legacy, Hex.Of(doc.EncodeStateAsUpdate()));
-    });
+    }
 
     [Fact, Covers("ENC-13", "ENC-83")]
-    public void Enc13_DiffInsideAStruct_RewritesOriginAndKeepsTheTail() => Stub.Run(() =>
+    [Requires(Feature.V2)]
+    public void Enc13_DiffInsideAStruct_RewritesOriginAndKeepsTheTail()
     {
         var doc = ClientText(1, "abc");
         Assert.Equal("0101010184010002626300", Hex.Of(Wire.Encode(doc, UpdateFormat.V1, Hex.Bytes("010101"))));
@@ -182,10 +192,11 @@ public sealed class UpdateLayoutTests
         var astral = ClientText(1, "a😀b");
         // the state vector falls between the surrogate halves: the low half cannot be written, so U+FFFD stands in for it
         Assert.Equal("0101010284010104efbfbd6200", Hex.Of(Wire.Encode(astral, UpdateFormat.V1, Hex.Bytes("010102"))));
-    });
+    }
 
     [Fact, Covers("ENC-27")]
-    public void Enc27_UpdateEvent_CarriesTheSameBytesAsEncodingTheState() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.V2, Feature.Events)]
+    public void Enc27_UpdateEvent_CarriesTheSameBytesAsEncodingTheState()
     {
         var doc = Wire.NewDoc();
         var events = new List<string>();
@@ -197,12 +208,13 @@ public sealed class UpdateLayoutTests
         doc.GetText("t").Insert(2, "!");
         Assert.Single(events);
         Assert.NotEqual(V1(doc), events[0]);                      // later events carry only the new structs
-    });
+    }
 
     // ------------------------------------------------------------------ V2 columns
 
     [Fact, Covers("ENC-08", "Q13")]
-    public void Q13_UintOptRle_MarksARunWithNegativeZero_SoZeroRunsAreDistinguishable() => Stub.Run(() =>
+    [Requires(Feature.Array, Feature.V2)]
+    public void Q13_UintOptRle_MarksARunWithNegativeZero_SoZeroRunsAreDistinguishable()
     {
         YArray[] Arrays(int n) => Enumerable.Range(0, n).Select(_ => new YArray()).ToArray();
         byte[] TypeRefColumn(int n)
@@ -217,10 +229,11 @@ public sealed class UpdateLayoutTests
         var one = Wire.NewDoc();
         one.GetArray("a").Insert(0, new YEntry[] { new YArray() });
         Assert.Equal("000001010000010703016101010101000001010000", V2(one));
-    });
+    }
 
     [Fact, Covers("ENC-08", "Q14")]
-    public void Q14_IntDiffOptRle_ColumnsHoldDiffsAndRunFlags() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.V2)]
+    public void Q14_IntDiffOptRle_ColumnsHoldDiffsAndRunFlags()
     {
         var a = ClientText(5, "ab");
         var b = Wire.NewDoc(300);
@@ -231,10 +244,11 @@ public sealed class UpdateLayoutTests
         var cols = V2Columns.Split(Wire.Encode(a, UpdateFormat.V2));
         Assert.Equal("ac044500", Hex.Of(cols.Client));
         Assert.Equal("02", Hex.Of(cols.LeftClock));              // origin clock 1 (diff 1, doubled, no run flag)
-    });
+    }
 
     [Fact, Covers("ENC-76")]
-    public void Enc76_V2Keys_NeverReuseAClock() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Text, Feature.V2)]
+    public void Enc76_V2Keys_NeverReuseAClock()
     {
         var doc = ClientText(1, "ab");
         doc.GetText("t").Format(0, 1, Obj(("bold", true)));
@@ -242,10 +256,11 @@ public sealed class UpdateLayoutTests
         var cols = V2Columns.Split(Wire.Encode(doc, UpdateFormat.V2));
         Assert.Equal("0002", Hex.Of(cols.KeyClock));              // clocks 0 and 1; a cache hit would repeat 0
         Assert.Equal("0b746162626f6c64626f6c6441014400", Hex.Of(cols.String));   // "bold" is written both times
-    });
+    }
 
     [Fact, Covers("ENC-78", "ENC-81", "ENC-23")]
-    public void Enc78_SkipLengths_AreRawVarUintInTheRestSection_AndMergeCoalescesSkipsNotItems() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.V2, Feature.Events)]
+    public void Enc78_SkipLengths_AreRawVarUintInTheRestSection_AndMergeCoalescesSkipsNotItems()
     {
         var u0 = Hex.Bytes("0101010004010174016100");
         var u1 = Hex.Bytes("01010101840100016200");
@@ -264,23 +279,25 @@ public sealed class UpdateLayoutTests
         var merged = Wire.Merge(UpdateFormat.V2, v2[0], v2[2]);
         Assert.Equal("00000241000102000504000a008406037461634101010100000103000100", Hex.Of(merged));
         Assert.Equal("0103000100", Hex.Of(V2Columns.Split(merged).Rest));
-    });
+    }
 
     [Fact, Covers("ENC-82")]
-    public void Enc82_MergeOfOneUpdate_ReturnsItsBytes_EvenWhenTheyAreNotValid() => Stub.Run(() =>
+    [Requires(Feature.Text)]
+    public void Enc82_MergeOfOneUpdate_ReturnsItsBytes_EvenWhenTheyAreNotValid()
     {
         var one = Hex.Bytes("01010101840100016200");
         Assert.Equal(Hex.Of(one), Hex.Of(Wire.Merge(UpdateFormat.V1, one)));
         var skipWithFlags = Hex.Bytes("010101008a0200");
         Assert.Equal(Hex.Of(skipWithFlags), Hex.Of(Wire.Merge(UpdateFormat.V1, skipWithFlags)));
-    });
+    }
 
     // ------------------------------------------------------------------ delete sets
 
     private static Doc Eight() { var d = ClientText(1, "abcdefgh"); d.GetText("t").Delete(1, 2); d.GetText("t").Delete(3, 1); return d; }
 
     [Fact, Covers("ENC-16", "ENC-17", "ENC-18", "ENC-80")]
-    public void Enc16_DeleteSet_IsSortedRangesPerClient_DeltaCodedInV2() => Stub.Run(() =>
+    [Requires(Feature.V2)]
+    public void Enc16_DeleteSet_IsSortedRangesPerClient_DeltaCodedInV2()
     {
         var doc = Eight();
         Assert.Equal("01050100040101740161810100028401020264658101040184010502676801010201020501", V1(doc));
@@ -289,10 +306,11 @@ public sealed class UpdateLayoutTests
         // numClients 1, client 1, two ranges: (clock 1, len 2) then (clock 5 as a delta from the end of the last range, len 1);
         // V2 writes len - 1 and resets the running clock for each client
         Assert.Equal("01050001010201010200", Hex.Of(cols.Rest));
-    });
+    }
 
     [Fact, Covers("ENC-19")]
-    public void Enc19_UpdateEvents_CarryOnlyTheDeletesOfTheirTransaction_StateCarriesAll() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.Events)]
+    public void Enc19_UpdateEvents_CarryOnlyTheDeletesOfTheirTransaction_StateCarriesAll()
     {
         var doc = Wire.NewDoc();
         var events = new List<string>();
@@ -302,10 +320,11 @@ public sealed class UpdateLayoutTests
         t.Delete(1, 1);
         Assert.Equal(new[] { "01010100040101740361626300", "000101010101" }, events);          // the second event is a delete set only
         Assert.Equal("010301000401017401618101000184010101630101010101", V1(doc));            // the state holds the structs and every delete
-    });
+    }
 
     [Fact, Covers("ENC-20", "ENC-52")]
-    public void Enc20_DeleteSetRangesBeyondKnownState_WaitInPendingDs_UntilTheStructsArrive() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.Events)]
+    public void Enc20_DeleteSetRangesBeyondKnownState_WaitInPendingDs_UntilTheStructsArrive()
     {
         var author = Wire.NewDoc();
         var events = new List<byte[]>();
@@ -320,12 +339,13 @@ public sealed class UpdateLayoutTests
         peer.ApplyUpdate(events[0]);                                                            // the insert arrives: the parked delete applies
         Assert.Equal("ac", peer.GetText("t").ToString());
         Assert.Equal("010301000401017401618101000184010101630101010101", V1(peer));
-    });
+    }
 
     // ------------------------------------------------------------------ applying updates
 
     [Fact, Covers("ENC-21", "ENC-84")]
-    public void Enc21_OutOfOrderUpdates_ArePending_AndEncodeThroughMerge() => Stub.Run(() =>
+    [Requires(Feature.Text)]
+    public void Enc21_OutOfOrderUpdates_ArePending_AndEncodeThroughMerge()
     {
         var u0 = Hex.Bytes("0101010004010174016100");
         var u1 = Hex.Bytes("01010101840100016200");
@@ -342,37 +362,36 @@ public sealed class UpdateLayoutTests
         Assert.Equal("010103", Hex.Of(Wire.StateVector(peer)));
         peer.ApplyUpdate(u1);                                                                   // applying again changes nothing
         Assert.Equal("abc", peer.GetText("t").ToString());
-    });
+    }
 
     [Theory, Covers("ENC-22", "ENC-38", "ENC-39")]
     [InlineData(0, "")] [InlineData(1, "")] [InlineData(2, "")] [InlineData(3, "01 78")] [InlineData(4, "")] [InlineData(5, "01 78")] [InlineData(6, "")]
-    public void Enc22_TypeRefs0To6_AreAccepted(int typeRef, string name) => Stub.Run(() =>
+    public void Enc22_TypeRefs0To6_AreAccepted(int typeRef, string name)
     {
         var update = Hex.Bytes($"01 01 01 00 07 01 01 61 {typeRef:x2} {name} 00");
         var (result, doc) = Wire.TryApply(update);
         Assert.True(result.Ok);
         Assert.Equal("010101", Hex.Of(Wire.StateVector(doc)));
-    });
+    }
 
     [Theory, Covers("ENC-22", "ENC-39")]
     [InlineData(7)] [InlineData(8)] [InlineData(9)] [InlineData(255)]
-    public void Enc22_UnknownTypeRefs_AreRejected(int typeRef) => Stub.Run(() =>
-        AssertRejected(Hex.Bytes($"01 01 01 00 07 01 01 61 {typeRef:x2} 00")));
+    public void Enc22_UnknownTypeRefs_AreRejected(int typeRef)=> AssertRejected(Hex.Bytes($"01 01 01 00 07 01 01 61 {typeRef:x2} 00"));
 
     [Theory, Covers("ENC-22", "ENC-38", "ENC-85")]
     [InlineData(11)] [InlineData(12)] [InlineData(31)]
-    public void Enc22_UnknownContentRefs_AreRejected(int contentRef) => Stub.Run(() =>
-        AssertRejected(Hex.Bytes($"01 01 01 00 {contentRef:x2} 01 01 74 00")));
+    public void Enc22_UnknownContentRefs_AreRejected(int contentRef)=> AssertRejected(Hex.Bytes($"01 01 01 00 {contentRef:x2} 01 01 74 00"));
 
     [Fact, Covers("ENC-85")]
-    public void Enc85_SkipWithFlagBits_IsASkipWhenApplied_ButFailsInMerge() => Stub.Run(() =>
+    [Requires(Feature.UpdateFunctions)]
+    public void Enc85_SkipWithFlagBits_IsASkipWhenApplied_ButFailsInMerge()
     {
         var skip = Hex.Bytes("01 01 01 00 8a 02 00");            // ref 10 with the origin flag bit set
         Assert.True(Wire.TryApply(skip).Result.Ok);
         var w = new System.Buffers.ArrayBufferWriter<byte>();
         var u0 = Hex.Bytes("0101010004010174016100");
         Assert.False(YUpdate.TryMerge(new[] { (ReadOnlyMemory<byte>)skip, u0 }, w).Ok);
-    });
+    }
 
     private static void AssertRejected(byte[] update, UpdateFormat format = UpdateFormat.V1)
     {
@@ -388,17 +407,19 @@ public sealed class UpdateLayoutTests
     [Theory, Covers("ENC-28")]
     [InlineData(UpdateFormat.V1, HiV1)]
     [InlineData(UpdateFormat.V2, HiV2)]
-    public void Enc28_EveryProperPrefix_IsRejectedAndChangesNothing(UpdateFormat format, string full) => Stub.Run(() =>
+    [Requires(Feature.V2)]
+    public void Enc28_EveryProperPrefix_IsRejectedAndChangesNothing(UpdateFormat format, string full)
     {
         var bytes = Hex.Bytes(full);
         for (var cut = 0; cut < bytes.Length; cut++) AssertRejected(bytes[..cut], format);
         Assert.True(Wire.TryApply(bytes, format).Result.Ok);
-    });
+    }
 
     // ------------------------------------------------------------------ strings and clocks
 
     [Fact, Covers("ENC-73", "Q16", "Q19")]
-    public void Enc73_Strings_ClocksCountUtf16Units_WhileTheWirePrefixCountsUtf8Bytes() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.V2)]
+    public void Enc73_Strings_ClocksCountUtf16Units_WhileTheWirePrefixCountsUtf8Bytes()
     {
         var doc = ClientText(1, "a😀b");
         Assert.Equal(4, doc.GetText("t").Length);                                                // 'a', high, low, 'b'
@@ -407,10 +428,10 @@ public sealed class UpdateLayoutTests
         Assert.Equal("00000101000001040a077461f09f98806201040101000001010000", V2(doc));
         var cols = V2Columns.Split(Wire.Encode(doc, UpdateFormat.V2));
         Assert.Equal("077461f09f9880620104", Hex.Of(cols.String));                               // joined "ta<emoji>b", lengths 1 and 4 in code units
-    });
+    }
 
     [Fact, Covers("ENC-71")]
-    public void Enc71_LengthsAndClocks_Reach2Pow53Minus1_AndNoFurther() => Stub.Run(() =>
+    public void Enc71_LengthsAndClocks_Reach2Pow53Minus1_AndNoFurther()
     {
         // a struct that starts at the largest clock is accepted and waits for its predecessors
         var atMax = Hex.Bytes("01 01 01 ff ff ff ff ff ff ff 0f 04 01 01 74 01 61 00");
@@ -420,5 +441,5 @@ public sealed class UpdateLayoutTests
         // clock + length beyond 2^53-1 would round in JS; y-sharp checks the sum
         var overflow = Hex.Bytes("01 01 01 ff ff ff ff ff ff ff 0f 04 01 01 74 02 61 62 00");
         Assert.False(Wire.TryApply(overflow).Result.Ok);
-    });
+    }
 }

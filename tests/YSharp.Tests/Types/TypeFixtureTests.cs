@@ -10,6 +10,7 @@ using YSharp.TestKit.Assertions;
 using YSharp.TestKit.Fixtures;
 using YSharp.TestKit.Ops;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Types;
 
@@ -18,6 +19,7 @@ namespace YSharp.Tests.Types;
 /// recorded (ADR 0011): update-event bytes, full and diff state in V1 and V2, state vectors, the typed <c>doc</c> dump of every
 /// replica and the events the <c>observe</c> steps captured. The struct-store and delete-set dumps belong to Spec 6.
 /// </summary>
+[Requires(Feature.TypesCore, Feature.Array, Feature.Map, Feature.Text, Feature.TextFormat, Feature.Xml, Feature.Events)]
 public sealed class TypeFixtureTests
 {
     private static readonly string[] Areas = { "text", "array", "map", "xml", "events" };
@@ -56,7 +58,7 @@ public sealed class TypeFixtureTests
     }
 
     [Theory, MemberData(nameof(TypeFixtures))]
-    public void Fixture_EveryStoredScenario_ReplaysToTheOraclesBytesDumpsAndEvents(string path) => Stub.Run(() =>
+    public void Fixture_EveryStoredScenario_ReplaysToTheOraclesBytesDumpsAndEvents(string path)
     {
         var fixture = FixtureReplay.Load(path);
         var replay = Replay(fixture);
@@ -64,7 +66,7 @@ public sealed class TypeFixtureTests
         AssertDocDump(fixture, replay);
         AssertEvents(fixture, replay);
         if (fixture.Observations.TryGetProperty("truncation", out _)) FixtureReplay.AssertTruncation(fixture, replay);
-    });
+    }
 
     private static void AssertDocDump(Fixture fixture, Replay replay)
     {

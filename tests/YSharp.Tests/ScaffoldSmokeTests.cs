@@ -2,9 +2,11 @@ using System;
 using System.Linq;
 using System.Reflection;
 using Xunit;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests;
 
+[LibraryIndependent]
 public class ScaffoldSmokeTests
 {
     [Fact]

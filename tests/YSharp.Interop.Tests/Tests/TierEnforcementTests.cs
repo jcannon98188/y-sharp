@@ -1,9 +1,11 @@
 using Xunit;
 using YSharp.TestKit.Tiers;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Interop.Tests;
 
 /// <summary>ADR 0015: no Needs=Node test in this assembly is in the Gating tier (the rule and its self-tests live in YSharp.Tests).</summary>
+[LibraryIndependent]
 public sealed class TierEnforcementTests
 {
     [Fact]

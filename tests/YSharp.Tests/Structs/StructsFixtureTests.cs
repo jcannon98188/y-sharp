@@ -10,6 +10,7 @@ using YSharp.TestKit.Fixtures;
 using YSharp.TestKit.Ops;
 using YSharp.TestKit.Traceability;
 using YSharp.TestKit.Values;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Structs;
 
@@ -19,6 +20,7 @@ namespace YSharp.Tests.Structs;
 /// vector, the encoded state (V1 and V2, full and diffed against every other replica), pure-function results and text roots.
 /// A struct-level difference is reported as a path into the dump (ADR 0012), not as a byte offset.
 /// </summary>
+[Requires(Feature.V1)]
 public sealed class StructsFixtureTests
 {
     private static readonly string Root = RepoRoot.Find();
@@ -28,6 +30,7 @@ public sealed class StructsFixtureTests
         Directory.EnumerateFiles(Dir, "*.json").Select(p => new object[] { Path.GetFileNameWithoutExtension(p) }).OrderBy(x => (string)x[0], StringComparer.Ordinal);
 
     [Fact]
+    [LibraryIndependent]
     public void Fixtures_AnyHeader_ExistAndCoverRegistryEntriesOfSpec6()
     {
         var pinned = PinnedVersions.Read(Root);
@@ -45,17 +48,17 @@ public sealed class StructsFixtureTests
     [Theory]
     [MemberData(nameof(FixtureNames))]
     [Covers("STR-29", "STR-38", "STR-39", "STR-42", "STR-43", "STR-44", "STR-61", "STR-62", "STR-63", "STR-64", "STR-65", "STR-66", "STR-67", "STR-68", "GC-06", "Q20", "Q21")]
+    [Requires(Feature.Text, Feature.Array, Feature.Map, Feature.V2, Feature.UpdateFunctions, Feature.V2Functions)]
     public void Fixture_EveryStoredScenario_ReplaysLikeTheOracle(string name)
     {
         var fixture = FixtureLoader.Load(Path.Combine(Dir, name + ".json"), PinnedVersions.Read(Root));
-        Impl.Run(() =>
         {
             var results = new Dictionary<string, byte[]>(StringComparer.Ordinal);
             var registry = CreateRegistry(results);
             var script = OpsScript.Parse(fixture.Script, registry);
             var ctx = new OpsInterpreter(registry).Run(script);
             Compare(name, fixture.Observations, ctx, results);
-        });
+        }
     }
 
     // ------------------------------------------------------------------ registry

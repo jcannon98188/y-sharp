@@ -1,9 +1,11 @@
 using System.Linq;
 using Xunit;
 using YSharp.TestKit.Tiers;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.TestKit;
 
+[LibraryIndependent]
 public class TierTests
 {
     [Fact]

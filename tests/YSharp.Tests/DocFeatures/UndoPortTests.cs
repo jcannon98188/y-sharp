@@ -5,6 +5,7 @@ using Xunit;
 using YSharp.TestKit.Ops;
 using YSharp.TestKit.Traceability;
 using static YSharp.Tests.DocFeatures.Ds;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.DocFeatures;
 
@@ -14,6 +15,7 @@ namespace YSharp.Tests.DocFeatures;
 /// "everything inside one millisecond" and never depends on test speed. Deviations are named in the test comments:
 /// the stub has no root <c>XmlText</c> getter and no <c>UndoManagerOptions.Doc</c>, so those tests use a <c>YText</c> root / a one-type scope.
 /// </summary>
+[Requires(Feature.Undo)]
 public sealed class UndoPortTests
 {
     private static readonly YValue Bold = Attrs(("bold", true));
@@ -22,7 +24,8 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testInconsistentFormat", "UM-18")]
-    public void Undo_InconsistentFormatMerge_KeepsTheMergedFormatting() => Impl.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Xml)]
+    public void Undo_InconsistentFormatMerge_KeepsTheMergedFormatting()
     {
         static void TestYjsMerge(Doc ydoc)
         {
@@ -47,13 +50,13 @@ public sealed class UndoPortTests
         var yDoc = new Doc(new DocOptions { Gc = false });
         yDoc.ApplyUpdate(initial.EncodeStateAsUpdate());
         TestYjsMerge(yDoc);
-    });
+    }
 
     // ------------------------------------------------------------------ capture timeout, scopes
 
     [Fact]
     [PortOf("undo-redo.tests.js:testInfiniteCaptureTimeout", "UM-03")]
-    public void Undo_InfiniteCaptureTimeout_MergesEverythingUntilStopCapturing() => Impl.Run(() =>
+    public void Undo_InfiniteCaptureTimeout_MergesEverythingUntilStopCapturing()
     {
         var u = Users.Init(3);
         var array0 = u.Array(0);
@@ -63,11 +66,12 @@ public sealed class UndoPortTests
         array0.Push(new YEntry[] { 4, 5, 6 });
         undoManager.Undo();
         Assert.Equal("[1,2,3]", J(array0));
-    });
+    }
 
     [Fact]
     [PortOf("undo-redo.tests.js:testEmptyTypeScope", "UM-02", "UM-16")]
-    public void Undo_EmptyTypeScopeExtendedLater_UndoesTheAddedType() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void Undo_EmptyTypeScopeExtendedLater_UndoesTheAddedType()
     {
         var ydoc = new Doc();
         var um = new UndoManager(Array.Empty<YType>(), Opts(doc: ydoc));   // upstream: new UndoManager([], { doc: ydoc })
@@ -76,11 +80,12 @@ public sealed class UndoPortTests
         yarray.Insert(0, new YEntry[] { 1 });
         um.Undo();
         Assert.Equal(0, yarray.Length);
-    });
+    }
 
     [Fact]
     [PortOf("undo-redo.tests.js:testGlobalScope", "UM-02")]
-    public void Undo_GlobalScope_UndoesAnyType() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void Undo_GlobalScope_UndoesAnyType()
     {
         var ydoc = new Doc();
         var um = new UndoManager(ydoc, Opts());
@@ -88,11 +93,12 @@ public sealed class UndoPortTests
         yarray.Insert(0, new YEntry[] { 1 });
         um.Undo();
         Assert.Equal(0, yarray.Length);
-    });
+    }
 
     [Fact]
     [PortOf("undo-redo.tests.js:testTypeScope", "UM-02")]
-    public void Undo_TypeScope_IgnoresChangesOutsideTheScope() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void Undo_TypeScope_IgnoresChangesOutsideTheScope()
     {
         var u = Users.Init(3);
         var array0 = u.Array(0);
@@ -109,11 +115,11 @@ public sealed class UndoPortTests
         Assert.Equal("abc", text1.ToString());
         undoManagerBoth.Undo();
         Assert.Equal("", text1.ToString());
-    });
+    }
 
     [Fact]
     [PortOf("undo-redo.tests.js:testTrackClass", "UM-01")]
-    public void Undo_TrackedOriginClass_TracksOnlyOriginsOfThatType() => Impl.Run(() =>
+    public void Undo_TrackedOriginClass_TracksOnlyOriginsOfThatType()
     {
         var u = Users.Init(3);
         var text0 = u.Text(0);
@@ -123,11 +129,12 @@ public sealed class UndoPortTests
         Assert.Equal("abc", text0.ToString());
         undoManager.Undo();
         Assert.Equal("", text0.ToString());
-    });
+    }
 
     [Fact]
     [PortOf("undo-redo.tests.js:testRejectUpdateExample", "UM-01", "UM-17")]
-    public void Undo_RejectUpdateExample_RestoresTheRestrictedRoot() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void Undo_RejectUpdateExample_RestoresTheRestrictedRoot()
     {
         var tmpydoc1 = new Doc();
         tmpydoc1.GetArray("restricted").Insert(0, new YEntry[] { 1 });
@@ -160,13 +167,14 @@ public sealed class UndoPortTests
         UpdateHandler(update2);
         Assert.Equal(0, restrictedType.Length);
         Assert.Equal(2, ydoc.GetArray("public").Length);
-    });
+    }
 
     // ------------------------------------------------------------------ text
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoText", "UM-10", "UM-20", "UM-05")]
-    public void Undo_Text_UndoesAndRedoesInsertsAndDeletes() => Impl.Run(() =>
+    [Requires(Feature.TextFormat)]
+    public void Undo_Text_UndoesAndRedoesInsertsAndDeletes()
     {
         var u = Users.Init(3);
         var text0 = u.Text(0);
@@ -210,11 +218,12 @@ public sealed class UndoPortTests
         Assert.Equal("[bcxyz]", Delta(text0));
         undoManager.Redo();
         Assert.Equal("[b][cxy{\"bold\":true}][z]", Delta(text0));
-    });
+    }
 
     [Fact]
     [PortOf("undo-redo.tests.js:testDoubleUndo", "UM-05", "UM-10")]
-    public void Undo_TwoConsecutiveUndos_RestoreTheOriginalText() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void Undo_TwoConsecutiveUndos_RestoreTheOriginalText()
     {
         var doc = new Doc();
         var text = doc.GetText();
@@ -226,11 +235,12 @@ public sealed class UndoPortTests
         manager.Undo();
         text.Insert(2, "3");
         Assert.Equal("12321", text.ToString());
-    });
+    }
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoInEmbed", "UM-18")]
-    public void Undo_EmbeddedNestedText_UndoesTheEmbedEdits() => Impl.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Text)]
+    public void Undo_EmbeddedNestedText_UndoesTheEmbedEdits()
     {
         var u = Users.Init(3);
         var text0 = u.Text(0);
@@ -247,11 +257,12 @@ public sealed class UndoPortTests
         Assert.Equal("initial text", nestedText.ToString());
         undoManager.Undo();
         Assert.Equal(0, text0.Length);
-    });
+    }
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoDeleteTextFormat", "UM-18")]
-    public void Undo_DeletedFormattedText_RestoresTheFormat() => Impl.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Text)]
+    public void Undo_DeletedFormattedText_RestoresTheFormat()
     {
         var doc = new Doc();
         var text = doc.GetText();
@@ -275,13 +286,14 @@ public sealed class UndoPortTests
         const string expect = "[Attack ships ][on fire{\"bold\":true}][ off the shoulder of Orion.]";
         Assert.Equal(expect, Delta(text));
         Assert.Equal(expect, Delta(text2));
-    });
+    }
 
     // ------------------------------------------------------------------ map
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoMap", "UM-20", "UM-12")]
-    public void Undo_Map_UndoesAndRedoesKeyChanges() => Impl.Run(() =>
+    [Requires(Feature.Map)]
+    public void Undo_Map_UndoesAndRedoesKeyChanges()
     {
         var u = Users.Init(2);
         var map0 = u.Map(0);
@@ -319,11 +331,11 @@ public sealed class UndoPortTests
         undoManager.StopCapturing();
         undoManager.Undo();
         Assert.Equal("initial", Get(map0, "b").Value.AsString());
-    });
+    }
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoDeleteInMap", "UM-10", "UM-12")]
-    public void Undo_MapKeyDeletedAndSetAgain_UndoesStepByStep() => Impl.Run(() =>
+    public void Undo_MapKeyDeletedAndSetAgain_UndoesStepByStep()
     {
         var u = Users.Init(3);
         var map0 = u.Map(0);
@@ -348,11 +360,12 @@ public sealed class UndoPortTests
         Assert.Equal("{}", J(map0));
         undoManager.Undo();
         Assert.Equal("{\"a\":\"a\"}", J(map0));
-    });
+    }
 
     [Fact]
     [PortOf("undo-redo.tests.js:testBehaviorOfIgnoreremotemapchangesProperty", "UM-12")]
-    public void Undo_IgnoreRemoteMapChanges_ControlsWhetherRemoteKeyChangesAreUndone() => Impl.Run(() =>
+    [Requires(Feature.Map, Feature.Events)]
+    public void Undo_IgnoreRemoteMapChanges_ControlsWhetherRemoteKeyChangesAreUndone()
     {
         var doc = new Doc();
         var doc2 = new Doc();
@@ -368,13 +381,14 @@ public sealed class UndoPortTests
         um1.Undo();
         Assert.Equal(2, Get(map1, "x").Value.AsNumber());
         Assert.Equal(2, Get(map2, "x").Value.AsNumber());
-    });
+    }
 
     // ------------------------------------------------------------------ array
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoArray", "UM-20", "UM-10")]
-    public void Undo_Array_UndoesAndRedoesInsertsAndDeletes() => Impl.Run(() =>
+    [Requires(Feature.Map)]
+    public void Undo_Array_UndoesAndRedoesInsertsAndDeletes()
     {
         var u = Users.Init(3);
         var array0 = u.Array(0);
@@ -423,11 +437,12 @@ public sealed class UndoPortTests
         Assert.Equal("[{\"b\":2}]", J(array0));
         undoManager.Redo();
         Assert.Equal("[{\"a\":1,\"b\":2}]", J(array0));
-    });
+    }
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoDeleteFilter", "UM-10")]
-    public void Undo_DeleteFilter_KeepsFilteredItemsWhenUndoingTheirInsert() => Impl.Run(() =>
+    [Requires(Feature.Map)]
+    public void Undo_DeleteFilter_KeepsFilteredItemsWhenUndoingTheirInsert()
     {
         var u = Users.Init(3);
         var array0 = u.Array(0);
@@ -441,13 +456,14 @@ public sealed class UndoPortTests
         undoManager.Undo();
         Assert.Equal(1, array0.Length);
         Assert.Single(((YMap)array0[0].Type!).Keys);
-    });
+    }
 
     // ------------------------------------------------------------------ cross-document and regression cases
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoUntilChangePerformed", "UM-09")]
-    public void Undo_UntilAChangeIsPerformed_SkipsNoOpStackItems() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Map, Feature.Events)]
+    public void Undo_UntilAChangeIsPerformed_SkipsNoOpStackItems()
     {
         var doc = new Doc();
         var doc2 = new Doc();
@@ -473,11 +489,12 @@ public sealed class UndoPortTests
         undoManager2.Undo();
         undoManager.Undo();
         Assert.Equal("value", Get(yMap2, "key").Value.AsString());
-    });
+    }
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoNestedUndoIssue", "UM-10", "UM-11")]
-    public void Undo_NestedMapsAndArrays_UndoesEachVersion() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void Undo_NestedMapsAndArrays_UndoesEachVersion()
     {
         var doc = new Doc(new DocOptions { Gc = false });
         var design = doc.GetMap();
@@ -525,11 +542,12 @@ public sealed class UndoPortTests
         Assert.Equal("{\"text\":{\"blocks\":{\"text\":\"Something\"}}}", J(design));
         undoManager.Redo();
         Assert.Equal("{\"text\":{\"blocks\":{\"text\":\"Something Else\"}}}", J(design));
-    });
+    }
 
     [Fact]
     [PortOf("undo-redo.tests.js:testConsecutiveRedoBug", "UM-10", "UM-11")]
-    public void Redo_ConsecutiveRedos_RestoreEachState() => Impl.Run(() =>
+    [Requires(Feature.Map)]
+    public void Redo_ConsecutiveRedos_RestoreEachState()
     {
         var doc = new Doc();
         var yRoot = doc.GetMap();
@@ -574,11 +592,12 @@ public sealed class UndoPortTests
         Assert.Equal("{\"x\":200,\"y\":200}", J(yPoint));
         undoMgr.Redo(); // expected x=300, y=300, actually nil upstream before the fix
         Assert.Equal("{\"x\":300,\"y\":300}", J(yPoint));
-    });
+    }
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoBlockBug", "UM-10")]
-    public void Undo_VersionedBlocks_UndoesEachBlockVersion() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void Undo_VersionedBlocks_UndoesEachBlockVersion()
     {
         var doc = new Doc(new DocOptions { Gc = false });
         var design = doc.GetMap();
@@ -613,13 +632,14 @@ public sealed class UndoPortTests
         undoManager.Redo(); // {"text":{"blocks":{"text":"3"}}}
         undoManager.Redo(); // {"text":{}}
         Assert.Equal("{\"text\":{\"blocks\":{\"text\":\"4\"}}}", J(design));
-    });
+    }
 
     // ------------------------------------------------------------------ xml
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoXml", "UM-18")]
-    public void Undo_Xml_UndoesAndRedoesTreeEdits() => Impl.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Text, Feature.Xml)]
+    public void Undo_Xml_UndoesAndRedoesTreeEdits()
     {
         var u = Users.Init(3);
         var xml0 = u.Xml(0);
@@ -641,11 +661,12 @@ public sealed class UndoPortTests
         Assert.Equal("<undefined></undefined>", xml0.ToString());
         undoManager.Undo();
         Assert.Equal("<undefined><p>con<bold>tent</bold></p></undefined>", xml0.ToString());
-    });
+    }
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoXmlBug", "UM-18")]
-    public void Undo_XmlElementCreatedAndEdited_UndoesCleanly() => Impl.Run(() =>
+    [Requires(Feature.Xml)]
+    public void Undo_XmlElementCreatedAndEdited_UndoesCleanly()
     {
         const string origin = "origin";
         var doc = new Doc();
@@ -680,11 +701,12 @@ public sealed class UndoPortTests
         undoManager.Redo();
         undoManager.Redo();
         Assert.Equal("<test-node a=\"180\" b=\"50\"></test-node>", fragment.ToString());
-    });
+    }
 
     [Fact]
     [PortOf("undo-redo.tests.js:testSpecialDeletionCase", "UM-10", "UM-18")]
-    public void Undo_SpecialDeletionOfAnElement_RestoresTheElement() => Impl.Run(() =>
+    [Requires(Feature.Xml)]
+    public void Undo_SpecialDeletionOfAnElement_RestoresTheElement()
     {
         const string origin = "undoable";
         var doc = new Doc();
@@ -708,11 +730,12 @@ public sealed class UndoPortTests
         Assert.Equal("", fragment.ToString());
         undoManager.Undo();
         Assert.Equal("<test a=\"1\" b=\"2\"></test>", fragment.ToString());
-    });
+    }
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoSetAttributeAndDeleteSyncsAttributes", "UM-12", "UM-18")]
-    public void Undo_SetAttributeThenDelete_SyncsTheAttributes() => Impl.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Text, Feature.Xml, Feature.V2)]
+    public void Undo_SetAttributeThenDelete_SyncsTheAttributes()
     {
         var doc = new Doc();
         var root = doc.GetXmlText("sharedRoot");   // upstream: doc.get('sharedRoot', Y.XmlText)
@@ -744,13 +767,13 @@ public sealed class UndoPortTests
         var remoteDoc = new Doc();
         remoteDoc.ApplyUpdate(doc.EncodeStateAsUpdate(default, UpdateFormat.V2), null, UpdateFormat.V2);
         AssertButton(remoteDoc.GetXmlText("sharedRoot"));
-    });
+    }
 
     // ------------------------------------------------------------------ events
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoEvents", "UM-04", "UM-14")]
-    public void Undo_StackEvents_FireWithTheExpectedMetadata() => Impl.Run(() =>
+    public void Undo_StackEvents_FireWithTheExpectedMetadata()
     {
         var u = Users.Init(3);
         var text0 = u.Text(0);
@@ -772,11 +795,12 @@ public sealed class UndoPortTests
         Assert.Equal(0, receivedMetadata);
         undoManager.Redo();
         Assert.Equal(1, receivedMetadata);
-    });
+    }
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoDoingStackItem", "UM-14")]
-    public void Undo_DoingStackItem_ExposesTheItemMetaDuringUndoAndRedo() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Events)]
+    public void Undo_DoingStackItem_ExposesTheItemMetaDuringUndoAndRedo()
     {
         var doc = new Doc();
         var text = doc.GetText("text");
@@ -796,5 +820,5 @@ public sealed class UndoPortTests
         Assert.Equal("42", metaUndo);   // currStackItem is accessible while undoing
         Assert.Equal("42", metaRedo);   // and while redoing
         Assert.Null(undoManager.CurrStackItem);   // and null after the transaction
-    });
+    }
 }

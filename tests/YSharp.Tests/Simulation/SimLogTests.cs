@@ -3,10 +3,12 @@ using System.Text.Json.Nodes;
 using Xunit;
 using YSharp.TestKit.Sim;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Simulation;
 
 /// <summary>The recorder that turns a run into the op log stored in the golden fixtures (no documents involved).</summary>
+[LibraryIndependent]
 public sealed class SimLogTests
 {
     [Fact]

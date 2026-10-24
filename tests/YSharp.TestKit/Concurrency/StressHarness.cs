@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading;
 using Xunit;
 using YSharp.TestKit.Rng;
-using YSharp.TestKit.Stubs;
 
 namespace YSharp.TestKit.Concurrency;
 
@@ -77,14 +76,10 @@ public static class StressHarness
 
     private static int Pick(IPrng g, int max) => (int)Prng.Int32(g, 0, max);
 
-    /// <summary>Skips on the calling thread while the library is the stub, so it is not a worker-thread error.</summary>
-    private static void Probe() => ApiStub.SkipIfStub();
-
     // ------------------------------------------------------------------ workload 1: one document, many threads
 
     public static StressResult RunSharedDoc(StressOptions o)
     {
-        Probe();
         var result = new StressResult { Options = o };
         var doc = new Doc(new DocOptions { ClientId = 1 });
         var arr = doc.GetArray("a");
@@ -225,7 +220,6 @@ public static class StressHarness
     /// <summary>Fills a document, then reads it from many threads at random positions. Reads must return what a single-threaded read returns and must not change the encoded state.</summary>
     public static StressResult RunReadPurity(StressOptions o)
     {
-        Probe();
         var result = new StressResult { Options = o };
         var doc = new Doc(new DocOptions { ClientId = 1 });
         var arr = doc.GetArray("a");
@@ -281,7 +275,6 @@ public static class StressHarness
     /// <summary>Each thread owns a document and edits it; threads sync pairwise at random through <c>ApplyUpdate</c>. Afterwards all documents agree.</summary>
     public static StressResult RunConvergence(StressOptions o)
     {
-        Probe();
         var result = new StressResult { Options = o };
         var count = Math.Max(2, o.Writers);
         var docs = Enumerable.Range(0, count).Select(i => new Doc(new DocOptions { ClientId = (ulong)(10 + i) })).ToArray();

@@ -3,6 +3,7 @@ using System.Linq;
 using Xunit;
 using YSharp.TestKit.Assertions;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Structs;
 
@@ -11,6 +12,7 @@ namespace YSharp.Tests.Structs;
 /// the item flags, GC and Skip structs. The struct store is read through the ADR 0016 <c>structs</c> dump
 /// (<see cref="StructsProbe"/>); expected values were taken from the pinned Yjs.
 /// </summary>
+[Requires(Feature.Integrate)]
 public sealed class StructModelTests
 {
     internal static YValue Attr(string key, YValue value) =>
@@ -18,7 +20,8 @@ public sealed class StructModelTests
 
     [Fact]
     [Covers("STR-01", "STR-08")]
-    public void Item_RecordsItsId_AndItsLengthComesFromItsContent() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Array, Feature.Map)]
+    public void Item_RecordsItsId_AndItsLengthComesFromItsContent()
     {
         var a = Net.Mk(1);
         a.GetText("t").Insert(0, "abc");
@@ -30,11 +33,12 @@ public sealed class StructModelTests
         Assert.Equal(new[] { (0L, 3L), (3L, 3L), (6L, 1L), (7L, 1L) }, structs.Select(s => (s.Clock, s.Len)));
         Assert.Equal(new[] { 4, 8, 7, 8 }, structs.Select(s => s.Ref));
         Assert.All(structs, s => Assert.Equal(1UL, s.Client));
-    });
+    }
 
     [Fact]
     [Covers("STR-02", "STR-04")]
-    public void PerClientStructs_AreGapFree_AndTheStateIsTheEndOfTheLastStruct() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Map)]
+    public void PerClientStructs_AreGapFree_AndTheStateIsTheEndOfTheLastStruct()
     {
         var a = Net.Mk(1);
         var b = Net.Mk(2);
@@ -59,11 +63,12 @@ public sealed class StructModelTests
             }
             Assert.Equal(0L, doc.GetStateVector()[999]);
         }
-    });
+    }
 
     [Fact]
     [Covers("STR-03")]
-    public void AStructWithAClockGap_NeverEntersTheStore_ItWaitsAsPending() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void AStructWithAClockGap_NeverEntersTheStore_ItWaitsAsPending()
     {
         var a = Net.Mk(1);
         var ups = Net.Capture(a);
@@ -83,11 +88,12 @@ public sealed class StructModelTests
         var s = Assert.Single(StructsProbe.Of(d, 1));
         Assert.Equal((0L, 3L, "abc"), (s.Clock, s.Len, s.Text));
         Assert.Equal("abc", d.GetText("t").ToString());
-    });
+    }
 
     [Fact]
     [Covers("STR-05", "STR-40")]
-    public void FormatMarks_AreNotCountable_AndDeletionOnlySetsTheDeletedFlag() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Array)]
+    public void FormatMarks_AreNotCountable_AndDeletionOnlySetsTheDeletedFlag()
     {
         var a = Net.Mk(1, gc: false);
         var t = a.GetText("t");
@@ -105,11 +111,12 @@ public sealed class StructModelTests
         arr.Push(new YEntry[] { 1, 2, 3 });
         arr.Delete(1, 1);
         Assert.Equal(2, arr.Length);                                  // deleted content never counts
-    });
+    }
 
     [Fact]
     [Covers("STR-06")]
-    public void OriginOfALaterInsert_AnyInsert_IsTheLastIdOfTheItemItFollows() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void OriginOfALaterInsert_AnyInsert_IsTheLastIdOfTheItemItFollows()
     {
         var a = Net.Mk(1);
         var b = Net.Mk(2);
@@ -124,11 +131,12 @@ public sealed class StructModelTests
         Net.Sync(c, d);
         d.GetText("t").Insert(1, "Y");
         Assert.Equal((1UL, 0L), StructsProbe.Of(d, 2).Single().Origin);        // a one-long item: its own id
-    });
+    }
 
     [Fact]
     [Covers("STR-07")]
-    public void Siblings_DeletedNeighbours_AreSkipped() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Map, Feature.Xml)]
+    public void Siblings_DeletedNeighbours_AreSkipped()
     {
         var a = Net.Mk(1);
         var frag = a.GetXmlFragment("x");
@@ -140,7 +148,7 @@ public sealed class StructModelTests
         Assert.Equal("a", first.NodeName);
         Assert.Equal("c", ((YXmlElement)first.NextSibling!).NodeName);
         Assert.Equal("a", ((YXmlElement)last.PrevSibling!).NodeName);
-    });
+    }
 
     // ------------------------------------------------------------------ GC structs (F) and Skip structs (G)
 
@@ -160,7 +168,7 @@ public sealed class StructModelTests
 
     [Fact]
     [Covers("STR-31", "STR-32")]
-    public void ChildrenOfACollectedType_AfterGc_BecomeOneMergedGcStruct() => Impl.Run(() =>
+    public void ChildrenOfACollectedType_AfterGc_BecomeOneMergedGcStruct()
     {
         var (a, _) = CollectedMap();
         var s = StructsProbe.Of(a, 1);
@@ -168,11 +176,12 @@ public sealed class StructModelTests
         Assert.Equal((0L, 1L, true, 1), (s[0].Clock, s[0].Len, s[0].Deleted, s[0].Ref));   // the type's own item keeps a ContentDeleted shell
         Assert.True(s[1].IsGc);                                                            // GC: ref 0, always deleted
         Assert.Equal((1L, 3L, 0, true), (s[1].Clock, s[1].Len, s[1].Ref, s[1].Deleted));  // three adjacent GCs merged into one of length 3
-    });
+    }
 
     [Fact]
     [Covers("STR-16", "STR-33", "STR-34", "STR-35")]
-    public void GcStruct_IsWrittenFromAnOffset_AndIntegratedWithOne_AndNeverWaitsForAnything() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.V2)]
+    public void GcStruct_IsWrittenFromAnOffset_AndIntegratedWithOne_AndNeverWaitsForAnything()
     {
         var (a, ups) = CollectedMap();
         var d = Net.Mk(9);
@@ -186,14 +195,15 @@ public sealed class StructModelTests
         Assert.Null(StructuralDiff.Find(StructsProbe.DumpJson(a), StructsProbe.DumpJson(d)));
         Assert.Equal(0, d.GetArray("arr").Length);
         Assert.Equal(Hex.Of(a.EncodeStateAsUpdate()), Hex.Of(d.EncodeStateAsUpdate()));   // nothing is held back as pending
-    });
+    }
 
     private static readonly string MergedWithSkipV1 = "010301000401017401610a01840101016300";
     private static readonly string MergedWithSkipV2 = "00000241000102000504000a008406037461634101010100000103000100";
 
     [Fact]
     [Covers("STR-16", "STR-36", "STR-37", "STR-38", "STR-39")]
-    public void MergingAcrossAMissingRange_WritesASkip_ThatIsReadButNeverStored() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.V2, Feature.UpdateFunctions, Feature.Events, Feature.V2Functions)]
+    public void MergingAcrossAMissingRange_WritesASkip_ThatIsReadButNeverStored()
     {
         foreach (var format in new[] { UpdateFormat.V1, UpdateFormat.V2 })
         {
@@ -224,5 +234,5 @@ public sealed class StructModelTests
             Assert.DoesNotContain(StructsProbe.All(d), s => s.Kind == "skip");
             Assert.DoesNotContain(StructsProbe.All(a), s => s.Kind == "skip"); // a state update never contains Skips
         }
-    });
+    }
 }

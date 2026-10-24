@@ -7,7 +7,7 @@ using YSharp.TestKit.Fixtures;
 using YSharp.TestKit.Ops;
 using YSharp.TestKit.Tiers;
 using YSharp.TestKit.Traceability;
-using YSharp.TestKit.Stubs;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Interop.Tests;
 
@@ -15,6 +15,7 @@ namespace YSharp.Interop.Tests;
 /// <c>YSHARP_REPLAY=&lt;path&gt;</c> re-runs one saved script (a fixture candidate from the artifacts directory, or a bare ops script) on both
 /// sides with no FsCheck and no regeneration (ADR 0012 "Reporting"). Skips when the variable is not set.
 /// </summary>
+[Requires(Feature.V1, Feature.V2, Feature.UpdateFunctions, Feature.V2Functions, Feature.Array, Feature.Map, Feature.Text, Feature.TextFormat, Feature.Events)]
 [NeedsNode]
 [Tier(Tier.Smoke)]
 public sealed class ReplayTests(OracleHost host)
@@ -28,12 +29,12 @@ public sealed class ReplayTests(OracleHost host)
         var script = Reporting.LoadScript(path);
         var run = new DiffRun(host, "replay") { Label = "replay of " + path };
         try { run.Run(script); }
-        catch (NotImplementedException) when (ApiStub.IsStub) { Assert.Skip(ApiStub.Reason); }
         catch (DifferentialFailure f) { Assert.Fail(f.Persist(run.Directory)); }
     }
 }
 
 /// <summary>The <c>applyForeign</c> step (ADR 0012, 0016) on the C# interpreter and its generated fixture. No Node needed.</summary>
+[LibraryIndependent]
 public sealed class ApplyForeignTests
 {
     private static Fixture Load() => FixtureLoader.Load(Path.Combine(RepoRoot.Find(), "fixtures", "differential", "apply-foreign.json"), PinnedVersions.Read(RepoRoot.Find()));
@@ -69,12 +70,12 @@ public sealed class ApplyForeignTests
     }
 
     [Fact, Covers("DIFF-02")]
+    [Requires(Feature.V1, Feature.V2, Feature.UpdateFunctions, Feature.V2Functions, Feature.Array, Feature.Map, Feature.Text, Feature.TextFormat, Feature.Events)]
     public void TheFixture_ReplaysOnYSharp_WithTheOraclesObservations()
     {
         var fixture = Load();
         Assert.Contains("DIFF-02", fixture.Header.Covers);
         var reply = SharpSide.Run(fixture.Script.GetRawText());
-        if (reply.Status == SharpStatus.Stub) Assert.Skip("YSharp is still the API stub");
         Assert.True(reply.Status == SharpStatus.Ok, reply.Message);
         var expected = JsonNode.Parse(fixture.Observations.GetRawText())!.AsObject();
         var difference = ObservationDiff.Find(expected, reply.Observations!);
