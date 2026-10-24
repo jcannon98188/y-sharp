@@ -10,13 +10,13 @@ Each guarantee has an ID. Tests carry the ID in the traceability tag (TASK-1.8).
 
 - **CC-1** One lock per `Doc`. Write transactions are exclusive; read transactions are shared. A waiting writer blocks new readers.
 - **CC-2** The lock is re-entrant per thread, with owner tracking. A nested write on the owning thread joins the current transaction. Writes made from observers run in a follow-up transaction after cleanup, as in Yjs. Another thread never joins a transaction.
-- **CC-3** Upgrading from a read transaction to a write transaction on the same thread throws `YConcurrencyException`; it is not atomic.
+- **CC-3** Upgrading from a read transaction to a write transaction on the same thread throws `YConcurrencyException`; it is not atomic. `TryTransact*` called by a thread that holds a read transaction does not throw and does not wait: it returns `UpgradeRefused` at once, runs no body and leaves the read lock untouched. The throwing forms (`Transact`, `BeginTransaction`) throw.
 - **CC-4** A read transaction never mutates document state, caches included (search markers and similar lazily updated state are suppressed or per-transaction).
 - **CC-5** The lock is built only from `Monitor`, `Interlocked` and explicit state, so a systematic schedule tester can control it. No `ReaderWriterLockSlim`, no spin-waiting on internals.
 
 **Acquiring**
 
-- **CC-6** Blocking `Transact` forms take an optional timeout and `CancellationToken`, and throw `TimeoutException` or `OperationCanceledException`. `TryTransact*` never blocks and returns a result struct (`Acquired` or `Contended`). Signatures belong to TASK-1.14.
+- **CC-6** Blocking `Transact` forms take an optional timeout and `CancellationToken`, and throw `TimeoutException` or `OperationCanceledException`. `TryTransact*` never blocks and returns a result struct (`Acquired`, `Contended` when another thread holds the lock, or `UpgradeRefused`, see CC-3). Signatures belong to TASK-1.14.
 - **CC-7** An uncontended acquire and release allocates nothing. `TryTransact*` allocates nothing even when contended. Both are named hot paths for TASK-1.15. The contract has no numeric latency bound.
 
 **Handles and options**

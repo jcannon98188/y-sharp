@@ -185,6 +185,29 @@ public sealed class LockModelTests
         Conc.AssertDoesNotWait(() => doc.Transact(_ => { }), "a writer after the rejected scoped upgrade");
     });
 
+    [Fact, Covers("CC-3", "CC-6")]
+    public void TryTransact_WhileTheCallingThreadHoldsAReadTransaction_ReturnsUpgradeRefusedAtOnce() => Impl.Run(() =>
+    {
+        var doc = Conc.NewDoc();
+        var ran = false;
+        doc.ReadTransact(_ =>
+        {
+            TryTransactResult result = default;
+            Conc.AssertDoesNotWait(() => result = doc.TryTransact(_ => ran = true), "TryTransact under the caller's own read transaction");
+            Assert.False(result.Acquired);
+            Assert.Equal(TryTransactStatus.UpgradeRefused, result.Status);
+        });
+        using (doc.BeginReadTransaction())
+        {
+            Assert.Equal(TryTransactStatus.UpgradeRefused, doc.TryTransact(_ => ran = true).Status);
+        }
+        Assert.False(ran);
+        // the read lock was not disturbed: a writer elsewhere gets in, and TryTransact works again
+        Conc.AssertDoesNotWait(() => doc.Transact(_ => { }), "a writer after the refused upgrades");
+        Assert.True(doc.TryTransact(_ => ran = true).Acquired);
+        Assert.True(ran);
+    });
+
     // ------------------------------------------------------------------ CC-4
 
     [Fact, Covers("CC-4")]
