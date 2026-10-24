@@ -6,10 +6,10 @@
   title: "One lock per Doc"
   source: "docs/adr/0006-concurrency-contract.md:11"
   kind: y-sharp-own
-  layers: [unit]
+  layers: [unit, fuzz]
   wire: false
   owner: 12
-  status: pending
+  status: active
   ref: "adr 0006:11"
 
 - id: CC-2
@@ -19,7 +19,7 @@
   layers: [unit]
   wire: false
   owner: 12
-  status: pending
+  status: active
   ref: "adr 0006:12"
 
 - id: CC-3
@@ -29,17 +29,17 @@
   layers: [unit]
   wire: false
   owner: 12
-  status: pending
+  status: active
   ref: "adr 0006:13"
 
 - id: CC-4
   title: "A read transaction never mutates document state, caches included (search markers and similar lazily updated..."
   source: "docs/adr/0006-concurrency-contract.md:14"
   kind: y-sharp-own
-  layers: [unit]
+  layers: [unit, fuzz]
   wire: false
   owner: 12
-  status: pending
+  status: active
   ref: "adr 0006:14"
 
 - id: CC-5
@@ -49,7 +49,7 @@
   layers: [unit]
   wire: false
   owner: 12
-  status: pending
+  status: active
   ref: "adr 0006:15"
 
 - id: CC-6
@@ -59,7 +59,7 @@
   layers: [unit]
   wire: false
   owner: 12
-  status: pending
+  status: active
   ref: "adr 0006:19"
 
 - id: CC-7
@@ -69,17 +69,17 @@
   layers: [unit]
   wire: false
   owner: 12
-  status: pending
+  status: active
   ref: "adr 0006:20"
 
 - id: CC-8
   title: "Every public member of Doc, the shared types and the awareness classes is safe to call from any thread"
   source: "docs/adr/0006-concurrency-contract.md:24"
   kind: y-sharp-own
-  layers: [unit]
+  layers: [unit, fuzz]
   wire: false
   owner: 12
-  status: pending
+  status: active
   ref: "adr 0006:24"
 
 - id: CC-9
@@ -89,7 +89,7 @@
   layers: [unit]
   wire: false
   owner: 12
-  status: pending
+  status: active
   ref: "adr 0006:25"
 
 - id: CC-10
@@ -99,17 +99,17 @@
   layers: [unit]
   wire: false
   owner: 12
-  status: pending
+  status: active
   ref: "adr 0006:26"
 
 - id: CC-11
   title: "Observers and events run synchronously on the thread that commits, inside the write lock, in the oracle's..."
   source: "docs/adr/0006-concurrency-contract.md:30"
   kind: y-sharp-own
-  layers: [unit]
+  layers: [unit, fuzz]
   wire: false
   owner: 12
-  status: pending
+  status: active
   ref: "adr 0006:30"
 
 - id: CC-12
@@ -119,7 +119,7 @@
   layers: [unit]
   wire: false
   owner: 12
-  status: pending
+  status: active
   ref: "adr 0006:31"
 
 - id: CC-13
@@ -129,9 +129,9 @@
   layers: [unit]
   wire: false
   owner: 12
-  status: pending
+  status: active
   ref: "adr 0006:32"
-  note: "Second half (a handler added during dispatch first runs next trigger) is a Divergence from JS (types.md TX-12)."
+  note: "Spec 7 ran the TX-12 probe against Yjs 13.6.33: JS has the same rule, so the second half is a match, not a Divergence."
 
 - id: CC-14
   title: "Observer faults are contained as in ADR 0005, whichever thread the commit runs on"
@@ -141,7 +141,7 @@
   wire: false
   adr: ["0005"]
   owner: 12
-  status: pending
+  status: active
   ref: "adr 0006:33"
 
 - id: CC-15
@@ -151,7 +151,7 @@
   layers: [unit]
   wire: false
   owner: 12
-  status: pending
+  status: active
   ref: "adr 0006:37"
 
 - id: CC-16
@@ -161,7 +161,7 @@
   layers: [unit]
   wire: false
   owner: 12
-  status: pending
+  status: active
   ref: "adr 0006:38"
 
 - id: CC-17
@@ -171,7 +171,7 @@
   layers: [unit]
   wire: false
   owner: 12
-  status: pending
+  status: active
   ref: "adr 0006:39"
 
 - id: CC-18
@@ -181,7 +181,7 @@
   layers: [unit]
   wire: false
   owner: 12
-  status: pending
+  status: active
   ref: "adr 0006:43"
 
 - id: CC-19
@@ -191,7 +191,7 @@
   layers: [unit]
   wire: false
   owner: 12
-  status: pending
+  status: active
   ref: "adr 0006:44"
 
 - id: CC-20
@@ -201,5 +201,5 @@
   layers: [unit]
   wire: false
   owner: 12
-  status: pending
+  status: active
   ref: "adr 0006:45"
