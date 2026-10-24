@@ -1,0 +1,233 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["X-E5","Y-1","Y-7","V-1","T-0.1"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":181},{"name":"b","clientId":182}],
+    "steps": [
+      {"step":"observe","doc":"a","target":{"root":"x","kind":"xmlFragment"},"name":"x-a"},
+      {"step":"observe","doc":"b","target":{"root":"x","kind":"xmlFragment"},"name":"x-b"},
+      {
+        "step": "xml.insert",
+        "doc": "a",
+        "target": {"root":"x","kind":"xmlFragment"},
+        "at": 0,
+        "kind": "element",
+        "name": "p"
+      },
+      {"step":"observe","doc":"a","target":[{"root":"x","kind":"xmlFragment"},0],"name":"p-a"},
+      {
+        "step": "xml.insert",
+        "doc": "a",
+        "target": [{"root":"x","kind":"xmlFragment"},0],
+        "at": 0,
+        "kind": "text",
+        "init": "some text"
+      },
+      {"step":"observe","doc":"a","target":[{"root":"x","kind":"xmlFragment"},0,0],"name":"xt-a"},
+      {"step":"sync","from":"a","to":"b"},
+      {
+        "step": "xml.setAttribute",
+        "doc": "a",
+        "target": [{"root":"x","kind":"xmlFragment"},0],
+        "name": "key",
+        "value": "value"
+      },
+      {"step":"text.insert","doc":"a","target":[{"root":"x","kind":"xmlFragment"},0,0],"at":4,"value":"!"},
+      {
+        "step": "xml.setAttribute",
+        "doc": "a",
+        "target": [{"root":"x","kind":"xmlFragment"},0,0],
+        "name": "k2",
+        "value": 1
+      },
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"xml.removeAttribute","doc":"a","target":[{"root":"x","kind":"xmlFragment"},0],"name":"key"},
+      {"step":"xml.delete","doc":"a","target":[{"root":"x","kind":"xmlFragment"},0],"at":0},
+      {"step":"sync","from":"a","to":"b"}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [
+            {"$":"bytes","hex":"0101b501000701017803017000"},
+            {"$":"bytes","hex":"0102b501010700b50100060400b5010109736f6d65207465787400"},
+            {"$":"bytes","hex":"0101b5010b2800b50100036b657901770576616c756500"},
+            {"$":"bytes","hex":"0101b5010cc4b50105b50106012100"},
+            {"$":"bytes","hex":"0101b5010d2800b50101026b32017d0100"},
+            {"$":"bytes","hex":"0001b501010b01"},
+            {"$":"bytes","hex":"0001b50102010a0c02"}
+          ],
+          "v2": [
+            {"$":"bytes","hex":"00010002b50200000107050278704100010101030001010000"},
+            {"$":"bytes","hex":"000003f5020102000200030700040b09736f6d65207465787409010001060001020100"},
+            {"$":"bytes","hex":"000003f50200010000012805036b657903010000010101010b770576616c756500"},
+            {"$":"bytes","hex":"000003f50201010a010c01c40301210100000001010c00"},
+            {"$":"bytes","hex":"000003f50200010200012804026b3202010000010101010d7d0100"},
+            {"$":"bytes","hex":"00000000000001000000000001b501010b00"},
+            {"$":"bytes","hex":"00000000000001000000000001b5010201090101"}
+          ]
+        },
+        "b": {
+          "v1": [
+            {"$":"bytes","hex":"0103b50100070101780301700700b50100060400b5010109736f6d65207465787400"},
+            {
+              "$": "bytes",
+              "hex": "0103b5010b2800b50100036b657901770576616c7565c4b50105b5010601212800b50101026b32017d0100"
+            },
+            {"$":"bytes","hex":"0001b50101010d"}
+          ],
+          "v2": [
+            {
+              "$": "bytes",
+              "hex": "00010003f5020102000200030701040f0b7870736f6d652074657874410009030100000203060001030000"
+            },
+            {
+              "$": "bytes",
+              "hex": "000003f5020303000a48010c052800c400280a066b6579216b3203010201000002410001030b770576616c75657d0100"
+            },
+            {"$":"bytes","hex":"00000000000001000000000001b50101010c"}
+          ]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {
+            "full": {"$":"bytes","hex":"0105b50100070101780301700100b501000100092100b50100036b657901000201b50101010d"},
+            "diff": {"b":{"$":"bytes","hex":"0001b50101010d"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "00010003f502010201000009070001000000210000090578706b6579410003030100000103040109010201050001b50101010c"
+            },
+            "diff": {"b":{"$":"bytes","hex":"00000000000001000000000001b50101010c"}}
+          }
+        },
+        "b": {
+          "v1": {
+            "full": {"$":"bytes","hex":"0105b50100070101780301700100b501000100092100b50100036b657901000201b50101010d"},
+            "diff": {"a":{"$":"bytes","hex":"0001b50101010d"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "00010003f502010201000009070001000000210000090578706b6579410003030100000103040109010201050001b50101010c"
+            },
+            "diff": {"a":{"$":"bytes","hex":"00000000000001000000000001b50101010c"}}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {
+        "a": {"v1":{"$":"bytes","hex":"01b5010e"},"v2":{"$":"bytes","hex":"01b5010e"}},
+        "b": {"v1":{"$":"bytes","hex":"01b5010e"},"v2":{"$":"bytes","hex":"01b5010e"}}
+      }
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {
+        "a": [
+          [
+            "x",
+            {
+              "kind": "xmlFragment",
+              "attrs": [],
+              "children": [{"kind":"xmlElement","name":"p","attrs":[],"children":[]}]
+            }
+          ]
+        ],
+        "b": [
+          [
+            "x",
+            {
+              "kind": "xmlFragment",
+              "attrs": [],
+              "children": [{"kind":"xmlElement","name":"p","attrs":[],"children":[]}]
+            }
+          ]
+        ]
+      }
+    },
+    "events": {
+      "api": "AbstractType.observe",
+      "value": [
+        {
+          "observer": "x-a",
+          "type": "YXmlEvent",
+          "keys": [],
+          "childListChanged": true,
+          "attributesChanged": [],
+          "delta": [{"insert":[{"kind":"xmlElement","name":"p","attrs":[],"children":[]}]}]
+        },
+        {
+          "observer": "p-a",
+          "type": "YXmlEvent",
+          "keys": [],
+          "childListChanged": true,
+          "attributesChanged": [],
+          "delta": [{"insert":[{"kind":"xmlText","attrs":[],"delta":[{"insert":"some text"}]}]}]
+        },
+        {
+          "observer": "x-b",
+          "type": "YXmlEvent",
+          "keys": [],
+          "childListChanged": true,
+          "attributesChanged": [],
+          "delta": [
+            {
+              "insert": [
+                {
+                  "kind": "xmlElement",
+                  "name": "p",
+                  "attrs": [],
+                  "children": [{"kind":"xmlText","attrs":[],"delta":[{"insert":"some text"}]}]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "observer": "p-a",
+          "type": "YXmlEvent",
+          "keys": [["key",{"action":"add"}]],
+          "childListChanged": false,
+          "attributesChanged": ["key"],
+          "delta": []
+        },
+        {"observer":"xt-a","type":"YTextEvent","delta":[{"retain":4},{"insert":"!"}],"keys":[]},
+        {"observer":"xt-a","type":"YTextEvent","delta":[],"keys":[["k2",{"action":"add"}]]},
+        {
+          "observer": "p-a",
+          "type": "YXmlEvent",
+          "keys": [["key",{"action":"delete","oldValue":"value"}]],
+          "childListChanged": false,
+          "attributesChanged": ["key"],
+          "delta": []
+        },
+        {
+          "observer": "p-a",
+          "type": "YXmlEvent",
+          "keys": [],
+          "childListChanged": true,
+          "attributesChanged": [],
+          "delta": [{"delete":1}]
+        }
+      ]
+    }
+  }
+}

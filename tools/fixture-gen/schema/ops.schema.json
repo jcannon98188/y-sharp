@@ -802,6 +802,127 @@
           "additionalProperties": false
         },
         {
+          "title": "xml.insert",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "xml.insert"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "target": {
+              "$ref": "#/$defs/target"
+            },
+            "at": {
+              "$ref": "#/$defs/index"
+            },
+            "kind": {
+              "enum": [
+                "element",
+                "text"
+              ]
+            },
+            "name": {
+              "type": "string"
+            },
+            "init": {
+              "$ref": "#/$defs/value"
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "target",
+            "at",
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "xml.delete",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "xml.delete"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "target": {
+              "$ref": "#/$defs/target"
+            },
+            "at": {
+              "$ref": "#/$defs/index"
+            },
+            "len": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "target",
+            "at"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "xml.setAttribute",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "xml.setAttribute"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "target": {
+              "$ref": "#/$defs/target"
+            },
+            "name": {
+              "type": "string"
+            },
+            "value": {
+              "$ref": "#/$defs/value"
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "target",
+            "name",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "title": "xml.removeAttribute",
+          "type": "object",
+          "properties": {
+            "step": {
+              "const": "xml.removeAttribute"
+            },
+            "doc": {
+              "$ref": "#/$defs/replicaName"
+            },
+            "target": {
+              "$ref": "#/$defs/target"
+            },
+            "name": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "step",
+            "doc",
+            "target",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        {
           "title": "mergeUpdates",
           "type": "object",
           "properties": {

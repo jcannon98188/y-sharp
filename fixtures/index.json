@@ -5,12 +5,36 @@
   "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
   "fixtures": [
     {
+      "path": "array/binary-and-mixed.json",
+      "area": "array",
+      "name": "binary-and-mixed",
+      "covers": ["A-15","A-16","A-4","A-3"],
+      "sha256": "8865b222a6a169a45cd0c56ea222d92389ba8df728cf5b7b90fa50b223207421",
+      "bytes": 9070
+    },
+    {
       "path": "array/concurrent-insert-order.json",
       "area": "array",
       "name": "concurrent-insert-order",
       "covers": ["A-18"],
       "sha256": "e01ea83df5b66aeec944a3c143618d5a69b6adbc4250ff05e0855c865ad98f4e",
       "bytes": 12830
+    },
+    {
+      "path": "array/events-and-targets.json",
+      "area": "array",
+      "name": "events-and-targets",
+      "covers": ["A-E1","A-E2","A-E4","A-E5","A-E6","A-E8","V-6","V-7","V-8"],
+      "sha256": "d7ac5098507ad06a7eb1092f8e7a8e97281f96cee42576d4f5d793364fc6038d",
+      "bytes": 5871
+    },
+    {
+      "path": "array/insert-in-deleted-region.json",
+      "area": "array",
+      "name": "insert-in-deleted-region",
+      "covers": ["A-17","A-13","A-16"],
+      "sha256": "74817b1970c12b7f5d95b0c0fc67cb46e3d7b7c7acd30791e1f515acb789c407",
+      "bytes": 14267
     },
     {
       "path": "array/insert-push-delete.json",
@@ -121,6 +145,22 @@
       "bytes": 38090
     },
     {
+      "path": "events/remote-updates.json",
+      "area": "events",
+      "name": "remote-updates",
+      "covers": ["TX-14","TX-15","M-E7","A-E6"],
+      "sha256": "a540e06b3ea4ee147be5add5c8403d6859447e47227c3748fb26bfe57539b0f0",
+      "bytes": 7706
+    },
+    {
+      "path": "events/transaction-ordering.json",
+      "area": "events",
+      "name": "transaction-ordering",
+      "covers": ["TX-1","TX-5","TX-10","TX-18","TX-19","Q23"],
+      "sha256": "88c139666d72c633e0111f210704d24fc248f42b77bbb0c5d47803b36515e8f7",
+      "bytes": 7807
+    },
+    {
       "path": "hostile/malformed-codec-extras.json",
       "area": "hostile",
       "name": "malformed-codec-extras",
@@ -194,6 +234,22 @@
       "bytes": 7500
     },
     {
+      "path": "map/events-keys.json",
+      "area": "map",
+      "name": "events-keys",
+      "covers": ["M-E1","M-E2","M-E3","M-E4","M-E7","V-5","Q23"],
+      "sha256": "4941942f359080d245673d07d10d04bd7e1f565af38f90bc60469349fe46df74",
+      "bytes": 8237
+    },
+    {
+      "path": "map/key-order.json",
+      "area": "map",
+      "name": "key-order",
+      "covers": ["Q26","M-11","M-3","M-6"],
+      "sha256": "8e21e36a69b011cb0f7af8a960542ecbcada7bd16020d158b94651ab6f00a1f8",
+      "bytes": 19559
+    },
+    {
       "path": "map/set-delete-clear.json",
       "area": "map",
       "name": "set-delete-clear",
@@ -218,6 +274,14 @@
       "bytes": 21246
     },
     {
+      "path": "text/apply-delta-edges.json",
+      "area": "text",
+      "name": "apply-delta-edges",
+      "covers": ["T-6","T-8","T-9","E-4","E-6","D-1","D-4"],
+      "sha256": "94123b3a6b614229a5a814afd033bf7766f1bfe438df71870b3a44cbf2010ac6",
+      "bytes": 9565
+    },
+    {
       "path": "text/apply-delta.json",
       "area": "text",
       "name": "apply-delta",
@@ -226,12 +290,44 @@
       "bytes": 3120
     },
     {
+      "path": "text/attribute-equality.json",
+      "area": "text",
+      "name": "attribute-equality",
+      "covers": ["Q27","F-5","F-4","D-2"],
+      "sha256": "748e0338fecf7292a4972f4a0459aac15f7ef8724a104391d230744360e60b50",
+      "bytes": 25064
+    },
+    {
+      "path": "text/concurrent-formatting.json",
+      "area": "text",
+      "name": "concurrent-formatting",
+      "covers": ["F-9","Y-6","Y-3"],
+      "sha256": "28a947b258cfcd0de7804886bc82f71522f9642ce6862878adcb4c616c2c06a2",
+      "bytes": 11146
+    },
+    {
       "path": "text/concurrent-same-position.json",
       "area": "text",
       "name": "concurrent-same-position",
       "covers": ["T-1","A-18"],
       "sha256": "e2aab54a2b7111ca4349b7d3bb3701886601f115cab77499ba2f6d35814b528d",
       "bytes": 13605
+    },
+    {
+      "path": "text/embed-attributes.json",
+      "area": "text",
+      "name": "embed-attributes",
+      "covers": ["E-1","E-2","E-3","E-6","D-1"],
+      "sha256": "907d220359e68aae0257a111c8bb3adab727bd1765aee42e673615aa14a0ea95",
+      "bytes": 11402
+    },
+    {
+      "path": "text/format-cleanup.json",
+      "area": "text",
+      "name": "format-cleanup",
+      "covers": ["F-2","F-3","F-7","F-8","T-3"],
+      "sha256": "424ce4b3a16a68e7b1a4e1679ed3b0cd45d8fcde2dd1b4f4781799feb395577b",
+      "bytes": 15343
     },
     {
       "path": "text/formatting.json",
@@ -250,6 +346,14 @@
       "bytes": 8674
     },
     {
+      "path": "text/nested-text-embeds.json",
+      "area": "text",
+      "name": "nested-text-embeds",
+      "covers": ["E-5","T-0.8","T-4","A-19"],
+      "sha256": "4500759559fb1e40c73b215870b3ac2a45da8e0943058d65777f986b717c5aeb",
+      "bytes": 7341
+    },
+    {
       "path": "text/observe-events.json",
       "area": "text",
       "name": "observe-events",
@@ -264,6 +368,38 @@
       "covers": ["T-5","E-1","E-2"],
       "sha256": "dfb96cebe91ce4320a04485cf2f7794093054a26b5f743f427248c7dd8fdc32d",
       "bytes": 5675
+    },
+    {
+      "path": "xml/attributes.json",
+      "area": "xml",
+      "name": "attributes",
+      "covers": ["X-1","X-2","X-E2","X-E7","V-5"],
+      "sha256": "49627e226ce89bce59472251a90c0e67bd2f9b04825a93b152dd8b1b0386e3b2",
+      "bytes": 8413
+    },
+    {
+      "path": "xml/element-tree.json",
+      "area": "xml",
+      "name": "element-tree",
+      "covers": ["X-E1","X-E2","X-E4","X-E6","T-0.8"],
+      "sha256": "d6b64cde0cf6ed9a40f12b0f886d3ac152102feacd17ce0980086634913b1d1c",
+      "bytes": 14012
+    },
+    {
+      "path": "xml/events.json",
+      "area": "xml",
+      "name": "events",
+      "covers": ["X-E5","Y-1","Y-7","V-1","T-0.1"],
+      "sha256": "39967e54035e00d805fcf6df2a7107c8d613f0ba0431a07365ff32dc7055a400",
+      "bytes": 8179
+    },
+    {
+      "path": "xml/text-in-fragment.json",
+      "area": "xml",
+      "name": "text-in-fragment",
+      "covers": ["X-1","F-1","E-1","T-5","Y-2"],
+      "sha256": "1607d0c6b8aa06681284fde0cf3dea9aeecc2efe893e838aaeb82939f1a5ceb9",
+      "bytes": 22370
     }
   ]
 }

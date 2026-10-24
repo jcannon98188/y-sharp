@@ -1,0 +1,713 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["Q27","F-5","F-4","D-2"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":71},{"name":"b","clientId":72}],
+    "steps": [
+      {"step":"text.insert","doc":"a","target":{"root":"t","kind":"text"},"at":0,"value":"abcdef"},
+      {
+        "step": "text.format",
+        "doc": "a",
+        "target": {"root":"t","kind":"text"},
+        "at": 0,
+        "len": 6,
+        "attributes": {"$":"obj","pairs":[["em",{"$":"obj","pairs":[["x",1]]}],["n",1],["s","a"]]}
+      },
+      {
+        "step": "text.format",
+        "doc": "a",
+        "target": {"root":"t","kind":"text"},
+        "at": 1,
+        "len": 2,
+        "attributes": {"$":"obj","pairs":[["em",{"$":"obj","pairs":[["x",1]]}],["n",1],["s","a"]]}
+      },
+      {
+        "step": "text.format",
+        "doc": "a",
+        "target": {"root":"t","kind":"text"},
+        "at": 3,
+        "len": 1,
+        "attributes": {"$":"obj","pairs":[["em",{"$":"obj","pairs":[["x",{"$":"obj","pairs":[["y",1]]}]]}]]}
+      },
+      {
+        "step": "text.format",
+        "doc": "a",
+        "target": {"root":"t","kind":"text"},
+        "at": 4,
+        "len": 1,
+        "attributes": {"$":"obj","pairs":[["em",{"$":"obj","pairs":[["x",{"$":"obj","pairs":[["y",1]]}]]}]]}
+      },
+      {
+        "step": "text.format",
+        "doc": "a",
+        "target": {"root":"t","kind":"text"},
+        "at": 0,
+        "len": 2,
+        "attributes": {"$":"obj","pairs":[["z",false],["zero",0],["empty",""]]}
+      },
+      {
+        "step": "text.format",
+        "doc": "a",
+        "target": {"root":"t","kind":"text"},
+        "at": 1,
+        "len": 1,
+        "attributes": {"$":"obj","pairs":[["z",false],["zero",0],["empty",""]]}
+      },
+      {"step":"sync","from":"a","to":"b"}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [
+            {"$":"bytes","hex":"01014700040101740661626364656600"},
+            {
+              "$": "bytes",
+              "hex": "0106470646470002656d077b2278223a317dc647064700016e0131c64707470001730322612286470502656d046e756c6c864709016e046e756c6c86470a0173046e756c6c00"
+            },
+            {
+              "$": "bytes",
+              "hex": "0102470cc64702470302656d0d7b2278223a7b2279223a317d7dc64703470402656d077b2278223a317d00"
+            },
+            {
+              "$": "bytes",
+              "hex": "0102470ec64703470d02656d0d7b2278223a7b2279223a317d7dc64704470502656d077b2278223a317d0147010d01"
+            },
+            {
+              "$": "bytes",
+              "hex": "01064710464706017a0566616c7365c647104706047a65726f0130c64711470605656d707479022222c647014702017a046e756c6cc647134702047a65726f046e756c6cc64714470205656d707479046e756c6c00"
+            }
+          ],
+          "v2": [
+            {"$":"bytes","hex":"0000028701000001040a077461626364656601060101000001010000"},
+            {
+              "$": "bytes",
+              "hex": "000300030303c70107050c02440802020101054600c601860f08656d6e73656d6e73024100024100000000010606760101787d017d017701617e7e7e00"
+            },
+            {
+              "$": "bytes",
+              "hex": "0002000203c7010302040202060201c60704656d656d420000000001020c76010178760101797d01760101787d0100"
+            },
+            {
+              "$": "bytes",
+              "hex": "0002000203c70103020602021a5001c60704656d656d420000000001020e76010178760101797d01760101787d010147010d00"
+            },
+            {
+              "$": "bytes",
+              "hex": "000300030303c7010a052002602402060c0100480100034600c61b147a7a65726f656d7074797a7a65726f656d707479010405010405000000010610797d0077007e7e7e00"
+            }
+          ]
+        },
+        "b": {
+          "v1": [
+            {
+              "$": "bytes",
+              "hex": "0115470004010174026162844701016384470201648447030165844704016646470002656d077b2278223a317dc647064700016e0131c64707470001730322612286470502656d046e756c6c864709016e046e756c6c86470a0173046e756c6cc64702470302656d0d7b2278223a7b2279223a317d7dc14703470401c64703470d02656d0d7b2278223a7b2279223a317d7dc64704470502656d077b2278223a317d464706017a0566616c7365c647104706047a65726f0130c64711470605656d707479022222c647014702017a046e756c6cc647134702047a65726f046e756c6cc64714470205656d707479046e756c6c0147010d01"
+            }
+          ],
+          "v2": [
+            {
+              "$": "bytes",
+              "hex": "000300030c03c7011e10030204024408025002000218026024020c01010602125002010048010013040084034600c6018602c600c100c6014600c63c2974616263646566656d6e73656d6e73656d656d656d7a7a65726f656d7074797a7a65726f656d7074790102410202410002410042010104050104050101000101011500760101787d017d017701617e7e7e76010178760101797d0176010178760101797d01760101787d01797d0077007e7e7e0147010d00"
+            }
+          ]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "0115470004010174026162844701016384470201648447030165844704016646470002656d077b2278223a317dc647064700016e0131c64707470001730322612286470502656d046e756c6c864709016e046e756c6c86470a0173046e756c6cc64702470302656d0d7b2278223a7b2279223a317d7dc14703470401c64703470d02656d0d7b2278223a7b2279223a317d7dc64704470502656d077b2278223a317d464706017a0566616c7365c647104706047a65726f0130c64711470605656d707479022222c647014702017a046e756c6cc647134702047a65726f046e756c6cc64714470205656d707479046e756c6c0147010d01"
+            },
+            "diff": {"b":{"$":"bytes","hex":"000147010d01"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "000300030c03c7011e10030204024408025002000218026024020c01010602125002010048010013040084034600c6018602c600c100c6014600c63c2974616263646566656d6e73656d6e73656d656d656d7a7a65726f656d7074797a7a65726f656d7074790102410202410002410042010104050104050101000101011500760101787d017d017701617e7e7e76010178760101797d0176010178760101797d01760101787d01797d0077007e7e7e0147010d00"
+            },
+            "diff": {"b":{"$":"bytes","hex":"0000000000000100000000000147010d00"}}
+          }
+        },
+        "b": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "0115470004010174026162844701016384470201648447030165844704016646470002656d077b2278223a317dc647064700016e0131c64707470001730322612286470502656d046e756c6c864709016e046e756c6c86470a0173046e756c6cc64702470302656d0d7b2278223a7b2279223a317d7dc14703470401c64703470d02656d0d7b2278223a7b2279223a317d7dc64704470502656d077b2278223a317d464706017a0566616c7365c647104706047a65726f0130c64711470605656d707479022222c647014702017a046e756c6cc647134702047a65726f046e756c6cc64714470205656d707479046e756c6c0147010d01"
+            },
+            "diff": {"a":{"$":"bytes","hex":"000147010d01"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "000300030c03c7011e10030204024408025002000218026024020c01010602125002010048010013040084034600c6018602c600c100c6014600c63c2974616263646566656d6e73656d6e73656d656d656d7a7a65726f656d7074797a7a65726f656d7074790102410202410002410042010104050104050101000101011500760101787d017d017701617e7e7e76010178760101797d0176010178760101797d01760101787d01797d0077007e7e7e0147010d00"
+            },
+            "diff": {"a":{"$":"bytes","hex":"0000000000000100000000000147010d00"}}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {
+        "a": {"v1":{"$":"bytes","hex":"014716"},"v2":{"$":"bytes","hex":"014716"}},
+        "b": {"v1":{"$":"bytes","hex":"014716"},"v2":{"$":"bytes","hex":"014716"}}
+      }
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {
+        "a": [
+          [
+            "t",
+            {
+              "kind": "text",
+              "delta": [
+                {
+                  "insert": "ab",
+                  "attributes": {
+                    "$": "obj",
+                    "pairs": [["z",false],["zero",0],["empty",""],["em",{"$":"obj","pairs":[["x",1]]}],["n",1],["s","a"]]
+                  }
+                },
+                {
+                  "insert": "c",
+                  "attributes": {"$":"obj","pairs":[["em",{"$":"obj","pairs":[["x",1]]}],["n",1],["s","a"]]}
+                },
+                {
+                  "insert": "d",
+                  "attributes": {
+                    "$": "obj",
+                    "pairs": [["em",{"$":"obj","pairs":[["x",{"$":"obj","pairs":[["y",1]]}]]}],["n",1],["s","a"]]
+                  }
+                },
+                {
+                  "insert": "e",
+                  "attributes": {
+                    "$": "obj",
+                    "pairs": [["em",{"$":"obj","pairs":[["x",{"$":"obj","pairs":[["y",1]]}]]}],["n",1],["s","a"]]
+                  }
+                },
+                {
+                  "insert": "f",
+                  "attributes": {"$":"obj","pairs":[["em",{"$":"obj","pairs":[["x",1]]}],["n",1],["s","a"]]}
+                }
+              ]
+            }
+          ]
+        ],
+        "b": [
+          [
+            "t",
+            {
+              "kind": "text",
+              "delta": [
+                {
+                  "insert": "ab",
+                  "attributes": {
+                    "$": "obj",
+                    "pairs": [["z",false],["zero",0],["empty",""],["em",{"$":"obj","pairs":[["x",1]]}],["n",1],["s","a"]]
+                  }
+                },
+                {
+                  "insert": "c",
+                  "attributes": {"$":"obj","pairs":[["em",{"$":"obj","pairs":[["x",1]]}],["n",1],["s","a"]]}
+                },
+                {
+                  "insert": "d",
+                  "attributes": {
+                    "$": "obj",
+                    "pairs": [["em",{"$":"obj","pairs":[["x",{"$":"obj","pairs":[["y",1]]}]]}],["n",1],["s","a"]]
+                  }
+                },
+                {
+                  "insert": "e",
+                  "attributes": {
+                    "$": "obj",
+                    "pairs": [["em",{"$":"obj","pairs":[["x",{"$":"obj","pairs":[["y",1]]}]]}],["n",1],["s","a"]]
+                  }
+                },
+                {
+                  "insert": "f",
+                  "attributes": {"$":"obj","pairs":[["em",{"$":"obj","pairs":[["x",1]]}],["n",1],["s","a"]]}
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    },
+    "structs": {
+      "api": "doc.store.clients",
+      "value": {
+        "a": [
+          [
+            71,
+            [
+              {
+                "id": [71,0],
+                "len": 2,
+                "kind": "item",
+                "parent": "t",
+                "content": {"ref":4,"value":"ab"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,2],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,1],
+                "parent": "t",
+                "content": {"ref":4,"value":"c"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,3],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,2],
+                "parent": "t",
+                "content": {"ref":4,"value":"d"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,4],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,3],
+                "parent": "t",
+                "content": {"ref":4,"value":"e"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,5],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,4],
+                "parent": "t",
+                "content": {"ref":4,"value":"f"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,6],
+                "len": 1,
+                "kind": "item",
+                "rightOrigin": [71,0],
+                "parent": "t",
+                "content": {"ref":6,"value":["em",{"$":"obj","pairs":[["x",1]]}]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,7],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,6],
+                "rightOrigin": [71,0],
+                "parent": "t",
+                "content": {"ref":6,"value":["n",1]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,8],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,7],
+                "rightOrigin": [71,0],
+                "parent": "t",
+                "content": {"ref":6,"value":["s","a"]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,9],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,5],
+                "parent": "t",
+                "content": {"ref":6,"value":["em",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,10],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,9],
+                "parent": "t",
+                "content": {"ref":6,"value":["n",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,11],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,10],
+                "parent": "t",
+                "content": {"ref":6,"value":["s",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,12],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,2],
+                "rightOrigin": [71,3],
+                "parent": "t",
+                "content": {"ref":6,"value":["em",{"$":"obj","pairs":[["x",{"$":"obj","pairs":[["y",1]]}]]}]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,13],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,3],
+                "rightOrigin": [71,4],
+                "parent": "t",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [71,14],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,3],
+                "rightOrigin": [71,13],
+                "parent": "t",
+                "content": {"ref":6,"value":["em",{"$":"obj","pairs":[["x",{"$":"obj","pairs":[["y",1]]}]]}]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,15],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,4],
+                "rightOrigin": [71,5],
+                "parent": "t",
+                "content": {"ref":6,"value":["em",{"$":"obj","pairs":[["x",1]]}]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,16],
+                "len": 1,
+                "kind": "item",
+                "rightOrigin": [71,6],
+                "parent": "t",
+                "content": {"ref":6,"value":["z",false]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,17],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,16],
+                "rightOrigin": [71,6],
+                "parent": "t",
+                "content": {"ref":6,"value":["zero",0]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,18],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,17],
+                "rightOrigin": [71,6],
+                "parent": "t",
+                "content": {"ref":6,"value":["empty",""]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,19],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,1],
+                "rightOrigin": [71,2],
+                "parent": "t",
+                "content": {"ref":6,"value":["z",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,20],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,19],
+                "rightOrigin": [71,2],
+                "parent": "t",
+                "content": {"ref":6,"value":["zero",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,21],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,20],
+                "rightOrigin": [71,2],
+                "parent": "t",
+                "content": {"ref":6,"value":["empty",null]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ],
+        "b": [
+          [
+            71,
+            [
+              {
+                "id": [71,0],
+                "len": 2,
+                "kind": "item",
+                "parent": "t",
+                "content": {"ref":4,"value":"ab"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,2],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,1],
+                "parent": "t",
+                "content": {"ref":4,"value":"c"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,3],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,2],
+                "parent": "t",
+                "content": {"ref":4,"value":"d"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,4],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,3],
+                "parent": "t",
+                "content": {"ref":4,"value":"e"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,5],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,4],
+                "parent": "t",
+                "content": {"ref":4,"value":"f"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,6],
+                "len": 1,
+                "kind": "item",
+                "rightOrigin": [71,0],
+                "parent": "t",
+                "content": {"ref":6,"value":["em",{"$":"obj","pairs":[["x",1]]}]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,7],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,6],
+                "rightOrigin": [71,0],
+                "parent": "t",
+                "content": {"ref":6,"value":["n",1]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,8],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,7],
+                "rightOrigin": [71,0],
+                "parent": "t",
+                "content": {"ref":6,"value":["s","a"]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,9],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,5],
+                "parent": "t",
+                "content": {"ref":6,"value":["em",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,10],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,9],
+                "parent": "t",
+                "content": {"ref":6,"value":["n",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,11],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,10],
+                "parent": "t",
+                "content": {"ref":6,"value":["s",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,12],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,2],
+                "rightOrigin": [71,3],
+                "parent": "t",
+                "content": {"ref":6,"value":["em",{"$":"obj","pairs":[["x",{"$":"obj","pairs":[["y",1]]}]]}]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,13],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,3],
+                "rightOrigin": [71,4],
+                "parent": "t",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [71,14],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,3],
+                "rightOrigin": [71,13],
+                "parent": "t",
+                "content": {"ref":6,"value":["em",{"$":"obj","pairs":[["x",{"$":"obj","pairs":[["y",1]]}]]}]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,15],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,4],
+                "rightOrigin": [71,5],
+                "parent": "t",
+                "content": {"ref":6,"value":["em",{"$":"obj","pairs":[["x",1]]}]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,16],
+                "len": 1,
+                "kind": "item",
+                "rightOrigin": [71,6],
+                "parent": "t",
+                "content": {"ref":6,"value":["z",false]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,17],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,16],
+                "rightOrigin": [71,6],
+                "parent": "t",
+                "content": {"ref":6,"value":["zero",0]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,18],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,17],
+                "rightOrigin": [71,6],
+                "parent": "t",
+                "content": {"ref":6,"value":["empty",""]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,19],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,1],
+                "rightOrigin": [71,2],
+                "parent": "t",
+                "content": {"ref":6,"value":["z",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,20],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,19],
+                "rightOrigin": [71,2],
+                "parent": "t",
+                "content": {"ref":6,"value":["zero",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [71,21],
+                "len": 1,
+                "kind": "item",
+                "origin": [71,20],
+                "rightOrigin": [71,2],
+                "parent": "t",
+                "content": {"ref":6,"value":["empty",null]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ]
+      }
+    }
+  }
+}

@@ -77,6 +77,14 @@ const makeType = s => {
   }
 }
 
+const makeXml = s => {
+  switch (s.kind) {
+    case 'element': return new Y.XmlElement(s.name)
+    case 'text': return new Y.XmlText(s.init === undefined ? undefined : untag(s.init))
+    default: throw new ScriptError(`xml.insert: unknown kind '${s.kind}'`)
+  }
+}
+
 const inTransaction = (ctx, docName, origin, body) => {
   if ((ctx.depth.get(docName) ?? 0) > 0) return body()
   ctx.depth.set(docName, 1)
@@ -144,8 +152,13 @@ defineStep({
     t.observe(e => {
       const rec = { observer: s.name, type: e.constructor.name }
       if (t instanceof Y.Text || t instanceof Y.Array) rec.delta = deltaOut(e.delta)
-      if (t instanceof Y.Map) {
+      if (t instanceof Y.Map || t instanceof Y.XmlFragment || t instanceof Y.XmlText) {
         rec.keys = Array.from(e.changes.keys, ([k, c]) => [k, { action: c.action, ...(c.action === 'add' ? {} : { oldValue: yvalueOut(c.oldValue) }) }])
+      }
+      if (t instanceof Y.XmlFragment) {
+        rec.childListChanged = e.childListChanged
+        rec.attributesChanged = Array.from(e.attributesChanged).sort()
+        rec.delta = deltaOut(e.changes.delta)
       }
       ctx.events.push(rec)
     })
@@ -238,6 +251,39 @@ defineStep({
   optional: ['init'],
   values: ['init'],
   run: (ctx, s) => target(ctx, s, Y.Map).set(s.key, makeType(s))
+})
+
+defineStep({
+  kind: 'xml.insert',
+  required: ['doc', 'target', 'at', 'kind'],
+  optional: ['name', 'init'],
+  values: ['init'],
+  run: (ctx, s) => target(ctx, s, Y.XmlFragment).insert(s.at, [makeXml(s)])
+})
+defineStep({
+  kind: 'xml.delete',
+  required: ['doc', 'target', 'at'],
+  optional: ['len'],
+  run: (ctx, s) => target(ctx, s, Y.XmlFragment).delete(s.at, s.len ?? 1)
+})
+defineStep({
+  kind: 'xml.setAttribute',
+  required: ['doc', 'target', 'name', 'value'],
+  values: ['value'],
+  run: (ctx, s) => {
+    const t = target(ctx, s)
+    if (!(t instanceof Y.XmlElement || t instanceof Y.XmlText)) throw new ScriptError('xml.setAttribute: target is not an element or an xml text')
+    t.setAttribute(s.name, untag(s.value))
+  }
+})
+defineStep({
+  kind: 'xml.removeAttribute',
+  required: ['doc', 'target', 'name'],
+  run: (ctx, s) => {
+    const t = target(ctx, s)
+    if (!(t instanceof Y.XmlElement || t instanceof Y.XmlText)) throw new ScriptError('xml.removeAttribute: target is not an element or an xml text')
+    t.removeAttribute(s.name)
+  }
 })
 
 // Pure update functions (ADR 0016): the result is recorded under the `results` observation, keyed by `name`.
