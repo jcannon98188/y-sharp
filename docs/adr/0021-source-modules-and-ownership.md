@@ -6,7 +6,7 @@ Extends ADR 0015 (layout) and the ADR 0018 milestone amendment. The implementati
 
 | Module (folder) | Owns | Milestone |
 |---|---|---|
-| `Encoding/` | lib0 primitives: varints, strings, buffer reader and writer, rented buffers, Any encoding | M1 |
+| `Encoding/` (namespace `YSharp.Lib0`) | lib0 primitives: varints, strings, buffer reader and writer, rented buffers, Any encoding | M1 |
 | `Values/` | `YValue`, JS-compatible JSON writer and reader, error types, `YLimits` | M1 |
 | `Store/` | struct storage in the layout chosen by M0, the struct store, content buffers, internal delete set, ids | M2 |
 | `Integration/` | item integration, pending structs, rejection, garbage collection | M2 |
@@ -34,3 +34,7 @@ Public types stay in the `YSharp` namespace. Internals live in `YSharp.<Module>`
 ## Consequences
 
 An M0 spec, "Source layout skeleton", runs alongside the spike and the feature-gates spec (ADR 0020). It moves the five stub files into these folders and partial files and declares the lifecycle hook points. It changes no behaviour: every member still throws `NotImplementedException`, and an API-diff check shows the public surface is unchanged. M1 starts after it.
+
+## Amendment: the `Encoding/` folder uses the namespace `YSharp.Lib0`
+
+The `Encoding/` module keeps its folder, but its types live in the namespace `YSharp.Lib0`, not `YSharp.Encoding`. A `YSharp.Encoding` namespace shadows `System.Text.Encoding` wherever code inside `YSharp` writes `Encoding.UTF8`, and it broke the existing TestKit and fuzz code (found by TASK-4.8). Renaming the namespace avoids editing those suite files. Later specs put codec and lib0 types in `YSharp.Lib0`.

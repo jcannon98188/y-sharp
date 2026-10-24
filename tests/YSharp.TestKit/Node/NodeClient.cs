@@ -82,10 +82,15 @@ public sealed class NodeClient : IAsyncDisposable
         _process = process;
         var generation = Interlocked.Increment(ref _generation);
 
-        _ = Task.Run(async () =>
+        var stderrLines = new System.Collections.Generic.List<string>();
+        var stderrDone = Task.Run(async () =>
         {
             string? line;
-            while ((line = await process.StandardError.ReadLineAsync()) != null) _options.OnStderr?.Invoke(line);
+            while ((line = await process.StandardError.ReadLineAsync()) != null)
+            {
+                lock (stderrLines) stderrLines.Add(line);
+                _options.OnStderr?.Invoke(line);
+            }
         });
 
         using var cts = new CancellationTokenSource(_options.HandshakeTimeout);
@@ -96,7 +101,13 @@ public sealed class NodeClient : IAsyncDisposable
             Kill(process);
             throw new NodeRequestException("Timed out waiting for the node handshake.");
         }
-        if (hello == null) throw new NodeRequestException("Node exited before the handshake.");
+        if (hello == null)
+        {
+            await Task.WhenAny(stderrDone, Task.Delay(2000));
+            string tail;
+            lock (stderrLines) tail = string.Join(" | ", stderrLines);
+            throw new NodeRequestException("Node exited before the handshake." + (tail.Length == 0 ? "" : " stderr: " + tail));
+        }
         HelloLine = hello;
         using (var h = JsonDocument.Parse(hello))
         {
