@@ -4,7 +4,7 @@ title: Package the map into the implementation plan
 status: To Do
 assignee: []
 created_date: '2026-10-24 16:52'
-updated_date: '2026-10-24 17:47'
+updated_date: '2026-10-24 19:36'
 labels:
   - 'wayfinder:grilling'
 dependencies:
@@ -43,4 +43,6 @@ From TASK-3.9 (ADR 0020): the plan must define the feature list (one feature per
 From TASK-3.6 (ADR 0021): M0 also holds a "Source layout skeleton" spec (split the stub into module folders and partial files, declare the hook points, no behaviour change, API-diff check), which blocks M1. Every spec names the folders and files it owns.
 
 From TASK-3.5 (ADR 0018 spike amendment): the M0 spike is a spec (or two: candidates plus harness) whose output is the storage ADR. The M2 store spec adds the third driver adapter and deletes spike/ once the harness passes.
+
+From TASK-3.7 (ADR 0022): every implementation spec's DoD includes the suite-change rules: separate suite: commits, a Suite changes list in the notes, and no open owner question.
 <!-- SECTION:NOTES:END -->

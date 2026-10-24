@@ -4,7 +4,7 @@ title: 'y-sharp implementation planning: wayfinder map'
 status: To Do
 assignee: []
 created_date: '2026-10-24 16:51'
-updated_date: '2026-10-24 17:48'
+updated_date: '2026-10-24 19:36'
 labels:
   - 'wayfinder:map'
 dependencies: []
@@ -37,6 +37,7 @@ A spec-ready **y-sharp implementation plan** in Backlog: a parent task whose chi
 - [Skip gating once the stub starts disappearing](TASK-3.9): declared spec-sized feature gates replace the global stub probe; tests whose features have not landed skip before running, the checker rejects untagged tests, NotImplementedException always fails; built by an M0 spec that blocks M1 (ADR 0020).
 - [Module boundaries and file ownership in src/YSharp](TASK-3.6): module folders per milestone; storage hidden behind an ItemRef handle; generic V1/V2 codec seam; partial-method lifecycle hooks; one owner per file, partial classes for shared public types; an M0 layout-skeleton spec (ADR 0021).
 - [M0 spike design](TASK-3.5): both models spiked local-only over a shared content layer behind a driver the real store later reuses; bytes per operation, median of 3; eliminate failures, prefer headroom, then simplicity (ADR 0018 spike amendment, ADR 0009 wording).
+- [Rules for changing the suite during implementation](TASK-3.7): free / with-evidence / owner levels; the oracle decides disputed tests; new divergences, retirements, budget raises and any weakening need the owner; suite: commits and a Suite changes list in every spec's DoD (ADR 0022).
 
 ## Not yet specified
 
