@@ -32,6 +32,9 @@ jobs:
           path: bench-baseline
           key: bench-baseline-${{ github.run_id }}
           restore-keys: bench-baseline-
+      # A build failure of the benchmark project must surface (gating); only the run, compare and table steps below are non-gating.
+      - name: Build benchmark project
+        run: dotnet build bench/YSharp.Benchmarks -c Release
       - name: Benchmarks
         run: dotnet run -c Release --no-build --project bench/YSharp.Benchmarks -- --filter "*" --exporters json --artifacts bench-current
         continue-on-error: true
