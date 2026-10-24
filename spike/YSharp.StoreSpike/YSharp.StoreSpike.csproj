@@ -5,11 +5,14 @@
     tests/YSharp.Tests/Allocation/Spike, so the test project and this project share one copy of each.
   -->
   <PropertyGroup>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>YSharp.StoreSpike</RootNamespace>
     <IsPackable>false</IsPackable>
     <!-- ADR 0018 spike measurement settings: Release, TieredCompilation off, workstation GC. -->
     <TieredCompilation>false</TieredCompilation>
     <ServerGarbageCollection>false</ServerGarbageCollection>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\..\tests\YSharp.Tests\Allocation\Spike\**\*.cs" Link="Harness\%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
 </Project>
