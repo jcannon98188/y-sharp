@@ -4,6 +4,7 @@ title: 'Spec 13: Live differential harness'
 status: To Do
 assignee: []
 created_date: '2026-10-23 22:01'
+updated_date: '2026-10-24 00:51'
 labels: []
 dependencies:
   - TASK-2.4
@@ -28,4 +29,5 @@ Wave 3. YSharp.Interop.Tests against a live Node child.
 - [ ] #1 Stateless ops scripts over NDJSON with FsCheck generator, virtual clock, timeouts and oracle-misbehaved handling
 - [ ] #2 Smoke PR job and nightly slow tier run; failures replayable and saved as fixture candidates
 - [ ] #3 Protocol message catalogue, per-divergence normalisers and delivery-schedule steps specified and implemented
+- [ ] #4 Implements the 'applyForeign' step (ADR 0012) on the C# interpreter and the live Node client path, with schema change and [Covers]
 <!-- AC:END -->
