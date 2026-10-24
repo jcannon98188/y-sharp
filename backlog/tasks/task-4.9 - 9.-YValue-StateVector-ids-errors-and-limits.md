@@ -4,7 +4,7 @@ title: '9. YValue, StateVector, ids, errors and limits'
 status: To Do
 assignee: []
 created_date: '2026-10-24 19:41'
-updated_date: '2026-10-24 19:42'
+updated_date: '2026-10-24 20:59'
 labels:
   - spec
   - 'model:sonnet'
@@ -45,3 +45,13 @@ Read first: `docs/handoff-implementation-planning.md`, ADRs 0005, 0006, 0008, 00
 - [ ] #3 Fixture drift check (`npm run check` in `tools/fixture-gen`) is clean
 - [ ] #4 ADR 0022 followed: suite changes in separate `suite:` commits, a Suite changes list in the notes, no open owner decision
 <!-- DOD:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: @orchestrator
+created: 2026-10-24 20:59
+---
+Owner decision needed: confirm two feature-gate edits (ADR 0022 'gate changes'). (1) ValueQuirkTests class gate Values -> Values,V1,Map (it builds values through Doc/Map/V1; Values-only went red with 36 failures). (2) BUD-03 test moved from HotPathBudgetTests (Transactions gate) to new ValueBudgetTests (Values gate), body identical. Doc-free YValueAnyTests cover the same bytes meanwhile.
+---
+<!-- COMMENTS:END -->
