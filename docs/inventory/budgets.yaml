@@ -22,6 +22,7 @@
   owner: 14
   status: pending
   ref: "adr 0009"
+  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
 
 - id: BUD-03
   title: "Scalar YValue reads and AttributeEquals allocate zero bytes"
@@ -32,6 +33,7 @@
   owner: 14
   status: pending
   ref: "adr 0009"
+  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
 
 - id: BUD-04
   title: "Event dispatch with no handlers allocates zero bytes"
@@ -42,6 +44,7 @@
   owner: 14
   status: pending
   ref: "adr 0009"
+  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
 
 - id: BUD-05
   title: "A commit with no Update subscriber allocates zero bytes"
@@ -52,6 +55,7 @@
   owner: 14
   status: pending
   ref: "adr 0009"
+  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
 
 - id: BUD-06
   title: "EncodeStateAsUpdate into a pre-sized writer allocates zero bytes"
@@ -62,6 +66,7 @@
   owner: 14
   status: pending
   ref: "adr 0009"
+  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
 
 - id: BUD-07
   title: "A one-character YText.Insert at the end allocates zero bytes"
@@ -72,6 +77,7 @@
   owner: 14
   status: pending
   ref: "adr 0009"
+  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
 
 - id: BUD-08
   title: "TryApplyUpdate (V1 and V2) stays within a bounded allocation budget"
@@ -82,6 +88,7 @@
   owner: 14
   status: pending
   ref: "adr 0009"
+  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
 
 - id: BUD-09
   title: "Push and Set of scalars stay within a bounded allocation budget"
@@ -92,6 +99,7 @@
   owner: 14
   status: pending
   ref: "adr 0009"
+  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
 
 - id: BUD-10
   title: "A sync Step1/Step2 round trip stays within a bounded allocation budget"
@@ -102,6 +110,7 @@
   owner: 14
   status: pending
   ref: "adr 0009"
+  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
 
 - id: BUD-11
   title: "Awareness encode and apply stay within a bounded allocation budget"
@@ -112,6 +121,7 @@
   owner: 14
   status: pending
   ref: "adr 0009"
+  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
 
 - id: BUD-12
   title: "Hostile input of N bytes allocates at most k*N plus a fixed amount"
@@ -122,6 +132,7 @@
   owner: 14
   status: pending
   ref: "adr 0009"
+  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
 
 - id: BUD-13
   title: "Managed heap per item after forced collection does not exceed the figure Yjs produced on the same workload (1M text inserts, 1M array pushes, 100k map keys)"
@@ -132,6 +143,7 @@
   owner: 14
   status: pending
   ref: "adr 0009"
+  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
 
 - id: BUD-14
   title: "Zero gen2 collections and no large-object-heap growth during 100k steady-state edits"
@@ -142,3 +154,4 @@
   owner: 14
   status: pending
   ref: "adr 0009"
+  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."

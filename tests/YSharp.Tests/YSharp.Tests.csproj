@@ -14,6 +14,10 @@
     <ProjectReference Include="..\..\src\YSharp\YSharp.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <!-- The benchmark comparison has no dependencies, so the gating tests compile it directly instead of referencing the BenchmarkDotNet project (Spec 14). -->
+    <Compile Include="..\..\bench\YSharp.Benchmarks\Comparison\BenchmarkComparison.cs" Link="Allocation\Comparison\BenchmarkComparison.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="TestKit/Node/echo-server.mjs" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

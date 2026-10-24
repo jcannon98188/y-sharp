@@ -21,10 +21,37 @@ jobs:
         env:
           YSHARP_TIER: Nightly
         run: dotnet test --solution YSharp.slnx -c Release --no-build --report-trx --results-directory TestResults
-      # The SharpFuzz job is sharpfuzz.yml (TASK-2.11, non-gating). Placeholder: benchmark comparison (TASK-2.14).
-      - name: Benchmarks (shell)
-        run: dotnet run -c Release --project bench/YSharp.Benchmarks -- --list flat
+      # The SharpFuzz job is sharpfuzz.yml (TASK-2.11, non-gating). Benchmarks and their comparison are non-gating too (ADR 0009, TASK-2.14).
+      - name: Restore last stored benchmark run
+        uses: actions/cache/restore@v4
+        with:
+          path: bench-baseline
+          key: bench-baseline-${{ github.run_id }}
+          restore-keys: bench-baseline-
+      - name: Benchmarks
+        run: dotnet run -c Release --no-build --project bench/YSharp.Benchmarks -- --filter "*" --exporters json --artifacts bench-current
         continue-on-error: true
+      - name: Compare benchmarks with the last stored run (reports regressions, never fails)
+        run: |
+          mkdir -p bench-current bench-baseline
+          dotnet run -c Release --no-build --project bench/YSharp.Benchmarks -- compare bench-baseline bench-current --out bench-comparison.md | tee -a "$GITHUB_STEP_SUMMARY"
+        continue-on-error: true
+      - name: Bytes-per-item table (y-sharp next to Yjs)
+        run: dotnet run -c Release --no-build --project bench/YSharp.Benchmarks -- table | tee -a "$GITHUB_STEP_SUMMARY"
+        continue-on-error: true
+      - name: Store this run as the next baseline
+        run: |
+          # Keep the previous baseline when this run produced no reports (for example while y-sharp is still the API stub).
+          if [ -n "$(find bench-current -name '*-report*.json' 2>/dev/null)" ]; then
+            rm -rf bench-baseline && mkdir -p bench-baseline
+            find bench-current -name '*-report*.json' -exec cp {} bench-baseline/ \;
+          fi
+        continue-on-error: true
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: bench-baseline
+          key: bench-baseline-${{ github.run_id }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -32,4 +59,7 @@ jobs:
           path: |
             **/TestResults/*.trx
             **/failing-seeds/**
+            TestResults/memory/**
+            bench-comparison.md
+            bench-current/**/*.json
           if-no-files-found: ignore
