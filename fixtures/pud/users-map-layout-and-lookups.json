@@ -28,9 +28,9 @@
         "doc": "a",
         "name": "pudA",
         "clientIds": [1,2,3],
-        "deletedIds": [[1,0],[1,1],[2,1],[2,2],[2,3],[9,0]]
+        "deletedIds": [[1,3],[1,4],[1,5],[2,4],[2,5],[2,6],[2,7],[9,0]]
       },
-      {"step":"pud.observe","doc":"b","name":"pudB","clientIds":[1,2],"deletedIds":[[1,0],[2,1]]}
+      {"step":"pud.observe","doc":"b","name":"pudB","clientIds":[1,2],"deletedIds":[[1,4],[2,5],[2,7]]}
     ]
   },
   "observations": {
@@ -176,7 +176,16 @@
               ]
             },
             "byClientId": [[1,"user a"],[2,"user b"],[3,null]],
-            "byDeletedId": [[[1,0],null],[[1,1],null],[[2,1],null],[[2,2],null],[[2,3],null],[[9,0],null]]
+            "byDeletedId": [
+              [[1,3],null],
+              [[1,4],"user a"],
+              [[1,5],null],
+              [[2,4],null],
+              [[2,5],"user b"],
+              [[2,6],"user b"],
+              [[2,7],null],
+              [[9,0],null]
+            ]
           }
         },
         "pudB": {
@@ -208,7 +217,7 @@
               ]
             },
             "byClientId": [[1,"user a"],[2,"user b"]],
-            "byDeletedId": [[[1,0],null],[[2,1],null]]
+            "byDeletedId": [[[1,4],"user a"],[[2,5],"user b"],[[2,7],null]]
           }
         }
       }

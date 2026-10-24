@@ -474,8 +474,8 @@ const puds = [
         ...both('a', 'b'),
         tick(10),
         ...both('a', 'b'),
-        { step: 'pud.observe', doc: 'a', name: 'pudA', clientIds: [1, 2, 3], deletedIds: [[1, 0], [1, 1], [2, 1], [2, 2], [2, 3], [9, 0]] },
-        { step: 'pud.observe', doc: 'b', name: 'pudB', clientIds: [1, 2], deletedIds: [[1, 0], [2, 1]] }
+        { step: 'pud.observe', doc: 'a', name: 'pudA', clientIds: [1, 2, 3], deletedIds: [[1, 3], [1, 4], [1, 5], [2, 4], [2, 5], [2, 6], [2, 7], [9, 0]] },
+        { step: 'pud.observe', doc: 'b', name: 'pudB', clientIds: [1, 2], deletedIds: [[1, 4], [2, 5], [2, 7]] }
       ]
     }
   },
@@ -491,7 +491,7 @@ const puds = [
         ins('a', 0, 'hello'), del('a', 1, 2),
         tick(0),
         { step: 'sync', from: 'a', to: 'c' },
-        { step: 'pud.observe', doc: 'c', name: 'pudC', clientIds: [3, 5], deletedIds: [[3, 1], [3, 2], [3, 3]] }
+        { step: 'pud.observe', doc: 'c', name: 'pudC', clientIds: [3, 5], deletedIds: [[3, 4], [3, 5], [3, 6], [3, 7]] }
       ]
     }
   },
@@ -513,8 +513,8 @@ const puds = [
         ...both('a', 'b'),
         tick(0),
         ...both('a', 'b'),
-        { step: 'pud.observe', doc: 'a', name: 'pudA', clientIds: [1, 2], deletedIds: [[1, 0], [2, 0], [2, 1]] },
-        { step: 'pud.observe', doc: 'b', name: 'pudB', clientIds: [1, 2], deletedIds: [[1, 0], [2, 0], [2, 1]] }
+        { step: 'pud.observe', doc: 'a', name: 'pudA', clientIds: [1, 2], deletedIds: [[1, 0], [1, 4], [2, 3], [2, 4], [2, 5]] },
+        { step: 'pud.observe', doc: 'b', name: 'pudB', clientIds: [1, 2], deletedIds: [[1, 0], [1, 4], [2, 3], [2, 4], [2, 5]] }
       ]
     }
   }

@@ -230,24 +230,24 @@
       "area": "pud",
       "name": "concurrent-user-creation-overwrite",
       "covers": ["PUD-04","PUD-05","PUD-03","PUD-09"],
-      "sha256": "8ea6ae84a6067aa3c3dbb991abca5d227f81c5eeb74db37296cbd4f7d04bf751",
-      "bytes": 19348
+      "sha256": "337d4600519b12f89fd98a2acfa8060f04e7e888c76860eede11eee1afee3dae",
+      "bytes": 19546
     },
     {
       "path": "pud/late-construction-reads-existing-data.json",
       "area": "pud",
       "name": "late-construction-reads-existing-data",
       "covers": ["PUD-02","PUD-01","PUD-06","PUD-08"],
-      "sha256": "89ade3515c18a55084822819472e7f2615ebadbda4258aadbb2fb9def7526469",
-      "bytes": 10533
+      "sha256": "321042b3335e26b47bc10b385cc8a76ee6a030fcd34572e942d3e64fdb529fde",
+      "bytes": 10617
     },
     {
       "path": "pud/users-map-layout-and-lookups.json",
       "area": "pud",
       "name": "users-map-layout-and-lookups",
       "covers": ["PUD-01","PUD-03","PUD-06","PUD-08","PUD-09"],
-      "sha256": "87a9605ee4f863854a67f70c4cec704150cbdf6ecb2d72bb6e10035166166658",
-      "bytes": 18775
+      "sha256": "2c07e8a158290a562de1792164dae1ed52ac83c0f5cd4af2d78b01a97bff4140",
+      "bytes": 18985
     },
     {
       "path": "random/text-three-clients-seed-1337.json",

@@ -26,8 +26,20 @@
       {"step":"tick","ms":0},
       {"step":"sync","from":"a","to":"b"},
       {"step":"sync","from":"b","to":"a"},
-      {"step":"pud.observe","doc":"a","name":"pudA","clientIds":[1,2],"deletedIds":[[1,0],[2,0],[2,1]]},
-      {"step":"pud.observe","doc":"b","name":"pudB","clientIds":[1,2],"deletedIds":[[1,0],[2,0],[2,1]]}
+      {
+        "step": "pud.observe",
+        "doc": "a",
+        "name": "pudA",
+        "clientIds": [1,2],
+        "deletedIds": [[1,0],[1,4],[2,3],[2,4],[2,5]]
+      },
+      {
+        "step": "pud.observe",
+        "doc": "b",
+        "name": "pudB",
+        "clientIds": [1,2],
+        "deletedIds": [[1,0],[1,4],[2,3],[2,4],[2,5]]
+      }
     ]
   },
   "observations": {
@@ -211,7 +223,7 @@
               ]
             },
             "byClientId": [[1,"user a"],[2,"user a"]],
-            "byDeletedId": [[[1,0],null],[[2,0],null],[[2,1],null]]
+            "byDeletedId": [[[1,0],null],[[1,4],null],[[2,3],null],[[2,4],"user a"],[[2,5],null]]
           }
         },
         "pudB": {
@@ -233,7 +245,7 @@
               ]
             },
             "byClientId": [[1,"user a"],[2,"user a"]],
-            "byDeletedId": [[[1,0],null],[[2,0],null],[[2,1],null]]
+            "byDeletedId": [[[1,0],null],[[1,4],null],[[2,3],null],[[2,4],"user a"],[[2,5],null]]
           }
         }
       }
