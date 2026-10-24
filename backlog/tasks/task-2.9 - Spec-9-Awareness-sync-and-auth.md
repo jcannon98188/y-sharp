@@ -4,6 +4,7 @@ title: 'Spec 9: Awareness, sync and auth'
 status: To Do
 assignee: []
 created_date: '2026-10-23 22:01'
+updated_date: '2026-10-24 00:51'
 labels: []
 dependencies:
   - TASK-2.2
@@ -27,4 +28,5 @@ Wave 2. All three y-protocols modules; providers out of scope.
 - [ ] #1 Tests and oracle-generated goldens cover AW-* and SY-*
 - [ ] #2 TimeProvider seam used for timeouts; two-peer convergence harness and structural-equality case table exist
 - [ ] #3 Traceability check passes; every owned registry entry is active or pending with a written reason and owner, and no new pending entries were added; owned ledger rows have an outcome other than pending; fixtures regenerate with no drift; gating tier within its time budget; traceability matrix attached to the task
+- [ ] #4 Registers, on both the Node generator and the C# interpreter, the protocol step kinds of ADR 0016: sync.step1/step2/update and awareness.setLocal/applyUpdate/removeStates/encode; each with schema change and [Covers]
 <!-- AC:END -->

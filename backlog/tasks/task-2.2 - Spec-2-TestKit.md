@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@claude'
 created_date: '2026-10-23 22:01'
-updated_date: '2026-10-23 22:35'
+updated_date: '2026-10-24 00:51'
 labels: []
 dependencies:
   - TASK-2.1
@@ -54,4 +54,6 @@ PRNG done: Xorshift32, Xoroshiro128Plus, Prng helpers; goldens from lib0 via tes
 
 Validation: dotnet build YSharp.slnx (Debug+Release) 0 errors; dotnet test --solution YSharp.slnx: Debug 141 total/0 failed/10 skipped, Release 141/0/6 skipped. Skips are the 4 allocation tests in Debug (by design) plus tests that need a real implementation (YValue conversion, ops end-to-end, sim Init/Compare/ApplyRandomTests) which skip on the NotImplemented stub.
 Decisions: tagged-value wire tags ({"$":"nan|inf|-inf|-0|undefined|bigint|bytes|str|obj"}) and fixture header shape ({schema,covers,versions{yjs,lib0,y-protocols},node,generator,seed}) and step field name 'step' are TestKit's choice because ADR 0011/0016 defer exact fields to tools/fixture-gen/schema/ops.schema.json (Spec 4); Spec 4 must align or change TestKit. Namespace YSharp.TestKit.Rng (avoids clash with class Prng). Sim harness TestKit sees public API only, so struct-store/pending/delete-set checks (SIM-02) go through ISimInternals supplied by YSharp.Tests. Tests carry Trait(Covers, SIM-1x) as placeholders until Spec 3's [Covers] exists; proposed IDs SIM-10 connector, SIM-11 init, SIM-12 compare, SIM-13 applyRandomTests, SIM-14 V2 framing. Added packages xunit.v3.assert and xunit.v3.extensibility.core to Directory.Packages.props; added echo-server.mjs copy item to YSharp.Tests.csproj. TieredCompilation=off for allocation tests is not yet set in YSharp.Tests (helper warms up instead); to be set by Spec 14.
+
+Gap list from Spec 4 handoff: C# interpreter lacks deliver, applyForeign, mergeUpdates/diffUpdate/convertUpdate, text.insertEmbed/applyDelta, *.insertType, xml.*, doc-feature and protocol steps. Assigned via ACs: 5 (update fns), 7 (text/array/map/xml), 8 (doc features), 9 (protocol), 10 (deliver), 13 (applyForeign).
 <!-- SECTION:NOTES:END -->
