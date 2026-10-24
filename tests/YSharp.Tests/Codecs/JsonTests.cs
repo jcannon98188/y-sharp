@@ -100,11 +100,21 @@ public sealed class JsonTests
     [InlineData("\u007f\u0080\u009f\u00a0", "\"\u007f\u0080\u009f\u00a0\"")]
     [InlineData("\u2028\u2029\ufeff", "\"\u2028\u2029\ufeff\"")]
     [InlineData("\u00e9\u20ac\ud83d\ude00", "\"\u00e9\u20ac\ud83d\ude00\"")]
-    [InlineData("\ud800", "\"\\ud800\"")]
-    [InlineData("\udc00\ud800", "\"\\udc00\\ud800\"")]
-    [InlineData("\ud800\ud83d\ude00", "\"\\ud800\ud83d\ude00\"")]
-    [InlineData("\udfffa", "\"\\udfffa\"")]
     public void Q30_StringEscaping_MatchesQuoteJsonString(string value, string expected) =>
+        Assert.Equal(expected, Json(value));
+
+    // Lone surrogates cannot ride in an attribute argument (attribute metadata is UTF-8 and turns them into U+FFFD), so they come from a member.
+    public static IEnumerable<object[]> LoneSurrogateText() => new[]
+    {
+        new object[] { "\ud800", "\"\\ud800\"" },
+        new object[] { "\udc00\ud800", "\"\\udc00\\ud800\"" },
+        new object[] { "\ud800\ud83d\ude00", "\"\\ud800\ud83d\ude00\"" },
+        new object[] { "\udfffa", "\"\\udfffa\"" },
+    };
+
+    [Theory, Covers("Q30")]
+    [MemberData(nameof(LoneSurrogateText))]
+    public void Q30_LoneSurrogates_AreEscapedAsLowercaseHex(string value, string expected) =>
         Assert.Equal(expected, Json(value));
 
     [Fact, Covers("Q30", "Q08")]
