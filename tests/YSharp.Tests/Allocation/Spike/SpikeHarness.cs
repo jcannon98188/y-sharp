@@ -135,13 +135,11 @@ public static class SpikeCandidates
 {
     public const string Control = "control";
     public const string ObjectPerItem = "object-per-item";
-    public const string Arenas = YSharp.StoreSpike.Arenas.ArenaStore.CandidateId;
 
     public static Func<IStoreDriver> Factory(string candidate) => candidate switch
     {
         Control => () => new ControlStore(),
         ObjectPerItem => () => new YSharp.StoreSpike.ObjectPerItem.ObjectPerItemStore(),
-        Arenas => () => new YSharp.StoreSpike.Arenas.ArenaStore(),
         _ => throw new ArgumentException("unknown candidate " + candidate, nameof(candidate)),
     };
 }
