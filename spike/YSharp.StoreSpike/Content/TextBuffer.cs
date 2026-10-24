@@ -36,4 +36,16 @@ public sealed class TextBuffer
     }
 
     public ReadOnlySpan<char> Get(ContentSlice slice) => _chunks[slice.Chunk].AsSpan(slice.Start, slice.Length);
+
+    /// <summary>
+    /// Drops a chunk that no live slice refers to, so the GC can reclaim it (ADR 0018: deleted content releases its payload storage). The caller
+    /// tracks which chunks are dead. The chunk being appended to is never released; its index stays reserved and reading a released chunk fails.
+    /// </summary>
+    public void Release(int chunk)
+    {
+        if (chunk == _chunks.Count - 1) throw new InvalidOperationException("the chunk being appended to cannot be released");
+        _chunks[chunk] = Array.Empty<char>();
+    }
+
+    public bool IsReleased(int chunk) => _chunks[chunk].Length == 0;
 }
