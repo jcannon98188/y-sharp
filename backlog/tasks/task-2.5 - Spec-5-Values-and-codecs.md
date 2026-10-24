@@ -5,7 +5,7 @@ status: Done
 assignee:
   - '@claude'
 created_date: '2026-10-23 22:01'
-updated_date: '2026-10-24 01:13'
+updated_date: '2026-10-24 01:14'
 labels: []
 dependencies:
   - TASK-2.2
@@ -51,6 +51,8 @@ Wave 2. YValue, the JS-compatible JSON writer and reader, V1/V2 encode and decod
 
 <!-- SECTION:NOTES:BEGIN -->
 Evidence: dotnet build YSharp.slnx 0 warnings/0 errors (Debug and Release). dotnet test --solution YSharp.slnx: Debug 451 total, 0 failed, 167 passed, 284 skipped (skips are tests that need the implementation; each skips on NotImplementedException from the API stub, per ADR 0019); Release 451/0 failed/171 passed/280 skipped; gating tier runs in about 3-4 s. Traceability gate (TraceabilityGateTests) passes with 0 violations: owner 5 has 105 entries, 101 active, 4 excluded not-applicable (ENC-26 obfuscate, ENC-57/58/59 JS-typed arguments), 0 pending. Pending high-water mark ratcheted 571 -> 466 (registry) and 210 -> 197 (ledger). Ledger: 12 rows ported, testObfuscateUpdates skipped with reason. Fixtures: npm run check in tools/fixture-gen reports 25 files up to date (8 new from scenarios/encoding.mjs; hostile.mjs gains Q12 divergence on the 2^63 client id; fixture.schema.json covers pattern now accepts Q-ids). C# interpreter gains mergeUpdates, diffUpdate, convertUpdate, text.insertEmbed, array.insertType, map.insertType in tests/YSharp.Tests/Codecs (registered only when the shared registry lacks them). Kinds changed from match to diverge where ADR 0003/0005 already decide: ENC-37, 46, 51, 60, 62, 64, 65, 67, 68, each with a [Diverges] test. Open API questions for the implementer: StateVector and ItemId use uint client ids, but Q12 and ENC-37 say the wire accepts clients up to 2^53-1 (tests assert acceptance via TryApplyUpdate only); the stub has no parseUpdateMeta, logUpdate or obfuscateUpdate; doc/struct/ds dumps of fixtures are compared by specs 6 and 7 (readers live there). Matrix: docs/inventory/matrices/spec-5-traceability.md.
+
+Gap: C# interpreter step kinds mergeUpdates/diffUpdate/convertUpdate implemented here (done).
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
