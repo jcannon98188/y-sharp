@@ -32,7 +32,7 @@ export default [
       c('num-structs-2-pow-32-minus-1-body-short', '01 ff ff ff ff 0f 01 00'),
       c('num-clients-2-pow-32-minus-1', 'ff ff ff ff 0f'),
       c('unterminated-varuint', '80 80 80 80 80 80 80 80 80 80 00'),
-      c('client-id-2-pow-63', `01 01 80 80 80 80 80 80 80 80 80 01 00 04 ${root} 02 68 69 00`),
+      c('client-id-2-pow-63', `01 01 80 80 80 80 80 80 80 80 80 01 00 04 ${root} 02 68 69 00`, { classification: 'diverge', divergence: 'Q12' }),
       c('content-ref-11', textStruct('0b', root)),
       c('unknown-type-ref-9', textStruct('07', `${root} 09`)),
       c('invalid-utf8-string', textStruct('04', `${root} 01 ff`)),

@@ -1,0 +1,939 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": [
+      "ENC-01",
+      "ENC-10",
+      "ENC-11",
+      "ENC-13",
+      "ENC-14",
+      "ENC-15",
+      "ENC-27",
+      "ENC-28",
+      "ENC-76",
+      "ENC-81",
+      "ENC-85",
+      "Q14"
+    ],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":1},{"name":"b","clientId":2}],
+    "steps": [
+      {"step":"text.insert","doc":"a","target":{"root":"t","kind":"text"},"at":0,"value":"hello world"},
+      {
+        "step": "text.format",
+        "doc": "a",
+        "target": {"root":"t","kind":"text"},
+        "at": 0,
+        "len": 5,
+        "attributes": {"$":"obj","pairs":[["bold",true]]}
+      },
+      {
+        "step": "text.insertEmbed",
+        "doc": "a",
+        "target": {"root":"t","kind":"text"},
+        "at": 5,
+        "value": {"$":"obj","pairs":[["img","x.png"]]}
+      },
+      {
+        "step": "map.set",
+        "doc": "a",
+        "target": {"root":"m","kind":"map"},
+        "key": "bin",
+        "value": {"$":"bytes","hex":"000102ff"}
+      },
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"num","value":3.5},
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"num","value":4},
+      {
+        "step": "map.insertType",
+        "doc": "a",
+        "target": {"root":"m","kind":"map"},
+        "key": "child",
+        "kind": "map",
+        "init": {"$":"obj","pairs":[["x",1]]}
+      },
+      {
+        "step": "array.push",
+        "doc": "a",
+        "target": {"root":"a","kind":"array"},
+        "values": ["p","q",{"$":"obj","pairs":[["o",1]]}]
+      },
+      {
+        "step": "array.insertType",
+        "doc": "a",
+        "target": {"root":"a","kind":"array"},
+        "at": 1,
+        "kind": "text",
+        "init": "inner"
+      },
+      {
+        "step": "array.insertType",
+        "doc": "a",
+        "target": {"root":"a","kind":"array"},
+        "at": 0,
+        "kind": "array",
+        "init": [1,2]
+      },
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"text.insert","doc":"a","target":{"root":"t","kind":"text"},"at":3,"value":"AA"},
+      {"step":"text.insert","doc":"b","target":{"root":"t","kind":"text"},"at":3,"value":"BB"},
+      {"step":"array.insert","doc":"a","target":{"root":"a","kind":"array"},"at":2,"values":["fromA"]},
+      {"step":"array.insert","doc":"b","target":{"root":"a","kind":"array"},"at":2,"values":["fromB"]},
+      {"step":"map.set","doc":"a","target":{"root":"m","kind":"map"},"key":"conflict","value":"a"},
+      {"step":"map.set","doc":"b","target":{"root":"m","kind":"map"},"key":"conflict","value":"b"},
+      {"step":"text.delete","doc":"b","target":{"root":"t","kind":"text"},"at":0,"len":2},
+      {"step":"array.delete","doc":"b","target":{"root":"a","kind":"array"},"at":0,"len":1},
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"sync","from":"b","to":"a"}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [
+            {"$":"bytes","hex":"01010100040101740b68656c6c6f20776f726c6400"},
+            {"$":"bytes","hex":"0102010b46010004626f6c640474727565c60104010504626f6c64046e756c6c00"},
+            {"$":"bytes","hex":"0101010dc5010c01050f7b22696d67223a22782e706e67227d00"},
+            {"$":"bytes","hex":"0101010e2301016d0362696e04000102ff00"},
+            {"$":"bytes","hex":"0101010f2801016d036e756d017c4060000000"},
+            {"$":"bytes","hex":"01010110a8010f017d040101010f01"},
+            {"$":"bytes","hex":"010201112701016d056368696c6401280001110178017d0100"},
+            {"$":"bytes","hex":"0101011308010161037701707701717601016f7d0100"},
+            {"$":"bytes","hex":"01020116c701130114020400011605696e6e657200"},
+            {"$":"bytes","hex":"0102011c470113000800011c027d017d0200"},
+            {"$":"bytes","hex":"0101011fc40102010302414100"},
+            {"$":"bytes","hex":"01010121c80113011601770566726f6d4100"},
+            {"$":"bytes","hex":"010101222801016d08636f6e666c6963740177016100"},
+            {
+              "$": "bytes",
+              "hex": "01030200c401020103024242c80113011601770566726f6d422801016d08636f6e666c6963740177016201010300021c032201"
+            }
+          ],
+          "v2": [
+            {"$":"bytes","hex":"00000101000001040f0c7468656c6c6f20776f726c64010b0101000001010000"},
+            {"$":"bytes","hex":"00020002024102010802000a034600c60b08626f6c64626f6c64440000000001020b787e00"},
+            {"$":"bytes","hex":"00000241010118010a01c5010000000001010d760103696d677705782e706e6700"},
+            {"$":"bytes","hex":"000001010000012307046d62696e01030101000001010e04000102ff00"},
+            {"$":"bytes","hex":"000001010000012807046d6e756d0103010100010101010f7c4060000000"},
+            {"$":"bytes","hex":"0000024100011e0001a80100000001010101107d040101010f00"},
+            {"$":"bytes","hex":"0000024100012200032700280b076d6368696c647801050103010000010101010102117d0100"},
+            {"$":"bytes","hex":"00000101000001080301610101010001030101137701707701717601016f7d0100"},
+            {"$":"bytes","hex":"0000024102022606012803c700040705696e6e657205010001020001021600"},
+            {"$":"bytes","hex":"00000241010138012603470008010001000100010201021c7d017d0200"},
+            {"$":"bytes","hex":"00000241010104010601c4040241410200000001011f00"},
+            {"$":"bytes","hex":"00000241010126012c01c8010000000101010121770566726f6d4100"},
+            {"$":"bytes","hex":"00000101000001280c096d636f6e666c6963740108010100010101012277016100"},
+            {
+              "$": "bytes",
+              "hex": "00000302410202042202062605c400c800280f0b42426d636f6e666c696374020108010100024100010300770566726f6d4277016201010300011a020300"
+            }
+          ]
+        },
+        "b": {
+          "v1": [
+            {
+              "$": "bytes",
+              "hex": "01100100040101740568656c6c6f8401040620776f726c6446010004626f6c640474727565c60104010504626f6c64046e756c6cc5010c01050f7b22696d67223a22782e706e67227d2301016d0362696e04000102ff2101016d036e756d01a8010f017d042701016d056368696c6401280001110178017d010801016101770170880113027701717601016f7d01c701130114020400011605696e6e6572470113000800011c027d017d020101010f01"
+            },
+            {"$":"bytes","hex":"01010200c40102010302424200"},
+            {"$":"bytes","hex":"01010202c80113011601770566726f6d4200"},
+            {"$":"bytes","hex":"010102032801016d08636f6e666c6963740177016200"},
+            {"$":"bytes","hex":"000101010002"},
+            {"$":"bytes","hex":"000101011c03"},
+            {
+              "$": "bytes",
+              "hex": "0103011fc401020103024141c80113011601770566726f6d412101016d08636f6e666c696374010101012201"
+            }
+          ],
+          "v2": [
+            {
+              "$": "bytes",
+              "hex": "0002000202410d0908001006050000060c05000a001e421f040084004600c600c50023002100a8002700280008008800c700040047000838297468656c6c6f20776f726c64626f6c64626f6c646d62696e6d6e756d6d6368696c647861696e6e657201050644000103010301054100050701030000010000030102000441024200011000787e760103696d677705782e706e6704000102ff7d047d017701707701717601016f7d017d017d020101010f00"
+            },
+            {"$":"bytes","hex":"0000030241000104010601c4040242420200000001010000"},
+            {"$":"bytes","hex":"0000030241000126012c01c8010000000101010102770566726f6d4200"},
+            {"$":"bytes","hex":"00000102000001280c096d636f6e666c6963740108010100010101010377016200"},
+            {"$":"bytes","hex":"0000000000000100000000000101010001"},
+            {"$":"bytes","hex":"0000000000000100000000000101011c02"},
+            {
+              "$": "bytes",
+              "hex": "000002410302042202062605c400c800210f0b41416d636f6e666c69637402010801010002410001031f770566726f6d410101012200"
+            }
+          ]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "02030200c401020103024242c80113011601770566726f6d422801016d08636f6e666c696374017701621501000101017402840101016c840102026c6f8401040620776f726c6446010004626f6c640474727565c60104010504626f6c64046e756c6cc5010c01050f7b22696d67223a22782e706e67227d2301016d0362696e04000102ff2101016d036e756d01a8010f017d042701016d056368696c6401280001110178017d010801016101770170880113027701717601016f7d01c701130114020400011605696e6e6572410113010002c401020103024141c80113011601770566726f6d412101016d08636f6e666c6963740101010400020f011c032201"
+            },
+            "diff": {"b":{"$":"bytes","hex":"0001010400020f011c032201"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "00020002030241160e04226402040010060500000668220906266c0a001e4260262bc400c8002800010084024600c600c50023002100a8002700280008008800c700040041000000c400c80021533d42426d636f6e666c696374746c6c6f20776f726c64626f6c64626f6c646d62696e6d6e756d6d6368696c647861696e6e657241416d636f6e666c696374020108410002064400010301030105410005020108090104000001000000010201020a41000241020201024100020300770566726f6d427701621500787e760103696d677705782e706e6704000102ff7d047d017701707701717601016f7d01770566726f6d4101010400010d000c020300"
+            },
+            "diff": {"b":{"$":"bytes","hex":"00000000000001000000000001010400010d000c020300"}}
+          }
+        },
+        "b": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "02030200c401020103024242c80113011601770566726f6d422801016d08636f6e666c696374017701621501000101017402840101016c840102026c6f8401040620776f726c6446010004626f6c640474727565c60104010504626f6c64046e756c6cc5010c01050f7b22696d67223a22782e706e67227d2301016d0362696e04000102ff2101016d036e756d01a8010f017d042701016d056368696c6401280001110178017d010801016101770170880113027701717601016f7d01c701130114020400011605696e6e6572410113010002c401020103024141c80113011601770566726f6d412101016d08636f6e666c6963740101010400020f011c032201"
+            },
+            "diff": {"a":{"$":"bytes","hex":"0001010400020f011c032201"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "00020002030241160e04226402040010060500000668220906266c0a001e4260262bc400c8002800010084024600c600c50023002100a8002700280008008800c700040041000000c400c80021533d42426d636f6e666c696374746c6c6f20776f726c64626f6c64626f6c646d62696e6d6e756d6d6368696c647861696e6e657241416d636f6e666c696374020108410002064400010301030105410005020108090104000001000000010201020a41000241020201024100020300770566726f6d427701621500787e760103696d677705782e706e6704000102ff7d047d017701707701717601016f7d01770566726f6d4101010400010d000c020300"
+            },
+            "diff": {"a":{"$":"bytes","hex":"00000000000001000000000001010400010d000c020300"}}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {
+        "a": {"v1":{"$":"bytes","hex":"0202040123"},"v2":{"$":"bytes","hex":"0202040123"}},
+        "b": {"v1":{"$":"bytes","hex":"0202040123"},"v2":{"$":"bytes","hex":"0202040123"}}
+      }
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {
+        "a": [
+          [
+            "a",
+            {
+              "kind": "array",
+              "items": ["p","fromA","fromB",{"kind":"text","delta":[{"insert":"inner"}]},"q",{"$":"obj","pairs":[["o",1]]}]
+            }
+          ],
+          [
+            "m",
+            {
+              "kind": "map",
+              "pairs": [
+                ["bin",{"$":"bytes","hex":"000102ff"}],
+                ["num",4],
+                ["child",{"kind":"map","pairs":[["x",1]]}],
+                ["conflict","b"]
+              ]
+            }
+          ],
+          [
+            "t",
+            {
+              "kind": "text",
+              "delta": [
+                {"insert":"lAABBlo","attributes":{"$":"obj","pairs":[["bold",true]]}},
+                {"insert":{"$":"obj","pairs":[["img","x.png"]]}},
+                {"insert":" world"}
+              ]
+            }
+          ]
+        ],
+        "b": [
+          [
+            "a",
+            {
+              "kind": "array",
+              "items": ["p","fromA","fromB",{"kind":"text","delta":[{"insert":"inner"}]},"q",{"$":"obj","pairs":[["o",1]]}]
+            }
+          ],
+          [
+            "m",
+            {
+              "kind": "map",
+              "pairs": [
+                ["bin",{"$":"bytes","hex":"000102ff"}],
+                ["num",4],
+                ["child",{"kind":"map","pairs":[["x",1]]}],
+                ["conflict","b"]
+              ]
+            }
+          ],
+          [
+            "t",
+            {
+              "kind": "text",
+              "delta": [
+                {"insert":"lAABBlo","attributes":{"$":"obj","pairs":[["bold",true]]}},
+                {"insert":{"$":"obj","pairs":[["img","x.png"]]}},
+                {"insert":" world"}
+              ]
+            }
+          ]
+        ]
+      }
+    },
+    "structs": {
+      "api": "doc.store.clients",
+      "value": {
+        "a": [
+          [
+            2,
+            [
+              {
+                "id": [2,0],
+                "len": 2,
+                "kind": "item",
+                "origin": [1,2],
+                "rightOrigin": [1,3],
+                "parent": "t",
+                "content": {"ref":4,"value":"BB"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,2],
+                "len": 1,
+                "kind": "item",
+                "origin": [1,19],
+                "rightOrigin": [1,22],
+                "parent": "a",
+                "content": {"ref":8,"value":["fromB"]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,3],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "conflict",
+                "content": {"ref":8,"value":["b"]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ],
+          [
+            1,
+            [
+              {
+                "id": [1,0],
+                "len": 2,
+                "kind": "item",
+                "parent": "t",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [1,2],
+                "len": 1,
+                "kind": "item",
+                "origin": [1,1],
+                "parent": "t",
+                "content": {"ref":4,"value":"l"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,3],
+                "len": 2,
+                "kind": "item",
+                "origin": [1,2],
+                "parent": "t",
+                "content": {"ref":4,"value":"lo"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,5],
+                "len": 6,
+                "kind": "item",
+                "origin": [1,4],
+                "parent": "t",
+                "content": {"ref":4,"value":" world"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,11],
+                "len": 1,
+                "kind": "item",
+                "rightOrigin": [1,0],
+                "parent": "t",
+                "content": {"ref":6,"value":["bold",true]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,12],
+                "len": 1,
+                "kind": "item",
+                "origin": [1,4],
+                "rightOrigin": [1,5],
+                "parent": "t",
+                "content": {"ref":6,"value":["bold",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,13],
+                "len": 1,
+                "kind": "item",
+                "origin": [1,12],
+                "rightOrigin": [1,5],
+                "parent": "t",
+                "content": {"ref":5,"value":{"$":"obj","pairs":[["img","x.png"]]}},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,14],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "bin",
+                "content": {"ref":3,"value":{"$":"bytes","hex":"000102ff"}},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,15],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "num",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [1,16],
+                "len": 1,
+                "kind": "item",
+                "origin": [1,15],
+                "parent": "m",
+                "parentSub": "num",
+                "content": {"ref":8,"value":[4]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,17],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "child",
+                "content": {"ref":7,"value":"YMap"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,18],
+                "len": 1,
+                "kind": "item",
+                "parent": [1,17],
+                "parentSub": "x",
+                "content": {"ref":8,"value":[1]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,19],
+                "len": 1,
+                "kind": "item",
+                "parent": "a",
+                "content": {"ref":8,"value":["p"]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,20],
+                "len": 2,
+                "kind": "item",
+                "origin": [1,19],
+                "parent": "a",
+                "content": {"ref":8,"value":["q",{"$":"obj","pairs":[["o",1]]}]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,22],
+                "len": 1,
+                "kind": "item",
+                "origin": [1,19],
+                "rightOrigin": [1,20],
+                "parent": "a",
+                "content": {"ref":7,"value":"YText"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,23],
+                "len": 5,
+                "kind": "item",
+                "parent": [1,22],
+                "content": {"ref":4,"value":"inner"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,28],
+                "len": 1,
+                "kind": "item",
+                "rightOrigin": [1,19],
+                "parent": "a",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {"id":[1,29],"len":2,"kind":"gc"},
+              {
+                "id": [1,31],
+                "len": 2,
+                "kind": "item",
+                "origin": [1,2],
+                "rightOrigin": [1,3],
+                "parent": "t",
+                "content": {"ref":4,"value":"AA"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,33],
+                "len": 1,
+                "kind": "item",
+                "origin": [1,19],
+                "rightOrigin": [1,22],
+                "parent": "a",
+                "content": {"ref":8,"value":["fromA"]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,34],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "conflict",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              }
+            ]
+          ]
+        ],
+        "b": [
+          [
+            2,
+            [
+              {
+                "id": [2,0],
+                "len": 2,
+                "kind": "item",
+                "origin": [1,2],
+                "rightOrigin": [1,3],
+                "parent": "t",
+                "content": {"ref":4,"value":"BB"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,2],
+                "len": 1,
+                "kind": "item",
+                "origin": [1,19],
+                "rightOrigin": [1,22],
+                "parent": "a",
+                "content": {"ref":8,"value":["fromB"]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,3],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "conflict",
+                "content": {"ref":8,"value":["b"]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ],
+          [
+            1,
+            [
+              {
+                "id": [1,0],
+                "len": 2,
+                "kind": "item",
+                "parent": "t",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [1,2],
+                "len": 1,
+                "kind": "item",
+                "origin": [1,1],
+                "parent": "t",
+                "content": {"ref":4,"value":"l"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,3],
+                "len": 2,
+                "kind": "item",
+                "origin": [1,2],
+                "parent": "t",
+                "content": {"ref":4,"value":"lo"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,5],
+                "len": 6,
+                "kind": "item",
+                "origin": [1,4],
+                "parent": "t",
+                "content": {"ref":4,"value":" world"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,11],
+                "len": 1,
+                "kind": "item",
+                "rightOrigin": [1,0],
+                "parent": "t",
+                "content": {"ref":6,"value":["bold",true]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,12],
+                "len": 1,
+                "kind": "item",
+                "origin": [1,4],
+                "rightOrigin": [1,5],
+                "parent": "t",
+                "content": {"ref":6,"value":["bold",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,13],
+                "len": 1,
+                "kind": "item",
+                "origin": [1,12],
+                "rightOrigin": [1,5],
+                "parent": "t",
+                "content": {"ref":5,"value":{"$":"obj","pairs":[["img","x.png"]]}},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,14],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "bin",
+                "content": {"ref":3,"value":{"$":"bytes","hex":"000102ff"}},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,15],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "num",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [1,16],
+                "len": 1,
+                "kind": "item",
+                "origin": [1,15],
+                "parent": "m",
+                "parentSub": "num",
+                "content": {"ref":8,"value":[4]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,17],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "child",
+                "content": {"ref":7,"value":"YMap"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,18],
+                "len": 1,
+                "kind": "item",
+                "parent": [1,17],
+                "parentSub": "x",
+                "content": {"ref":8,"value":[1]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,19],
+                "len": 1,
+                "kind": "item",
+                "parent": "a",
+                "content": {"ref":8,"value":["p"]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,20],
+                "len": 2,
+                "kind": "item",
+                "origin": [1,19],
+                "parent": "a",
+                "content": {"ref":8,"value":["q",{"$":"obj","pairs":[["o",1]]}]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,22],
+                "len": 1,
+                "kind": "item",
+                "origin": [1,19],
+                "rightOrigin": [1,20],
+                "parent": "a",
+                "content": {"ref":7,"value":"YText"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,23],
+                "len": 5,
+                "kind": "item",
+                "parent": [1,22],
+                "content": {"ref":4,"value":"inner"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,28],
+                "len": 1,
+                "kind": "item",
+                "rightOrigin": [1,19],
+                "parent": "a",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {"id":[1,29],"len":2,"kind":"gc"},
+              {
+                "id": [1,31],
+                "len": 2,
+                "kind": "item",
+                "origin": [1,2],
+                "rightOrigin": [1,3],
+                "parent": "t",
+                "content": {"ref":4,"value":"AA"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,33],
+                "len": 1,
+                "kind": "item",
+                "origin": [1,19],
+                "rightOrigin": [1,22],
+                "parent": "a",
+                "content": {"ref":8,"value":["fromA"]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [1,34],
+                "len": 1,
+                "kind": "item",
+                "parent": "m",
+                "parentSub": "conflict",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              }
+            ]
+          ]
+        ]
+      }
+    },
+    "ds": {
+      "api": "Y.createDeleteSetFromStructStore",
+      "value": {"a":[[1,[[0,2],[15,1],[28,3],[34,1]]]],"b":[[1,[[0,2],[15,1],[28,3],[34,1]]]]}
+    },
+    "truncation": {
+      "api": "Y.applyUpdate, Y.applyUpdateV2 on every proper prefix of encodeStateAsUpdate(replica)",
+      "value": [
+        {
+          "replica": "a",
+          "encoding": "v1",
+          "length": 257,
+          "fullDoc": "e13a43f5e7ccb5936219e709b27933ff1c5025da08e9074f806647771a840553",
+          "cuts": [
+            {"from":0,"to":9,"outcome":"throws","error":"Error"},
+            {"from":10,"to":11,"outcome":"throws","error":"RangeError"},
+            {"from":12,"to":17,"outcome":"throws","error":"Error"},
+            {"from":18,"to":18,"outcome":"throws","error":"TypeError"},
+            {"from":19,"to":19,"outcome":"throws","error":"Error"},
+            {"from":20,"to":24,"outcome":"throws","error":"RangeError"},
+            {"from":25,"to":27,"outcome":"throws","error":"Error"},
+            {"from":28,"to":28,"outcome":"throws","error":"RangeError"},
+            {"from":29,"to":29,"outcome":"throws","error":"Error"},
+            {"from":30,"to":37,"outcome":"throws","error":"RangeError"},
+            {"from":38,"to":38,"outcome":"throws","error":"Error"},
+            {"from":39,"to":39,"outcome":"throws","error":"TypeError"},
+            {"from":40,"to":40,"outcome":"throws","error":"Error"},
+            {"from":41,"to":41,"outcome":"throws","error":"RangeError"},
+            {"from":42,"to":47,"outcome":"throws","error":"Error"},
+            {"from":48,"to":48,"outcome":"throws","error":"RangeError"},
+            {"from":49,"to":53,"outcome":"throws","error":"Error"},
+            {"from":54,"to":54,"outcome":"throws","error":"RangeError"},
+            {"from":55,"to":58,"outcome":"throws","error":"Error"},
+            {"from":59,"to":60,"outcome":"throws","error":"RangeError"},
+            {"from":61,"to":64,"outcome":"throws","error":"Error"},
+            {"from":65,"to":70,"outcome":"throws","error":"RangeError"},
+            {"from":71,"to":74,"outcome":"throws","error":"Error"},
+            {"from":75,"to":78,"outcome":"throws","error":"RangeError"},
+            {"from":79,"to":79,"outcome":"throws","error":"Error"},
+            {"from":80,"to":83,"outcome":"throws","error":"RangeError"},
+            {"from":84,"to":89,"outcome":"throws","error":"Error"},
+            {"from":90,"to":93,"outcome":"throws","error":"RangeError"},
+            {"from":94,"to":94,"outcome":"throws","error":"Error"},
+            {"from":95,"to":98,"outcome":"throws","error":"RangeError"},
+            {"from":99,"to":104,"outcome":"throws","error":"Error"},
+            {"from":105,"to":119,"outcome":"throws","error":"RangeError"},
+            {"from":120,"to":122,"outcome":"throws","error":"Error"},
+            {"from":123,"to":123,"outcome":"throws","error":"RangeError"},
+            {"from":124,"to":124,"outcome":"throws","error":"Error"},
+            {"from":125,"to":127,"outcome":"throws","error":"RangeError"},
+            {"from":128,"to":128,"outcome":"throws","error":"Error"},
+            {"from":129,"to":132,"outcome":"throws","error":"RangeError"},
+            {"from":133,"to":135,"outcome":"throws","error":"Error"},
+            {"from":136,"to":136,"outcome":"throws","error":"RangeError"},
+            {"from":137,"to":137,"outcome":"throws","error":"Error"},
+            {"from":138,"to":140,"outcome":"throws","error":"RangeError"},
+            {"from":141,"to":145,"outcome":"throws","error":"Error"},
+            {"from":146,"to":146,"outcome":"throws","error":"TypeError"},
+            {"from":147,"to":150,"outcome":"throws","error":"Error"},
+            {"from":151,"to":151,"outcome":"throws","error":"RangeError"},
+            {"from":152,"to":152,"outcome":"throws","error":"Error"},
+            {"from":153,"to":157,"outcome":"throws","error":"RangeError"},
+            {"from":158,"to":163,"outcome":"throws","error":"Error"},
+            {"from":164,"to":164,"outcome":"throws","error":"RangeError"},
+            {"from":165,"to":165,"outcome":"throws","error":"Error"},
+            {"from":166,"to":166,"outcome":"throws","error":"TypeError"},
+            {"from":167,"to":170,"outcome":"throws","error":"Error"},
+            {"from":171,"to":171,"outcome":"throws","error":"RangeError"},
+            {"from":172,"to":172,"outcome":"throws","error":"Error"},
+            {"from":173,"to":173,"outcome":"throws","error":"TypeError"},
+            {"from":174,"to":174,"outcome":"throws","error":"Error"},
+            {"from":175,"to":175,"outcome":"throws","error":"RangeError"},
+            {"from":176,"to":179,"outcome":"throws","error":"Error"},
+            {"from":180,"to":180,"outcome":"throws","error":"TypeError"},
+            {"from":181,"to":181,"outcome":"throws","error":"Error"},
+            {"from":182,"to":182,"outcome":"throws","error":"RangeError"},
+            {"from":183,"to":183,"outcome":"throws","error":"TypeError"},
+            {"from":184,"to":185,"outcome":"throws","error":"Error"},
+            {"from":186,"to":186,"outcome":"throws","error":"RangeError"},
+            {"from":187,"to":187,"outcome":"throws","error":"TypeError"},
+            {"from":188,"to":199,"outcome":"throws","error":"Error"},
+            {"from":200,"to":204,"outcome":"throws","error":"RangeError"},
+            {"from":205,"to":216,"outcome":"throws","error":"Error"},
+            {"from":217,"to":218,"outcome":"throws","error":"RangeError"},
+            {"from":219,"to":224,"outcome":"throws","error":"Error"},
+            {"from":225,"to":225,"outcome":"throws","error":"TypeError"},
+            {"from":226,"to":226,"outcome":"throws","error":"Error"},
+            {"from":227,"to":231,"outcome":"throws","error":"RangeError"},
+            {"from":232,"to":234,"outcome":"throws","error":"Error"},
+            {"from":235,"to":235,"outcome":"throws","error":"RangeError"},
+            {"from":236,"to":236,"outcome":"throws","error":"Error"},
+            {"from":237,"to":244,"outcome":"throws","error":"RangeError"},
+            {"from":245,"to":256,"outcome":"throws","error":"Error"}
+          ]
+        },
+        {
+          "replica": "a",
+          "encoding": "v2",
+          "length": 254,
+          "fullDoc": "e13a43f5e7ccb5936219e709b27933ff1c5025da08e9074f806647771a840553",
+          "cuts": [
+            {"from":0,"to":1,"outcome":"throws","error":"Error"},
+            {"from":2,"to":3,"outcome":"throws","error":"RangeError"},
+            {"from":4,"to":4,"outcome":"throws","error":"Error"},
+            {"from":5,"to":7,"outcome":"throws","error":"RangeError"},
+            {"from":8,"to":8,"outcome":"throws","error":"Error"},
+            {"from":9,"to":22,"outcome":"throws","error":"RangeError"},
+            {"from":23,"to":23,"outcome":"throws","error":"Error"},
+            {"from":24,"to":32,"outcome":"throws","error":"RangeError"},
+            {"from":33,"to":33,"outcome":"throws","error":"Error"},
+            {"from":34,"to":76,"outcome":"throws","error":"RangeError"},
+            {"from":77,"to":77,"outcome":"throws","error":"Error"},
+            {"from":78,"to":160,"outcome":"throws","error":"RangeError"},
+            {"from":161,"to":161,"outcome":"throws","error":"Error"},
+            {"from":162,"to":170,"outcome":"throws","error":"RangeError"},
+            {"from":171,"to":171,"outcome":"throws","error":"Error"},
+            {"from":172,"to":173,"outcome":"throws","error":"RangeError"},
+            {"from":174,"to":174,"outcome":"throws","error":"Error"},
+            {"from":175,"to":184,"outcome":"throws","error":"RangeError"},
+            {"from":185,"to":187,"outcome":"throws","error":"Error"},
+            {"from":188,"to":188,"outcome":"throws","error":"TypeError"},
+            {"from":189,"to":189,"outcome":"throws","error":"Error"},
+            {"from":190,"to":194,"outcome":"throws","error":"RangeError"},
+            {"from":195,"to":195,"outcome":"throws","error":"TypeError"},
+            {"from":196,"to":196,"outcome":"throws","error":"Error"},
+            {"from":197,"to":197,"outcome":"throws","error":"RangeError"},
+            {"from":198,"to":199,"outcome":"throws","error":"Error"},
+            {"from":200,"to":202,"outcome":"throws","error":"TypeError"},
+            {"from":203,"to":204,"outcome":"throws","error":"Error"},
+            {"from":205,"to":207,"outcome":"throws","error":"RangeError"},
+            {"from":208,"to":208,"outcome":"throws","error":"TypeError"},
+            {"from":209,"to":209,"outcome":"throws","error":"Error"},
+            {"from":210,"to":214,"outcome":"throws","error":"RangeError"},
+            {"from":215,"to":215,"outcome":"throws","error":"Error"},
+            {"from":216,"to":219,"outcome":"throws","error":"RangeError"},
+            {"from":220,"to":224,"outcome":"throws","error":"TypeError"},
+            {"from":225,"to":225,"outcome":"throws","error":"Error"},
+            {"from":226,"to":226,"outcome":"throws","error":"RangeError"},
+            {"from":227,"to":227,"outcome":"throws","error":"TypeError"},
+            {"from":228,"to":228,"outcome":"throws","error":"Error"},
+            {"from":229,"to":229,"outcome":"throws","error":"RangeError"},
+            {"from":230,"to":230,"outcome":"throws","error":"TypeError"},
+            {"from":231,"to":232,"outcome":"throws","error":"Error"},
+            {"from":233,"to":233,"outcome":"throws","error":"RangeError"},
+            {"from":234,"to":236,"outcome":"throws","error":"TypeError"},
+            {"from":237,"to":237,"outcome":"throws","error":"Error"},
+            {"from":238,"to":242,"outcome":"throws","error":"RangeError"},
+            {"from":243,"to":253,"outcome":"throws","error":"Error"}
+          ]
+        }
+      ]
+    }
+  }
+}

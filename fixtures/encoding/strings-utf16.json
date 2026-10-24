@@ -1,0 +1,223 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["ENC-05","ENC-73","Q16","Q17","Q18","Q19"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 0
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [{"name":"a","clientId":1},{"name":"b","clientId":2}],
+    "steps": [
+      {"step":"text.insert","doc":"a","target":{"root":"t","kind":"text"},"at":0,"value":"a😀b"},
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"text.delete","doc":"b","target":{"root":"t","kind":"text"},"at":2,"len":1},
+      {"step":"text.insert","doc":"a","target":{"root":"t","kind":"text"},"at":4,"value":"﻿bom é € 🧑‍🚀"},
+      {"step":"sync","from":"b","to":"a"},
+      {"step":"sync","from":"a","to":"b"},
+      {
+        "step": "text.insert",
+        "doc": "b",
+        "target": {"root":"t","kind":"text"},
+        "at": 0,
+        "value": {"$":"str","units":[55296]}
+      },
+      {
+        "step": "text.insert",
+        "doc": "b",
+        "target": {"root":"t","kind":"text"},
+        "at": 1,
+        "value": {"$":"str","units":[56320]}
+      },
+      {"step":"text.insertEmbed","doc":"b","target":{"root":"t","kind":"text"},"at":0,"value":"😀"},
+      {
+        "step": "map.set",
+        "doc": "a",
+        "target": {"root":"m","kind":"map"},
+        "key": "é€😀",
+        "value": "😀 emoji key and value"
+      },
+      {"step":"sync","from":"a","to":"b"},
+      {"step":"sync","from":"b","to":"a"}
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [
+            {"$":"bytes","hex":"01010100040101740661f09f98806200"},
+            {"$":"bytes","hex":"0101010484010319efbbbf626f6d20c3a920e282ac20f09fa791e2808df09f9a8000"},
+            {"$":"bytes","hex":"000101010201"},
+            {
+              "$": "bytes",
+              "hex": "010101122801016d09c3a9e282acf09f9880017718f09f988020656d6f6a69206b657920616e642076616c756500"
+            },
+            {"$":"bytes","hex":"0102020044010004f090808044020004f09f988000"}
+          ],
+          "v2": [
+            {"$":"bytes","hex":"00000101000001040a077461f09f98806201040101000001010000"},
+            {
+              "$": "bytes",
+              "hex": "000002410001060001841b19efbbbf626f6d20c3a920e282ac20f09fa791e2808df09f9a800e00000001010400"
+            },
+            {"$":"bytes","hex":"0000000000000100000000000101010200"},
+            {
+              "$": "bytes",
+              "hex": "00000101000001280d0a6dc3a9e282acf09f9880010401010001010101127718f09f988020656d6f6a69206b657920616e642076616c756500"
+            },
+            {"$":"bytes","hex":"0000030201020002010001440b08f0908080f09f9880420000000001020000"}
+          ]
+        },
+        "b": {
+          "v1": [
+            {"$":"bytes","hex":"01010100040101740661f09f98806200"},
+            {"$":"bytes","hex":"000101010201"},
+            {"$":"bytes","hex":"0101010484010319efbbbf626f6d20c3a920e282ac20f09fa791e2808df09f9a8000"},
+            {"$":"bytes","hex":"0101020044010003efbfbd00"},
+            {"$":"bytes","hex":"01010201c40200010003efbfbd00"},
+            {"$":"bytes","hex":"0101020244020004f09f988000"},
+            {
+              "$": "bytes",
+              "hex": "010101122801016d09c3a9e282acf09f9880017718f09f988020656d6f6a69206b657920616e642076616c756500"
+            }
+          ],
+          "v2": [
+            {"$":"bytes","hex":"00000101000001040a077461f09f98806201040101000001010000"},
+            {"$":"bytes","hex":"0000000000000100000000000101010200"},
+            {
+              "$": "bytes",
+              "hex": "000002410001060001841b19efbbbf626f6d20c3a920e282ac20f09fa791e2808df09f9a800e00000001010400"
+            },
+            {"$":"bytes","hex":"000002020100010001440503efbfbd0100000001010000"},
+            {"$":"bytes","hex":"0000034200010100010001c40503efbfbd0100000001010100"},
+            {"$":"bytes","hex":"000002420000010001440604f09f98800200000001010200"},
+            {
+              "$": "bytes",
+              "hex": "00000101000001280d0a6dc3a9e282acf09f9880010401010001010101127718f09f988020656d6f6a69206b657920616e642076616c756500"
+            }
+          ]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "0202020044010004f090808044020004f09f9880040100040101740461efbfbd810101018401021a62efbbbf626f6d20c3a920e282ac20f09fa791e2808df09f9a802801016d09c3a9e282acf09f9880017718f09f988020656d6f6a69206b657920616e642076616c75650101010201"
+            },
+            "diff": {"b":{"$":"bytes","hex":"000101010201"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "0000050201024101020300020100094401040081008400283931f0908080f09f98807461efbfbd62efbbbf626f6d20c3a920e282ac20f09fa791e2808df09f9a806dc3a9e282acf09f9880420001020f010401010002410002020004007718f09f988020656d6f6a69206b657920616e642076616c75650101010200"
+            },
+            "diff": {"b":{"$":"bytes","hex":"0000000000000100000000000101010200"}}
+          }
+        },
+        "b": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "0202020044010004f090808044020004f09f9880040100040101740461efbfbd810101018401021a62efbbbf626f6d20c3a920e282ac20f09fa791e2808df09f9a802801016d09c3a9e282acf09f9880017718f09f988020656d6f6a69206b657920616e642076616c75650101010201"
+            },
+            "diff": {"a":{"$":"bytes","hex":"000101010201"}}
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "0000050201024101020300020100094401040081008400283931f0908080f09f98807461efbfbd62efbbbf626f6d20c3a920e282ac20f09fa791e2808df09f9a806dc3a9e282acf09f9880420001020f010401010002410002020004007718f09f988020656d6f6a69206b657920616e642076616c75650101010200"
+            },
+            "diff": {"a":{"$":"bytes","hex":"0000000000000100000000000101010200"}}
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {
+        "a": {"v1":{"$":"bytes","hex":"0202040113"},"v2":{"$":"bytes","hex":"0202040113"}},
+        "b": {"v1":{"$":"bytes","hex":"0202040113"},"v2":{"$":"bytes","hex":"0202040113"}}
+      }
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {
+        "a": [
+          ["m",{"kind":"map","pairs":[["é€😀","😀 emoji key and value"]]}],
+          ["t",{"kind":"text","delta":[{"insert":"😀𐀀a�b﻿bom é € 🧑‍🚀"}]}]
+        ],
+        "b": [
+          ["m",{"kind":"map","pairs":[["é€😀","😀 emoji key and value"]]}],
+          ["t",{"kind":"text","delta":[{"insert":"😀𐀀a�b﻿bom é € 🧑‍🚀"}]}]
+        ]
+      }
+    },
+    "truncation": {
+      "api": "Y.applyUpdate, Y.applyUpdateV2 on every proper prefix of encodeStateAsUpdate(replica)",
+      "value": [
+        {
+          "replica": "a",
+          "encoding": "v1",
+          "length": 112,
+          "fullDoc": "50d1648a74377b830a582882fb9c5f1e0f1634bb3f79e08fc99c47c4fe1e52c6",
+          "cuts": [
+            {"from":0,"to":7,"outcome":"throws","error":"Error"},
+            {"from":8,"to":11,"outcome":"throws","error":"RangeError"},
+            {"from":12,"to":15,"outcome":"throws","error":"Error"},
+            {"from":16,"to":19,"outcome":"throws","error":"RangeError"},
+            {"from":20,"to":25,"outcome":"throws","error":"Error"},
+            {"from":26,"to":26,"outcome":"throws","error":"RangeError"},
+            {"from":27,"to":27,"outcome":"throws","error":"Error"},
+            {"from":28,"to":31,"outcome":"throws","error":"RangeError"},
+            {"from":32,"to":39,"outcome":"throws","error":"Error"},
+            {"from":40,"to":65,"outcome":"throws","error":"RangeError"},
+            {"from":66,"to":68,"outcome":"throws","error":"Error"},
+            {"from":69,"to":69,"outcome":"throws","error":"RangeError"},
+            {"from":70,"to":70,"outcome":"throws","error":"Error"},
+            {"from":71,"to":79,"outcome":"throws","error":"RangeError"},
+            {"from":80,"to":80,"outcome":"throws","error":"Error"},
+            {"from":81,"to":81,"outcome":"throws","error":"TypeError"},
+            {"from":82,"to":82,"outcome":"throws","error":"Error"},
+            {"from":83,"to":106,"outcome":"throws","error":"RangeError"},
+            {"from":107,"to":111,"outcome":"throws","error":"Error"}
+          ]
+        },
+        {
+          "replica": "a",
+          "encoding": "v2",
+          "length": 124,
+          "fullDoc": "50d1648a74377b830a582882fb9c5f1e0f1634bb3f79e08fc99c47c4fe1e52c6",
+          "cuts": [
+            {"from":0,"to":2,"outcome":"throws","error":"Error"},
+            {"from":3,"to":7,"outcome":"throws","error":"RangeError"},
+            {"from":8,"to":8,"outcome":"throws","error":"Error"},
+            {"from":9,"to":10,"outcome":"throws","error":"RangeError"},
+            {"from":11,"to":11,"outcome":"throws","error":"Error"},
+            {"from":12,"to":13,"outcome":"throws","error":"RangeError"},
+            {"from":14,"to":14,"outcome":"throws","error":"Error"},
+            {"from":15,"to":23,"outcome":"throws","error":"RangeError"},
+            {"from":24,"to":24,"outcome":"throws","error":"Error"},
+            {"from":25,"to":81,"outcome":"throws","error":"RangeError"},
+            {"from":82,"to":82,"outcome":"throws","error":"Error"},
+            {"from":83,"to":83,"outcome":"throws","error":"RangeError"},
+            {"from":84,"to":85,"outcome":"throws","error":"Error"},
+            {"from":86,"to":87,"outcome":"throws","error":"RangeError"},
+            {"from":88,"to":92,"outcome":"throws","error":"Error"},
+            {"from":93,"to":93,"outcome":"throws","error":"TypeError"},
+            {"from":94,"to":94,"outcome":"throws","error":"Error"},
+            {"from":95,"to":118,"outcome":"throws","error":"RangeError"},
+            {"from":119,"to":123,"outcome":"throws","error":"Error"}
+          ]
+        }
+      ]
+    }
+  }
+}

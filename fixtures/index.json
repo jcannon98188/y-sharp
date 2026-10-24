@@ -37,6 +37,120 @@
       "bytes": 6724
     },
     {
+      "path": "encoding/any-values.json",
+      "area": "encoding",
+      "name": "any-values",
+      "covers": ["ENC-06","ENC-07","ENC-72","Q01","Q02","Q03","Q04","Q05","Q06","Q08"],
+      "sha256": "affc0c75588d906ec40006f3a1414ac86b26cf82239603136aee6e16787ee8d4",
+      "bytes": 19846
+    },
+    {
+      "path": "encoding/delete-sets.json",
+      "area": "encoding",
+      "name": "delete-sets",
+      "covers": ["ENC-16","ENC-17","ENC-18","ENC-19","ENC-20","ENC-80"],
+      "sha256": "c2b8c13baa84d60f11a566ade20321ffb706a7cae54115ce8863e19ff447437d",
+      "bytes": 20183
+    },
+    {
+      "path": "encoding/embeds-and-formats.json",
+      "area": "encoding",
+      "name": "embeds-and-formats",
+      "covers": ["ENC-12","ENC-75","Q08","Q11","Q28","Q30"],
+      "sha256": "b599f2dab1775ace8c997f2eaff6cf4dda5f29d850ed59872f0fa78656c5d07e",
+      "bytes": 9357
+    },
+    {
+      "path": "encoding/ids-clocks-lengths.json",
+      "area": "encoding",
+      "name": "ids-clocks-lengths",
+      "covers": [
+        "ENC-02",
+        "ENC-03",
+        "ENC-04",
+        "ENC-08",
+        "ENC-09",
+        "ENC-70",
+        "ENC-71",
+        "ENC-74",
+        "ENC-77",
+        "ENC-78",
+        "ENC-79",
+        "Q12",
+        "Q13",
+        "Q14"
+      ],
+      "sha256": "bb3bd51d0d822cd47231672b7c3b6d77b22a7b963d5996f272a5ff0bc3da1dfd",
+      "bytes": 54703
+    },
+    {
+      "path": "encoding/merge-diff-convert-edges.json",
+      "area": "encoding",
+      "name": "merge-diff-convert-edges",
+      "covers": ["ENC-23","ENC-24","ENC-25","ENC-81","ENC-82","ENC-83","ENC-84"],
+      "sha256": "b0f21aaa3aed133b2cc23c507fc4c32c7f2a2d521551a8c08dd571bcdeffaf5d",
+      "bytes": 12661
+    },
+    {
+      "path": "encoding/strings-utf16.json",
+      "area": "encoding",
+      "name": "strings-utf16",
+      "covers": ["ENC-05","ENC-73","Q16","Q17","Q18","Q19"],
+      "sha256": "17bc0ac5cb0bf80f4e6556c090e4dc09d604f72146a27e5425185f54acf2312c",
+      "bytes": 10279
+    },
+    {
+      "path": "encoding/struct-layouts.json",
+      "area": "encoding",
+      "name": "struct-layouts",
+      "covers": [
+        "ENC-01",
+        "ENC-10",
+        "ENC-11",
+        "ENC-13",
+        "ENC-14",
+        "ENC-15",
+        "ENC-27",
+        "ENC-28",
+        "ENC-76",
+        "ENC-81",
+        "ENC-85",
+        "Q14"
+      ],
+      "sha256": "80bf29e0f98f565d3f8fbb0422a655488633443d7f61bd8df15352463338e368",
+      "bytes": 38090
+    },
+    {
+      "path": "hostile/malformed-codec-extras.json",
+      "area": "hostile",
+      "name": "malformed-codec-extras",
+      "covers": [
+        "ENC-36",
+        "ENC-44",
+        "ENC-46",
+        "ENC-47",
+        "ENC-48",
+        "ENC-49",
+        "ENC-50",
+        "ENC-51",
+        "ENC-60",
+        "ENC-61",
+        "ENC-62",
+        "ENC-63",
+        "ENC-64",
+        "ENC-65",
+        "ENC-66",
+        "ENC-67",
+        "ENC-68",
+        "ENC-69",
+        "ENC-22",
+        "ENC-56",
+        "Q07"
+      ],
+      "sha256": "54ca8eb54a1e0d730044e547042d2eeb43a16e0cdb69d03e5acaf69992a4e924",
+      "bytes": 11047
+    },
+    {
       "path": "hostile/malformed-v1-updates.json",
       "area": "hostile",
       "name": "malformed-v1-updates",
@@ -60,8 +174,8 @@
         "ENC-53",
         "ENC-54"
       ],
-      "sha256": "ec4f70ca1b2c4d41f8337470f2d214ba02bc9124bced41b51eb9ba7c8c0211f0",
-      "bytes": 10398
+      "sha256": "bb5f900e6824ff7eb97324032de6fb69e672dbb2fc567958b6517668b17d06b4",
+      "bytes": 10431
     },
     {
       "path": "hostile/malformed-v2-updates.json",

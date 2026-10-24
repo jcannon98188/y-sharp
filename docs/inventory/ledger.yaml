@@ -1202,7 +1202,8 @@
   module: encoding
   randomized: false
   owner: 5
-  outcome: pending
+  outcome: ported
+  note: "Ported through the wire: the contentRefs table is internal, so each slot is decoded and re-encoded (UpstreamPortTests.TestStructReferences)."
 
 - key: encoding.tests.js:testPermanentUserData
   file: yjs/tests/encoding.tests.js
@@ -1210,7 +1211,8 @@
   module: encoding
   randomized: false
   owner: 5
-  outcome: pending
+  outcome: ported
+  note: "Ported; the 10 ms wait becomes the synchronous Defer seam of PermanentUserDataOptions, and one assertion on GetUserByClientId is added."
 
 - key: encoding.tests.js:testDiffStateVectorOfUpdateIsEmpty
   file: yjs/tests/encoding.tests.js
@@ -1218,7 +1220,7 @@
   module: encoding
   randomized: false
   owner: 5
-  outcome: pending
+  outcome: ported
 
 - key: encoding.tests.js:testDiffStateVectorOfUpdateIgnoresSkips
   file: yjs/tests/encoding.tests.js
@@ -1226,7 +1228,7 @@
   module: encoding
   randomized: false
   owner: 5
-  outcome: pending
+  outcome: ported
 
 - key: undo-redo.tests.js:testInconsistentFormat
   file: yjs/tests/undo-redo.tests.js
@@ -1442,7 +1444,8 @@
   module: compatibility
   randomized: false
   owner: 5
-  outcome: pending
+  outcome: ported
+  note: "The base64 document and expected value are read from the pinned compatibility.tests.js at test time."
 
 - key: compatibility.tests.js:testMapDecodingCompatibilityV1
   file: yjs/tests/compatibility.tests.js
@@ -1450,7 +1453,8 @@
   module: compatibility
   randomized: false
   owner: 5
-  outcome: pending
+  outcome: ported
+  note: "The base64 document and expected value are read from the pinned compatibility.tests.js at test time."
 
 - key: compatibility.tests.js:testTextDecodingCompatibilityV1
   file: yjs/tests/compatibility.tests.js
@@ -1458,7 +1462,8 @@
   module: compatibility
   randomized: false
   owner: 5
-  outcome: pending
+  outcome: ported
+  note: "The base64 document and expected value are read from the pinned compatibility.tests.js at test time."
 
 - key: snapshot.tests.js:testBasic
   file: yjs/tests/snapshot.tests.js
@@ -1562,7 +1567,7 @@
   module: updates
   randomized: false
   owner: 5
-  outcome: pending
+  outcome: ported
 
 - key: updates.tests.js:testKeyEncoding
   file: yjs/tests/updates.tests.js
@@ -1570,7 +1575,7 @@
   module: updates
   randomized: false
   owner: 5
-  outcome: pending
+  outcome: ported
 
 - key: updates.tests.js:testMergeUpdates1
   file: yjs/tests/updates.tests.js
@@ -1578,7 +1583,8 @@
   module: updates
   randomized: false
   owner: 5
-  outcome: pending
+  outcome: ported
+  note: "Ported without parseUpdateMeta (no public API) and without the readDeleteSet/writeDeleteSet byte comparison (internals); both are checked through state vectors and by applying the diffed update."
 
 - key: updates.tests.js:testMergeUpdates2
   file: yjs/tests/updates.tests.js
@@ -1586,7 +1592,8 @@
   module: updates
   randomized: false
   owner: 5
-  outcome: pending
+  outcome: ported
+  note: "Ported without parseUpdateMeta (no public API) and without the readDeleteSet/writeDeleteSet byte comparison (internals); both are checked through state vectors and by applying the diffed update."
 
 - key: updates.tests.js:testMergePendingUpdates
   file: yjs/tests/updates.tests.js
@@ -1594,7 +1601,8 @@
   module: updates
   randomized: false
   owner: 5
-  outcome: pending
+  outcome: ported
+  note: "applyDelta([{insert}]) becomes Insert(0, text): TextDeltaOp has no public constructor, and a delta without retain inserts at 0."
 
 - key: updates.tests.js:testObfuscateUpdates
   file: yjs/tests/updates.tests.js
@@ -1602,7 +1610,8 @@
   module: updates
   randomized: false
   owner: 5
-  outcome: pending
+  outcome: skipped
+  reason: "obfuscateUpdate is a Yjs debugging utility; the y-sharp API (ADR 0008) has none, so ENC-26 is excluded as not-applicable."
 
 - key: relativePositions.tests.js:testRelativePositionCase1
   file: yjs/tests/relativePositions.tests.js

@@ -9,7 +9,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 1.1"
 
 - id: ENC-02
@@ -19,7 +19,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 1.2"
 
 - id: ENC-03
@@ -29,7 +29,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 1.3"
 
 - id: ENC-04
@@ -39,7 +39,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 1.4"
 
 - id: ENC-05
@@ -49,7 +49,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 1.5"
 
 - id: ENC-06
@@ -59,7 +59,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 1.6"
 
 - id: ENC-07
@@ -69,7 +69,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 1.7"
 
 - id: ENC-08
@@ -79,7 +79,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 1.8"
 
 - id: ENC-09
@@ -89,7 +89,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 2"
 
 - id: ENC-10
@@ -99,7 +99,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 3.1"
 
 - id: ENC-11
@@ -109,7 +109,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 3.2"
 
 - id: ENC-12
@@ -119,7 +119,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 3.3"
 
 - id: ENC-13
@@ -129,7 +129,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 3.4"
 
 - id: ENC-14
@@ -139,7 +139,7 @@
   layers: [unit, fixture, port, differential]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 3.5"
 
 - id: ENC-15
@@ -149,7 +149,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 3.6"
 
 - id: ENC-16
@@ -159,7 +159,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 4.1"
 
 - id: ENC-17
@@ -169,7 +169,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 4.2"
 
 - id: ENC-18
@@ -179,7 +179,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 4.3"
 
 - id: ENC-19
@@ -189,7 +189,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 4.4"
 
 - id: ENC-20
@@ -199,7 +199,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 4.5"
 
 - id: ENC-21
@@ -209,7 +209,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 5"
 
 - id: ENC-22
@@ -219,7 +219,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 5.1"
 
 - id: ENC-23
@@ -229,7 +229,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 6"
 
 - id: ENC-24
@@ -239,7 +239,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 6.1"
 
 - id: ENC-25
@@ -249,7 +249,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 6.2"
 
 - id: ENC-26
@@ -259,8 +259,10 @@
   layers: [unit, fixture, port, differential]
   wire: true
   owner: 5
-  status: pending
+  status: excluded
   ref: "encoding.md 6.3"
+  exclusion: not-applicable
+  note: "obfuscateUpdate is a Yjs debugging utility with no equivalent in the y-sharp API (ADR 0008); its upstream test is skipped in the ledger."
 
 - id: ENC-27
   title: "Update emission sources (what produces bytes)"
@@ -269,7 +271,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 7"
 
 - id: ENC-28
@@ -279,7 +281,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.1"
 
 - id: ENC-29
@@ -289,7 +291,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
 
 - id: ENC-30
@@ -299,7 +301,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
 
 - id: ENC-31
@@ -309,7 +311,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
 
 - id: ENC-32
@@ -319,7 +321,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
 
 - id: ENC-33
@@ -329,7 +331,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
 
 - id: ENC-34
@@ -339,7 +341,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
 
 - id: ENC-35
@@ -349,7 +351,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
 
 - id: ENC-36
@@ -359,18 +361,20 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
 
 - id: ENC-37
   title: "Malformed input: client id >= 2^53 (e.g. 2^63 as 80*9 01) -> accepted; value is the nearest double (precision "
   source: "docs/research/encoding.md:423"
-  kind: match
+  kind: diverge
   layers: [unit, fixture, differential, fuzz]
   wire: true
+  adr: ["0003"]
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
+  note: "Client ids at or above 2^53 are rejected (Q12); JS rounds them to the nearest double."
 
 - id: ENC-38
   title: "Malformed input: info with content ref 11 -> TypeError (\"not a function\")"
@@ -379,7 +383,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
 
 - id: ENC-39
@@ -389,7 +393,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
 
 - id: ENC-40
@@ -399,7 +403,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
 
 - id: ENC-41
@@ -409,7 +413,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
 
 - id: ENC-42
@@ -419,7 +423,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
 
 - id: ENC-43
@@ -429,7 +433,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
 
 - id: ENC-44
@@ -439,7 +443,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
 
 - id: ENC-45
@@ -449,18 +453,20 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
 
 - id: ENC-46
   title: "Malformed input: Any tag 7d as the last byte -> the VarInt payload reads as 0 silently (1.3), so the struct *i"
   source: "docs/research/encoding.md:432"
-  kind: match
+  kind: diverge
   layers: [unit, fixture, differential, fuzz]
   wire: true
+  adr: ["0005"]
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
+  note: "An Any tag at the very end is a decode error and applies nothing; JS reads 0, keeps the struct and fails later (partial application)."
 
 - id: ENC-47
   title: "Malformed input: Any float32 truncated -> RangeError: Invalid DataView length 4"
@@ -469,7 +475,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
 
 - id: ENC-48
@@ -479,7 +485,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
 
 - id: ENC-49
@@ -489,7 +495,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
 
 - id: ENC-50
@@ -499,18 +505,20 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
 
 - id: ENC-51
   title: "Malformed input: ds delete len 0 -> Error: Unexpected case (only on V2 re-encode path, see 4.3)"
   source: "docs/research/encoding.md:437"
-  kind: match
+  kind: diverge
   layers: [unit, fixture, differential, fuzz]
   wire: true
+  adr: ["0003"]
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
+  note: "A zero-length delete range is ignored and converts fine; JS throws 'Unexpected case' when it re-encodes the range."
 
 - id: ENC-52
   title: "Malformed input: ds range beyond known state -> accepted, parked in pendingDs"
@@ -519,7 +527,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
 
 - id: ENC-53
@@ -529,7 +537,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
 
 - id: ENC-54
@@ -539,7 +547,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
 
 - id: ENC-55
@@ -549,7 +557,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
 
 - id: ENC-56
@@ -559,7 +567,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.2 row"
 
 - id: ENC-57
@@ -569,8 +577,10 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: excluded
   ref: "encoding.md 8.2 row"
+  exclusion: not-applicable
+  note: "A C# span cannot be undefined; an empty span is the empty-bytes case ENC-29."
 
 - id: ENC-58
   title: "Malformed input: plain Array [0,0] instead of Uint8Array -> accepted (decoder only indexes arr[i]; but readUin"
@@ -579,8 +589,10 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: excluded
   ref: "encoding.md 8.2 row"
+  exclusion: not-applicable
+  note: "A C# span cannot be a plain Array; the span is always contiguous bytes."
 
 - id: ENC-59
   title: "Malformed input: Node Buffer -> accepted, fine"
@@ -589,18 +601,22 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: excluded
   ref: "encoding.md 8.2 row"
+  exclusion: not-applicable
+  note: "A Node Buffer is a Uint8Array view; y-sharp takes spans, so there is nothing to accept or reject."
 
 - id: ENC-60
   title: "Reader at EOF: readUint8 -> undefined, advances"
   source: "docs/research/encoding.md:453"
-  kind: match
+  kind: diverge
   layers: [unit, fixture, differential, fuzz]
   wire: true
+  adr: ["0005"]
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.3 row"
+  note: "EOF is always a decode error (ADR 0005); JS readUint8 returns undefined and carries on."
 
 - id: ENC-61
   title: "Reader at EOF: readVarUint -> throws"
@@ -609,18 +625,20 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.3 row"
 
 - id: ENC-62
   title: "Reader at EOF: readVarInt (first byte) -> returns 0, advances (silent)"
   source: "docs/research/encoding.md:455"
-  kind: match
+  kind: diverge
   layers: [unit, fixture, differential, fuzz]
   wire: true
+  adr: ["0005"]
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.3 row"
+  note: "EOF is always a decode error (ADR 0005); JS readVarInt returns 0 at EOF."
 
 - id: ENC-63
   title: "Reader at EOF: readVarInt (after continuation) -> throws"
@@ -629,28 +647,32 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.3 row"
 
 - id: ENC-64
   title: "Reader at EOF: UintOptRleDecoder.read on empty buffer -> returns 0 forever (silent)"
   source: "docs/research/encoding.md:457"
-  kind: match
+  kind: diverge
   layers: [unit, fixture, differential, fuzz]
   wire: true
+  adr: ["0005"]
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.3 row"
+  note: "An exhausted UintOptRle column is a decode error; JS returns 0 forever."
 
 - id: ENC-65
   title: "Reader at EOF: IntDiffOptRleDecoder.read on empty buffer -> returns 0 forever, s stays 0 (silent)"
   source: "docs/research/encoding.md:458"
-  kind: match
+  kind: diverge
   layers: [unit, fixture, differential, fuzz]
   wire: true
+  adr: ["0005"]
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.3 row"
+  note: "An exhausted IntDiffOptRle column is a decode error; JS returns 0 forever."
 
 - id: ENC-66
   title: "Reader at EOF: RleDecoder.read on empty buffer -> throws Unexpected end of array: readUint8 returns undefined "
@@ -659,28 +681,32 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.3 row"
 
 - id: ENC-67
   title: "Reader at EOF: RleDecoder after final run -> repeats last value forever"
   source: "docs/research/encoding.md:460"
-  kind: match
+  kind: diverge
   layers: [unit, fixture, differential, fuzz]
   wire: true
+  adr: ["0005"]
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.3 row"
+  note: "An exhausted Rle column is a decode error; JS repeats the last value forever."
 
 - id: ENC-68
   title: "Reader at EOF: StringDecoder.read beyond joined string -> \"\""
   source: "docs/research/encoding.md:461"
-  kind: match
+  kind: diverge
   layers: [unit, fixture, differential, fuzz]
   wire: true
+  adr: ["0005"]
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.3 row"
+  note: "A string length beyond the joined V2 string is a decode error; JS returns the empty string."
 
 - id: ENC-69
   title: "Reader at EOF: readVarUint8Array / readFloat* -> RangeError if beyond backing buffer"
@@ -689,7 +715,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 8.3 row"
 
 - id: ENC-70
@@ -699,7 +725,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 9"
 
 - id: ENC-71
@@ -709,7 +735,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 9"
 
 - id: ENC-72
@@ -719,7 +745,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 9"
 
 - id: ENC-73
@@ -729,7 +755,7 @@
   layers: [unit, fixture, differential, fuzz]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 9"
 
 - id: ENC-74
@@ -739,7 +765,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 10"
 
 - id: ENC-75
@@ -749,7 +775,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 10"
 
 - id: ENC-76
@@ -759,7 +785,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 10"
 
 - id: ENC-77
@@ -769,7 +795,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 10"
 
 - id: ENC-78
@@ -779,7 +805,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 10"
 
 - id: ENC-79
@@ -789,7 +815,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 10"
 
 - id: ENC-80
@@ -799,7 +825,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 10"
 
 - id: ENC-81
@@ -809,7 +835,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 10"
 
 - id: ENC-82
@@ -819,7 +845,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 10"
 
 - id: ENC-83
@@ -829,7 +855,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 10"
 
 - id: ENC-84
@@ -839,7 +865,7 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 10"
 
 - id: ENC-85
@@ -849,5 +875,5 @@
   layers: [unit, fixture, differential]
   wire: true
   owner: 5
-  status: pending
+  status: active
   ref: "encoding.md 10"
