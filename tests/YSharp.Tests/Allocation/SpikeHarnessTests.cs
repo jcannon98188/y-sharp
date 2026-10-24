@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Xunit;
-using YSharp.StoreSpike.Content;
-using YSharp.StoreSpike.Harness;
+using YSharp.Store;
+using YSharp.StoreHarness;
 using YSharp.TestKit.Tiers;
 using YSharp.TestKit.Gating;
 
@@ -11,9 +11,10 @@ namespace YSharp.Tests.Allocation;
 
 /// <summary>
 /// Self-tests of the M0 spike driver, workloads, harness and shared content layer (TASK-4.3). They do not measure budgets: the measurements run in
-/// the Nightly tier, in Release. The content-layer and workload tests run in every configuration.
+/// the Nightly tier, in Release. The content-layer and workload tests run in every configuration. The content layer and the control store are
+/// built from the library's <c>Store/</c> module since the spike project was deleted (TASK-4.11), so the class requires the Store feature.
 /// </summary>
-[LibraryIndependent]
+[Requires(Feature.Store)]
 public sealed class SpikeHarnessTests
 {
     private const long ChunkCeiling = 64 * 1024;
@@ -170,7 +171,7 @@ public sealed class SpikeHarnessTests
     public void TextBuffer_LongRun_EveryChunkAtOrBelow64KB_AndSlicesReadBack()
     {
         var buffer = new TextBuffer();
-        var slices = new List<(ContentSlice Slice, char Value)>();
+        var slices = new List<(int Address, char Value)>();
         var one = new char[1];
         for (var i = 0; i < 300_000; i++)
         {
@@ -181,29 +182,43 @@ public sealed class SpikeHarnessTests
 
         Assert.True(buffer.ChunkCount > 1);
         Assert.True(buffer.MaxChunkBytes <= ChunkCeiling);
-        Assert.All(slices, s => Assert.Equal(s.Value, buffer.Get(s.Slice)[0]));
+        Assert.All(slices, s => Assert.Equal(s.Value, buffer.CharAt(s.Address)));
     }
 
     [Fact]
-    public void TextBuffer_RejectsAppendsThatWouldSpanChunks()
+    public void TextBuffer_AnAppendLongerThanAChunk_SpansChunks_AndReadsBack()
     {
+        // The spike rejected such appends; the store's buffer is one address space, so a long string continues into the next chunk.
         var buffer = new TextBuffer();
-        var tooLong = new string('x', TextBuffer.ChunkChars + 1);
+        buffer.Append("ab");
+        var longText = new string('x', TextBuffer.ChunkChars) + "yz";
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => buffer.Append(tooLong.AsSpan()));
+        var address = buffer.Append(longText);
+
+        Assert.Equal(2, address);
+        Assert.Equal(2, buffer.ChunkCount);
+        Assert.True(buffer.MaxChunkBytes <= ChunkCeiling);
+        Assert.Equal(longText, buffer.GetString(address, longText.Length));
+        Assert.False(buffer.TryGetSpan(address, longText.Length, out _));
     }
 
     [Fact]
-    public void MapPayloads_ManyKeys_KeepValuesAndKeysAndStayInChunks()
+    public void KeyTableAndValueColumn_ManyKeys_KeepValuesAndKeysAndStayInChunks()
     {
-        var payloads = new MapPayloads();
-        const int keys = 100_000;
-        for (var i = 0; i < keys; i++) payloads.Add(("k" + i).AsSpan(), i);
+        var keys = new KeyTable();
+        var values = new ValueColumn();
+        const int count = 100_000;
+        for (var i = 0; i < count; i++)
+        {
+            keys.Add(("k" + i).AsSpan());
+            values.Append(i);
+        }
 
-        Assert.Equal(keys, payloads.Count);
-        Assert.Equal("k99999", new string(payloads.KeyOf(99_999)));
-        Assert.Equal(12_345.0, payloads.ValueOf(12_345));
-        Assert.True(payloads.MaxChunkBytes <= ChunkCeiling);
+        Assert.Equal(count, keys.Count);
+        Assert.Equal("k99999", new string(keys.Get(99_999)));
+        Assert.Equal(12_345.0, values.Get(12_345).AsNumber());
+        Assert.True(keys.MaxChunkBytes <= ChunkCeiling);
+        Assert.True(values.MaxChunkBytes <= ChunkCeiling);
     }
 
     [Fact]

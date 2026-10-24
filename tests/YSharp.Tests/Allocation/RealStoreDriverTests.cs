@@ -1,27 +1,26 @@
 using System;
 using System.Text;
 using Xunit;
-using YSharp.StoreSpike.Content;
-using YSharp.StoreSpike.Harness;
+using YSharp.Store;
+using YSharp.StoreHarness;
 using YSharp.TestKit.Gating;
 using YSharp.TestKit.Tiers;
-using YSharp.StoreSpike.ObjectPerItem;
 
 namespace YSharp.Tests.Allocation;
 
 /// <summary>
-/// Behaviour of spike candidate A, object per item (TASK-4.4, ADR 0018 spike amendment). Tests go through the driver interface, and through
-/// <see cref="ItemRef"/> for the struct layout the merge rules produce. Expected layouts are worked by hand from Yjs v13.6.33
-/// (<c>Item.mergeWith</c>, <c>tryToMergeWithLefts</c>, <c>findNextPosition</c>), not recomputed by the store's own code.
-/// The spike never touches the library, so the class is library independent (ADR 0020), like SpikeHarnessTests.
+/// The real store (TASK-4.11) through the spike harness's third driver adapter. These are the behaviour tests of spike candidate A
+/// (TASK-4.4), ported when the spike project was deleted: the store is the candidate's port (ADR 0023), so it must keep the candidate's
+/// behaviour. Expected layouts are worked by hand from Yjs v13.6.33 (<c>Item.mergeWith</c>, <c>tryToMergeWithLefts</c>,
+/// <c>findNextPosition</c>), not recomputed by the store's own code.
 /// </summary>
-[LibraryIndependent]
-public sealed class SpikeObjectPerItemTests
+[Requires(Feature.Store)]
+public sealed class RealStoreDriverTests
 {
     [Fact]
     public void InsertChar_AtTheEndAndInTheMiddle_BuildsTheVisibleText()
     {
-        var store = new ObjectPerItemStore();
+        var store = new RealStoreDriver();
         store.InsertChar(0, 'a');
         store.InsertChar(1, 'c');
         store.InsertChar(1, 'b');
@@ -55,9 +54,9 @@ public sealed class SpikeObjectPerItemTests
         Assert.Equal(3, store.StructCountOf(store.LocalClient));
 
         var x = store.TextStart.Right;
-        Assert.Equal(4u, x.Clock);
-        Assert.Equal((store.LocalClient, 1u), store.OriginOf(x));
-        Assert.Equal((store.LocalClient, 2u), store.RightOriginOf(x));
+        Assert.Equal(4L, x.Clock);
+        Assert.Equal(new ItemId(store.LocalClient, 1), store.Store.OriginOf(x));
+        Assert.Equal(new ItemId(store.LocalClient, 2), store.Store.RightOriginOf(x));
     }
 
     [Fact]
@@ -68,11 +67,11 @@ public sealed class SpikeObjectPerItemTests
 
         var pending = store.PendingDeletes;
         Assert.Equal(1, pending.Count);
-        Assert.Equal(1u, pending[0].Clock);
-        Assert.Equal(1u, pending[0].Length);
+        Assert.Equal(1L, pending[0].Clock);
+        Assert.Equal(1L, pending[0].Length);
         var b = store.TextStart.Right;
         Assert.True(b.IsDeleted);
-        Assert.Equal(ContentKind.Text, b.Kind);
+        Assert.Equal(ContentKind.String, b.Kind);
 
         store.Commit();
 
@@ -94,7 +93,7 @@ public sealed class SpikeObjectPerItemTests
         store.DeleteAt(1);
 
         Assert.Equal(1, store.PendingDeletes.Count);
-        Assert.Equal(new DeleteRange(0, 1, 2), store.PendingDeletes[0]);
+        Assert.Equal(new DeleteRange(store.LocalClient, 1, 2), store.PendingDeletes[0]);
 
         store.Commit();
 
@@ -102,14 +101,14 @@ public sealed class SpikeObjectPerItemTests
         Assert.Equal(3, store.StructCountOf(store.LocalClient));
         var deleted = store.TextStart.Right;
         Assert.True(deleted.IsDeleted);
-        Assert.Equal(2, deleted.Length);
+        Assert.Equal(2L, deleted.Length);
         Assert.Equal(ContentKind.Deleted, deleted.Kind);
     }
 
     [Fact]
     public void SetKey_NewAndOverwritten_KeepsTheLatestValue_AndDeletesTheReplacedItem()
     {
-        var store = new ObjectPerItemStore();
+        var store = new RealStoreDriver();
         store.SetKey("k1", 1);
         store.SetKey("k2", 2);
         store.Commit();
@@ -130,13 +129,15 @@ public sealed class SpikeObjectPerItemTests
         Assert.Equal(first, current.Left);
         Assert.True(first.IsDeleted);
         Assert.Equal(ContentKind.Deleted, first.Kind);
-        Assert.Equal((store.LocalClient, first.Clock), store.OriginOf(current));
+        Assert.Equal(new ItemId(store.LocalClient, first.Clock), store.Store.OriginOf(current));
+        Assert.Equal("k1", store.Store.ParentSubOf(current));
+        Assert.Equal("k1", store.Store.ParentSubOf(first));
     }
 
     [Fact]
     public void PushValue_ManyBatches_KeepsTheValuesInOrder_InOneMergedStruct()
     {
-        var store = new ObjectPerItemStore();
+        var store = new RealStoreDriver();
         SpikeWorkloads.PushScalars(store, 3_500);
 
         var values = store.ArrayValues();
@@ -154,7 +155,7 @@ public sealed class SpikeObjectPerItemTests
     {
         // The first commit merges five pushes into one struct, so the last item changes identity; the long transaction then appends to
         // a chain of 20,000 unmerged items.
-        var store = new ObjectPerItemStore();
+        var store = new RealStoreDriver();
         for (var i = 0; i < 5; i++) store.PushValue(i);
         store.Commit();
         for (var i = 5; i < 20_005; i++) store.PushValue(i);
@@ -170,7 +171,7 @@ public sealed class SpikeObjectPerItemTests
     public void RandomEdits_WithRandomCommits_MatchAStringModel()
     {
         var random = new Random(2024);
-        var store = new ObjectPerItemStore();
+        var store = new RealStoreDriver();
         var model = new StringBuilder();
         for (var step = 0; step < 30_000; step++)
         {
@@ -200,7 +201,7 @@ public sealed class SpikeObjectPerItemTests
     [Fact]
     public void TextWorkload_MatchesTheControlStore()
     {
-        var store = new ObjectPerItemStore();
+        var store = new RealStoreDriver();
         var control = new ControlStore();
         SpikeWorkloads.TypeText(store, 20_000);
         SpikeWorkloads.TypeText(control, 20_000);
@@ -213,7 +214,7 @@ public sealed class SpikeObjectPerItemTests
     [Fact]
     public void SteadyState_KeepsTheLength_AndMatchesTheControlStore()
     {
-        var store = new ObjectPerItemStore();
+        var store = new RealStoreDriver();
         var control = new ControlStore();
         foreach (IStoreDriver d in new IStoreDriver[] { store, control })
         {
@@ -229,7 +230,7 @@ public sealed class SpikeObjectPerItemTests
     [Fact]
     public void EveryChunk_AtOrBelow64KB_AfterSlowTierShapedWork()
     {
-        var store = new ObjectPerItemStore();
+        var store = new RealStoreDriver();
         SpikeWorkloads.Build(store, SpikeWorkloads.TextInsert, 200_000);
         SpikeWorkloads.Build(store, SpikeWorkloads.ArrayPush, 200_000);
         SpikeWorkloads.Build(store, SpikeWorkloads.MapSet, 50_000);
@@ -243,20 +244,20 @@ public sealed class SpikeObjectPerItemTests
     [Fact]
     public void ClientIds_Are53Bit()
     {
-        var store = new ObjectPerItemStore(ClientTable.MaxClientId);
+        var store = new RealStoreDriver(ClientTable.MaxClientId);
         store.InsertChar(0, 'a');
         store.Commit();
 
-        Assert.Equal(ClientTable.MaxClientId, store.ClientOf(store.TextStart));
-        Assert.Throws<ArgumentOutOfRangeException>(() => new ObjectPerItemStore(ClientTable.MaxClientId + 1));
+        Assert.Equal(ClientTable.MaxClientId, store.Store.ClientOf(store.TextStart));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new RealStoreDriver(ClientTable.MaxClientId + 1));
     }
 
     [Fact]
-    public void DeletingEveryCharacterOfATextChunk_MakesTheChunkReleasable()
+    public void DeletingEveryCharacterOfATextChunk_ReleasesTheChunk()
     {
         // One chunk holds 32,768 characters. Typing 40,000 fills chunk 0 and starts chunk 1; deleting the first 32,768 characters
-        // releases every slice of chunk 0.
-        var store = new ObjectPerItemStore();
+        // garbage-collects every slice of chunk 0, so the store releases it (ADR 0023: the M2 store calls TextBuffer.Release).
+        var store = new RealStoreDriver();
         // Commit as the workloads do. One 40,000-character transaction would be quadratic: Yjs findMarker walks left over every
         // clock-adjacent item, and nothing merges them before the commit.
         for (var i = 0; i < 40_000; i++)
@@ -266,7 +267,7 @@ public sealed class SpikeObjectPerItemTests
         }
 
         store.Commit();
-        Assert.Equal(0, store.ReleasableTextChunks);
+        Assert.Equal(0, store.ReleasedTextChunks);
 
         // Committing every 256 deletes lets the commit merge the tombstones into one struct, so lookups do not walk thousands of them.
         for (var i = 0; i < TextBuffer.ChunkChars; i++)
@@ -277,15 +278,17 @@ public sealed class SpikeObjectPerItemTests
         store.Commit();
 
         Assert.Equal(40_000 - TextBuffer.ChunkChars, store.TextLength);
-        Assert.Equal(1, store.ReleasableTextChunks);
+        Assert.Equal(1, store.ReleasedTextChunks);
+        Assert.True(store.Store.Text.IsReleased(0));
+        Assert.Equal(new string('x', 40_000 - TextBuffer.ChunkChars), store.Text());
     }
 
     [Fact]
-    public void Candidates_ObjectPerItem_IsRegisteredWithTheHarness()
+    public void Candidates_RealStore_IsRegisteredWithTheHarness()
     {
-        Assert.IsType<ObjectPerItemStore>(SpikeCandidates.Factory(SpikeCandidates.ObjectPerItem)());
+        Assert.IsType<RealStoreDriver>(SpikeCandidates.Factory(SpikeCandidates.RealStore)());
 
-        var m = SpikeHarness.MeasureSteadyState(SpikeCandidates.ObjectPerItem, SpikeCandidates.Factory(SpikeCandidates.ObjectPerItem),
+        var m = SpikeHarness.MeasureSteadyState(SpikeCandidates.RealStore, SpikeCandidates.Factory(SpikeCandidates.RealStore),
             edits: 4_000, warmup: 200, startChars: 1_000);
         Assert.Equal(0.5, m.StructsPerOp);
     }
@@ -296,14 +299,14 @@ public sealed class SpikeObjectPerItemTests
     [InlineData(SpikeWorkloads.ArrayPush)]
     [InlineData(SpikeWorkloads.MapSet)]
     [InlineData(SpikeWorkloads.SteadyState)]
-    public void Process_ObjectPerItem_MeetsTheSpikeGates(string workload)
+    public void Process_RealStore_MeetsTheSpikeGatesAndFigures(string workload)
     {
 #if DEBUG
         Assert.Skip("The spike measurements run only in Release (ADR 0009).");
 #endif
         if (YSharpEnv.CurrentTier != Tier.Nightly) Assert.Skip("The spike measurements belong to the Nightly tier (YSHARP_TIER=Nightly).");
 
-        var m = SpikeProcess.MedianOfRuns(SpikeCandidates.ObjectPerItem, workload);
+        var m = SpikeProcess.MedianOfRuns(SpikeCandidates.RealStore, workload);
         TestContext.Current.TestOutputHelper?.WriteLine(System.Text.Json.JsonSerializer.Serialize(m));
 
         // ADR 0018 selection gates: Yjs bytes per operation, zero gen2 collections in the steady state, no LOH growth.
@@ -317,12 +320,22 @@ public sealed class SpikeObjectPerItemTests
         Assert.True(m.BytesPerOp <= ceiling, $"{m.BytesPerOp} bytes per operation, gate {ceiling}");
         Assert.Equal(0, m.LohGrowthBytes);
         if (workload == SpikeWorkloads.SteadyState) Assert.Equal(0, m.Gen2Collections);
+
+        // ADR 0023: the M2 and M3 memory gates hold the real store to candidate A's spike figures, compared at the precision the ADR records them.
+        var (figure, decimals) = workload switch
+        {
+            SpikeWorkloads.TextInsert => (98.17, 2),
+            SpikeWorkloads.ArrayPush => (8.079, 3),
+            SpikeWorkloads.MapSet => (165.52, 2),
+            _ => (47.93, 2),
+        };
+        Assert.True(Math.Round(m.BytesPerOp, decimals) <= figure, $"{m.BytesPerOp} bytes per operation, spike figure {figure} (ADR 0023)");
     }
 
     [Fact]
-    public void SmallStartList_RandomInsertsAndRemoves_MatchAListModel_AndStartSmall()
+    public void ChunkedList_RandomInsertsAndRemoves_MatchAListModel_AndStartSmall()
     {
-        var list = new SmallStartList<long>();
+        var list = new ChunkedList<long>();
         list.Add(1);
         Assert.True(list.MaxBlockBytes <= 16 * sizeof(long));
 
@@ -355,16 +368,16 @@ public sealed class SpikeObjectPerItemTests
 
         Assert.Equal(model.Count, list.Count);
         for (var i = 0; i < model.Count; i++) Assert.Equal(model[i], list[i]);
-        Assert.True(model.Count > SmallStartList<long>.BlockCapacity);
+        Assert.True(model.Count > ChunkedList<long>.BlockCapacity);
         Assert.Equal(64 * 1024, list.MaxBlockBytes);
 
         list.RemoveRange(0, list.Count - 1);
         Assert.Equal(model[^1], list[0]);
     }
 
-    private static ObjectPerItemStore Typed(string text)
+    private static RealStoreDriver Typed(string text)
     {
-        var store = new ObjectPerItemStore();
+        var store = new RealStoreDriver();
         for (var i = 0; i < text.Length; i++) store.InsertChar(i, text[i]);
         store.Commit();
         return store;
