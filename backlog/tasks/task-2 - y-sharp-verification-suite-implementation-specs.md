@@ -4,7 +4,7 @@ title: 'y-sharp verification suite: implementation specs'
 status: To Do
 assignee: []
 created_date: '2026-10-23 22:01'
-updated_date: '2026-10-24 10:34'
+updated_date: '2026-10-24 10:38'
 labels: []
 dependencies: []
 references:
@@ -34,4 +34,6 @@ Spec 9 API changes/gaps: added Awareness.TryEncodeUpdate and optional YSync.TryR
 Spec 10: Q25 now active (owner 10). API gaps: no Y.cleanupYTextFormatting counterpart (internal int YText.CleanupFormatting() seam); Q25 fixture assumes YEvent.GetPath() relative to CurrentTarget. fixtures/sim ~18MB. Randomized gating budget (~60s) unmeasured until implementation exists. Spec 11: ERR-20 pending (needs fault-injection seam); limit semantics unspecified (MaxAnyDepth, MaxStructsPerUpdate, MaxStringBytes, MaxUpdateBytes); ERR-19 assumes OOM from observer propagates. 2-min gating budget unproven. AFL++ job untested. Merged high-water: registry 36 / ledger 0.
 
 Spec 12 API gaps: needs internal static class YSharp.ScheduleSeam (settable Action<string>? Point, Action<string, Func<bool>>? Block) per tests/YSharp.TestKit/Concurrency/ScheduleSeam.cs; CC-9 exception type for stale views unspecified; TryTransact under held read lock unspecified; Transact(body, origin, timeout) with null origin binds to generic overload (use named args); CC-18 lock-order checker is Debug-only. Pending: registry 16 / ledger 0.
+
+Spec 13 limits: live properties unrun until implementation exists (expect unrecorded divergences needing normalisers); no awareness/sync.* or XML/nested/subdoc generators yet (SharpSide.Extensions hook only); events/structs/ds not compared on the y-sharp side yet.
 <!-- SECTION:NOTES:END -->
