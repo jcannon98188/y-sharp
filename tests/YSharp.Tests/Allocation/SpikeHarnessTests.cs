@@ -5,6 +5,7 @@ using Xunit;
 using YSharp.StoreSpike.Content;
 using YSharp.StoreSpike.Harness;
 using YSharp.TestKit.Tiers;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Allocation;
 
@@ -12,6 +13,7 @@ namespace YSharp.Tests.Allocation;
 /// Self-tests of the M0 spike driver, workloads, harness and shared content layer (TASK-4.3). They do not measure budgets: the measurements run in
 /// the Nightly tier, in Release. The content-layer and workload tests run in every configuration.
 /// </summary>
+[LibraryIndependent]
 public sealed class SpikeHarnessTests
 {
     private const long ChunkCeiling = 64 * 1024;
