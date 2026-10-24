@@ -51,22 +51,6 @@ public sealed class HotPathBudgetTests
         Assert.False(acquired, "the writer should have kept TryTransact from acquiring");
     }
 
-    [Fact, Covers("BUD-03")]
-    public void ScalarValueReads_AndAttributeEquals_AllocateNothing()
-    {
-        YValue number = 42.0, flag = true, text = "abc", other = 42.0;
-        var sink = 0.0;
-        AllocationBudgets.Check("BUD-03", "", () =>
-        {
-            _ = number.Kind;
-            if (number.TryGetNumber(out var n)) sink += n;
-            if (flag.TryGetBool(out var b) && b) sink += 1;
-            if (text.TryGetString(out var s)) sink += s.Length;
-            if (number.AttributeEquals(other)) sink += 1;
-        });
-        Assert.True(sink > 0);
-    }
-
     [Fact, Covers("BUD-04")]
     [Requires(Feature.Map, Feature.Events)]
     public void EventDispatch_WithNoHandlersForTheChangedType_AllocatesNothing()

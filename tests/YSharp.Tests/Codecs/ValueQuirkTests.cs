@@ -13,7 +13,7 @@ namespace YSharp.Tests.Codecs;
 /// pinned Node; the whole-fixture replays are in <see cref="WireFixtureTests"/>. Each test builds a client-1 document with one
 /// <c>m.k</c> value and compares the Any payload inside the V1 update, or decodes a hand-built payload.
 /// </summary>
-[Requires(Feature.Values)]
+[Requires(Feature.Values, Feature.V1, Feature.Map)]
 public sealed class ValueQuirkTests
 {
     private static string AnyHex(YValue v) => Hex.Of(Wire.AnyPayloadOfMapSet(v));
@@ -91,7 +91,6 @@ public sealed class ValueQuirkTests
     }
 
     [Fact, Covers("Q06")]
-    [Requires(Feature.Map)]
     public void Q06_Undefined_IsADistinctCaseFromNull_AndIsStoredInAMap()
     {
         Assert.Equal("7f", AnyHex(YValue.Undefined));
