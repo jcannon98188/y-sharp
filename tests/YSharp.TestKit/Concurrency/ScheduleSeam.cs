@@ -6,9 +6,9 @@ namespace YSharp.TestKit.Concurrency;
 /// <summary>
 /// The reflection adapter for the one internal seam Spec 12 needs. The TestKit cannot see the library's internals (ADR 0015: InternalsVisibleTo goes to
 /// YSharp.Tests, YSharp.Fuzz.Tests and YSharp.Benchmarks only), so it sets the delegates by reflection; tests in YSharp.Tests assign
-/// <c>YSharp.ScheduleSeam</c> directly (<c>SeamInstall</c>). The seam itself: from the implementation (ADR 0006 "Seams", docs/research/schedule-exploration.md section 2).
+/// <c>YSharp.Transactions.ScheduleSeam</c> directly (<c>SeamInstall</c>). The seam itself: from the implementation (ADR 0006 "Seams", docs/research/schedule-exploration.md section 2).
 /// <para>
-/// Contract: an <c>internal static class YSharp.ScheduleSeam</c> in the <c>YSharp</c> assembly (visible to the test assemblies) with two
+/// Contract: an <c>internal static class YSharp.Transactions.ScheduleSeam</c> in the <c>YSharp</c> assembly (visible to the test assemblies) with two
 /// settable static members, each a property or field:
 /// </para>
 /// <list type="bullet">
@@ -23,7 +23,7 @@ namespace YSharp.TestKit.Concurrency;
 /// </summary>
 public static class ScheduleSeam
 {
-    public const string TypeName = "YSharp.ScheduleSeam";
+    public const string TypeName = "YSharp.Transactions.ScheduleSeam";
 
     private const BindingFlags Flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 

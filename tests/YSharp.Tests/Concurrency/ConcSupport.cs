@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Xunit;
 using YSharp.TestKit.Concurrency;
+using Seam = YSharp.Transactions.ScheduleSeam;
 
 namespace YSharp.Tests.Concurrency;
 
@@ -137,18 +138,18 @@ internal static class Conc
     }
 }
 
-/// <summary>Routes the library's yield and block points to a scheduler by assigning the internal <see cref="ScheduleSeam"/> delegates directly (this project sees internals; the TestKit scenarios use reflection, ADR 0015). Serial collection only: the hook is static.</summary>
+/// <summary>Routes the library's yield and block points to a scheduler by assigning the internal <see cref="Seam"/> delegates directly (this project sees internals; the TestKit scenarios use reflection, ADR 0015). Serial collection only: the hook is static.</summary>
 internal sealed class SeamInstall : IDisposable
 {
     public SeamInstall(CooperativeScheduler scheduler)
     {
-        ScheduleSeam.Point = scheduler.Point;
-        ScheduleSeam.Block = scheduler.Block;
+        Seam.Point = scheduler.Point;
+        Seam.Block = scheduler.Block;
     }
 
     public void Dispose()
     {
-        ScheduleSeam.Point = null;
-        ScheduleSeam.Block = null;
+        Seam.Point = null;
+        Seam.Block = null;
     }
 }
