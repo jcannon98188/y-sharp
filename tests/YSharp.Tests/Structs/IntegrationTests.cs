@@ -37,6 +37,7 @@ public sealed class IntegrationTests
 
     [Fact]
     [Covers("STR-13")]
+    [Requires(Feature.Text)]
     public void MissingDependency_IsFoundInOrderOrigin_ThenRightOrigin()
     {
         var (u1, u2, u3) = TwoDependencies();

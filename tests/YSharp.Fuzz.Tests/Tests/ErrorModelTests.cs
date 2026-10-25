@@ -26,6 +26,7 @@ public sealed class ErrorModelTests
     // ------------------------------------------------------------------ ERR-01, ERR-02
 
     [Fact, Covers("ERR-01", Layer = CoverLayer.Unit)]
+    [Requires(Feature.V1)]
     public void Err01_TryApplyUpdate_ReturnsATypedResult_AndApplyUpdateThrowsTheSameCode()
     {
         var doc = new Doc();
@@ -54,6 +55,7 @@ public sealed class ErrorModelTests
     }
 
     [Fact, Covers("ERR-02", Layer = CoverLayer.Unit)]
+    [Requires(Feature.V1)]
     public void Err02_DifferentJsFailureKinds_CollapseIntoTheSameCode()
     {
         // JS raises Error, RangeError or TypeError for these; y-sharp reports one code and the tests never look at anything else

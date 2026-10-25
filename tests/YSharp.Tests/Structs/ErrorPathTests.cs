@@ -20,6 +20,7 @@ public sealed class ErrorPathTests
 
     [Fact]
     [Covers("STR-69", "STR-72")]
+    [Requires(Feature.V1)]
     public void TheUnexpectedCaseSites_AreGuardedByTheirCallers_ThePayloadWaitsOrIsIgnored()
     {
         // addStruct clock gap and findIndexSS miss: a struct beyond the known state, and a delete range for an unknown client.

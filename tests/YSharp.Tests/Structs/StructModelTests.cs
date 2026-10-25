@@ -168,6 +168,7 @@ public sealed class StructModelTests
 
     [Fact]
     [Covers("STR-31", "STR-32")]
+    [Requires(Feature.Array, Feature.Map, Feature.Gc)]
     public void ChildrenOfACollectedType_AfterGc_BecomeOneMergedGcStruct()
     {
         var (a, _) = CollectedMap();
