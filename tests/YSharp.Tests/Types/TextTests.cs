@@ -402,6 +402,59 @@ public sealed class TextTests
         Assert.Equal(expected, text2.DeltaJson());
     }
 
+    [Fact, Covers("F-8")]
+    [Requires(Feature.TextFormat)]
+    public void RemoteChange_SameConcurrentFormat_DeletesTheDuplicateFormatItems()
+    {
+        // Yjs cleanupYTextAfterTransaction runs in a follow-up transaction of each doc that applies the other's format; the state, delete
+        // set included, is the oracle's (yjs 13.6.33)
+        var a = NewDoc(1);
+        var b = NewDoc(2);
+        a.GetText("text").Insert(0, "hello world");
+        Exchange(a, b);
+        a.GetText("text").Format(0, 5, Bold);
+        b.GetText("text").Format(0, 5, Bold);
+        Exchange(a, b);
+        Exchange(a, b);
+        const string expected =
+            "0202020046010004626f6c640474727565c60104010504626f6c64046e756c6c040100040104746578740568656c6c6f8401040620776f726c6441010001" +
+            "c60104010504626f6c64046e756c6c0101010b01";
+        Assert.Equal(expected, Convert.ToHexString(a.EncodeStateAsUpdate()).ToLowerInvariant());
+        Assert.Equal(expected, Convert.ToHexString(b.EncodeStateAsUpdate()).ToLowerInvariant());
+    }
+
+    [Fact, Covers("F-8")]
+    [Requires(Feature.TextFormat, Feature.Map)]
+    public void RemoteChange_ToANestedTextNobodyRead_StillCleansUpItsFormatting()
+    {
+        // the relay never reads the map or the text, so no shared type object wraps them; Yjs has one for every type and still cleans up
+        var a = NewDoc(1);
+        var c = NewDoc(3);
+        var relay = NewDoc(2);
+        a.GetMap("m").Set("t", new YText("abcdefgh"));
+        Exchange(a, c);
+        Nested(a).Format(1, 4, Obj(("b", 1)));
+        Nested(c).Delete(1, 4);
+        relay.ApplyUpdate(a.EncodeStateAsUpdate());
+        relay.ApplyUpdate(c.EncodeStateAsUpdate());
+        Assert.Equal("010601002701016d0174020400010001618101010484010503666768c10101010201c6010501060162046e756c6c01010202040901",
+            Convert.ToHexString(relay.EncodeStateAsUpdate()).ToLowerInvariant());
+
+        static YText Nested(Doc doc)
+        {
+            Assert.True(doc.GetMap("m").TryGet("t", out var entry));
+            return (YText)entry.Type!;
+        }
+    }
+
+    private static void Exchange(Doc a, Doc b)
+    {
+        var fromA = a.EncodeStateAsUpdate();
+        var fromB = b.EncodeStateAsUpdate();
+        b.ApplyUpdate(fromA);
+        a.ApplyUpdate(fromB);
+    }
+
     [Fact, PortOf("y-text.tests.js:testDeltaAfterConcurrentFormatting", "F-9", "Y-6")]
     [Requires(Feature.TextFormat, Feature.Events)]
     public void Text_ConcurrentFormatting_ProducesTheExpectedDelta()
