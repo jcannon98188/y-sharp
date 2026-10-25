@@ -192,7 +192,8 @@ public sealed class ValueQuirkTests
     {
         Assert.Equal("77026162", AnyHex("ab"));
         Assert.Equal("7700", AnyHex(""));
-        Assert.Equal("7403010203", AnyHex(YValue.Bytes(new byte[] { 1, 2, 3 })));
+        // a top-level Uint8Array is ContentBinary, as Yjs typeMapSet writes it; inside an array it is the Any tag 116
+        Assert.Equal("75017403010203", AnyHex(YValue.Array(new[] { YValue.Bytes(new byte[] { 1, 2, 3 }) })));
         var doc = Wire.NewDoc();
         doc.GetText("t").Insert(0, "é");      // two UTF-8 bytes, one UTF-16 unit
         Assert.Equal("010101000401017402c3a900", Hex.Of(Wire.Encode(doc)));

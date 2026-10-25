@@ -122,10 +122,10 @@ public sealed class ErrorPathTests
         Assert.True(d.TryApplyUpdate(update).Ok);
         Assert.Equal("ab", Text(d));
 
-        // bit 6 (parentSub) is ignored when an origin exists
+        // bit 6 (parentSub) is ignored when an origin exists (the origin is e's own "x", client 3 clock 0)
         var e = Net.Mk(3);
         e.GetText("t").Insert(0, "x");
-        Assert.True(e.TryApplyUpdate(Hex.Bytes("01010500a40100017900")).Ok);
+        Assert.True(e.TryApplyUpdate(Hex.Bytes("01010500a40300017900")).Ok);
         Assert.Equal("xy", Text(e));
     }
 

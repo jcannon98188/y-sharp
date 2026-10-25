@@ -340,6 +340,7 @@ public sealed class TextTests
     }
 
     [Fact, PortOf("y-text.tests.js:testFormattingRemoved", "F-7")]
+    [Requires(Feature.Sync)]
     public void Text_FormattedTextDeleted_LeavesNothingBehind()
     {
         var text0 = Net.Init(1).Peers[0].Text;
@@ -351,6 +352,7 @@ public sealed class TextTests
     }
 
     [Fact, PortOf("y-text.tests.js:testFormattingRemovedInMidText", "F-7")]
+    [Requires(Feature.Sync)]
     public void Text_FormattedMiddleDeleted_LeavesNoFormattingMarkers()
     {
         var text0 = Net.Init(1).Peers[0].Text;
@@ -697,6 +699,7 @@ public sealed class TextTests
     }
 
     [Fact, PortOf("y-text.tests.js:testToJson", "T-3")]
+    [Requires(Feature.Sync)]
     public void ToJson_FormattedText_ReturnsTheUnformattedText()
     {
         var text0 = Net.Init(1).Peers[0].Text;
@@ -705,6 +708,7 @@ public sealed class TextTests
     }
 
     [Fact, PortOf("y-text.tests.js:testAppendChars", "T-1")]
+    [Requires(Feature.Sync)]
     public void Text_TenThousandAppends_KeepTheLengthCorrect()
     {
         const int n = 10000;

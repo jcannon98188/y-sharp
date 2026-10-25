@@ -263,7 +263,7 @@ public sealed class GarbageCollectionTests
 
     [Fact]
     [Covers("GC-11")]
-    [Requires(Feature.Text)]
+    [Requires(Feature.Text, Feature.Sync)]
     public void ConvergenceHelper_ChecksStoresAndPending_WithGcOnByDefault_AndAGcOffRunByHand()
     {
         var internals = new StructsSimInternals();

@@ -95,7 +95,7 @@ public sealed class StructStoreTests
 
     [Fact]
     [Covers("STR-52")]
-    [Requires(Feature.Text)]
+    [Requires(Feature.Text, Feature.Events)]
     public void PendingStructsAndPendingDeleteSet_AreStoreState_ReExportedByEncodeStateAsUpdate()
     {
         // pendingStructs

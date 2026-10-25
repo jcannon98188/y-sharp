@@ -311,6 +311,7 @@ public sealed class SharpSideGuardTests
     }
 
     [Fact, Covers("DIFF-01")]
+    [Requires(Feature.Events)]
     public void AGeneratedScript_IsAcceptedByTheInterpreter_NeverReportedAsAScriptError()
     {
         var reply = SharpSide.Run(ScriptPlanScript());

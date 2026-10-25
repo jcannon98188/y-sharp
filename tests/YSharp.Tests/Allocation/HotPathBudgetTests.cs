@@ -65,7 +65,7 @@ public sealed class HotPathBudgetTests
     }
 
     [Fact, Covers("BUD-05")]
-    [Requires(Feature.Text)]
+    [Requires(Feature.Text, Feature.Events)]
     public void Commit_WithNoUpdateSubscriber_AllocatesNothing()
     {
         var doc = AllocDocs.Populated();
@@ -92,7 +92,7 @@ public sealed class HotPathBudgetTests
     }
 
     [Fact, Covers("BUD-07")]
-    [Requires(Feature.Text)]
+    [Requires(Feature.Text, Feature.Events)]
     public void OneCharacterTextInsert_AtTheEnd_AllocatesNothing()
     {
         var doc = AllocDocs.Populated();
@@ -103,7 +103,7 @@ public sealed class HotPathBudgetTests
     [Theory, Covers("BUD-08")]
     [InlineData(UpdateFormat.V1)]
     [InlineData(UpdateFormat.V2)]
-    [Requires(Feature.V2, Feature.Text)]
+    [Requires(Feature.V2, Feature.Text, Feature.Events)]
     public void TryApplyUpdate_HotPath_StaysWithinItsBudget(UpdateFormat format)
     {
         // Each call applies a new update to the target; the stream is long enough for warm-up, measurement and a diagnostic rerun's start.

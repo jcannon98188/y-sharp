@@ -37,7 +37,7 @@ public sealed class IntegrationTests
 
     [Fact]
     [Covers("STR-13")]
-    [Requires(Feature.Text)]
+    [Requires(Feature.Text, Feature.Events)]
     public void MissingDependency_IsFoundInOrderOrigin_ThenRightOrigin()
     {
         var (u1, u2, u3) = TwoDependencies();
@@ -105,7 +105,7 @@ public sealed class IntegrationTests
 
     [Fact]
     [Covers("STR-17")]
-    [Requires(Feature.Text)]
+    [Requires(Feature.Text, Feature.Events)]
     public void PartiallyKnownStruct_OnIntegration_IntegratesOnlyTheUnseenSuffix()
     {
         var a = Net.Mk(1);
@@ -163,7 +163,7 @@ public sealed class IntegrationTests
 
     [Fact]
     [Covers("STR-18", "STR-19", "STR-20", "STR-23")]
-    [Requires(Feature.Text)]
+    [Requires(Feature.Text, Feature.Events)]
     public void ConflictZone_ItemsFromAThirdClient_ConvergesUnderEveryDeliveryOrder()
     {
         // Three clients type at the same place; two of them then type again inside the conflict zone.

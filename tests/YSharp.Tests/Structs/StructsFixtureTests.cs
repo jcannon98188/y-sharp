@@ -48,7 +48,7 @@ public sealed class StructsFixtureTests
     [Theory]
     [MemberData(nameof(FixtureNames))]
     [Covers("STR-29", "STR-38", "STR-39", "STR-42", "STR-43", "STR-44", "STR-61", "STR-62", "STR-63", "STR-64", "STR-65", "STR-66", "STR-67", "STR-68", "GC-06", "Q20", "Q21")]
-    [Requires(Feature.Text, Feature.Array, Feature.Map, Feature.V2, Feature.UpdateFunctions, Feature.V2Functions)]
+    [Requires(Feature.Text, Feature.Array, Feature.Map, Feature.V2, Feature.UpdateFunctions, Feature.V2Functions, Feature.Events)]
     public void Fixture_EveryStoredScenario_ReplaysLikeTheOracle(string name)
     {
         var fixture = FixtureLoader.Load(Path.Combine(Dir, name + ".json"), PinnedVersions.Read(Root));

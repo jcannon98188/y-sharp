@@ -58,7 +58,7 @@ public sealed class AmplificationTests
     private static byte[] HiBytes => UpdateBuilder.V1(UpdateBuilder.TextInsert(1, "t", "hi"));
 
     [Fact, Covers("HOS-AMP", "HOS-REF", "ERR-10", Layer = CoverLayer.Unit)]
-    [Requires(Feature.Text)]
+    [Requires(Feature.Text, Feature.Fuzz)]
     public void ThousandsOfTinyPendingUpdates_StayLinear_AndAllIntegrateWhenTheDependencyArrives()
     {
         const int count = 3000;

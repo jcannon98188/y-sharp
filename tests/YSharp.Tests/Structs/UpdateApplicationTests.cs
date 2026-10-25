@@ -38,7 +38,7 @@ public sealed class UpdateApplicationTests
 
     [Fact]
     [Covers("STR-29")]
-    [Requires(Feature.Text, Feature.V2)]
+    [Requires(Feature.Text, Feature.V2, Feature.Events)]
     public void ItemWrite_BothOriginsAbsent_EmitsParentInfo()
     {
         var a = Net.Mk(1);
@@ -195,7 +195,7 @@ public sealed class UpdateApplicationTests
 
     [Fact]
     [Covers("STR-62")]
-    [Requires(Feature.Text)]
+    [Requires(Feature.Text, Feature.Events)]
     public void ReapplyingAnUpdate_IsANoOp_NoEventsNoStateChange()
     {
         var a = Net.Mk(1);
@@ -235,7 +235,7 @@ public sealed class UpdateApplicationTests
 
     [Fact]
     [Covers("STR-63", "STR-64", "STR-52")]
-    [Requires(Feature.Text, Feature.UpdateFunctions)]
+    [Requires(Feature.Text, Feature.UpdateFunctions, Feature.Events)]
     public void WhenOneStructWaits_EarlierStructsOfTheUpdateStillIntegrate_AndTheRestIsKeptAsPending()
     {
         var x = Net.Mk(1);
@@ -274,7 +274,7 @@ public sealed class UpdateApplicationTests
 
     [Fact]
     [Covers("STR-64")]
-    [Requires(Feature.Text)]
+    [Requires(Feature.Text, Feature.Events)]
     public void IndependentPendingUpdates_AreMergedIntoOnePendingState_AndEachRetriesWhenItsDependencyArrives()
     {
         var x = Net.Mk(1);
@@ -313,7 +313,7 @@ public sealed class UpdateApplicationTests
 
     [Fact]
     [Covers("STR-65")]
-    [Requires(Feature.Text)]
+    [Requires(Feature.Text, Feature.Events)]
     public void DeleteSet_ArrivingBeforeTheStructsItRefersTo_IsHeldAndAppliedLater()
     {
         var a = Net.Mk(1);
@@ -343,7 +343,7 @@ public sealed class UpdateApplicationTests
 
     [Fact]
     [Covers("STR-65")]
-    [Requires(Feature.Text)]
+    [Requires(Feature.Text, Feature.Events)]
     public void ReapplyingADeleteSet_ForAlreadyDeletedRanges_ChangesNothing()
     {
         var a = Net.Mk(1);

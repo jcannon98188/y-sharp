@@ -288,8 +288,9 @@ public sealed class UpdateLayoutTests
     {
         var one = Hex.Bytes("01010101840100016200");
         Assert.Equal(Hex.Of(one), Hex.Of(Wire.Merge(UpdateFormat.V1, one)));
+        // a single input is still decoded in full first (ADR 0005): a Skip ref with flag bits is Malformed (ENC-85), where Yjs returns the input
         var skipWithFlags = Hex.Bytes("010101008a0200");
-        Assert.Equal(Hex.Of(skipWithFlags), Hex.Of(Wire.Merge(UpdateFormat.V1, skipWithFlags)));
+        Assert.Equal(YError.Malformed, YUpdate.TryMerge(new[] { (ReadOnlyMemory<byte>)skipWithFlags }, new System.Buffers.ArrayBufferWriter<byte>()).Error);
     }
 
     // ------------------------------------------------------------------ delete sets

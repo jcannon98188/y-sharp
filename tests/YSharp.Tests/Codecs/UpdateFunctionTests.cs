@@ -48,7 +48,7 @@ public sealed class UpdateFunctionTests
     [Theory, Covers("ENC-23")]
     [InlineData(UpdateFormat.V1)]
     [InlineData(UpdateFormat.V2)]
-    [Requires(Feature.Text, Feature.V2)]
+    [Requires(Feature.Text, Feature.V2, Feature.Events)]
     public void Enc23_Merge_OfAllUpdates_AppliesToTheSameStateInAnyOrder(UpdateFormat format)
     {
         var (doc, updates) = Busy(format);
@@ -139,7 +139,7 @@ public sealed class UpdateFunctionTests
     }
 
     [Fact, Covers("ENC-27", "ENC-84")]
-    [Requires(Feature.Text, Feature.V2)]
+    [Requires(Feature.Text, Feature.V2, Feature.Events)]
     public void Enc27_EveryEmissionSource_ProducesUpdatesThatApplyToTheSameState()
     {
         var (doc, events) = Busy(UpdateFormat.V1);

@@ -162,7 +162,7 @@ public class OpsScriptTests
     // ------------------------------------------------------------ end to end against the implementation
 
     [Fact]
-    [Requires(Feature.Text)]
+    [Requires(Feature.Text, Feature.Events)]
     public void Run_TextInsertScript_ProducesDocAndUpdates()
     {
         var reg = StandardSteps.CreateRegistry();

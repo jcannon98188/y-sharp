@@ -67,7 +67,7 @@ public sealed class StructModelTests
 
     [Fact]
     [Covers("STR-03")]
-    [Requires(Feature.Text)]
+    [Requires(Feature.Text, Feature.Events)]
     public void AStructWithAClockGap_NeverEntersTheStore_ItWaitsAsPending()
     {
         var a = Net.Mk(1);

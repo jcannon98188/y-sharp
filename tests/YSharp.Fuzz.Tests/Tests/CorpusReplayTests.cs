@@ -46,7 +46,7 @@ public sealed class CorpusReplayTests
     public void Corpus_Clocks_GapsOverlapsAndOverflowsAreContained() => Replay("HOS-CLOCK");
 
     [Fact, Covers("HOS-REF", "ERR-06", "ERR-07", Layer = CoverLayer.Unit)]
-    [Requires(Feature.Text)]
+    [Requires(Feature.Text, Feature.Fuzz)]
     public void Corpus_References_MissingCyclicAndNonTypeParentsNeverSpin() => Replay("HOS-REF");
 
     [Fact, Covers("HOS-SEM", "ERR-04", Layer = CoverLayer.Unit)]
@@ -54,7 +54,7 @@ public sealed class CorpusReplayTests
     public void Corpus_MeaninglessButWellFormedInput_IsRejectedOrIgnored() => Replay("HOS-SEM");
 
     [Fact, Covers("HOS-AMP", Layer = CoverLayer.Unit)]
-    [Requires(Feature.Text)]
+    [Requires(Feature.Text, Feature.Fuzz)]
     public void Corpus_Amplification_IsBoundedInTimeAndAllocation() => Replay("HOS-AMP");
 
     [Fact, Covers("HOS-PROTO", Layer = CoverLayer.Unit)]

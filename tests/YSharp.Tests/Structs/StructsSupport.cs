@@ -27,7 +27,7 @@ internal static class StructsProbe
     {
         using var json = JsonDocument.Parse(DumpJson(doc));
         return json.RootElement.EnumerateArray().Select(c => new ClientStructs(
-            c[0].GetUInt32(),
+            c[0].GetUInt64(),
             c[1].EnumerateArray().Select(s => StructInfo.From(c[0].GetUInt64(), s)).ToList())).ToList();
     }
 
