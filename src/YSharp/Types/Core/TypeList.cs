@@ -50,7 +50,8 @@ internal static class TypeList
     {
         var doc = type.AttachedDoc ?? throw new InvalidOperationException("The type is not integrated.");
         var branch = type.Branch;
-        if ((uint)index > (uint)branch.Length) throw new ArgumentOutOfRangeException(nameof(index), "Length exceeded!");
+        if (index < 0) throw new ArgumentOutOfRangeException(nameof(index));
+        if (index > branch.Length) throw new ArgumentOutOfRangeException(nameof(index), "Length exceeded!");
         Validate(content, undefinedAllowed: false);
         if (content.IsEmpty) return;
 
@@ -92,13 +93,18 @@ internal static class TypeList
         InsertAfter(tx, doc, branch, n, content);
     }
 
-    /// <summary>Yjs <c>typeListDelete</c>: deletes <paramref name="length"/> elements from <paramref name="index"/>.</summary>
+    /// <summary>
+    /// Yjs <c>typeListDelete</c>: deletes <paramref name="length"/> elements from <paramref name="index"/>. As in JS, a range that runs past the
+    /// end deletes what exists and then throws "Length exceeded!" (A-5); the deleted part stays. A start past the end deletes nothing.
+    /// </summary>
     public static void Delete(Transaction tx, YType type, int index, int length)
     {
         var doc = type.AttachedDoc ?? throw new InvalidOperationException("The type is not integrated.");
         var branch = type.Branch;
-        if (index < 0 || length < 0 || (long)index + length > branch.Length) throw new ArgumentOutOfRangeException(nameof(length), "Length exceeded!");
+        if (index < 0) throw new ArgumentOutOfRangeException(nameof(index));
+        if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
         if (length == 0) return;
+        if (index > branch.Length) throw new ArgumentOutOfRangeException(nameof(length), "Length exceeded!");
 
         var store = doc.Store;
         var markers = branch.MarkersFor(store);
@@ -131,8 +137,46 @@ internal static class TypeList
             n = n.Right;
         }
 
-        if (length > 0) throw new YInternalException("The list is shorter than its length.");
+        // JS throws before updating the markers and leaves them stale; y-sharp updates them first (no wire effect)
         markers?.Update(startIndex, -startLength + length);
+        if (length > 0) throw new ArgumentOutOfRangeException(nameof(length), "Length exceeded!");
+    }
+
+    /// <summary>
+    /// Yjs <c>typeListPushGenerics</c>: inserts after the last item, deleted or not. The branch keeps its last item, so this needs no walk
+    /// (ADR 0023); the markers need no update, as nothing after the end moves.
+    /// </summary>
+    public static void Push(Transaction tx, YType type, ReadOnlySpan<YEntry> content)
+    {
+        var doc = type.AttachedDoc ?? throw new InvalidOperationException("The type is not integrated.");
+        Validate(content, undefinedAllowed: false);
+        if (content.IsEmpty) return;
+        InsertAfter(tx, doc, type.Branch, new ItemRef(type.Branch.End), content);
+    }
+
+    /// <summary>Yjs <c>typeListSlice</c> with JS <c>Array.prototype.slice</c> bounds: negative indexes count from the end, both are clamped.</summary>
+    public static List<YEntry> Slice(YType type, int start, int end)
+    {
+        var length = type.Branch.Length;
+        start = start < 0 ? Math.Max(0, length + start) : Math.Min(start, length);
+        end = end < 0 ? Math.Max(0, length + end) : Math.Min(end, length);
+        var result = new List<YEntry>(Math.Max(0, end - start));
+        if (type.AttachedDoc is not { } doc || end <= start) return result;
+        var left = end - start;
+        for (var n = StructStore.StartOf(type.Branch); !n.IsNull && left > 0; n = n.Right)
+        {
+            if (n.IsDeleted || !n.IsCountable) continue;
+            if (n.Length <= start)
+            {
+                start -= (int)n.Length;
+                continue;
+            }
+
+            for (var i = start; i < n.Length && left > 0; i++, left--) result.Add(ContentAt(doc, n, i));
+            start = 0;
+        }
+
+        return result;
     }
 
     /// <summary>

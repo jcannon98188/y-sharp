@@ -22,6 +22,13 @@ internal sealed class SearchMarkers
 
     public int Count => _count;
 
+    /// <summary>Forgets every marker (Yjs <c>_searchMarker.length = 0</c>), after a remote change moved items under them.</summary>
+    internal void Clear()
+    {
+        Array.Clear(_items, 0, _count);
+        _count = 0;
+    }
+
     /// <summary>A marker found by <see cref="Find"/>: the marked item and its index.</summary>
     internal readonly record struct Hit(Item Item, int Index);
 

@@ -290,11 +290,23 @@ public sealed partial class Doc
         first?.Throw();
     }
 
+    /// <summary>
+    /// Yjs <c>AbstractType._callObserver</c>: a remote change integrates items without moving the search markers, so each changed type of a
+    /// non-local transaction forgets them (an update applied inside a local transaction makes it non-local, as Yjs <c>readUpdateV2</c> does).
+    /// Done before any hook, so a beforeObserverCalls handler already reads through fresh markers.
+    /// </summary>
+    private static void ClearStaleMarkers(TxState state)
+    {
+        if (state.IsLocal || state.ChangedOrNull is not { } changed) return;
+        foreach (var type in changed.Keys) type.Branch.Markers?.Clear();
+    }
+
     private void CleanupOne(Transaction tx)
     {
         try
         {
             tx.State.TakeAfterState();
+            ClearStaleMarkers(tx.State);
             HookBeforeObservers(tx);
             HookObservers(tx);
             HookAfterTransaction(tx);

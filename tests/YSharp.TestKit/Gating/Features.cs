@@ -63,6 +63,7 @@ public static class Features
         Feature.V2,
         Feature.V2Functions,
         Feature.TypesCore,
+        Feature.Array,
     };
 }
 
