@@ -144,6 +144,22 @@ public sealed class TransactionTests
     }
 
     [Fact, Covers("CC-9")]
+    public void ATransactionKeptPastItsBody_StaysInvalid_WhileALaterTransactionRuns()
+    {
+        var doc = Conc.NewDoc();
+        Transaction? kept = null;
+        doc.Transact(tx => kept = tx);
+        doc.Transact(_ =>
+        {
+            Assert.False(kept!.IsValid);
+            Assert.Throws<YLifetimeException>(() => kept.Origin);
+        }, "later");
+        Transaction? keptRead = null;
+        doc.ReadTransact(tx => keptRead = tx);
+        doc.ReadTransact(_ => Assert.False(keptRead!.IsValid));
+    }
+
+    [Fact, Covers("CC-9")]
     public void AReadTransactionKeptPastItsBody_IsInvalid()
     {
         var doc = Conc.NewDoc();
