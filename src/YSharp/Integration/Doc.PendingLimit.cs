@@ -63,6 +63,7 @@ public sealed partial class Doc
     /// </summary>
     internal long PredictPendingBytes(UpdateRefs update)
     {
+        if (NothingCanWait(update)) return 0;
         var dry = new PendingDryRun();
         var pending = _pending?.Clone();
         DeleteRanges? pendingDeletes = null;
@@ -75,6 +76,37 @@ public sealed partial class Doc
         DryReadUpdate(dry, update.Copy(), ref pending, ref pendingDeletes);
         return V1Bytes(pending, pendingDeletes);
     }
+
+    /// <summary>
+    /// The hot path, without allocating: nothing is pending, every client's structs follow on from its state with no gap, every dependency on
+    /// another client is already in the store, and every delete range lies below its client's state. Then no struct can wait (a rejected one
+    /// takes only its own client's later structs with it) and no range can stay unapplied, so nothing would be pending.
+    /// </summary>
+    private bool NothingCanWait(UpdateRefs update)
+    {
+        if (_pending is not null || _pendingDeletes is not null) return false;
+        foreach (var range in update.Deletes)
+            if (range.End > Store.GetState(range.Client)) return false;
+
+        foreach (var client in update.ClientValues)
+        {
+            var refs = client.Refs;
+            if (refs.Count == 0) continue;
+            var expected = refs[0].Clock;
+            if (expected > Store.GetState(client.Client)) return false;
+            for (var i = 0; i < refs.Count; i++)
+            {
+                var r = refs[i];
+                if (r.Kind == RefKind.Skip || r.Clock != expected) return false;
+                expected = r.End;
+                if (!Known(r.Origin, r.Client) || !Known(r.RightOrigin, r.Client) || !Known(r.ParentId, r.Client)) return false;
+            }
+        }
+
+        return true;
+    }
+
+    private bool Known(ItemId? dep, ulong client) => dep is not { } d || d.Client == client || d.Clock < Store.GetState(d.Client);
 
     /// <summary><see cref="ReadUpdate"/> against a dry run's virtual state, on the caller's copies of the pending state. Keep the two in step.</summary>
     private void DryReadUpdate(PendingDryRun dry, UpdateRefs update, ref PendingStructs? pending, ref DeleteRanges? pendingDeletes)

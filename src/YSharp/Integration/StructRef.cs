@@ -125,6 +125,9 @@ internal sealed class UpdateRefs
 
     public IEnumerable<ClientRefs> Clients => _clients.Values;
 
+    /// <summary>The clients without boxing an enumerator (the hot path's pending check).</summary>
+    internal Dictionary<ulong, ClientRefs>.ValueCollection ClientValues => _clients.Values;
+
     public int ClientCount => _clients.Count;
 
     /// <summary>The delete ranges in update order.</summary>
