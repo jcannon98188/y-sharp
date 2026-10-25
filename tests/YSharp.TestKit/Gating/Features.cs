@@ -58,6 +58,7 @@ public static class Features
         Feature.Transactions,
         Feature.Integrate,
         Feature.V1,
+        Feature.Gc,
     };
 }
 

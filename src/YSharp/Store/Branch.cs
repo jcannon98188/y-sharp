@@ -53,6 +53,18 @@ internal sealed class Branch
     internal MapKeyTable? Map => _map;
 
     internal MapKeyTable MapFor(StructStore store) => _map ??= new MapKeyTable(store.Keys);
+
+    /// <summary>
+    /// Forgets the sequence, the key table and the markers (Yjs <c>ContentType.gc</c>: <c>_start = null</c>, <c>_map = new Map()</c>), once every
+    /// item in them was garbage-collected with the type that holds them.
+    /// </summary>
+    internal void ClearContent()
+    {
+        Start = null;
+        End = null;
+        _map = null;
+        _markers = null;
+    }
 }
 
 /// <summary>The wire type refs of Yjs <c>ContentType</c> (<c>ContentType.js:28-34</c>).</summary>
