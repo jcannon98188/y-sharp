@@ -121,32 +121,42 @@ internal sealed class ClientRefs
 /// </summary>
 internal sealed class UpdateRefs
 {
-    private readonly Dictionary<ulong, ClientRefs> _clients = new();
+    private static readonly Dictionary<ulong, ClientRefs> NoClients = new();
 
-    public IEnumerable<ClientRefs> Clients => _clients.Values;
+    // created on the first client: the update functions decode only delete ranges into it (HOS-AMP)
+    private Dictionary<ulong, ClientRefs>? _clients;
+
+    public IEnumerable<ClientRefs> Clients => ClientValues;
 
     /// <summary>The clients without boxing an enumerator (the hot path's pending check).</summary>
-    internal Dictionary<ulong, ClientRefs>.ValueCollection ClientValues => _clients.Values;
+    internal Dictionary<ulong, ClientRefs>.ValueCollection ClientValues => (_clients ?? NoClients).Values;
 
-    public int ClientCount => _clients.Count;
+    public int ClientCount => _clients?.Count ?? 0;
 
     /// <summary>The delete ranges in update order.</summary>
     public List<DeleteRange> Deletes { get; } = new();
 
     /// <summary>Sets <paramref name="client"/>'s structs, replacing an earlier block of the same client.</summary>
-    public void SetClient(ulong client, List<StructRef> refs) => _clients[client] = new ClientRefs(client, refs);
+    public void SetClient(ulong client, List<StructRef> refs) => (_clients ??= new())[client] = new ClientRefs(client, refs);
+
+    private void SetClient(ulong client, List<StructRef> refs, int next) => (_clients ??= new())[client] = new ClientRefs(client, refs) { Next = next };
 
     public void AddDelete(ulong client, long clock, long length) => Deletes.Add(new DeleteRange(client, clock, length));
 
-    internal bool TryGet(ulong client, out ClientRefs refs) => _clients.TryGetValue(client, out refs!);
+    internal bool TryGet(ulong client, out ClientRefs refs)
+    {
+        refs = null!;
+        return _clients != null && _clients.TryGetValue(client, out refs!);
+    }
 
-    internal void Remove(ulong client) => _clients.Remove(client);
+    internal void Remove(ulong client) => _clients?.Remove(client);
 
     /// <summary>A copy whose clients can be consumed without consuming this update (the struct lists are shared; integration never changes them).</summary>
     internal UpdateRefs Copy()
     {
         var copy = new UpdateRefs();
-        foreach (var (client, refs) in _clients) copy._clients[client] = new ClientRefs(client, refs.Refs) { Next = refs.Next };
+        if (_clients != null)
+            foreach (var (client, refs) in _clients) copy.SetClient(client, refs.Refs, refs.Next);
         copy.Deletes.AddRange(Deletes);
         return copy;
     }

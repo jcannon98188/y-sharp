@@ -27,7 +27,10 @@ internal static class UpdateReader
     /// The update functions' reading (Yjs <c>lazyStructReaderGenerator</c>): only an info byte of exactly 10 is a Skip, so a Skip ref with flag
     /// bits is an item with the unknown content ref 10 and is Malformed (ENC-85). Applying an update reads any info with ref 10 as a Skip.
     /// </param>
-    /// <param name="inReadOrder">When given, also receives every struct in the order the update lists them, repeated clients included.</param>
+    /// <param name="inReadOrder">
+    /// When given, receives every struct in the order the update lists them, repeated clients included, and <paramref name="update"/> holds only
+    /// the delete ranges.
+    /// </param>
     public static YError Read<TDecoder>(ref TDecoder decoder, YLimits limits, out UpdateRefs update, bool exactSkip = false,
         List<StructRef>? inReadOrder = null)
         where TDecoder : IUpdateDecoder, allows ref struct
@@ -43,14 +46,30 @@ internal static class UpdateReader
             if (structs > limits.MaxStructsPerUpdate) return YError.LimitExceeded;
             if (!decoder.CanHold(numStructs, CountClaim.Structs)) return YError.Malformed;
             if (!decoder.ReadClient(out var client) || !decoder.ReadVarUint(out var startClock)) return decoder.Error;
-            var refs = new List<StructRef>((int)Math.Min(numStructs, 1024));
             var clock = (long)startClock;
+            if (inReadOrder != null)
+            {
+                // the update functions work on the structs in read order only, so no per-client blocks are built, and the first block sizes the
+                // list exactly, where EnsureCapacity would round a one-struct update up to four (HOS-AMP)
+                var needed = inReadOrder.Count + (int)Math.Min(numStructs, 1024);
+                if (inReadOrder.Capacity < needed) inReadOrder.Capacity = inReadOrder.Count == 0 ? needed : Math.Max(needed, inReadOrder.Capacity * 2);
+                for (ulong s = 0; s < numStructs; s++)
+                {
+                    var error = ReadStruct(ref decoder, limits, client, clock, exactSkip, out var r);
+                    if (error != YError.None) return error;
+                    clock = r.End;
+                    inReadOrder.Add(r);
+                }
+
+                continue;
+            }
+
+            var refs = new List<StructRef>((int)Math.Min(numStructs, 1024));
             for (ulong s = 0; s < numStructs; s++)
             {
                 var error = ReadStruct(ref decoder, limits, client, clock, exactSkip, out var r);
                 if (error != YError.None) return error;
                 clock = r.End;
-                inReadOrder?.Add(r);
                 // applying: adjacent GC or Skip structs act as one (a GC never waits, a Skip is dropped), so they are held as one run and a
                 // flood of one-clock structs costs one entry (HOS-AMP); the update functions keep every struct, as diff writes them back
                 if (!exactSkip && r.Kind != RefKind.Item && refs.Count > 0 && refs[^1].Kind == r.Kind)

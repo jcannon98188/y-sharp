@@ -88,8 +88,15 @@ internal static class UpdateMerge
     public static List<StructRef> Merge(IReadOnlyList<List<StructRef>> updates)
     {
         var sources = new List<Source>(updates.Count);
-        foreach (var u in updates) sources.Add(new Source(u));
-        var output = new List<StructRef>();
+        var total = 0;
+        foreach (var u in updates)
+        {
+            sources.Add(new Source(u));
+            total += u.Count;
+        }
+
+        // the merge writes at most one struct per input struct, plus a Skip per gap (HOS-AMP: no doubling on large merges)
+        var output = new List<StructRef>(total);
         var hasWrite = false;
         StructRef write = default;
         while (true)
