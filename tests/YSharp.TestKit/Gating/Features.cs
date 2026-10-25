@@ -65,6 +65,7 @@ public static class Features
         Feature.TypesCore,
         Feature.Array,
         Feature.Map,
+        Feature.Text,
     };
 }
 

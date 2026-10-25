@@ -46,6 +46,18 @@ internal sealed class Branch
         TypeRef = typeRef;
         TypeName = typeName;
         _useMarkers = TypeRefs.UsesMarkers(typeRef);
+        HasFormatting = false;   // JS copies _start, _map and _length into a fresh instance, so the new type starts without the flag
+    }
+
+    /// <summary>Whether a format item was ever integrated into the sequence (Yjs <c>_hasFormatting</c>).</summary>
+    internal bool HasFormatting;
+
+    /// <summary>Yjs <c>ContentFormat.integrate</c>: the type has formats, and its search markers are dropped for good (<c>_searchMarker = null</c>).</summary>
+    internal void MarkFormatted()
+    {
+        HasFormatting = true;
+        _useMarkers = false;
+        _markers = null;
     }
 
     /// <summary>The search markers, or null for a type that does not use them.</summary>
