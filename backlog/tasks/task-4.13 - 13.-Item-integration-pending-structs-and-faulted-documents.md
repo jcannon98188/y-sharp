@@ -1,10 +1,10 @@
 ---
 id: TASK-4.13
 title: '13. Item integration, pending structs and faulted documents'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-10-24 19:41'
-updated_date: '2026-10-25 07:39'
+updated_date: '2026-10-25 07:42'
 labels:
   - spec
   - 'model:opus'
@@ -32,19 +32,25 @@ Read first: `docs/handoff-implementation-planning.md`, ADRs 0005, 0006, 0008, 00
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Every test whose required features have all landed passes, and no test requiring this spec's features skips
-- [ ] #2 This spec's features are added to `Features.Landed`
-- [ ] #3 The traceability gate passes and no pending registry entry is added
-- [ ] #4 A faulted document: `IsFaulted` true, reads and `EncodeStateAsUpdate` work, mutators and `ApplyUpdate` throw `YInternalException`, `TryApplyUpdate` returns `Rejected`; the fault is permanent
+- [x] #1 Every test whose required features have all landed passes, and no test requiring this spec's features skips
+- [x] #2 This spec's features are added to `Features.Landed`
+- [x] #3 The traceability gate passes and no pending registry entry is added
+- [x] #4 A faulted document: `IsFaulted` true, reads and `EncodeStateAsUpdate` work, mutators and `ApplyUpdate` throw `YInternalException`, `TryApplyUpdate` returns `Rejected`; the fault is permanent
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `dotnet build YSharp.slnx` has 0 warnings
-- [ ] #2 `dotnet test --solution YSharp.slnx` is green in Debug and in Release
-- [ ] #3 Fixture drift check (`npm run check` in `tools/fixture-gen`) is clean
-- [ ] #4 ADR 0022 followed: suite changes in separate `suite:` commits, a Suite changes list in the notes, no open owner decision
+- [x] #1 `dotnet build YSharp.slnx` has 0 warnings
+- [x] #2 `dotnet test --solution YSharp.slnx` is green in Debug and in Release
+- [x] #3 Fixture drift check (`npm run check` in `tools/fixture-gen`) is clean
+- [x] #4 ADR 0022 followed: suite changes in separate `suite:` commits, a Suite changes list in the notes, no open owner decision
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Suite changes: IntegrationEngineTests (24 tests, free); 5 owner-approved gate edits (Text on MissingDependency; V1 on ErrorPath unexpected-case and Err01/Err02; Array/Map/Gc on ChildrenOfACollectedType). Additive Store accessors in Store/StructStore.Integration.cs (ADR 0021).
+<!-- SECTION:NOTES:END -->
 
 ## Comments
 
@@ -61,3 +67,9 @@ created: 2026-10-25 07:39
 Owner approved the 5 gate fixes.
 ---
 <!-- COMMENTS:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Item integration (Yjs integrate/conflict scan), pending structs, rejection rules and permanent faulted documents landed. Verified by the implementer: 0-warning build, Debug and Release with 0 failures, drift check clean.
+<!-- SECTION:FINAL_SUMMARY:END -->
