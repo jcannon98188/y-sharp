@@ -35,7 +35,24 @@ public sealed class V1RoundTripTests
         }
     }
 
-    public static IEnumerable<object[]> FixturesWithState() => AllWithState().Where(f => !NeedCommitMerge.Contains(f)).Select(f => new object[] { f });
+    // A replica whose state is not what a fresh Yjs doc holds after applying it: an item there was undone and redone, and Yjs never merges an
+    // item with `redone` set, but the update does not carry `redone`, so a fresh doc merges it (see the test below).
+    private static readonly HashSet<string> NotAFixedPoint = new(StringComparer.Ordinal) { "undo/capture-timeout-merging.json" };
+
+    public static IEnumerable<object[]> FixturesWithState() =>
+        AllWithState().Where(f => !NeedCommitMerge.Contains(f) && !NotAFixedPoint.Contains(f)).Select(f => new object[] { f });
+
+    [Fact, Covers("ENC-10", "ENC-16")]
+    public void AStateWithARedoneItem_MergesItInAFreshDoc_AsYjsDoes()
+    {
+        // oracle, Yjs 13.6.33: a fresh Doc({gc:false}) applying replica a's state of undo/capture-timeout-merging encodes these bytes:
+        // the deleted "d" (redone in the original doc, so never merged there) merges with "e"
+        var fx = FixtureReplay.Load("undo/capture-timeout-merging.json");
+        var full = BytesOf(fx.Observations.GetProperty("state").GetProperty("value").GetProperty("a").GetProperty("v1").GetProperty("full"));
+        var doc = new Doc(new DocOptions { Gc = false });
+        doc.ApplyUpdate(full);
+        Assert.Equal("01050100040101740361626384010202646544010003616263c4010201030164440105014e0101010005", Hex.Of(doc.EncodeStateAsUpdate()));
+    }
 
     public static IEnumerable<object[]> FixturesNeedingCommitMerge() => AllWithState().Where(NeedCommitMerge.Contains).Select(f => new object[] { f });
 
@@ -61,7 +78,7 @@ public sealed class V1RoundTripTests
         {
             var v1 = replica.Value.GetProperty("v1");
             var full = BytesOf(v1.GetProperty("full"));
-            var doc = new Doc();
+            var doc = new Doc(new DocOptions { Gc = false });
             var result = doc.TryApplyUpdate(full);
             Assert.True(result.Ok, $"{fixture} {replica.Name}: the oracle's state was not accepted ({result.Error}).");
 
@@ -84,7 +101,7 @@ public sealed class V1RoundTripTests
         var state = fx.Observations.GetProperty("state").GetProperty("value");
         foreach (var replica in structs.GetProperty("value").EnumerateObject())
         {
-            var doc = new Doc();
+            var doc = new Doc(new DocOptions { Gc = false });
             doc.ApplyUpdate(BytesOf(state.GetProperty(replica.Name).GetProperty("v1").GetProperty("full")));
             using var actual = JsonDocument.Parse(doc.DumpStructs());
             var diff = StructuralDiff.Find(WithoutKeep(replica.Value), WithoutKeep(actual.RootElement));
