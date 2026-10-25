@@ -136,14 +136,15 @@ public sealed class IntegrationEngineTests
         d.IntegrateRemote(Update(Str(1, 0, "hello")));
 
         Assert.Equal("hello", Text(d));
-        var s = Structs(d, 1);
-        Assert.Equal(new[] { (0L, 2L), (2L, 3L) }, s.Select(x => (x.Clock, x.Length)));
-        Assert.Equal("llo", d.Store.GetString(s[1]));
-        Assert.Equal(new ItemId(1, 1), d.Store.OriginOf(s[1]));
+        // "llo" integrates with origin (1,1), the last known id, so it is the right neighbour of "he" and the commit merges the two
+        // (oracle, Yjs 13.6.33: one ContentString struct (0,5) after applying "he" then "hello")
+        var s = Assert.Single(Structs(d, 1));
+        Assert.Equal((0L, 5L), (s.Clock, s.Length));
+        Assert.Equal("hello", d.Store.GetString(s));
 
         d.IntegrateRemote(Update(Str(1, 0, "hello")));                                     // entirely known: dropped
         Assert.Equal("hello", Text(d));
-        Assert.Equal(2, Structs(d, 1).Count);
+        Assert.Single(Structs(d, 1));
     }
 
     [Theory]
@@ -237,7 +238,9 @@ public sealed class IntegrationEngineTests
     {
         foreach (var collected in new[] { false, true })
         {
-            var d = Mk();
+            // with GC on the commit would collect the deleted type at once (oracle: the late child is then a GC struct), so the
+            // uncollected case runs with GC off and the collected case collects it by hand
+            var d = new Doc(new DocOptions { ClientId = 100, Gc = false });
             var nested = new Branch();
             var typeItem = StructRef.OfPayload(1, 0, ContentKind.Type, nested);
             typeItem.ParentRoot = "arr";
@@ -294,8 +297,10 @@ public sealed class IntegrationEngineTests
         d.IntegrateRemote(Update(StructRef.Gc(1, 0, 2)));
         d.IntegrateRemote(Update(StructRef.Gc(1, 0, 5), StructRef.Skip(1, 5, 2), Str(1, 7, "z", origin: (4, 0))));
 
+        // the known part of GC(0,5) is skipped and GC(2,3) is stored from the offset; the commit merges it into GC(0,2)
+        // (oracle, Yjs 13.6.33: one GC struct (0,5))
         var s = Structs(d, 1);
-        Assert.Equal(new[] { (0L, 2L), (2L, 3L) }, s.Select(x => (x.Clock, x.Length)));
+        Assert.Equal(new[] { (0L, 5L) }, s.Select(x => (x.Clock, x.Length)));
         Assert.All(s, x => Assert.True(x.IsGc));
         Assert.Equal(5, d.Store.GetState(1));
         var waiting = Assert.Single(d.Pending!.Clients);
@@ -387,8 +392,10 @@ public sealed class IntegrationEngineTests
         d.IntegrateRemote(Update(Str(1, 2, "cde", origin: (1, 1))));
         Assert.Equal("ae", Text(d));
         Assert.Null(d.PendingDeletes);
-        Assert.Equal(new[] { (0L, 1L, false), (1L, 1L, true), (2L, 2L, true), (4L, 1L, false) },
-            Structs(d, 1).Select(s => (s.Clock, s.Length, s.IsDeleted)));             // split where the range ends inside an item
+        // split where the range ends inside an item; the commit then merges the deleted b with the deleted cd
+        // (oracle, Yjs 13.6.33: (0,1) live, (1,3) ContentDeleted, (4,1) live)
+        Assert.Equal(new[] { (0L, 1L, false), (1L, 3L, true), (4L, 1L, false) },
+            Structs(d, 1).Select(s => (s.Clock, s.Length, s.IsDeleted)));
     }
 
     [Fact]
