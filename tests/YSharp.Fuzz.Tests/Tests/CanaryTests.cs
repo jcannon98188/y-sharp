@@ -50,18 +50,22 @@ public sealed class CanaryTests
     // ------------------------------------------------------------------ HOS-DEEP document depth (1M)
 
     [Fact, Covers("HOS-DEEP", "ERR-11", Layer = CoverLayer.Unit)]
+    [Requires(Feature.Array)]
     public void DocumentDepth_1MNestedArrays_ApplyEncodeDeleteAndCollectIteratively() =>
         CanaryHost.AssertPasses("array-chain", 1_000_000);
 
     [Fact, Covers("HOS-DEEP", "ERR-11", Layer = CoverLayer.Unit)]
+    [Requires(Feature.Map)]
     public void DocumentDepth_1MNestedMaps_ApplyEncodeDeleteAndCollectIteratively() =>
         CanaryHost.AssertPasses("map-chain", 1_000_000);
 
     [Fact, Covers("HOS-DEEP", "ERR-11", Layer = CoverLayer.Unit)]
+    [Requires(Feature.UpdateFunctions, Feature.V2Functions)]
     public void DocumentDepth_1MNestedTypes_UpdateFunctionsMergeDiffConvertAndStateVectorDoNotRecurse() =>
         CanaryHost.AssertPasses("update-functions", 1_000_000);
 
     [Fact, Covers("HOS-DEEP", "ERR-11")]
+    [Requires(Feature.Array)]
     public void DocumentDepth_FuzzedDepths_NeverOverflow()
     {
         // the fuzz-layer view of the canary: a handful of depths across the range, each in its own process

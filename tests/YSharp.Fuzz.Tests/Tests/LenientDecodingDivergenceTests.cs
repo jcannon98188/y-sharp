@@ -56,6 +56,7 @@ public sealed class LenientDecodingDivergenceTests
     }
 
     [Fact, Covers("Q15", Layer = CoverLayer.Unit), Diverges("Q15", adr: "0005")]
+    [Requires(Feature.Text, Feature.V2)]
     public void Q15_EveryLenientlyDecodedInput_IsRejectedWithoutChange_InYSharp()
     {
         foreach (var c in Cases())

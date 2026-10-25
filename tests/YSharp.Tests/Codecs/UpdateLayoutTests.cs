@@ -57,6 +57,7 @@ public sealed class UpdateLayoutTests
     [InlineData(4294967295UL, 16384, "01ffffffff0f808001")]
     [InlineData(1099511627776UL, 1, "0180808080802001")]          // 2^40: past 32 bits, still a 53-bit client id (A1)
     [InlineData(9007199254740991UL, 1, "01ffffffffffffff0f01")]   // 2^53-1
+    [Requires(Feature.Text)]
     public void Enc02_VarUint_ClientsAndClocksAtTheByteBoundaries(ulong client, int length, string expectedSv)
     {
         var doc = ClientText(client, new string('x', length));

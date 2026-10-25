@@ -34,6 +34,7 @@ public sealed class TruncationTests
     }
 
     [Fact, Covers("HOS-TRUNC", Layer = CoverLayer.Unit)]
+    [Requires(Feature.Text, Feature.V2)]
     public void Updates_EveryProperPrefix_IsMalformedAndChangesNothing()
     {
         var failures = new List<string>();
@@ -77,6 +78,7 @@ public sealed class TruncationTests
     }
 
     [Fact, Covers("HOS-TRUNC", Layer = CoverLayer.Unit)]
+    [Requires(Feature.Text, Feature.Sync)]
     public void SyncFrames_EveryProperPrefixInsideTheFrame_IsMalformedAndChangesNothing()
     {
         var frames = new List<(string Name, byte[] Frame)>();

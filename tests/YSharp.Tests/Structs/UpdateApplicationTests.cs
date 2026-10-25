@@ -216,6 +216,7 @@ public sealed class UpdateApplicationTests
 
     [Fact]
     [Covers("STR-62", "STR-64")]
+    [Requires(Feature.Text, Feature.Events)]
     public void CausallyDependentUpdates_ConvergeUnderEveryDeliveryOrder_AndLeaveNothingPending()
     {
         var (u1, u2, u3) = Chain();

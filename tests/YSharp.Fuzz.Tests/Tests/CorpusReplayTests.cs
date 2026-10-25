@@ -30,30 +30,39 @@ public sealed class CorpusReplayTests
     private static void Replay(string hosClass)=> CorpusRunner.ReplayAll(CasesOf(hosClass));
 
     [Fact, Covers("HOS-TRUNC", Layer = CoverLayer.Unit)]
+    [Requires(Feature.Text, Feature.V2)]
     public void Corpus_Truncation_EveryStoredPrefixIsMalformedAndChangesNothing() => Replay("HOS-TRUNC");
 
     [Fact, Covers("HOS-MUT", Layer = CoverLayer.Unit)]
+    [Requires(Feature.Text, Feature.V2)]
     public void Corpus_Mutations_NoSingleEditCrashesHangsOverAllocatesOrFaultsTheDocument() => Replay("HOS-MUT");
 
     [Fact, Covers("HOS-LEN", "ERR-09", Layer = CoverLayer.Unit)]
+    [Requires(Feature.Text, Feature.V2)]
     public void Corpus_OversizedCountsAndLengths_AreRejectedWithinTheAllocationBound() => Replay("HOS-LEN");
 
     [Fact, Covers("HOS-CLOCK", Layer = CoverLayer.Unit)]
+    [Requires(Feature.Text)]
     public void Corpus_Clocks_GapsOverlapsAndOverflowsAreContained() => Replay("HOS-CLOCK");
 
     [Fact, Covers("HOS-REF", "ERR-06", "ERR-07", Layer = CoverLayer.Unit)]
+    [Requires(Feature.Text)]
     public void Corpus_References_MissingCyclicAndNonTypeParentsNeverSpin() => Replay("HOS-REF");
 
     [Fact, Covers("HOS-SEM", "ERR-04", Layer = CoverLayer.Unit)]
+    [Requires(Feature.Text)]
     public void Corpus_MeaninglessButWellFormedInput_IsRejectedOrIgnored() => Replay("HOS-SEM");
 
     [Fact, Covers("HOS-AMP", Layer = CoverLayer.Unit)]
+    [Requires(Feature.Text)]
     public void Corpus_Amplification_IsBoundedInTimeAndAllocation() => Replay("HOS-AMP");
 
     [Fact, Covers("HOS-PROTO", Layer = CoverLayer.Unit)]
+    [Requires(Feature.Text, Feature.Sync, Feature.Awareness)]
     public void Corpus_ProtocolFrames_UnknownTypesOverrunsAndBadStatesAreContained() => Replay("HOS-PROTO");
 
     [Fact, Covers("ERR-21", Layer = CoverLayer.Unit)]
+    [Requires(Feature.Text, Feature.V2, Feature.Sync, Feature.Awareness)]
     public void Corpus_EveryStoredFile_LeavesTheDocumentUnfaultedAndUsable()=> CorpusRunner.ReplayAll(CorpusFiles.LoadAll());
 
     [Fact]
