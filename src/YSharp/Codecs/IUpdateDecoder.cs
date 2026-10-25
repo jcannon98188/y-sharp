@@ -13,8 +13,11 @@ internal interface IUpdateDecoder
     /// <summary>Why the last failed read failed: <see cref="YError.Malformed"/> or <see cref="YError.LimitExceeded"/>.</summary>
     YError Error { get; }
 
-    /// <summary>Bytes left in the underlying buffer, for checking a count claim before anything is sized from it.</summary>
-    int Remaining { get; }
+    /// <summary>
+    /// Whether <paramref name="count"/> entries of <paramref name="claim"/> could still be read: checked before a loop or an array is sized from
+    /// a count claim. Each format knows the least an entry costs it.
+    /// </summary>
+    bool CanHold(ulong count, CountClaim claim);
 
     /// <summary>A plain varuint from the rest buffer: client and struct counts, start clocks, Skip lengths, delete-set counts and clients.</summary>
     bool ReadVarUint(out ulong value);
@@ -55,6 +58,9 @@ internal interface IUpdateDecoder
     /// <summary>One element of a legacy JSON content: JSON text in both formats, the literal <c>undefined</c> being an undefined element.</summary>
     bool ReadJsonElement(out YValue value);
 }
+
+/// <summary>The counts an update claims, for <see cref="IUpdateDecoder.CanHold"/>.</summary>
+internal enum CountClaim { Clients, Structs, DeleteClients, DeleteRanges, AnyValues, JsonValues }
 
 /// <summary>The encoder half of the codec seam: the shape of Yjs <c>UpdateEncoderV1</c> and <c>UpdateEncoderV2</c>.</summary>
 internal interface IUpdateEncoder

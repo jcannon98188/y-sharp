@@ -34,16 +34,14 @@ internal static class UpdateReader
     {
         update = new UpdateRefs();
         if (!decoder.ReadVarUint(out var numClients)) return decoder.Error;
-        // a client block is at least three bytes (struct count, client, start clock)
-        if (numClients > (ulong)decoder.Remaining / 3) return YError.Malformed;
+        if (!decoder.CanHold(numClients, CountClaim.Clients)) return YError.Malformed;
         long structs = 0;
         for (ulong c = 0; c < numClients; c++)
         {
             if (!decoder.ReadVarUint(out var numStructs)) return decoder.Error;
             structs += (long)Math.Min(numStructs, int.MaxValue + 1UL);
             if (structs > limits.MaxStructsPerUpdate) return YError.LimitExceeded;
-            // a struct is at least two bytes (info and a length or a parent)
-            if (numStructs > (ulong)decoder.Remaining / 2) return YError.Malformed;
+            if (!decoder.CanHold(numStructs, CountClaim.Structs)) return YError.Malformed;
             if (!decoder.ReadClient(out var client) || !decoder.ReadVarUint(out var startClock)) return decoder.Error;
             var refs = new List<StructRef>((int)Math.Min(numStructs, 1024));
             var clock = (long)startClock;
@@ -77,12 +75,12 @@ internal static class UpdateReader
         where TDecoder : IUpdateDecoder, allows ref struct
     {
         if (!decoder.ReadVarUint(out var numClients)) return decoder.Error;
-        if (numClients > (ulong)decoder.Remaining / 2) return YError.Malformed;
+        if (!decoder.CanHold(numClients, CountClaim.DeleteClients)) return YError.Malformed;
         for (ulong c = 0; c < numClients; c++)
         {
             decoder.ResetDsCurVal();
             if (!decoder.ReadVarUint(out var client) || !decoder.ReadVarUint(out var numDeletes)) return decoder.Error;
-            if (numDeletes > (ulong)decoder.Remaining / 2) return YError.Malformed;
+            if (!decoder.CanHold(numDeletes, CountClaim.DeleteRanges)) return YError.Malformed;
             for (ulong i = 0; i < numDeletes; i++)
             {
                 if (!decoder.ReadDsClock(out var clock) || !decoder.ReadDsLen(out var length)) return decoder.Error;
@@ -180,7 +178,7 @@ internal static class UpdateReader
             case RefAny:
             {
                 if (!decoder.ReadLen(out var count)) return decoder.Error;
-                if (count > (ulong)decoder.Remaining) return YError.Malformed;   // every element is at least one byte
+                if (!decoder.CanHold(count, contentRef == RefAny ? CountClaim.AnyValues : CountClaim.JsonValues)) return YError.Malformed;
                 var values = new YValue[(int)count];
                 for (var i = 0; i < values.Length; i++)
                 {

@@ -60,6 +60,7 @@ public static class Features
         Feature.V1,
         Feature.Gc,
         Feature.UpdateFunctions,
+        Feature.V2,
     };
 }
 

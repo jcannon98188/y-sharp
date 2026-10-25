@@ -25,7 +25,14 @@ internal ref struct UpdateDecoderV1 : IUpdateDecoder
 
     public readonly YError Error => error != YError.None ? error : reader.Error;
 
-    public readonly int Remaining => reader.Remaining;
+    /// <summary>Every entry is a few bytes of the one buffer: a client block three (struct count, client, start clock), a struct two (info and a
+    /// length or a parent), a delete-set client or range two, a value one.</summary>
+    public readonly bool CanHold(ulong count, CountClaim claim) => claim switch
+    {
+        CountClaim.Clients => count <= (ulong)reader.Remaining / 3,
+        CountClaim.AnyValues or CountClaim.JsonValues => count <= (ulong)reader.Remaining,
+        _ => count <= (ulong)reader.Remaining / 2,
+    };
 
     private bool Fail(YError e = YError.Malformed)
     {
