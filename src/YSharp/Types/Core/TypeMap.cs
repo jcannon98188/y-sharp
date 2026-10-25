@@ -39,13 +39,15 @@ internal static class TypeMap
         doc.IntegrateLocal(tx, item);
     }
 
-    /// <summary>Yjs <c>typeMapDelete</c>: deletes the key's current item, if any.</summary>
-    public static void Delete(Transaction tx, YType type, string key)
+    /// <summary>Yjs <c>typeMapDelete</c>: deletes the key's current item, if any. True when that item was live.</summary>
+    public static bool Delete(Transaction tx, YType type, string key)
     {
         ArgumentNullException.ThrowIfNull(key);
-        if (type.AttachedDoc is not { } doc) return;
+        if (type.AttachedDoc is not { } doc) return false;
         var current = new ItemRef(type.Branch.Map?.Get(key));
-        if (!current.IsNull) doc.DeleteItem(tx, current);
+        if (current.IsNull || current.IsDeleted) return false;
+        doc.DeleteItem(tx, current);
+        return true;
     }
 
     /// <summary>Yjs <c>typeMapGet</c>: the last element of the key's current item, or false when it is absent or deleted.</summary>
