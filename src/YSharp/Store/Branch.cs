@@ -33,12 +33,20 @@ internal sealed class Branch
     /// <summary>The node name of an XML element or the hook name of an XML hook (written after the type ref); null otherwise.</summary>
     internal string? TypeName;
 
-    private readonly bool _useMarkers;
+    private bool _useMarkers;
     private SearchMarkers? _markers;
     private MapKeyTable? _map;
 
     /// <param name="useMarkers">Whether the type keeps search markers (Yjs creates them for arrays, text and XML children).</param>
     internal Branch(bool useMarkers = false) => _useMarkers = useMarkers;
+
+    /// <summary>Gives an untyped root its type (Yjs <c>doc.get(name, Constructor)</c> replacing the placeholder): the items stay where they are.</summary>
+    internal void Upgrade(byte typeRef, string? typeName)
+    {
+        TypeRef = typeRef;
+        TypeName = typeName;
+        _useMarkers = TypeRefs.UsesMarkers(typeRef);
+    }
 
     /// <summary>The search markers, or null for a type that does not use them.</summary>
     internal SearchMarkers? Markers => _markers;

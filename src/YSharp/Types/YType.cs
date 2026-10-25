@@ -18,7 +18,19 @@ public abstract class YType
     }
 
     /// <summary>The storage of this type (Yjs <c>_start</c>, <c>_map</c>, <c>_item</c>...).</summary>
-    internal Store.Branch Branch { get; }
+    internal Store.Branch Branch { get; private set; }
+
+    /// <summary>
+    /// Makes this new type the owner of root <paramref name="root"/> of <paramref name="doc"/>, keeping its items (the placeholder upgrade: Yjs
+    /// copies <c>_start</c>, <c>_map</c> and <c>_length</c> into the new instance; y-sharp keeps the branch, so no item is re-parented).
+    /// </summary>
+    internal void AdoptRoot(Store.Branch root, Doc doc)
+    {
+        root.Upgrade(Branch.TypeRef, Branch.TypeName);
+        root.Owner = this;
+        Branch = root;
+        AttachedDoc = doc;
+    }
 
     /// <summary>The wire type ref of this class (Yjs <c>ContentType</c> refs); <see cref="Store.TypeRefs.Untyped"/> for the root placeholder.</summary>
     internal virtual byte WireTypeRef => Store.TypeRefs.Untyped;

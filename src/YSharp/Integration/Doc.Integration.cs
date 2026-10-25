@@ -56,6 +56,14 @@ public sealed partial class Doc
     /// <summary>The storage of root type <paramref name="name"/>, created on first use (Yjs <c>doc.get(name)</c> creates an untyped placeholder).</summary>
     internal Branch RootBranch(string name)
     {
+        lock (_rootGate) return RootBranchLocked(name);
+    }
+
+    /// <summary>Guards the root table: roots are named by the user's Get calls and by updates being integrated.</summary>
+    private readonly object _rootGate = new();
+
+    private Branch RootBranchLocked(string name)
+    {
         _roots ??= new Dictionary<string, Branch>(StringComparer.Ordinal);
         if (!_roots.TryGetValue(name, out var branch)) _roots[name] = branch = new Branch();
         return branch;
