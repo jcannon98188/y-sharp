@@ -32,6 +32,7 @@ public sealed class AmplificationTests
     [Theory, Covers("HOS-AMP", Layer = CoverLayer.Unit)]
     [InlineData(false)]
     [InlineData(true)]
+    [Requires(Feature.Text)]
     public void ManyOneClockStructs_100k_AreBoundedInTimeAndAllocation(bool skips)
     {
         var bytes = ManyStructs(100_000, skips);
