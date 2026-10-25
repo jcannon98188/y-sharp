@@ -4,7 +4,7 @@ title: 28. M4 gate and first live differential run
 status: To Do
 assignee: []
 created_date: '2026-10-24 19:42'
-updated_date: '2026-10-24 19:42'
+updated_date: '2026-10-25 23:32'
 labels:
   - spec
   - 'model:sonnet'
@@ -49,3 +49,9 @@ Read first: `docs/handoff-implementation-planning.md`, ADRs 0005, 0006, 0008, 00
 - [ ] #3 Fixture drift check (`npm run check` in `tools/fixture-gen`) is clean
 - [ ] #4 ADR 0022 followed: suite changes in separate `suite:` commits, a Suite changes list in the notes, no open owner decision
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+From TASK-4.24: HotPathBudgetTests BUD-05 and BUD-07 are gated on Events, so this gate activates them. Release measurements at TASK-4.24: BUD-05 1150 bytes per operation (OrderedDictionary x9, closures x3, Position x2, HashSet, Transaction); BUD-07 782 bytes (Item x3, Int32[] x3, OrderedDictionary x2). ADR 0009 makes both zero, but BUD-01 option A allocates a Transaction for each Transact and every insert allocates an Item, so zero needs an owner decision (bounded budgets) or pooling work. This is listed for owner sign-off in TASK-4.24.
+<!-- SECTION:NOTES:END -->
