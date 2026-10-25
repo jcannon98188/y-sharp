@@ -106,7 +106,7 @@ public sealed class UpdateFunctionTests
     }
 
     [Fact, Covers("ENC-25")]
-    [Requires(Feature.V2)]
+    [Requires(Feature.V2, Feature.V2Functions)]
     public void Enc25_Convert_GivesTheNativeBytesOfTheOtherFormat()
     {
         Assert.Equal(HiV2, Hex.Of(Wire.Convert(Hex.Bytes(HiV1), UpdateFormat.V1, UpdateFormat.V2)));

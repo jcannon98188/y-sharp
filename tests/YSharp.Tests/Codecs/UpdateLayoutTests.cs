@@ -103,7 +103,7 @@ public sealed class UpdateLayoutTests
     // ------------------------------------------------------------------ update skeleton and struct layout
 
     [Fact, Covers("ENC-10", "ENC-11", "ENC-15", "ENC-77", "ENC-79")]
-    [Requires(Feature.V2)]
+    [Requires(Feature.V2, Feature.Text)]
     public void Enc10_WorkedExample_TextHi_IsTheDocumentedV1AndV2Bytes()
     {
         var doc = ClientText(1, "hi");
@@ -184,7 +184,7 @@ public sealed class UpdateLayoutTests
     }
 
     [Fact, Covers("ENC-13", "ENC-83")]
-    [Requires(Feature.V2)]
+    [Requires(Feature.V2, Feature.Text)]
     public void Enc13_DiffInsideAStruct_RewritesOriginAndKeepsTheTail()
     {
         var doc = ClientText(1, "abc");
@@ -297,7 +297,7 @@ public sealed class UpdateLayoutTests
     private static Doc Eight() { var d = ClientText(1, "abcdefgh"); d.GetText("t").Delete(1, 2); d.GetText("t").Delete(3, 1); return d; }
 
     [Fact, Covers("ENC-16", "ENC-17", "ENC-18", "ENC-80")]
-    [Requires(Feature.V2)]
+    [Requires(Feature.V2, Feature.Text)]
     public void Enc16_DeleteSet_IsSortedRangesPerClient_DeltaCodedInV2()
     {
         var doc = Eight();

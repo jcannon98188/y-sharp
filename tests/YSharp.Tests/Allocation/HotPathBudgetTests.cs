@@ -103,7 +103,7 @@ public sealed class HotPathBudgetTests
     [Theory, Covers("BUD-08")]
     [InlineData(UpdateFormat.V1)]
     [InlineData(UpdateFormat.V2)]
-    [Requires(Feature.V2)]
+    [Requires(Feature.V2, Feature.Text)]
     public void TryApplyUpdate_HotPath_StaysWithinItsBudget(UpdateFormat format)
     {
         // Each call applies a new update to the target; the stream is long enough for warm-up, measurement and a diagnostic rerun's start.
