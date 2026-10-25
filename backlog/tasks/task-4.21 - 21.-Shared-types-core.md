@@ -1,10 +1,11 @@
 ---
 id: TASK-4.21
 title: 21. Shared types core
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-10-24 19:42'
-updated_date: '2026-10-24 19:42'
+updated_date: '2026-10-25 19:11'
 labels:
   - spec
   - 'model:sonnet'
