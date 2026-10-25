@@ -276,7 +276,7 @@ const hostileExtra = [
   c('parent-info-2', textStruct('04', '02 01 00 01 61')),
   c('parent-info-5', textStruct('04', '05 01 00 01 61')),
   c('delete-set-zero-deletes-for-client', '00 01 05 00'),
-  c('delete-set-len-0', '00 01 05 01 00 00'),
+  c('delete-set-len-0', '00 01 05 01 00 00', { classification: 'diverge', divergence: 'ENC-51' }),
   c('delete-set-two-clients-one-truncated', '00 02 05 01 00 01 06'),
   // Q07: Date, Map and ArrayBuffer reach the wire as the empty object; the bytes decode as an empty object
   c('any-empty-object-from-flattened-date', '01 01 01 00 28 01 01 6d 01 6b 01 76 00 00', { roots: [['m', 'map']] }),

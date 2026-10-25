@@ -202,10 +202,13 @@ internal static class FixtureReplay
         for (var i = 0; i < want.Count; i++) HexAssert.Equal(want[i], actual[i], $"{label} #{i}");
     }
 
+    /// <summary>Recorded divergences where y-sharp accepts what the oracle rejects (ADR 0003): a <c>diverge</c> case naming one is accepted.</summary>
+    private static readonly HashSet<string> LenientDivergences = new(StringComparer.Ordinal) { "ENC-51" };
+
     /// <summary>
     /// The malformed-input contract: where the oracle accepts a <c>match</c> case y-sharp accepts it; where the oracle rejects, y-sharp
-    /// rejects; a <c>diverge</c> or <c>js-crash</c> case is rejected. Every rejection is typed (never an exception from
-    /// <c>TryApplyUpdate</c>) and changes nothing (ADR 0005 atomic decode).
+    /// rejects; a <c>diverge</c> or <c>js-crash</c> case is rejected, except a divergence in <see cref="LenientDivergences"/>, which is
+    /// accepted. Every rejection is typed (never an exception from <c>TryApplyUpdate</c>) and changes nothing (ADR 0005 atomic decode).
     /// </summary>
     public static void AssertMalformed(Fixture fixture, Func<string, bool>? only = null)
     {
@@ -218,7 +221,9 @@ internal static class FixtureReplay
             var format = c.GetProperty("encoding").GetString() == "v2" ? UpdateFormat.V2 : UpdateFormat.V1;
             var bytes = BytesOf(c.GetProperty("bytes"));
             var classification = c.GetProperty("classification").GetString();
-            var expectAccepted = classification == "match" && c.GetProperty("outcome").GetString() == "ok";
+            var divergence = c.TryGetProperty("divergence", out var d) ? d.GetString() : null;
+            var expectAccepted = (classification == "match" && c.GetProperty("outcome").GetString() == "ok")
+                || (classification == "diverge" && divergence is not null && LenientDivergences.Contains(divergence));
 
             var (result, doc) = Wire.TryApply(bytes, format);
             Assert.True(expectAccepted == result.Ok,

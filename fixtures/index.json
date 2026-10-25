@@ -403,8 +403,8 @@
         "ENC-56",
         "Q07"
       ],
-      "sha256": "54ca8eb54a1e0d730044e547042d2eeb43a16e0cdb69d03e5acaf69992a4e924",
-      "bytes": 11047
+      "sha256": "41a3e819fdd24ee603c9e57541ebd99ab6a8921033b845c0bd16c4e46c4cd69c",
+      "bytes": 11083
     },
     {
       "path": "hostile/malformed-v1-updates.json",

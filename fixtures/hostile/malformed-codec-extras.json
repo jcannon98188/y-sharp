@@ -162,7 +162,8 @@
           "pendingDs": false,
           "sv": {"$":"bytes","hex":"00"},
           "doc": [["t",{"kind":"text","delta":[]}]],
-          "classification": "match"
+          "classification": "diverge",
+          "divergence": "ENC-51"
         },
         {
           "name": "delete-set-two-clients-one-truncated",
