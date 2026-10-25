@@ -11,7 +11,7 @@ namespace YSharp.Store;
 /// payloads. Conflict resolution, transactions, codecs and types live in their own modules and drive these operations through
 /// <see cref="ItemRef"/> handles. Everything it holds is reachable only from the document (ADR 0018).
 /// </summary>
-internal sealed class StructStore
+internal sealed partial class StructStore
 {
     internal readonly ClientTable Clients = new();
     internal readonly TextBuffer Text = new();

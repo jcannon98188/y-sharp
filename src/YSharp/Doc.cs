@@ -39,7 +39,12 @@ public sealed partial class Doc : IDisposable
     }
 
     public YLimits Limits => _options.Limits;
-    public bool IsFaulted => throw Sketch.NI;   // ADR 0005: readable, refuses changes. Mutators and ApplyUpdate throw YInternalException, TryApplyUpdate returns Rejected
+    /// <summary>
+    /// True once a violated internal invariant faulted the document, for good (ADR 0005, ERR-20). A faulted document stays readable and refuses
+    /// changes: mutators and ApplyUpdate throw <see cref="YInternalException"/>, TryApplyUpdate returns Rejected. Recover by applying its
+    /// EncodeStateAsUpdate to a fresh document.
+    /// </summary>
+    public bool IsFaulted => Volatile.Read(ref _faulted);
 
     /// <summary>A new client id: from the injected generator (fixtures pin ids), else a random 32-bit id as in Yjs (<c>random.uint32()</c>).</summary>
     internal ulong GenerateClientId() => _options.ClientIdGenerator?.Next() ?? (ulong)Random.Shared.NextInt64(0, 1L << 32);

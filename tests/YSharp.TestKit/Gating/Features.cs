@@ -56,6 +56,7 @@ public static class Features
         Feature.Json,
         Feature.Store,
         Feature.Transactions,
+        Feature.Integrate,
     };
 }
 
