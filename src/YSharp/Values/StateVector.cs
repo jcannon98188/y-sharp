@@ -63,21 +63,26 @@ public sealed class StateVector
     internal static StateVector Create(ReadOnlySpan<KeyValuePair<ulong, long>> clients) => Normalise(clients.ToArray());
 
     /// <summary>The clock of <paramref name="client"/>, or 0 when the state vector has no entry for it.</summary>
-    public long this[ulong client]
+    public long this[ulong client] => TryGetClock(client, out var clock) ? clock : 0;
+
+    /// <summary>The clock of <paramref name="client"/>; false when the state vector has no entry for it (an entry can hold clock 0).</summary>
+    internal bool TryGetClock(ulong client, out long clock)
     {
-        get
+        // entries are sorted by descending client id
+        int lo = 0, hi = entries.Length - 1;
+        while (lo <= hi)
         {
-            // entries are sorted by descending client id
-            int lo = 0, hi = entries.Length - 1;
-            while (lo <= hi)
+            var mid = lo + ((hi - lo) >> 1);
+            var id = entries[mid].Key;
+            if (id == client)
             {
-                var mid = lo + ((hi - lo) >> 1);
-                var id = entries[mid].Key;
-                if (id == client) return entries[mid].Value;
-                if (id > client) lo = mid + 1; else hi = mid - 1;
+                clock = entries[mid].Value;
+                return true;
             }
-            return 0;
+            if (id > client) lo = mid + 1; else hi = mid - 1;
         }
+        clock = 0;
+        return false;
     }
 
     /// <summary>Every client with an entry, by descending id.</summary>

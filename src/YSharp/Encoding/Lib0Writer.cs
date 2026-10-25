@@ -120,6 +120,14 @@ internal sealed class Lib0Writer : IDisposable
         Utf8.GetBytes(value, Take(byteCount));
     }
 
+    /// <summary>The span form of <see cref="WriteVarString(string)"/>, for text read out of a buffer without making a string.</summary>
+    public void WriteVarString(ReadOnlySpan<char> value)
+    {
+        var byteCount = Utf8.GetByteCount(value);
+        WriteVarUint((uint)byteCount);
+        Utf8.GetBytes(value, Take(byteCount));
+    }
+
     internal static int VarUintLength(ulong value)
     {
         var n = 1;

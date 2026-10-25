@@ -20,6 +20,19 @@ public sealed class DeleteSet
     /// <summary>Whether <paramref name="id"/> lies in one of the deleted ranges (Yjs <c>isDeleted</c>).</summary>
     public bool Contains(ItemId id) => ranges.Contains(id.Client, id.Clock);
 
-    // The delete-set encoders belong to the codecs (V1 in spec 14, V2 in spec 18); they implement this member.
-    public void Encode(IBufferWriter<byte> writer, UpdateFormat format = UpdateFormat.V1) => throw Sketch.NI;
+    /// <summary>Writes the set as an update's delete set (Yjs <c>writeDeleteSet</c>): clients descending, each client's ranges by clock.</summary>
+    public void Encode(IBufferWriter<byte> writer, UpdateFormat format = UpdateFormat.V1)
+    {
+        ArgumentNullException.ThrowIfNull(writer);
+        if (format == UpdateFormat.V2)
+        {
+            YSharp.Codecs.V2.UpdateCodecV2.EncodeDeleteSet(this, writer);
+            return;
+        }
+
+        using var w = new YSharp.Lib0.Lib0Writer(16);
+        var encoder = new YSharp.Codecs.V1.UpdateEncoderV1(w);
+        YSharp.Codecs.UpdateWriter.WriteDeleteSet(ref encoder, ranges);
+        w.CopyTo(writer);
+    }
 }

@@ -24,6 +24,15 @@ internal sealed class Branch
     /// <summary>The shared type object that owns this branch, set by <c>Types/</c>.</summary>
     internal object? Owner;
 
+    /// <summary>
+    /// Which shared type this is, as the wire names it (Yjs <c>ContentType</c> type refs: <see cref="TypeRefs"/>), or <see cref="TypeRefs.Untyped"/>
+    /// for a root that was only named on the wire. The codecs write it for a nested type; <c>Types/</c> sets it when it creates or converts a type.
+    /// </summary>
+    internal byte TypeRef = TypeRefs.Untyped;
+
+    /// <summary>The node name of an XML element or the hook name of an XML hook (written after the type ref); null otherwise.</summary>
+    internal string? TypeName;
+
     private readonly bool _useMarkers;
     private SearchMarkers? _markers;
     private MapKeyTable? _map;
@@ -44,4 +53,35 @@ internal sealed class Branch
     internal MapKeyTable? Map => _map;
 
     internal MapKeyTable MapFor(StructStore store) => _map ??= new MapKeyTable(store.Keys);
+}
+
+/// <summary>The wire type refs of Yjs <c>ContentType</c> (<c>ContentType.js:28-34</c>).</summary>
+internal static class TypeRefs
+{
+    public const byte Array = 0;
+    public const byte Map = 1;
+    public const byte Text = 2;
+    public const byte XmlElement = 3;
+    public const byte XmlFragment = 4;
+    public const byte XmlHook = 5;
+    public const byte XmlText = 6;
+
+    /// <summary>Not a wire value: a root type that was only named by an update (Yjs <c>doc.get(name)</c> with no constructor).</summary>
+    public const byte Untyped = 255;
+
+    /// <summary>Whether the type keeps search markers (Yjs creates them for arrays, text and the XML list types, not for maps and hooks).</summary>
+    public static bool UsesMarkers(byte typeRef) => typeRef is Array or Text or XmlElement or XmlFragment or XmlText;
+
+    /// <summary>The Yjs class name of a type ref, as the struct dump shows it (ADR 0016).</summary>
+    public static string ClassName(byte typeRef) => typeRef switch
+    {
+        Array => "YArray",
+        Map => "YMap",
+        Text => "YText",
+        XmlElement => "YXmlElement",
+        XmlFragment => "YXmlFragment",
+        XmlHook => "YXmlHook",
+        XmlText => "YXmlText",
+        _ => "AbstractType",
+    };
 }
