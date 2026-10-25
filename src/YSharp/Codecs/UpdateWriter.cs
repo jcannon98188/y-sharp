@@ -333,4 +333,30 @@ internal static class UpdateWriter
             end = start;
         }
     }
+
+    /// <summary>A delete set from ranges already in write order: each run of one client's ranges is that client's entry.</summary>
+    public static void WriteDeleteRuns<TEncoder>(ref TEncoder encoder, List<DeleteRange> ranges)
+        where TEncoder : IUpdateEncoder, allows ref struct
+    {
+        var clients = 0;
+        for (var i = 0; i < ranges.Count; i++)
+            if (i == 0 || ranges[i].Client != ranges[i - 1].Client) clients++;
+        encoder.WriteVarUint((ulong)clients);
+        var start = 0;
+        while (start < ranges.Count)
+        {
+            var end = start + 1;
+            while (end < ranges.Count && ranges[end].Client == ranges[start].Client) end++;
+            encoder.ResetDsCurVal();
+            encoder.WriteVarUint(ranges[start].Client);
+            encoder.WriteVarUint((ulong)(end - start));
+            for (var i = start; i < end; i++)
+            {
+                encoder.WriteDsClock(ranges[i].Clock);
+                encoder.WriteDsLen(ranges[i].Length);
+            }
+
+            start = end;
+        }
+    }
 }

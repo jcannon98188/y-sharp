@@ -19,4 +19,12 @@ internal static class UpdateCodecV2
 
     /// <summary>Writes a delete set as a V2 delete set.</summary>
     public static void EncodeDeleteSet(DeleteSet deleteSet, IBufferWriter<byte> writer) => throw Sketch.NI;
+
+    /// <summary>Decodes a whole V2 update the way the update functions read it (exact Skips, structs in read order).</summary>
+    public static YError DecodeForFunctions(ReadOnlySpan<byte> update, YLimits limits, out UpdateRefs refs, System.Collections.Generic.List<StructRef> inReadOrder) =>
+        throw Sketch.NI;
+
+    /// <summary>Writes an update function's result as V2: the structs in client blocks, then the delete ranges (already in write order).</summary>
+    public static void EncodeFunctionOutput(System.Collections.Generic.List<StructRef> structs, System.Collections.Generic.List<YSharp.Store.DeleteRange> deletes,
+        IBufferWriter<byte> output) => throw Sketch.NI;
 }

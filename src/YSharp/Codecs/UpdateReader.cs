@@ -23,7 +23,13 @@ internal static class UpdateReader
 
     public const byte HasOrigin = 0x80, HasRightOrigin = 0x40, HasParentSub = 0x20;
 
-    public static YError Read<TDecoder>(ref TDecoder decoder, YLimits limits, out UpdateRefs update)
+    /// <param name="exactSkip">
+    /// The update functions' reading (Yjs <c>lazyStructReaderGenerator</c>): only an info byte of exactly 10 is a Skip, so a Skip ref with flag
+    /// bits is an item with the unknown content ref 10 and is Malformed (ENC-85). Applying an update reads any info with ref 10 as a Skip.
+    /// </param>
+    /// <param name="inReadOrder">When given, also receives every struct in the order the update lists them, repeated clients included.</param>
+    public static YError Read<TDecoder>(ref TDecoder decoder, YLimits limits, out UpdateRefs update, bool exactSkip = false,
+        List<StructRef>? inReadOrder = null)
         where TDecoder : IUpdateDecoder, allows ref struct
     {
         update = new UpdateRefs();
@@ -39,14 +45,25 @@ internal static class UpdateReader
             // a struct is at least two bytes (info and a length or a parent)
             if (numStructs > (ulong)decoder.Remaining / 2) return YError.Malformed;
             if (!decoder.ReadClient(out var client) || !decoder.ReadVarUint(out var startClock)) return decoder.Error;
-            var refs = new List<StructRef>((int)numStructs);
+            var refs = new List<StructRef>((int)Math.Min(numStructs, 1024));
             var clock = (long)startClock;
             for (ulong s = 0; s < numStructs; s++)
             {
-                var error = ReadStruct(ref decoder, limits, client, clock, out var r);
+                var error = ReadStruct(ref decoder, limits, client, clock, exactSkip, out var r);
                 if (error != YError.None) return error;
-                refs.Add(r);
                 clock = r.End;
+                inReadOrder?.Add(r);
+                // applying: adjacent GC or Skip structs act as one (a GC never waits, a Skip is dropped), so they are held as one run and a
+                // flood of one-clock structs costs one entry (HOS-AMP); the update functions keep every struct, as diff writes them back
+                if (!exactSkip && r.Kind != RefKind.Item && refs.Count > 0 && refs[^1].Kind == r.Kind)
+                {
+                    var last = refs[^1];
+                    last.Length += r.Length;
+                    refs[^1] = last;
+                    continue;
+                }
+
+                refs.Add(r);
             }
 
             update.SetClient(client, refs);
@@ -77,13 +94,14 @@ internal static class UpdateReader
         return YError.None;
     }
 
-    private static YError ReadStruct<TDecoder>(ref TDecoder decoder, YLimits limits, ulong client, long clock, out StructRef r)
+    private static YError ReadStruct<TDecoder>(ref TDecoder decoder, YLimits limits, ulong client, long clock, bool exactSkip, out StructRef r)
         where TDecoder : IUpdateDecoder, allows ref struct
     {
         r = default;
         if (clock > MaxClock) return YError.Malformed;   // the previous struct ended at 2^53
         if (!decoder.ReadInfo(out var info)) return decoder.Error;
         var contentRef = info & 0x1f;
+        if (exactSkip && contentRef == RefSkip && info != RefSkip) return YError.Malformed;
         if (contentRef == RefGc || contentRef == RefSkip)
         {
             // a GC length goes through the length encoder, a Skip length is always a plain varuint (Yjs Skip.write)

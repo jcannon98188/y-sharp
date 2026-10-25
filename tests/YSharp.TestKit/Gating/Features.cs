@@ -59,6 +59,7 @@ public static class Features
         Feature.Integrate,
         Feature.V1,
         Feature.Gc,
+        Feature.UpdateFunctions,
     };
 }
 
