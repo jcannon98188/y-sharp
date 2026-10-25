@@ -232,6 +232,31 @@ public sealed class ArrayTests
         Assert.Equal(arr.ToArray().Length, arr.Length);
     }
 
+    [Fact, Covers("A-14")]
+    public void SearchMarkers_AfterARemoteChange_AreDiscarded_EvenWhenAppliedInsideALocalTransaction()
+    {
+        // markers set by local index reads must not survive a remote insert ahead of them (Yjs clears them in _callObserver)
+        foreach (var nested in new[] { false, true })
+        {
+            var local = NewDoc(1);
+            var remote = NewDoc(2);
+            var arr = local.GetArray("a");
+            arr.Push(Enumerable.Range(0, 40).Select(i => (YEntry)i).ToArray());
+            remote.ApplyUpdate(local.EncodeStateAsUpdate());
+            for (var i = 0; i < 40; i += 7) _ = arr[i];   // place markers
+            remote.GetArray("a").Insert(0, new YEntry[] { -1, -2 });
+            var update = remote.EncodeStateAsUpdate();
+            if (nested) local.Transact(_ => local.ApplyUpdate(update));
+            else local.ApplyUpdate(update);
+
+            var expected = arr.ToArray();
+            Assert.Equal(42, expected.Length);
+            for (var i = 0; i < expected.Length; i++) Assert.Equal(expected[i].Value, arr[i].Value);
+            arr.Insert(20, new YEntry[] { 99 });
+            Assert.Equal(99, arr.ToArray()[20].Value.AsNumber());
+        }
+    }
+
     [Fact, PortOf("y-array.tests.js:testLengthIssue2", "A-14", "A-2")]
     public void SearchMarkers_LengthIssue314_StaysCorrect()
     {
