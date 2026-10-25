@@ -28,12 +28,13 @@ jobs:
           YSHARP_TIER: Gating
         run: dotnet test --solution YSharp.slnx -c ${{ matrix.config }} --no-build --report-trx --results-directory TestResults
       # The traceability check (ADR 0010) and the fixture version-header check (GeneratedFixtureTests) run inside the gating tests above; the matrix is uploaded below.
-      # Coverage (ADR 0015): collected on the Linux gating run only, no threshold. A second pass keeps the gating run above free of the profiler.
+      # Coverage (ADR 0015): collected on the Linux gating run only, no threshold. A second pass keeps the gating run above free of instrumentation.
+      # Static instrumentation only (.github/coverage.settings.xml): the runtime profiler crashed the test host at random points.
       - name: Coverage (Linux gating run)
         if: matrix.coverage
         env:
           YSHARP_TIER: Gating
-        run: dotnet test --solution YSharp.slnx -c ${{ matrix.config }} --no-build --coverage --coverage-output-format cobertura --results-directory TestResults/coverage
+        run: dotnet test --solution YSharp.slnx -c ${{ matrix.config }} --no-build --coverage --coverage-output-format cobertura --coverage-settings ${{ github.workspace }}/.github/coverage.settings.xml --results-directory TestResults/coverage
       - name: Coverage summary
         if: matrix.coverage && always()
         run: |
