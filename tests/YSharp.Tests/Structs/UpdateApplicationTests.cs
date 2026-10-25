@@ -59,7 +59,7 @@ public sealed class UpdateApplicationTests
 
     [Fact]
     [Covers("STR-29")]
-    [Requires(Feature.Map)]
+    [Requires(Feature.Map, Feature.Events)]
     public void ItemWrite_AMapEntryWritesItsKeyOnlyWithNullOrigins_AnOverwriteInheritsIt()
     {
         var a = Net.Mk(1);

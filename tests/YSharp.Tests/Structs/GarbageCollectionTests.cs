@@ -151,7 +151,8 @@ public sealed class GarbageCollectionTests
             Net.Sync(a, b);
             ((YMap)b.GetArray("arr")[0].Type!).Set("k", "late");
             arr.Delete(0, 1);
-            Net.Both(a, b);
+            Net.Sync(b, a);                                 // b sends its set before it learns of the delete (it would collect it)
+            Net.Sync(a, b);
 
             visible.Add($"{a.GetArray("arr").Length}/{b.GetArray("arr").Length}");
             states.Add(Hex.Of(a.EncodeStateAsUpdate()));

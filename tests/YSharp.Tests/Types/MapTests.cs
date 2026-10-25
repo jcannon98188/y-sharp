@@ -108,6 +108,7 @@ public sealed class MapTests
     }
 
     [Fact, Covers("M-8")]
+    [Requires(Feature.Sync)]
     public void ValueKinds_BetweenReplicas_RoundTrip()
     {
         var net = Net.Init(2);
@@ -143,6 +144,7 @@ public sealed class MapTests
     }
 
     [Fact, Covers("M-11", "Q26")]
+    [Requires(Feature.Sync)]
     public void KeyEdgeCases_EmptyUnicodeAndProto_AreOrdinaryKeys()
     {
         var net = Net.Init(2);
@@ -183,7 +185,7 @@ public sealed class MapTests
     // ------------------------------------------------------------------ ports
 
     [Fact, PortOf("y-map.tests.js:testBasicMapTests", "M-1", "M-6", "M-8")]
-    [Requires(Feature.Array)]
+    [Requires(Feature.Array, Feature.Sync)]
     public void Map_EveryValueKind_RoundTripsBetweenPeers()
     {
         var net = Net.Init(3);
@@ -224,6 +226,7 @@ public sealed class MapTests
     }
 
     [Fact, PortOf("y-map.tests.js:testGetAndSetOfMapProperty", "M-3", "M-2")]
+    [Requires(Feature.Sync)]
     public void Map_GetAndSetOfProperty_ReturnsTheStoredValues()
     {
         var net = Net.Init(2);
@@ -245,6 +248,7 @@ public sealed class MapTests
     }
 
     [Fact, PortOf("y-map.tests.js:testGetAndSetOfMapPropertySyncs", "M-1")]
+    [Requires(Feature.Sync)]
     public void Map_GetAndSetOfProperty_SyncsToThePeer()
     {
         var net = Net.Init(2);
@@ -257,6 +261,7 @@ public sealed class MapTests
     }
 
     [Fact, PortOf("y-map.tests.js:testGetAndSetOfMapPropertyWithConflict", "M-9")]
+    [Requires(Feature.Sync)]
     public void Map_ConcurrentSetOfTheSameKey_ConvergesOnOneValue()
     {
         var net = Net.Init(3);
@@ -268,6 +273,7 @@ public sealed class MapTests
     }
 
     [Fact, PortOf("y-map.tests.js:testSizeAndDeleteOfMapProperty", "M-6")]
+    [Requires(Feature.Sync)]
     public void Map_DeleteOfAProperty_UpdatesTheSize()
     {
         var map0 = Net.Init(1).Peers[0].Map;
@@ -281,6 +287,7 @@ public sealed class MapTests
     }
 
     [Fact, PortOf("y-map.tests.js:testGetAndSetAndDeleteOfMapProperty", "M-4")]
+    [Requires(Feature.Sync)]
     public void Map_ConcurrentSetAndDelete_ConvergesOnTheDelete()
     {
         var net = Net.Init(3);
@@ -293,6 +300,7 @@ public sealed class MapTests
     }
 
     [Fact, PortOf("y-map.tests.js:testSetAndClearOfMapProperties", "M-5")]
+    [Requires(Feature.Sync)]
     public void Map_Clear_RemovesEveryProperty()
     {
         var net = Net.Init(1);
@@ -312,6 +320,7 @@ public sealed class MapTests
     }
 
     [Fact, PortOf("y-map.tests.js:testSetAndClearOfMapPropertiesWithConflicts", "M-5", "M-9")]
+    [Requires(Feature.Sync)]
     public void Map_ConcurrentSetAndClear_Converges()
     {
         var net = Net.Init(4);
@@ -338,6 +347,7 @@ public sealed class MapTests
     }
 
     [Fact, PortOf("y-map.tests.js:testGetAndSetOfMapPropertyWithThreeConflicts", "M-9")]
+    [Requires(Feature.Sync)]
     public void Map_ThreeConcurrentSetsOfTheSameKey_ConvergeOnOneValue()
     {
         var net = Net.Init(3);
@@ -351,6 +361,7 @@ public sealed class MapTests
     }
 
     [Fact, PortOf("y-map.tests.js:testGetAndSetAndDeleteOfMapPropertyWithThreeConflicts", "M-9", "M-4")]
+    [Requires(Feature.Sync)]
     public void Map_ThreeConcurrentSetsAndDeletes_Converge()
     {
         var net = Net.Init(4);

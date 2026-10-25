@@ -181,7 +181,7 @@ public sealed class StructModelTests
 
     [Fact]
     [Covers("STR-16", "STR-33", "STR-34", "STR-35")]
-    [Requires(Feature.Array, Feature.V2, Feature.Map)]
+    [Requires(Feature.Array, Feature.V2, Feature.Map, Feature.Events)]
     public void GcStruct_IsWrittenFromAnOffset_AndIntegratedWithOne_AndNeverWaitsForAnything()
     {
         var (a, ups) = CollectedMap();

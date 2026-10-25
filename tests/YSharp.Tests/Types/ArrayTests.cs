@@ -570,7 +570,7 @@ public sealed class ArrayTests
     }
 
     [Fact, PortOf("y-array.tests.js:testIteratingArrayContainingTypes", "A-12")]
-    [Requires(Feature.Map)]
+    [Requires(Feature.Map, Feature.DocLifecycle)]
     public void Array_IteratingNestedTypes_VisitsEveryElementInOrder()
     {
         var y = NewDoc();

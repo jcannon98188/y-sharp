@@ -371,7 +371,7 @@ public sealed class SharedTypeTests
     }
 
     [Fact, PortOf("y-map.tests.js:testYmapSetsYmap", "T-0.12")]
-    [Requires(Feature.Map)]
+    [Requires(Feature.Map, Feature.Sync)]
     public void Set_ReturnsTheLiveInstance_Map()
     {
         var net = Net.Init(2);

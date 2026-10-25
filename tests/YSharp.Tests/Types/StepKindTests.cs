@@ -84,7 +84,7 @@ public sealed class StepKindTests
     }
 
     [Fact, Covers("A-9", "T-0.8")]
-    [Requires(Feature.Array, Feature.Map)]
+    [Requires(Feature.Array, Feature.Map, Feature.Text)]
     public void ArrayInsertType_NestedType_IsReachableByPath()
     {
         var ctx = Run($$$"""
