@@ -50,10 +50,18 @@ public static class AllocationBudgets
     public const double Headroom = 1.25;
 
     /// <summary>
-    /// The recorded limits, keyed <c>BUD-nn</c> or <c>BUD-nn:part</c>. Empty until the implementation exists (ADR 0018 milestone gate);
-    /// every bounded budget is therefore pending. Fill in <c>WithHeadroom(measured)</c> values as each milestone closes.
+    /// The recorded limits, keyed <c>BUD-nn</c> or <c>BUD-nn:part</c>. A bounded budget without one is pending. Fill in
+    /// <c>WithHeadroom(measured)</c> values as each milestone closes (ADR 0018 milestone gate).
     /// </summary>
-    public static readonly IReadOnlyDictionary<string, long> Limits = new Dictionary<string, long>();
+    public static readonly IReadOnlyDictionary<string, long> Limits = new Dictionary<string, long>
+    {
+        // TASK-4.12, owner decision (option A): each transaction hands its body a fresh 24-byte Transaction over pooled state, so a kept
+        // reference stays stale for good (CC-9). Measured 24 bytes per operation in Release; recorded with headroom. Contended TryTransact runs no body: 0.
+        ["BUD-01:Transact"] = WithHeadroom(24),
+        ["BUD-01:ReadTransact"] = WithHeadroom(24),
+        ["BUD-02:Uncontended"] = WithHeadroom(24),
+        ["BUD-02:Contended"] = 0,
+    };
 
     /// <summary>The one-off large-object-heap growth BUD-14 tolerates: a single caller-supplied payload larger than a chunk (ADR 0018). The workload has none, so one chunk is slack.</summary>
     public const long LohAllowanceBytes = 128 * 1024;
@@ -64,8 +72,8 @@ public static class AllocationBudgets
 
     public static readonly IReadOnlyList<Budget> All = new Budget[]
     {
-        new("BUD-01", "Transact/ReadTransact with a static lambda, uncontended", BudgetKind.Zero, "Transact", "ReadTransact"),
-        new("BUD-02", "TryTransact, uncontended and contended", BudgetKind.Zero, "Uncontended", "Contended"),
+        new("BUD-01", "Transact/ReadTransact with a static lambda, uncontended", BudgetKind.Bounded, "Transact", "ReadTransact"),
+        new("BUD-02", "TryTransact, uncontended and contended", BudgetKind.Bounded, "Uncontended", "Contended"),
         new("BUD-03", "Scalar YValue reads and AttributeEquals", BudgetKind.Zero),
         new("BUD-04", "Event dispatch with no handlers for the changed type", BudgetKind.Zero),
         new("BUD-05", "Commit with no Update subscriber", BudgetKind.Zero),

@@ -21,21 +21,22 @@ public sealed class HotPathBudgetTests
     private const int Warmup = 50;
 
     [Fact, Covers("BUD-01")]
-    public void Transact_WithStaticLambda_AllocatesNothing()
+    public void Transact_WithStaticLambda_StaysWithinItsBudget()
     {
         var doc = new Doc();
         AllocationBudgets.Check("BUD-01", "Transact", () => doc.Transact(0, static (_, _) => { }));
     }
 
     [Fact, Covers("BUD-01")]
-    public void ReadTransact_WithStaticLambda_AllocatesNothing()
+    [Requires(Feature.Text, Feature.Array, Feature.Map)]
+    public void ReadTransact_WithStaticLambda_StaysWithinItsBudget()
     {
         var doc = AllocDocs.Populated();
         AllocationBudgets.Check("BUD-01", "ReadTransact", () => doc.ReadTransact(static _ => { }));
     }
 
     [Fact, Covers("BUD-02")]
-    public void TryTransact_Uncontended_AllocatesNothing()
+    public void TryTransact_Uncontended_StaysWithinItsBudget()
     {
         var doc = new Doc();
         AllocationBudgets.Check("BUD-02", "Uncontended", () => doc.TryTransact(static _ => { }));
@@ -77,6 +78,7 @@ public sealed class HotPathBudgetTests
     }
 
     [Fact, Covers("BUD-06")]
+    [Requires(Feature.V1, Feature.Text, Feature.Array, Feature.Map)]
     public void EncodeStateAsUpdate_IntoPreSizedWriter_AllocatesNothing()
     {
         var doc = AllocDocs.Populated();

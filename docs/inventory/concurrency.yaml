@@ -63,7 +63,7 @@
   ref: "adr 0006:19"
 
 - id: CC-7
-  title: "An uncontended acquire and release allocates nothing"
+  title: "An uncontended acquire and release allocates only the Transaction its body receives (BUD-01, BUD-02); a contended TryTransact allocates nothing"
   source: "docs/adr/0006-concurrency-contract.md:20"
   kind: y-sharp-own
   layers: [unit]

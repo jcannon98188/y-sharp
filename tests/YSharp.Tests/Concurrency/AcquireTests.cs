@@ -6,6 +6,7 @@ using YSharp.TestKit.Allocation;
 using YSharp.TestKit.Tiers;
 using YSharp.TestKit.Traceability;
 using YSharp.TestKit.Gating;
+using YSharp.Tests.Allocation;
 
 namespace YSharp.Tests.Concurrency;
 
@@ -114,19 +115,22 @@ public sealed class AcquireTests
 
     // ------------------------------------------------------------------ CC-7 (BUD-01, BUD-02)
 
+    // Owner decision (TASK-4.12): an uncontended acquire allocates only the small Transaction its body receives (BUD-01, BUD-02 limits);
+    // a contended TryTransact runs no body and allocates nothing.
+
     [Fact, Covers("CC-7")]
-    public void Acquire_UncontendedAcquireAndRelease_AllocatesNothing()
+    public void Acquire_UncontendedAcquireAndRelease_StaysWithinItsBudget()
     {
         var doc = Conc.NewDoc();
-        AllocationAssert.AtMost("BUD-01", 0, () => doc.Transact(0, static (_, _) => { }));
-        AllocationAssert.AtMost("BUD-01", 0, () => doc.ReadTransact(Nop));
+        AllocationBudgets.Check("BUD-01", "Transact", () => doc.Transact(0, static (_, _) => { }));
+        AllocationBudgets.Check("BUD-01", "ReadTransact", () => doc.ReadTransact(Nop));
     }
 
     [Fact, Covers("CC-7")]
-    public void TryTransact_AllocatesNothing_Uncontended()
+    public void TryTransact_Uncontended_StaysWithinItsBudget()
     {
         var doc = Conc.NewDoc();
-        AllocationAssert.AtMost("BUD-02", 0, () => doc.TryTransact(Nop));
+        AllocationBudgets.Check("BUD-02", "Uncontended", () => doc.TryTransact(Nop));
     }
 
     [Fact, Covers("CC-7")]

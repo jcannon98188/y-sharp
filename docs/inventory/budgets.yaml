@@ -3,26 +3,26 @@
 # Initial population (TASK-2.3): every entry starts pending with an owning spec (ADR 0019). Fields are best-effort; the owning spec refines them.
 
 - id: BUD-01
-  title: "Uncontended Transact/ReadTransact with a static lambda allocates zero bytes"
+  title: "Uncontended Transact/ReadTransact with a static lambda allocates at most its recorded limit"
   source: "docs/adr/0009-allocation-and-memory-budgets.md:1"
   kind: y-sharp-own
   layers: [unit]
   wire: false
   owner: 14
-  status: pending
+  status: active
   ref: "adr 0009"
-  note: "BUD-01..11 are the eleven named hot paths; BUD-12..14 are the other ADR 0009 budgets."
+  note: "BUD-01..11 are the eleven named hot paths; BUD-12..14 are the other ADR 0009 budgets. active (TASK-4.12): bounded, not zero, by owner decision (option A): the body receives a fresh 24-byte Transaction over pooled state so a kept reference stays stale (CC-9). Measured 24 bytes per operation in Release for Transact and ReadTransact; limit 30 (plus 25%)."
 
 - id: BUD-02
-  title: "TryTransact allocates zero bytes, also when contended"
+  title: "TryTransact allocates at most its recorded limit uncontended, and zero bytes when contended"
   source: "docs/adr/0009-allocation-and-memory-budgets.md:1"
   kind: y-sharp-own
   layers: [unit]
   wire: false
   owner: 14
-  status: pending
+  status: active
   ref: "adr 0009"
-  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
+  note: "active (TASK-4.12): bounded by owner decision (option A), as BUD-01. Measured 24 bytes per operation uncontended (limit 30, plus 25%) and 0 contended (limit 0) in Release."
 
 - id: BUD-03
   title: "Scalar YValue reads and AttributeEquals allocate zero bytes"
