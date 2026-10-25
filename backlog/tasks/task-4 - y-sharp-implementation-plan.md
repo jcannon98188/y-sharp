@@ -4,7 +4,7 @@ title: y-sharp implementation plan
 status: To Do
 assignee: []
 created_date: '2026-10-24 16:51'
-updated_date: '2026-10-24 19:43'
+updated_date: '2026-10-25 07:39'
 labels: []
 dependencies: []
 documentation:
@@ -51,3 +51,9 @@ The y-sharp implementation plan: 44 session-sized spec tasks (TASK-4.1 to TASK-4
 
 ADRs 0005 (ERR-20 is permanent), 0009 (bytes per operation), 0018 (milestone and spike amendments), 0020 (feature gates), 0021 (modules and ownership), 0022 (suite-change rules). Research: `docs/research/test-surface.md` and `docs/research/storage-layout.md`.
 <!-- SECTION:DESCRIPTION:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Standing owner approval (2026-10-25): when a test is gated on a landed feature but fails only because it calls an API owned by a later spec, adding [Requires] for that later feature is pre-approved under ADR 0022. Record each one in the spec's task notes. Any other test, gate, budget or registry change still goes to the owner.
+<!-- SECTION:NOTES:END -->
