@@ -4,7 +4,7 @@ title: 12. Transactions and the document lock
 status: To Do
 assignee: []
 created_date: '2026-10-24 19:41'
-updated_date: '2026-10-24 19:42'
+updated_date: '2026-10-25 06:20'
 labels:
   - spec
   - 'model:opus'
@@ -46,3 +46,13 @@ Read first: `docs/handoff-implementation-planning.md`, ADRs 0005, 0006, 0008, 00
 - [ ] #3 Fixture drift check (`npm run check` in `tools/fixture-gen`) is clean
 - [ ] #4 ADR 0022 followed: suite changes in separate `suite:` commits, a Suite changes list in the notes, no open owner decision
 <!-- DOD:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: @orchestrator
+created: 2026-10-25 06:20
+---
+Owner decision needed (ADR 0022 gate changes; 5 tests red until answered): (1) add [Requires(Feature.DocLifecycle)] to the CC-17 Destroy tests in LifecycleTests (3 failing + ADestroyedDocument_KeepsAcceptingAcquires_OnlyIsDestroyedChanges); (2) HotPathBudgetTests.ReadTransact_WithStaticLambda_AllocatesNothing -> [Requires(Text, Array, Map)]; (3) HotPathBudgetTests.EncodeStateAsUpdate_IntoPreSizedWriter_AllocatesNothing -> [Requires(V1, Text, Array, Map)]; (4) confirm TestKit ScheduleSeam TypeName change to YSharp.Transactions.ScheduleSeam. For spec 39: LockModelTests.TryTransact_WhileTheCallingThreadHoldsAReadTransaction_ReturnsUpgradeRefusedAtOnce checks from another thread, which should get Contended; run the check on the reading thread. Also: cleanup now calls HookGarbageCollection before HookSubdocs (Yjs order).
+---
+<!-- COMMENTS:END -->
