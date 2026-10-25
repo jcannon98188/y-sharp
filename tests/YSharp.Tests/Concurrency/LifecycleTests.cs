@@ -173,6 +173,7 @@ public sealed class LifecycleTests
     // ------------------------------------------------------------------ CC-17
 
     [Fact, Covers("CC-17")]
+    [Requires(Feature.DocLifecycle)]
     public void Destroy_IsAWriteTransaction_AndWaitsForAWriterToFinish()
     {
         var doc = Conc.NewDoc();
@@ -182,6 +183,7 @@ public sealed class LifecycleTests
     }
 
     [Fact, Covers("CC-17")]
+    [Requires(Feature.DocLifecycle)]
     public void Destroy_WaitsForReaders_Too()
     {
         var doc = Conc.NewDoc();
@@ -191,6 +193,7 @@ public sealed class LifecycleTests
     }
 
     [Fact, Covers("CC-17")]
+    [Requires(Feature.DocLifecycle)]
     public void Destroy_OnTheOwningThread_JoinsTheTransaction_AndDoesNotDeadlock()
     {
         var doc = Conc.NewDoc();
@@ -202,7 +205,7 @@ public sealed class LifecycleTests
     }
 
     [Fact, Covers("CC-17")]
-    [Requires(Feature.Array)]
+    [Requires(Feature.Array, Feature.DocLifecycle)]
     public void ADestroyedDocument_KeepsAcceptingAcquires_OnlyIsDestroyedChanges()
     {
         var doc = Conc.NewDoc();
