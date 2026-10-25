@@ -34,7 +34,7 @@ public sealed partial class Doc
     private Transaction? _cleaning;                 // the transaction whose cleanup is running
     private List<Transaction> _cleanups = new();    // Yjs doc._transactionCleanups
     private List<Transaction>? _spareCleanups = new();
-    private Transaction[] _writePool = new Transaction[2];
+    private TxState[] _writePool = new TxState[2];
     private int _writePoolCount;
 
     public void Transact(Action<Transaction> body, object? origin = null)
@@ -206,8 +206,7 @@ public sealed partial class Doc
         if (_tx != null) return new TxHandle(_tx, entry, false);
 
         // the lock was free, or the owner writes from cleanup (an observer): a new transaction, cleaned up after the current one (CC-2)
-        var tx = RentWrite();
-        tx.Begin(origin, local);
+        var tx = RentWrite().Begin(origin, local);
         _tx = tx;
         _cleanups.Add(tx);
         try
@@ -268,8 +267,9 @@ public sealed partial class Doc
             _cleaning = null;
             foreach (var tx in cleanups)
             {
-                tx.End();
-                ReturnWrite(tx);
+                var state = tx.State;
+                state.End();
+                ReturnWrite(state);
             }
 
             cleanups.Clear();
@@ -283,7 +283,7 @@ public sealed partial class Doc
     {
         try
         {
-            tx.TakeAfterState();
+            tx.State.TakeAfterState();
             HookBeforeObservers(tx);
             HookObservers(tx);
             HookAfterTransaction(tx);
@@ -299,12 +299,12 @@ public sealed partial class Doc
         }
     }
 
-    private Transaction RentWrite() => _writePoolCount > 0 ? _writePool[--_writePoolCount] : new Transaction(this, write: true);
+    private TxState RentWrite() => _writePoolCount > 0 ? _writePool[--_writePoolCount] : new TxState(this, write: true);
 
-    private void ReturnWrite(Transaction tx)
+    private void ReturnWrite(TxState state)
     {
         if (_writePoolCount == _writePool.Length) Array.Resize(ref _writePool, _writePool.Length * 2);
-        _writePool[_writePoolCount++] = tx;
+        _writePool[_writePoolCount++] = state;
     }
 
     private static int ToMilliseconds(TimeSpan timeout)

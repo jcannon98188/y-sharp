@@ -45,7 +45,7 @@ internal sealed class DocLock
     private int _waitingWriters;
     private Reader[] _readers = new Reader[4];
     private int _readerCount;       // distinct reader threads, the first _readerCount entries of _readers
-    private Transaction[] _readPool = new Transaction[4];
+    private TxState[] _readPool = new TxState[4];
     private int _readPoolCount;
 
     internal DocLock(Doc doc)
@@ -256,11 +256,11 @@ internal sealed class DocLock
             if (at < 0) throw new YConcurrencyException("A read transaction was ended on a thread that does not hold it (CC-15).");
             if (--_readers[at].Depth == 0)
             {
-                var tx = _readers[at].Tx;
+                var state = _readers[at].Tx.State;
                 _readers[at] = _readers[--_readerCount];
                 _readers[_readerCount] = default;
-                tx.End();
-                ReturnRead(tx);
+                state.End();
+                ReturnRead(state);
                 released = true;
                 if (_readerCount == 0) Monitor.PulseAll(_sync);
             }
@@ -304,15 +304,14 @@ internal sealed class DocLock
 
     private Transaction RentRead()
     {
-        var tx = _readPoolCount > 0 ? _readPool[--_readPoolCount] : new Transaction(_doc, write: false);
-        tx.Begin(null, local: true);
-        return tx;
+        var state = _readPoolCount > 0 ? _readPool[--_readPoolCount] : new TxState(_doc, write: false);
+        return state.Begin(null, local: true);
     }
 
-    private void ReturnRead(Transaction tx)
+    private void ReturnRead(TxState state)
     {
         if (_readPoolCount == _readPool.Length) Array.Resize(ref _readPool, _readPool.Length * 2);
-        _readPool[_readPoolCount++] = tx;
+        _readPool[_readPoolCount++] = state;
     }
 
     private void PulseAll()
