@@ -335,7 +335,6 @@ YSharp.TransactionScope|method System.Void Dispose()
 YSharp.TransactionScope|property YSharp.Transaction Transaction {get;}
 YSharp.TransactionScope|ref struct
 YSharp.Transaction|base System.Object
-YSharp.Transaction|ctor()
 YSharp.Transaction|property System.Boolean IsLocal {get;}
 YSharp.Transaction|property System.Boolean IsValid {get;}
 YSharp.Transaction|property System.Boolean IsWrite {get;}

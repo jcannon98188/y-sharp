@@ -21,7 +21,7 @@ if [[ "${1:-}" == "--update" ]]; then
   exit 0
 fi
 
-if diff -u "$here/baseline.txt" "$current"; then
+if diff -u --strip-trailing-cr "$here/baseline.txt" "$current"; then
   echo "public surface unchanged ($(wc -l < "$current") lines)"
 else
   echo "public surface CHANGED: see diff above" >&2
