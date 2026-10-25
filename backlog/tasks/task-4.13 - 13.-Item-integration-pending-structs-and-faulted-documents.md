@@ -4,7 +4,7 @@ title: '13. Item integration, pending structs and faulted documents'
 status: To Do
 assignee: []
 created_date: '2026-10-24 19:41'
-updated_date: '2026-10-24 19:42'
+updated_date: '2026-10-25 07:39'
 labels:
   - spec
   - 'model:opus'
@@ -45,3 +45,19 @@ Read first: `docs/handoff-implementation-planning.md`, ADRs 0005, 0006, 0008, 00
 - [ ] #3 Fixture drift check (`npm run check` in `tools/fixture-gen`) is clean
 - [ ] #4 ADR 0022 followed: suite changes in separate `suite:` commits, a Suite changes list in the notes, no open owner decision
 <!-- DOD:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: @orchestrator
+created: 2026-10-25 07:30
+---
+Owner decision needed (gate corrections; 5 tests red): IntegrationTests.MissingDependency_IsFoundInOrderOrigin_ThenRightOrigin -> [Requires(Text)]; ErrorPathTests.TheUnexpectedCaseSites_AreGuardedByTheirCallers_ThePayloadWaitsOrIsIgnored -> [Requires(V1)]; ErrorModelTests.Err01_TryApplyUpdate_ReturnsATypedResult_AndApplyUpdateThrowsTheSameCode -> [Requires(V1)]; ErrorModelTests.Err02_DifferentJsFailureKinds_CollapseIntoTheSameCode -> [Requires(V1)]; StructModelTests.ChildrenOfACollectedType_AfterGc_BecomeOneMergedGcStruct -> [Requires(Array, Map, Gc)]. Handoffs: spec 14 calls ThrowIfFaulted before decoding then IntegrateRemote; HasPending = Pending != null || PendingDeletes != null. Spec 21 sets Branch.Owner, routes local edits via IntegrateLocal/DeleteItem, gives roots search markers.
+---
+
+author: @orchestrator
+created: 2026-10-25 07:39
+---
+Owner approved the 5 gate fixes.
+---
+<!-- COMMENTS:END -->
