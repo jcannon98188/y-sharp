@@ -75,8 +75,8 @@ public sealed class StepKindTests
     public void TextApplyDelta_InsertRetainDeleteAndAttributes_AreApplied()
     {
         var ctx = Run($$$"""
-            [{"step":"text.applyDelta","doc":"a","target":{{{Text}}},"delta":[{"insert":"hello"},{"insert":{"$":"obj","pairs":[["linebreak","s"]]}}]},
-             {"step":"text.applyDelta","doc":"a","target":{{{Text}}},"delta":[{"retain":1},{"delete":1},{"retain":2,"attributes":{"$":"obj","pairs":[["bold",true]]}}]}]
+            [{"step":"text.applyDelta","doc":"a","target":{{{Text}}},"delta":[{"$":"obj","pairs":[["insert","hello"]]},{"$":"obj","pairs":[["insert",{"$":"obj","pairs":[["linebreak","s"]]}]]}]},
+             {"step":"text.applyDelta","doc":"a","target":{{{Text}}},"delta":[{"$":"obj","pairs":[["retain",1]]},{"$":"obj","pairs":[["delete",1]]},{"$":"obj","pairs":[["retain",2],["attributes",{"$":"obj","pairs":[["bold",true]]}]]}]}]
             """);
         Assert.Equal(
             """[{"insert":"h"},{"insert":"ll","attributes":{"bold":true}},{"insert":"o"},{"insert":{"linebreak":"s"}}]""",

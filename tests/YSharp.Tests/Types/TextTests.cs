@@ -95,7 +95,7 @@ public sealed class TextTests
     }
 
     [Fact, PortOf("y-text.tests.js:testSplitSurrogateCharacter", "T-5")]
-    [Requires(Feature.TextFormat)]
+    [Requires(Feature.TextFormat, Feature.Sync)]
     public void Text_SplitSurrogatePair_SurvivesDisconnectAndSync()
     {
         {
@@ -285,7 +285,7 @@ public sealed class TextTests
     }
 
     [Fact, Covers("F-5", "Q27")]
-    [Requires(Feature.TextFormat)]
+    [Requires(Feature.TextFormat, Feature.Sync)]
     public void AttributeEquality_IsShallow_SoFlatObjectsAreEqualAndNestedOnesAreNot()
     {
         var net = Net.Init(1);
@@ -466,7 +466,7 @@ public sealed class TextTests
     }
 
     [Fact, PortOf("y-text.tests.js:testToDeltaEmbedAttributes", "E-3", "D-1", "D-2")]
-    [Requires(Feature.TextFormat)]
+    [Requires(Feature.TextFormat, Feature.Sync)]
     public void ToDelta_EmbedWithAttributes_IncludesTheAttributes()
     {
         var text0 = Net.Init(1).Peers[0].Text;
@@ -478,7 +478,7 @@ public sealed class TextTests
     }
 
     [Fact, PortOf("y-text.tests.js:testToDeltaEmbedNoAttributes", "E-3", "D-2", "E-6")]
-    [Requires(Feature.TextFormat)]
+    [Requires(Feature.TextFormat, Feature.Sync)]
     public void ToDelta_EmbedWithoutAttributes_OmitsTheAttributesKey()
     {
         var text0 = Net.Init(1).Peers[0].Text;
@@ -491,7 +491,7 @@ public sealed class TextTests
     }
 
     [Fact, PortOf("y-text.tests.js:testGetDeltaWithEmbeds", "E-4")]
-    [Requires(Feature.TextFormat)]
+    [Requires(Feature.TextFormat, Feature.Sync)]
     public void ToDelta_ApplyDeltaEmbed_ReturnsTheEmbed()
     {
         var text0 = Net.Init(1).Peers[0].Text;
