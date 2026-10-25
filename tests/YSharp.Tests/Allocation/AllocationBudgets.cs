@@ -61,6 +61,9 @@ public static class AllocationBudgets
         ["BUD-01:ReadTransact"] = WithHeadroom(24),
         ["BUD-02:Uncontended"] = WithHeadroom(24),
         ["BUD-02:Contended"] = 0,
+        // TASK-4.20, M3 gate: one-character inserts applied one update at a time (CodecBudgetTests), 1069 bytes per call in Release for V1 and V2.
+        ["BUD-08:V1"] = WithHeadroom(1069),
+        ["BUD-08:V2"] = WithHeadroom(1069),
     };
 
     /// <summary>The one-off large-object-heap growth BUD-14 tolerates: a single caller-supplied payload larger than a chunk (ADR 0018). The workload has none, so one chunk is slack.</summary>

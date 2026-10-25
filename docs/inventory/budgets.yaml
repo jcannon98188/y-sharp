@@ -86,9 +86,9 @@
   layers: [unit]
   wire: false
   owner: 14
-  status: pending
+  status: active
   ref: "adr 0009"
-  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
+  note: "Active at the M3 gate (TASK-4.20): measured 1069 bytes per call in Release for V1 and V2 (CodecBudgetTests, one-character inserts applied one update at a time), recorded with 25% headroom; HotPathBudgetTests checks the same path once Text lands."
 
 - id: BUD-09
   title: "Push and Set of scalars stay within a bounded allocation budget"
