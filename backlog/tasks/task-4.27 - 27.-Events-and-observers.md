@@ -4,7 +4,7 @@ title: 27. Events and observers
 status: To Do
 assignee: []
 created_date: '2026-10-24 19:42'
-updated_date: '2026-10-25 22:55'
+updated_date: '2026-10-25 23:45'
 labels:
   - spec
   - 'model:opus'
@@ -49,4 +49,7 @@ Read first: `docs/handoff-implementation-planning.md`, ADRs 0005, 0006, 0008, 00
 
 <!-- SECTION:NOTES:BEGIN -->
 Gap found in TASK-4.22 (2026-10-25), for this spec: Doc.Yata.cs AddChangedType returns early when parent.Owner is null, i.e. a nested type that arrived in an update and was never read has no YType yet. Yjs records every changed type, so observeDeep on an ancestor could miss events for changes inside such a type. Likely fix: create the owner with YType.Of(parent, tx.Doc) instead of returning; check the BUD-08 allocation budget for remote applies (it would allocate one YType per untouched nested type). Related: Doc.Transactions.ClearStaleMarkers (TASK-4.22) relies on the changed set and runs before HookBeforeObservers; keep that order when the observer hooks land.
+
+From TASK-4.25: HookFormattingCleanup (Yjs cleanupYTextAfterTransaction) runs in CleanupOne after HookAfterTransaction, in the same try block. Yjs runs the observers, the deep observers, afterTransaction and the formatting cleanup through callAll, so each still runs when an earlier one throws. When observers land, keep that: an observer exception must not skip the formatting cleanup.
+Changed types that no YType object wraps yet are not in tx.Changed (AddChangedType skips them; the texts among them are tracked in TxState.UnwrappedTextsChanged for the cleanup). Yjs has an object for every type, so deep-observe parent chains through an unread nested type need the same care.
 <!-- SECTION:NOTES:END -->
