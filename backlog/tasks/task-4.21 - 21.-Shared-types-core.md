@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@claude'
 created_date: '2026-10-24 19:42'
-updated_date: '2026-10-25 20:01'
+updated_date: '2026-10-25 20:02'
 labels:
   - spec
   - 'model:sonnet'
@@ -57,3 +57,9 @@ Read first: `docs/handoff-implementation-planning.md`, ADRs 0005, 0006, 0008, 00
 7. Debug + Release tests, fixture-gen check, api-surface check, memory gate.
 Commit after each step (session-limit safety).
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Progress (resume point): YEntry done (d88ae4b). YType owns a Branch (private protected ctor, WireTypeRef override per class, AttachedDoc, Parent via Branch.Item.Parent.Owner; XML element/hook names in Branch.TypeName) (7b177bb). Next: Doc.Get*/root placeholder upgrade (Doc.Types.cs over RootBranch), set AttachedDoc on roots and in HookTypeIntegrated, then list/map cores, prelim buffering, YUntyped, ToJson.
+<!-- SECTION:NOTES:END -->
