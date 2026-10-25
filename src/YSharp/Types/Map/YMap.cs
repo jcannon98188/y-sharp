@@ -10,6 +10,8 @@ namespace YSharp;
 
 public class YMap : YType
 {
+    internal override byte WireTypeRef => Store.TypeRefs.Map;
+
     public YMap() { }
     public YMap(IEnumerable<KeyValuePair<string, YEntry>> entries) { }
     public int Count => throw Sketch.NI;

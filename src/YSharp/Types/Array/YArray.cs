@@ -10,6 +10,8 @@ namespace YSharp;
 
 public sealed class YArray : YType
 {
+    internal override byte WireTypeRef => Store.TypeRefs.Array;
+
     public YArray() { }
     public static YArray From(IEnumerable<YEntry> items) => throw Sketch.NI;
     public int Length => throw Sketch.NI;

@@ -10,6 +10,8 @@ namespace YSharp;
 
 public class YText : YType
 {
+    internal override byte WireTypeRef => Store.TypeRefs.Text;
+
     public YText(string? initial = null) { }
     public int Length => throw Sketch.NI;                                    // UTF-16 code units (Q17)
     public void Insert(int index, string text, in YValue attributes = default) => throw Sketch.NI;   // clamps index, as JS

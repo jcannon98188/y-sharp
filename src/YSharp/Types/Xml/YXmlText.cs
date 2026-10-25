@@ -8,6 +8,8 @@ namespace YSharp;
 
 public sealed class YXmlText : YText
 {
+    internal override byte WireTypeRef => Store.TypeRefs.XmlText;
+
     public YXmlText(string? initial = null) : base(initial) { }
     public YType? NextSibling => throw Sketch.NI;
     public YType? PrevSibling => throw Sketch.NI;

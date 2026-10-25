@@ -8,7 +8,9 @@ namespace YSharp;
 
 public sealed class YXmlElement : YXmlFragment
 {
-    public YXmlElement(string nodeName = "UNDEFINED") { }
+    internal override byte WireTypeRef => Store.TypeRefs.XmlElement;
+
+    public YXmlElement(string nodeName = "UNDEFINED") { Branch.TypeName = nodeName; }
     public string NodeName => throw Sketch.NI;
     public YType? NextSibling => throw Sketch.NI;
     public YType? PrevSibling => throw Sketch.NI;

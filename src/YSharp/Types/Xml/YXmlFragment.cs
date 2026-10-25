@@ -10,6 +10,8 @@ namespace YSharp;
 
 public class YXmlFragment : YType
 {
+    internal override byte WireTypeRef => Store.TypeRefs.XmlFragment;
+
     public int Length => throw Sketch.NI;                                    // prelim length before integration (X-F6)
     public YType? FirstChild => throw Sketch.NI;
     public YType this[int index] => throw Sketch.NI;

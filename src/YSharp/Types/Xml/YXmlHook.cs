@@ -8,7 +8,9 @@ namespace YSharp;
 
 public sealed class YXmlHook : YMap
 {
-    public YXmlHook(string hookName) { }
+    internal override byte WireTypeRef => Store.TypeRefs.XmlHook;
+
+    public YXmlHook(string hookName) { Branch.TypeName = hookName; }
     public string HookName => throw Sketch.NI;
 }
 
