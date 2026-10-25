@@ -1,10 +1,10 @@
 ---
 id: TASK-4.12
 title: 12. Transactions and the document lock
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-10-24 19:41'
-updated_date: '2026-10-25 07:07'
+updated_date: '2026-10-25 07:13'
 labels:
   - spec
   - 'model:opus'
@@ -32,20 +32,26 @@ Read first: `docs/handoff-implementation-planning.md`, ADRs 0005, 0006, 0008, 00
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Every test whose required features have all landed passes, and no test requiring this spec's features skips
-- [ ] #2 This spec's features are added to `Features.Landed`
-- [ ] #3 The traceability gate passes and no pending registry entry is added
-- [ ] #4 Implicit transactions join the calling thread's open transaction; `Transact`, `TryTransact`, `ReadTransact`, `BeginTransaction`, `TransactionScope` and `TransactWithTimeout` follow ADR 0006 and 0008
-- [ ] #5 Stale views throw `YLifetimeException`; read-to-write upgrade returns `UpgradeRefused` or throws `YConcurrencyException`
+- [x] #1 Every test whose required features have all landed passes, and no test requiring this spec's features skips
+- [x] #2 This spec's features are added to `Features.Landed`
+- [x] #3 The traceability gate passes and no pending registry entry is added
+- [x] #4 Implicit transactions join the calling thread's open transaction; `Transact`, `TryTransact`, `ReadTransact`, `BeginTransaction`, `TransactionScope` and `TransactWithTimeout` follow ADR 0006 and 0008
+- [x] #5 Stale views throw `YLifetimeException`; read-to-write upgrade returns `UpgradeRefused` or throws `YConcurrencyException`
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `dotnet build YSharp.slnx` has 0 warnings
-- [ ] #2 `dotnet test --solution YSharp.slnx` is green in Debug and in Release
-- [ ] #3 Fixture drift check (`npm run check` in `tools/fixture-gen`) is clean
-- [ ] #4 ADR 0022 followed: suite changes in separate `suite:` commits, a Suite changes list in the notes, no open owner decision
+- [x] #1 `dotnet build YSharp.slnx` has 0 warnings
+- [x] #2 `dotnet test --solution YSharp.slnx` is green in Debug and in Release
+- [x] #3 Fixture drift check (`npm run check` in `tools/fixture-gen`) is clean
+- [x] #4 ADR 0022 followed: suite changes in separate `suite:` commits, a Suite changes list in the notes, no open owner decision
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Suite changes (owner-approved): reuse test; BUD-01/02 Zero->Bounded (Transact/ReadTransact/uncontended TryTransact measured 24 B, limit 30; contended TryTransact 0); CC-7 wording in ADR 0006/0009 and concurrency.yaml; DocLifecycle gate on 4 Destroy tests; Text/Array/Map and V1 gates on two HotPathBudgetTests; ScheduleSeam moved to YSharp.Transactions. Open for spec 39: LockModelTests upgrade-refused test probes from another thread.
+<!-- SECTION:NOTES:END -->
 
 ## Comments
 
@@ -68,3 +74,9 @@ created: 2026-10-25 07:07
 Owner decided: option A (small per-transaction object over pooled state; raise BUD-01/02 to the measured value) and approved all four gate edits.
 ---
 <!-- COMMENTS:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Document lock and transaction lifecycle landed; Transaction is a 24-byte object over pooled TxState so stale references throw (CC-9). Verified by the implementer: 0-warning build, Debug and Release with 0 failures, drift check clean.
+<!-- SECTION:FINAL_SUMMARY:END -->
