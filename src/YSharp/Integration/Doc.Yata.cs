@@ -405,13 +405,20 @@ public sealed partial class Doc
 
     /// <summary>
     /// Yjs <c>addChangedTypeToTransaction</c>: records the change when the type is a root, or its item existed before the transaction and is
-    /// not deleted. Only a branch owned by a shared type object is recorded; the types attach themselves (TASK-4.21).
+    /// not deleted. Only a branch owned by a shared type object is recorded; the types attach themselves (TASK-4.21). A changed text that no
+    /// object wraps yet is noted for the formatting cleanup instead (TASK-4.25).
     /// </summary>
     private static void AddChangedType(Transaction tx, Branch parent, string? parentSub)
     {
-        if (parent.Owner is not YType type) return;
         var item = StructStore.ItemOf(parent);
         if (!item.IsNull && (item.IsDeleted || item.Clock >= tx.BeforeClock(tx.Doc.Store.ClientIdOf(item)))) return;
+        if (parent.Owner is not YType type)
+        {
+            if (parent.TypeRef is TypeRefs.Text or TypeRefs.XmlText)
+                (tx.State.UnwrappedTextsChanged ??= new HashSet<Branch>(ReferenceEqualityComparer.Instance)).Add(parent);
+            return;
+        }
+
         var changed = tx.Changed;
         if (!changed.TryGetValue(type, out var keys)) changed[type] = keys = new HashSet<string?>();
         keys.Add(parentSub);

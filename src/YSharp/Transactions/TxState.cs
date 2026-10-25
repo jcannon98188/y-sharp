@@ -28,6 +28,12 @@ internal sealed class TxState
     private Dictionary<YType, HashSet<string?>>? _changed;
     private Dictionary<YType, List<YEvent>>? _changedParentTypes;
 
+    /// <summary>
+    /// Changed texts that no shared type object wraps yet (read from an update, not yet read). Yjs has an object for every type, so the
+    /// formatting cleanup after a remote change still has to see them (TASK-4.25).
+    /// </summary>
+    internal HashSet<Branch>? UnwrappedTextsChanged;
+
     internal TxState(Doc doc, bool write)
     {
         Doc = doc;
@@ -80,6 +86,7 @@ internal sealed class TxState
         DeleteRanges.Clear();
         _changed?.Clear();
         _changedParentTypes?.Clear();
+        UnwrappedTextsChanged?.Clear();
     }
 
     internal long BeforeClock(ulong client)

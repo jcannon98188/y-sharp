@@ -310,6 +310,7 @@ public sealed partial class Doc
             HookBeforeObservers(tx);
             HookObservers(tx);
             HookAfterTransaction(tx);
+            HookFormattingCleanup(tx);
         }
         finally
         {

@@ -9,7 +9,8 @@ namespace YSharp;
 //
 // When they run (Doc.Transactions.cs, following Yjs transact and cleanupTransactions):
 //   opening a transaction: HookBeforeAllTransactions (first of a round only), HookBeforeTransaction
-//   cleanup of each transaction, in round order: HookBeforeObservers, HookObservers, HookAfterTransaction, then, even if one of those threw,
+//   cleanup of each transaction, in round order: HookBeforeObservers, HookObservers, HookAfterTransaction, HookFormattingCleanup (TASK-4.25),
+//     then, even if one of those threw,
 //     HookGarbageCollection (Yjs gc and struct merging), HookAfterTransactionCleanup (Yjs afterTransactionCleanup, then update and
 //     updateV2), HookSubdocs
 //   end of the round: HookAfterAllTransactions with the round's transactions
@@ -21,6 +22,7 @@ public sealed partial class Doc
     partial void HookBeforeObservers(Transaction tx);
     partial void HookObservers(Transaction tx);
     partial void HookAfterTransaction(Transaction tx);
+    partial void HookFormattingCleanup(Transaction tx);
     partial void HookGarbageCollection(Transaction tx);
     partial void HookAfterTransactionCleanup(Transaction tx);
     partial void HookSubdocs(Transaction tx);
