@@ -88,6 +88,7 @@ public sealed class LimitsTests
     [Theory, Covers("HOS-DEEP", "ERR-12", Layer = CoverLayer.Unit)]
     [InlineData(false)]
     [InlineData(true)]
+    [Requires(Feature.Text)]
     public void AnyDepth_AtTheLimitIsAccepted_OneOverIsRejected(bool tiny)
     {
         var limits = tiny ? Hostile.Tiny : Default;
@@ -96,6 +97,7 @@ public sealed class LimitsTests
     }
 
     [Fact, Covers("HOS-DEEP", "ERR-12", Layer = CoverLayer.Unit)]
+    [Requires(Feature.Text)]
     public void AnyDepth_100kDeep_IsRejectedOnASmallStackWithoutRecursing()
     {
         // the probe thread has a 256 KB stack: recursion proportional to the input depth would overflow it long before 100000 frames
@@ -105,6 +107,7 @@ public sealed class LimitsTests
     }
 
     [Fact, Covers("HOS-DEEP", "ERR-12", Layer = CoverLayer.Unit)]
+    [Requires(Feature.Text)]
     public void AnyDepth_ObjectsAndMixedNesting_AreAlsoLimited()
     {
         // {"a":[{"a":[...]}]} nested past the limit: the depth rule is the container depth, whatever the container kind
@@ -121,6 +124,7 @@ public sealed class LimitsTests
     // ------------------------------------------------------------------ structs per update (HOS-AMP, HOS-LEN)
 
     [Fact, Covers("HOS-AMP", "HOS-LEN", Layer = CoverLayer.Unit)]
+    [Requires(Feature.Text)]
     public void StructCount_Tiny_AtTheLimitIsAccepted_OneOverIsRejected()
     {
         var max = Hostile.Tiny.MaxStructsPerUpdate;
@@ -134,6 +138,7 @@ public sealed class LimitsTests
     }
 
     [Fact, Covers("HOS-AMP", "HOS-LEN", "ERR-09", Layer = CoverLayer.Unit)]
+    [Requires(Feature.Text)]
     public void StructCount_Default_AClaimOverTheLimitIsALimitRejection_AClaimAtTheLimitIsNot()
     {
         var limit = (ulong)Default.MaxStructsPerUpdate;
@@ -145,6 +150,7 @@ public sealed class LimitsTests
     // ------------------------------------------------------------------ string and update size
 
     [Fact, Covers("HOS-LEN", Layer = CoverLayer.Unit)]
+    [Requires(Feature.Text)]
     public void StringBytes_Tiny_AtTheLimitIsAccepted_OneOverIsRejected()
     {
         byte[] WithString(int bytes) => UpdateBuilder.V1(UpdateUpdate.TextOfBytes(bytes));
@@ -153,6 +159,7 @@ public sealed class LimitsTests
     }
 
     [Fact, Covers("HOS-LEN", "ERR-09", Layer = CoverLayer.Unit)]
+    [Requires(Feature.Text)]
     public void StringBytes_Default_AClaimOverTheLimitIsALimitRejection()
     {
         // item with a string whose claimed length is MaxStringBytes + 1 and no body: nothing may be allocated for the claim
@@ -163,6 +170,7 @@ public sealed class LimitsTests
 
     [Fact, Covers("HOS-LEN", Layer = CoverLayer.Unit)]
     [Requires(Feature.V2, Feature.UpdateFunctions, Feature.V2Functions)]
+    [Requires(Feature.Text)]
     public void UpdateBytes_Tiny_AtTheLimitIsAccepted_OneOverIsRejected()
     {
         var valid = UpdateBuilder.V1(UpdateBuilder.TextInsert(1, "t", "hi"));
@@ -230,6 +238,7 @@ public sealed class LimitsTests
     // ------------------------------------------------------------------ pending bytes (ERR-10)
 
     [Fact, Covers("HOS-AMP", "ERR-10", Layer = CoverLayer.Unit)]
+    [Requires(Feature.Text)]
     public void PendingBytes_RetainedStateAtTheLimitIsAccepted_OneOverIsRejected()
     {
         // one update whose only struct waits for a missing client: the retained pending state is that update's own V1 encoding
