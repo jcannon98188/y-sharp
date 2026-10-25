@@ -185,6 +185,7 @@ public sealed class ArrayTests
     }
 
     [Fact, Covers("A-13")]
+    [Requires(Feature.Sync)]
     public void Length_StaysConsistent_AfterConcurrentInsertAndDeleteMerges()
     {
         var net = Net.Init(3);
@@ -298,6 +299,7 @@ public sealed class ArrayTests
     }
 
     [Fact, Covers("A-15")]
+    [Requires(Feature.Sync)]
     public void BinaryContent_IsCopiedOnInsert_AndReadsBackAsBinary()
     {
         var net = Net.Init(2);
@@ -316,6 +318,7 @@ public sealed class ArrayTests
     }
 
     [Fact, Covers("A-16")]
+    [Requires(Feature.Sync)]
     public void MixedRuns_SplitCorrectly_WhenAMiddleElementIsDeleted()
     {
         var net = Net.Init(2);
@@ -345,6 +348,7 @@ public sealed class ArrayTests
     }
 
     [Fact, Covers("A-18")]
+    [Requires(Feature.Sync)]
     public void ConcurrentInserts_AtTheSameIndex_ConvergeToTheSameOrder()
     {
         var net = Net.Init(3);
@@ -408,6 +412,7 @@ public sealed class ArrayTests
     }
 
     [Fact, PortOf("y-array.tests.js:testDeleteInsert", "A-5", "A-6")]
+    [Requires(Feature.Sync)]
     public void Array_DeleteOutOfRangeThenInsert_ThrowsAndStaysUsable()
     {
         var net = Net.Init(2);
@@ -420,6 +425,7 @@ public sealed class ArrayTests
     }
 
     [Fact, PortOf("y-array.tests.js:testInsertThreeElementsTryRegetProperty", "A-10")]
+    [Requires(Feature.Sync)]
     public void Array_InsertThreeValues_ReadBackLocallyAndOnTheRemote()
     {
         var net = Net.Init(2);
@@ -431,6 +437,7 @@ public sealed class ArrayTests
     }
 
     [Fact, PortOf("y-array.tests.js:testConcurrentInsertWithThreeConflicts", "A-18")]
+    [Requires(Feature.Sync)]
     public void Array_ThreeConcurrentInserts_ConvergeToTheSameOrder()
     {
         var net = Net.Init(3);
@@ -441,6 +448,7 @@ public sealed class ArrayTests
     }
 
     [Fact, PortOf("y-array.tests.js:testConcurrentInsertDeleteWithThreeConflicts", "A-18")]
+    [Requires(Feature.Sync)]
     public void Array_ThreeConcurrentInsertsAndDeletes_Converge()
     {
         var net = Net.Init(3);
@@ -455,6 +463,7 @@ public sealed class ArrayTests
     }
 
     [Fact, PortOf("y-array.tests.js:testInsertionsInLateSync", "A-18")]
+    [Requires(Feature.Sync)]
     public void Array_InsertionsMadeWhileDisconnected_ConvergeOnLateSync()
     {
         var net = Net.Init(3);
@@ -473,6 +482,7 @@ public sealed class ArrayTests
     }
 
     [Fact, PortOf("y-array.tests.js:testDisconnectReallyPreventsSendingMessages", "A-13")]
+    [Requires(Feature.Sync)]
     public void Array_DisconnectedPeer_ReceivesNothingUntilReconnected()
     {
         var net = Net.Init(3);
@@ -491,6 +501,7 @@ public sealed class ArrayTests
     }
 
     [Fact, PortOf("y-array.tests.js:testDeletionsInLateSync", "A-13")]
+    [Requires(Feature.Sync)]
     public void Array_DeletionsMadeWhileDisconnected_ConvergeOnLateSync()
     {
         var net = Net.Init(2);
@@ -505,6 +516,7 @@ public sealed class ArrayTests
     }
 
     [Fact, PortOf("y-array.tests.js:testInsertThenMergeDeleteOnSync", "A-13")]
+    [Requires(Feature.Sync)]
     public void Array_InsertThenDeleteWhileDisconnected_MergeOnSync()
     {
         var net = Net.Init(2);
@@ -518,6 +530,7 @@ public sealed class ArrayTests
     }
 
     [Fact, PortOf("y-array.tests.js:testGarbageCollector", "A-13")]
+    [Requires(Feature.Sync)]
     public void Array_DeletedItemsWithGc_AreCollectedAndStillConverge()
     {
         var net = Net.Init(3);

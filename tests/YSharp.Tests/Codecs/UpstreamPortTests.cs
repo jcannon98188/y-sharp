@@ -165,7 +165,7 @@ public sealed class UpstreamPortTests
     }
 
     [Fact, PortOf("compatibility.tests.js:testArrayCompatibilityV1", "ENC-21", "ENC-11")]
-    [Requires(Feature.Array)]
+    [Requires(Feature.Array, Feature.Map)]
     public void Decode_OldV1ArrayDocument_YieldsTheStoredArray()
     {
         var block = CompatBlock("testArrayCompatibilityV1");
@@ -236,7 +236,7 @@ public sealed class UpstreamPortTests
     private static string[] ArrayJson(YArray array) => array.ToArray().Select(e => Json(e.Value)).ToArray();
 
     [Fact, PortOf("updates.tests.js:testMergeUpdates", "ENC-23")]
-    [Requires(Feature.Array)]
+    [Requires(Feature.Array, Feature.Sync)]
     public void MergeUpdates_ConcurrentArrayInserts_EqualsApplyingBothUpdates()
     {
         var sim = SimHarness.Init(Prng.Create(1), users: 3);
@@ -330,7 +330,7 @@ public sealed class UpstreamPortTests
     }
 
     [Fact, PortOf("updates.tests.js:testMergeUpdates1", "ENC-23", "ENC-24", "ENC-81")]
-    [Requires(Feature.Array)]
+    [Requires(Feature.Array, Feature.Events)]
     public void MergeUpdates_SequentialArrayInserts_MatchesTheMergedDoc()
     {
         foreach (var enc in Encoders())
@@ -350,7 +350,7 @@ public sealed class UpstreamPortTests
     }
 
     [Fact, PortOf("updates.tests.js:testMergeUpdates2", "ENC-23", "ENC-24", "ENC-81")]
-    [Requires(Feature.Array)]
+    [Requires(Feature.Array, Feature.Events)]
     public void MergeUpdates_InsertThenDelete_MatchesTheMergedDoc()
     {
         foreach (var enc in Encoders())
