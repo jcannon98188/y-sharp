@@ -32,6 +32,36 @@ public abstract class YType
         AttachedDoc = doc;
     }
 
+    /// <summary>
+    /// The shared type that owns <paramref name="branch"/>: a nested type read from an update gets its object on first read (Yjs creates it when
+    /// decoding <c>ContentType</c>; y-sharp keeps the wire branch and wraps it lazily).
+    /// </summary>
+    internal static YType Of(Store.Branch branch, Doc doc)
+    {
+        if (branch.Owner is YType owner) return owner;
+        YType created = branch.TypeRef switch
+        {
+            Store.TypeRefs.Array => new YArray(),
+            Store.TypeRefs.Map => new YMap(),
+            Store.TypeRefs.Text => new YText(),
+            Store.TypeRefs.XmlElement => new YXmlElement(branch.TypeName ?? "UNDEFINED"),
+            Store.TypeRefs.XmlFragment => new YXmlFragment(),
+            Store.TypeRefs.XmlHook => new YXmlHook(branch.TypeName ?? ""),
+            Store.TypeRefs.XmlText => new YXmlText(),
+            _ => new YUntyped(),
+        };
+        created.Branch = branch;
+        created.AttachedDoc = branch.Item is null && doc.RootNameOf(branch) is null ? null : doc;
+        branch.Owner = created;
+        return created;
+    }
+
+    /// <summary>
+    /// Yjs <c>_integrate</c>: called inside the transaction that integrates this type's item, after it is linked. A type that buffered writes
+    /// while prelim replays them here (T-0.6), so they are part of the same change, and nested prelim types follow recursively (T-0.8).
+    /// </summary>
+    internal virtual void OnIntegrated(Transaction tx) { }
+
     /// <summary>The wire type ref of this class (Yjs <c>ContentType</c> refs); <see cref="Store.TypeRefs.Untyped"/> for the root placeholder.</summary>
     internal virtual byte WireTypeRef => Store.TypeRefs.Untyped;
 

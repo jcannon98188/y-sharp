@@ -8,7 +8,10 @@ namespace YSharp;
 
 public sealed class YUntyped : YType   // placeholder from Doc.Get(name) before a concrete type is requested
 {
-    public override YType Clone() => throw Sketch.NI;
-    public override YValue ToJson() => throw Sketch.NI;
+    // Yjs AbstractType.clone() is unimplemented: there is nothing to copy the content into.
+    public override YType Clone() => throw new NotSupportedException("An untyped placeholder cannot be cloned; request its type first.");
+
+    // Yjs AbstractType.toJSON() returns undefined.
+    public override YValue ToJson() => default;
 }
 

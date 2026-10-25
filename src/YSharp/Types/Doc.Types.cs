@@ -53,7 +53,35 @@ public sealed partial class Doc
             }
         }
     }
-    public IReadOnlyDictionary<string, YType> Share => throw Sketch.NI;       // snapshot
-    public YValue ToJson() => throw Sketch.NI;                                // deprecated in JS, kept for DOC-07
+    /// <summary>Every root type by name, in creation order (Yjs <c>doc.share</c>); a root only named by an update is an untyped placeholder.</summary>
+    public IReadOnlyDictionary<string, YType> Share   // snapshot
+    {
+        get
+        {
+            lock (_rootGate)
+            {
+                var names = new List<string>();
+                foreach (var (name, _) in RootBranches) names.Add(name);
+                var share = new Dictionary<string, YType>(names.Count, StringComparer.Ordinal);
+                foreach (var name in names) share[name] = Get(name);
+                return share;
+            }
+        }
+    }
+
+    /// <summary>Yjs <c>doc.toJSON()</c>: each root's <c>toJSON()</c> by name.</summary>
+    public YValue ToJson()   // deprecated in JS, kept for DOC-07
+    {
+        var members = new List<KeyValuePair<string, YValue>>();
+        foreach (var (name, type) in Share) members.Add(new(name, type.ToJson()));
+        return YValue.Object(members.ToArray());
+    }
+
+    partial void HookTypeIntegrated(Transaction tx, Store.Branch type)
+    {
+        if (type.Owner is not YType owner) return;   // read from an update: wrapped on first read
+        owner.AttachedDoc = this;
+        owner.OnIntegrated(tx);
+    }
 
 }

@@ -62,6 +62,7 @@ public static class Features
         Feature.UpdateFunctions,
         Feature.V2,
         Feature.V2Functions,
+        Feature.TypesCore,
     };
 }
 
