@@ -4,7 +4,7 @@ title: 12. Transactions and the document lock
 status: To Do
 assignee: []
 created_date: '2026-10-24 19:41'
-updated_date: '2026-10-25 06:23'
+updated_date: '2026-10-25 07:07'
 labels:
   - spec
   - 'model:opus'
@@ -60,5 +60,11 @@ author: @orchestrator
 created: 2026-10-25 06:23
 ---
 Owner decision needed: pooled Transaction objects make CC-9 (stale transaction throws) and CC-7/BUD-01 (zero-allocation acquire) incompatible while Transaction is a class. Options: A) allocate a small per-transaction object (~24-40 B) over pooled state, raising BUD-01/02 from 0; B) make Transaction a readonly struct handle with a generation (public API change, breaks 13 suite uses and Assert.Same checks); C) amend CC-9 to hold only until reuse. Reuse test is on branch task-4.12-reuse-test (9f47d27).
+---
+
+author: @orchestrator
+created: 2026-10-25 07:07
+---
+Owner decided: option A (small per-transaction object over pooled state; raise BUD-01/02 to the measured value) and approved all four gate edits.
 ---
 <!-- COMMENTS:END -->
