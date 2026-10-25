@@ -64,9 +64,9 @@
   layers: [unit]
   wire: false
   owner: 14
-  status: pending
+  status: active
   ref: "adr 0009"
-  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
+  note: "Active at the M2 gate (TASK-4.17): measured 0 bytes per call in Release (CodecBudgetTests, a populated doc built from one V1 update); HotPathBudgetTests checks the same path once Text, Array and Map land."
 
 - id: BUD-07
   title: "A one-character YText.Insert at the end allocates zero bytes"
