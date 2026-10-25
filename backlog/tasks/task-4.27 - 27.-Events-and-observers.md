@@ -4,7 +4,7 @@ title: 27. Events and observers
 status: To Do
 assignee: []
 created_date: '2026-10-24 19:42'
-updated_date: '2026-10-24 19:42'
+updated_date: '2026-10-25 22:55'
 labels:
   - spec
   - 'model:opus'
@@ -44,3 +44,9 @@ Read first: `docs/handoff-implementation-planning.md`, ADRs 0005, 0006, 0008, 00
 - [ ] #3 Fixture drift check (`npm run check` in `tools/fixture-gen`) is clean
 - [ ] #4 ADR 0022 followed: suite changes in separate `suite:` commits, a Suite changes list in the notes, no open owner decision
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Gap found in TASK-4.22 (2026-10-25), for this spec: Doc.Yata.cs AddChangedType returns early when parent.Owner is null, i.e. a nested type that arrived in an update and was never read has no YType yet. Yjs records every changed type, so observeDeep on an ancestor could miss events for changes inside such a type. Likely fix: create the owner with YType.Of(parent, tx.Doc) instead of returning; check the BUD-08 allocation budget for remote applies (it would allocate one YType per untouched nested type). Related: Doc.Transactions.ClearStaleMarkers (TASK-4.22) relies on the changed set and runs before HookBeforeObservers; keep that order when the observer hooks land.
+<!-- SECTION:NOTES:END -->
