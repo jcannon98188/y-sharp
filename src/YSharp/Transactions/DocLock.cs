@@ -32,7 +32,7 @@ internal sealed class DocLock
     {
         public int Thread;
         public int Depth;
-        public Transaction Tx;
+        public TxState Tx;
     }
 
     private readonly object _sync = new();
@@ -203,7 +203,7 @@ internal sealed class DocLock
     /// Takes a shared read lock, or joins the calling thread's read or write lock. <paramref name="tx"/> is the read transaction for
     /// <see cref="LockEntry.ReadFresh"/> and <see cref="LockEntry.ReadJoined"/>, null for <see cref="LockEntry.ReadInWrite"/>.
     /// </summary>
-    internal LockEntry EnterRead(out Transaction? tx)
+    internal LockEntry EnterRead(out TxState? tx)
     {
         var me = Environment.CurrentManagedThreadId;
         Point("lock.read.acquire");
@@ -256,7 +256,7 @@ internal sealed class DocLock
             if (at < 0) throw new YConcurrencyException("A read transaction was ended on a thread that does not hold it (CC-15).");
             if (--_readers[at].Depth == 0)
             {
-                var state = _readers[at].Tx.State;
+                var state = _readers[at].Tx;
                 _readers[at] = _readers[--_readerCount];
                 _readers[_readerCount] = default;
                 state.End();
@@ -288,7 +288,7 @@ internal sealed class DocLock
             lock (_sync)
             {
                 var at = FindReader(me);
-                return at < 0 ? null : _readers[at].Tx;
+                return at < 0 ? null : _readers[at].Tx.Facade;
             }
         }
     }
@@ -302,10 +302,11 @@ internal sealed class DocLock
         return -1;
     }
 
-    private Transaction RentRead()
+    private TxState RentRead()
     {
         var state = _readPoolCount > 0 ? _readPool[--_readPoolCount] : new TxState(_doc, write: false);
-        return state.Begin(null, local: true);
+        state.BeginRead();
+        return state;
     }
 
     private void ReturnRead(TxState state)

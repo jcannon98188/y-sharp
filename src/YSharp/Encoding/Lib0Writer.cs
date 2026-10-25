@@ -14,10 +14,28 @@ internal sealed class Lib0Writer : IDisposable
 {
     private static readonly UTF8Encoding Utf8 = new(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: false);
 
+    [ThreadStatic]
+    private static Lib0Writer? spare;
+
     private byte[]? buffer;
     private int length;
+    private bool reusable;
 
     public Lib0Writer(int initialCapacity = 256) => buffer = BufferPool.Rent(Math.Max(initialCapacity, 16));
+
+    /// <summary>
+    /// A writer for a hot path that must not allocate (ADR 0009, BUD-06): the calling thread's spare writer when it has one, with a newly rented
+    /// buffer. Disposing it returns the buffer, as for any writer, and keeps the writer object as the thread's spare.
+    /// </summary>
+    public static Lib0Writer Rent(int initialCapacity = 256)
+    {
+        var w = spare;
+        if (w is null) return new Lib0Writer(initialCapacity) { reusable = true };
+        spare = null;
+        w.buffer = BufferPool.Rent(Math.Max(initialCapacity, 16));
+        w.length = 0;
+        return w;
+    }
 
     public int Length => length;
 
@@ -41,6 +59,7 @@ internal sealed class Lib0Writer : IDisposable
         buffer = null;
         length = 0;
         BufferPool.Return(b);
+        if (reusable) spare = this;
     }
 
     private static ObjectDisposedException Disposed() => new(nameof(Lib0Writer));

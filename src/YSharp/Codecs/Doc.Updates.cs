@@ -100,7 +100,7 @@ public sealed partial class Doc
                 return;
             }
 
-            using var w = new Lib0Writer(256);
+            using var w = Lib0Writer.Rent(256);
             var encoder = new UpdateEncoderV1(w);
             if (Pending is null && PendingDeletes is null)
             {
@@ -180,7 +180,7 @@ public sealed partial class Doc
         try
         {
             var store = Store;
-            using var w = new Lib0Writer(64);
+            using var w = Lib0Writer.Rent(64);
             var count = 0;
             for (var rank = 0; rank < store.ClientCount; rank++)
                 if (store.StructCountAtRank(rank) > 0) count++;

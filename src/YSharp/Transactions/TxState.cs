@@ -49,12 +49,24 @@ internal sealed class TxState
     /// <summary>Starts a life: takes the before state and hands out a new façade, the one allocation of an uncontended transaction (BUD-01, BUD-02).</summary>
     internal Transaction Begin(object? origin, bool local)
     {
+        BeginRead();
         Origin = origin;
         IsLocal = local;
-        _beforeCount = Snapshot(ref _before);
-        _afterCount = -1;
         return Public = new Transaction(this);
     }
+
+    /// <summary>Starts a read life without a façade; <see cref="Facade"/> makes it on first use (BUD-06: the library's own reads allocate nothing).</summary>
+    internal void BeginRead()
+    {
+        Origin = null;
+        IsLocal = true;
+        _beforeCount = Snapshot(ref _before);
+        _afterCount = -1;
+        Public = null;
+    }
+
+    /// <summary>The façade of the current life, created on first use.</summary>
+    internal Transaction Facade => Public ??= new Transaction(this);
 
     /// <summary>Takes the after state at the start of cleanup (Yjs <c>transaction.afterState = getStateVector(store)</c>).</summary>
     internal void TakeAfterState() => _afterCount = Snapshot(ref _after);

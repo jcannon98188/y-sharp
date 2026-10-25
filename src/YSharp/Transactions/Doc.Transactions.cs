@@ -10,15 +10,21 @@ namespace YSharp;
 /// <summary>A thread's entry into a transaction: what to undo when it leaves (<c>Doc.Leave</c>).</summary>
 internal readonly struct TxHandle
 {
-    internal TxHandle(Transaction tx, LockEntry entry, bool initial)
+    internal TxHandle(TxState state, LockEntry entry, bool initial)
     {
-        Tx = tx;
+        State = state;
         Entry = entry;
         Initial = initial;
     }
 
-    /// <summary>The transaction the caller runs in: its own, or the one it joined.</summary>
-    internal Transaction Tx { get; }
+    /// <summary>The pooled state of the transaction the caller runs in: its own, or the one it joined.</summary>
+    internal TxState State { get; }
+
+    /// <summary>
+    /// The transaction's public object. A read made by the library itself (encoding, reading the state vector) never asks for it, so it allocates
+    /// nothing (BUD-06); a public read hands it to the caller, and its first use creates it (BUD-02).
+    /// </summary>
+    internal Transaction Tx => State.Facade;
 
     internal LockEntry Entry { get; }
 
@@ -150,13 +156,18 @@ public sealed partial class Doc
     /// <summary>Enters a read transaction the way every reader does (CC-8): joins the calling thread's read or write transaction, or takes a shared read lock.</summary>
     internal TxHandle EnterRead()
     {
-        var entry = _lock.EnterRead(out var tx);
+        var entry = _lock.EnterRead(out var state);
         if (entry == LockEntry.ReadInWrite)
-            tx = _tx ?? _cleaning ?? throw new YInternalException("The write owner has no transaction to read through.");
-        return new TxHandle(tx!, entry, false);
+            state = (_tx ?? _cleaning ?? throw new YInternalException("The write owner has no transaction to read through.")).State;
+        return new TxHandle(state!, entry, false);
     }
 
-    internal void Leave(in TxHandle handle) => Leave(handle.Tx, handle.Entry, handle.Initial);
+    internal void Leave(in TxHandle handle)
+    {
+        // a read entry ends without touching the transaction's public object, so a read nobody looked at stays allocation-free
+        if (handle.Entry is LockEntry.ReadInWrite or LockEntry.ReadFresh or LockEntry.ReadJoined) Leave(null!, handle.Entry, handle.Initial);
+        else Leave(handle.Tx, handle.Entry, handle.Initial);
+    }
 
     internal void Leave(Transaction tx, LockEntry entry, bool initial)
     {
@@ -203,7 +214,7 @@ public sealed partial class Doc
 
     private TxHandle BeginWrite(LockEntry entry, object? origin, bool local)
     {
-        if (_tx != null) return new TxHandle(_tx, entry, false);
+        if (_tx != null) return new TxHandle(_tx.State, entry, false);
 
         // the lock was free, or the owner writes from cleanup (an observer): a new transaction, cleaned up after the current one (CC-2)
         var tx = RentWrite().Begin(origin, local);
@@ -220,7 +231,7 @@ public sealed partial class Doc
             throw;
         }
 
-        return new TxHandle(tx, entry, true);
+        return new TxHandle(tx.State, entry, true);
     }
 
     /// <summary>
