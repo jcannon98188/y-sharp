@@ -56,6 +56,15 @@ internal sealed class PendingStructs
         }
     }
 
+    /// <summary>A copy that can be changed without changing this one (the structs themselves are values).</summary>
+    public PendingStructs Clone()
+    {
+        var copy = new PendingStructs();
+        foreach (var (client, clock) in Missing) copy.Missing[client] = clock;
+        foreach (var (client, refs) in _clients) copy._clients[client] = new List<StructRef>(refs);
+        return copy;
+    }
+
     /// <summary>The waiting structs as an update with no deletes, for a retry (Yjs <c>applyUpdateV2(doc, pendingStructs.update)</c>).</summary>
     public UpdateRefs ToUpdate()
     {

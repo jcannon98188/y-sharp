@@ -138,4 +138,13 @@ internal sealed class UpdateRefs
     internal bool TryGet(ulong client, out ClientRefs refs) => _clients.TryGetValue(client, out refs!);
 
     internal void Remove(ulong client) => _clients.Remove(client);
+
+    /// <summary>A copy whose clients can be consumed without consuming this update (the struct lists are shared; integration never changes them).</summary>
+    internal UpdateRefs Copy()
+    {
+        var copy = new UpdateRefs();
+        foreach (var (client, refs) in _clients) copy._clients[client] = new ClientRefs(client, refs.Refs) { Next = refs.Next };
+        copy.Deletes.AddRange(Deletes);
+        return copy;
+    }
 }

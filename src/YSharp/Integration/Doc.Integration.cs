@@ -8,7 +8,8 @@ using YSharp.Store;
 namespace YSharp;
 
 // Item integration, pending structs, rejection and faulted documents (TASK-4.13, ADR 0005). The entry points other modules call:
-//   IntegrateRemote / IntegrateUpdate  a decoded update (codecs, spec 14): Yjs readUpdateV2 without the decoding
+//   IntegrateRemote / IntegrateUpdate  a decoded update (codecs, spec 14): Yjs readUpdateV2 without the decoding; TryIntegrateRemote
+//                                      (Doc.PendingLimit.cs) checks MaxPendingBytes first
 //   IntegrateLocal                     a new local item the types created with StructStore.CreateLocalItem: Yjs item.integrate(tx, 0)
 //   DeleteItem                         Yjs item.delete(tx), nested types included, iteratively
 //   ThrowIfFaulted / IsFaulted         the faulted-document state; every entry point above refuses on a faulted document
@@ -90,7 +91,8 @@ public sealed partial class Doc
 
     /// <summary>
     /// Integrates a decoded update in a remote transaction of its own, or in the calling thread's open one (Yjs <c>applyUpdate</c> without the
-    /// decoding). Returns how many structs were rejected (ADR 0005). Throws <see cref="YInternalException"/> on a faulted document.
+    /// decoding), with no pending-state limit (<see cref="TryIntegrateRemote"/> checks one). Returns how many structs were rejected (ADR 0005).
+    /// Throws <see cref="YInternalException"/> on a faulted document.
     /// </summary>
     internal int IntegrateRemote(UpdateRefs update, object? origin = null)
     {

@@ -8,7 +8,21 @@ namespace YSharp;
 
 public static partial class YUpdate
 {
-    public static YStatus TryConvert(ReadOnlySpan<byte> update, UpdateFormat from, UpdateFormat to, IBufferWriter<byte> output, YLimits? limits = null) => throw Sketch.NI;
+    /// <summary>
+    /// <paramref name="update"/> rewritten from <paramref name="from"/> to <paramref name="to"/> (Yjs <c>convertUpdateFormat</c>): the structs in
+    /// read order, Skips kept, then the delete set as <c>readDeleteSet</c> and <c>writeDeleteSet</c> pass it through. The same format is written
+    /// again too, as Yjs does.
+    /// </summary>
+    public static YStatus TryConvert(ReadOnlySpan<byte> update, UpdateFormat from, UpdateFormat to, IBufferWriter<byte> output, YLimits? limits = null)
+    {
+        ArgumentNullException.ThrowIfNull(output);
+        limits ??= YLimits.Default;
+        var error = DecodeForFunctions(update, from, limits, out var refs, out var structs);
+        if (error != YError.None) return new YStatus(error);
+        Write(to, structs, InWriteOrder(refs.Deletes), output);
+        return default;
+    }
+
     /// <summary>Whether <paramref name="update"/> decodes as <c>TryApplyUpdate</c> would decode it: Malformed or LimitExceeded, or success. Nothing is applied.</summary>
     public static YStatus TryValidate(ReadOnlySpan<byte> update, UpdateFormat format = UpdateFormat.V1, YLimits? limits = null)
     {

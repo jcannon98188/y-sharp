@@ -34,6 +34,9 @@ public sealed partial class Doc
         public ItemRef Right;
         public Branch? Parent;
         public string? ParentSub;
+
+        /// <summary>A dry run only: the struct would be stored as a GC (a collected neighbour or parent, or no parent at all).</summary>
+        public bool Collected;
     }
 
     // ------------------------------------------------------------------ integrateStructs (K2, K3)
@@ -42,9 +45,10 @@ public sealed partial class Doc
     /// Yjs <c>integrateStructs</c>: integrates every struct whose dependencies are known, following missing dependencies into other clients'
     /// structs of the same update, and returns what cannot be integrated yet, or null. A struct that can never be integrated is rejected with
     /// the rest of its client's structs and everything in this update that depends on them (ADR 0005, ERR-07); rejected structs are counted
-    /// in <paramref name="rejected"/> and are not kept.
+    /// in <paramref name="rejected"/> and are not kept. With <paramref name="dry"/> nothing is integrated: the structs are placed in the dry run's
+    /// virtual state instead, so the same walk predicts what would be left (<see cref="PredictPendingBytes"/>).
     /// </summary>
-    private PendingStructs? IntegrateStructs(Transaction tx, UpdateRefs update, ref int rejected)
+    private PendingStructs? IntegrateStructs(Transaction tx, UpdateRefs update, ref int rejected, PendingDryRun? dry = null)
     {
         if (update.ClientCount == 0) return null;
         // higher client ids first: in case of conflicts the lower id will probably not conflict with the higher one
@@ -65,7 +69,7 @@ public sealed partial class Doc
         {
             if (head.Kind != RefKind.Skip)
             {
-                if (!state.TryGetValue(head.Client, out var localClock)) state[head.Client] = localClock = Store.GetState(head.Client);
+                if (!state.TryGetValue(head.Client, out var localClock)) state[head.Client] = localClock = StateOf(head.Client, dry);
                 var offset = localClock - head.Clock;
                 if (offset < 0)
                 {
@@ -76,7 +80,7 @@ public sealed partial class Doc
                 }
                 else
                 {
-                    var resolution = Resolve(in head, out var resolved, out var missingClient, out var missingClock);
+                    var resolution = Resolve(in head, dry, out var resolved, out var missingClient, out var missingClock);
                     if (resolution == Resolution.Missing && rejectedFrom is not null && rejectedFrom.TryGetValue(missingClient, out var from) &&
                         missingClock >= from)
                         resolution = Resolution.Rejected;   // it depends on a rejected struct
@@ -95,12 +99,13 @@ public sealed partial class Doc
                         }
 
                         // this update depends on another update that has not arrived
-                        (rest ??= new PendingStructs()).AddMissing(missingClient, Store.GetState(missingClient));
+                        (rest ??= new PendingStructs()).AddMissing(missingClient, StateOf(missingClient, dry));
                         AddStackToRest(update, ids, stack, rest);
                     }
                     else if (offset == 0 || offset < head.Length)
                     {
-                        Integrate(tx, head, offset, resolved);
+                        if (dry is null) Integrate(tx, head, offset, resolved);
+                        else dry.Place(head.Client, head.Clock + offset, head.End, head.Kind == RefKind.Gc || resolved.Collected ? ContentKind.Gc : head.Content);
                         state[head.Client] = head.End;
                     }
                     // else: already known entirely, dropped (STR-62)
@@ -191,7 +196,7 @@ public sealed partial class Doc
     /// parent. A dependency of the struct's own client must lie before it, and a parent id must name a type (or a collected struct, which
     /// turns the struct into a GC); anything else is rejected (ADR 0005) where Yjs would fail or misbehave.
     /// </summary>
-    private Resolution Resolve(in StructRef r, out Resolved resolved, out ulong missingClient, out long missingClock)
+    private Resolution Resolve(in StructRef r, PendingDryRun? dry, out Resolved resolved, out ulong missingClient, out long missingClock)
     {
         resolved = default;
         missingClient = 0;
@@ -199,10 +204,17 @@ public sealed partial class Doc
         if (r.Kind != RefKind.Item) return Resolution.Ready;   // GC and Skip never wait (STR-16)
 
         if (SelfDependencyAhead(r.Origin, r) || SelfDependencyAhead(r.RightOrigin, r) || SelfDependencyAhead(r.ParentId, r)) return Resolution.Rejected;
-        if (IsMissing(r.Origin, r.Client, out missingClient, out missingClock) ||
-            IsMissing(r.RightOrigin, r.Client, out missingClient, out missingClock) ||
-            IsMissing(r.ParentId, r.Client, out missingClient, out missingClock))
+        if (IsMissing(r.Origin, r.Client, dry, out missingClient, out missingClock) ||
+            IsMissing(r.RightOrigin, r.Client, dry, out missingClient, out missingClock) ||
+            IsMissing(r.ParentId, r.Client, dry, out missingClient, out missingClock))
             return Resolution.Missing;
+
+        if (dry is not null)
+        {
+            var dryResolution = DryResolve(dry, in r, out var collected);
+            resolved.Collected = collected;
+            return dryResolution;
+        }
 
         if (r.Origin is { } o) resolved.Left = Store.GetItemCleanEnd(o.Client, o.Clock);
         if (r.RightOrigin is { } ro) resolved.Right = Store.GetItemCleanStart(ro.Client, ro.Clock);
@@ -247,11 +259,11 @@ public sealed partial class Doc
         return Resolution.Ready;
     }
 
-    private bool IsMissing(ItemId? dep, ulong client, out ulong missingClient, out long missingClock)
+    private bool IsMissing(ItemId? dep, ulong client, PendingDryRun? dry, out ulong missingClient, out long missingClock)
     {
         missingClient = 0;
         missingClock = 0;
-        if (dep is not { } d || d.Client == client || d.Clock < Store.GetState(d.Client)) return false;
+        if (dep is not { } d || d.Client == client || d.Clock < StateOf(d.Client, dry)) return false;
         missingClient = d.Client;
         missingClock = d.Clock;
         return true;

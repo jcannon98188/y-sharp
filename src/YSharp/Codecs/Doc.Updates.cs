@@ -52,7 +52,7 @@ public sealed partial class Doc
     // ---- updates (ADR 0005 pair: Try* never throws on bad bytes)
 
     /// <summary>
-    /// Applies an update. A malformed update or one over a limit changes nothing and returns <see cref="YError.Malformed"/> or
+    /// Applies an update. A malformed update or one over a limit (the pending state it would leave included) changes nothing and returns <see cref="YError.Malformed"/> or
     /// <see cref="YError.LimitExceeded"/>; structs that cannot be integrated are rejected with their dependents and counted, the rest applies, and
     /// the result is <see cref="YError.Rejected"/>. A faulted document returns <see cref="YError.Rejected"/> and changes nothing.
     /// </summary>
@@ -63,7 +63,7 @@ public sealed partial class Doc
         if (update.Length > limits.MaxUpdateBytes) return new ApplyResult(YError.LimitExceeded, 0, 0);
         var error = Decode(update, format, limits, out var refs);
         if (error != YError.None) return new ApplyResult(error, 0, 0);
-        var rejected = IntegrateRemote(refs, origin);
+        if (!TryIntegrateRemote(refs, origin, limits.MaxPendingBytes, out var rejected)) return new ApplyResult(YError.LimitExceeded, 0, 0);
         return new ApplyResult(rejected > 0 ? YError.Rejected : YError.None, rejected, 0);
     }
 
