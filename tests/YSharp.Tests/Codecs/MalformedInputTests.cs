@@ -244,10 +244,16 @@ public sealed class MalformedInputTests
     [Requires(Feature.V2)]
     public void Enc66_AnEmptyRleColumn_IsRejected()=> AssertRejected(V2("01 01 00 00"), UpdateFormat.V2);
 
-    [Fact, Covers("ENC-67"), Diverges("ENC-67", adr: "0005")]
+    [Fact, Covers("ENC-67")]
     [Requires(Feature.V2)]
-    public void Enc67_ARleColumnRunningOut_DoesNotRepeatItsLastValue()=> // two structs but one info run and one parentInfo run: JS repeats the last value for the second struct
-        AssertRejected(V2("01 02 00 00", info: "04", parentInfo: "01"), UpdateFormat.V2);
+    public void Enc67_ARleColumnsLastRun_RepeatsForEveryLaterRead()
+    {
+        // two root strings, "a" and "b" under key "t": the info and parentInfo columns hold one value each and no count, as lib0 writes a last run;
+        // the strings are "t", "a", "t", "b" (four lengths of 1: one UintOptRle run). The document equals the V1 form of the same two structs.
+        var v2 = AssertAccepted(V2("01 02 00 00", info: "04", parentInfo: "01", client: "01", str: "04 74 61 74 62 41 02"), UpdateFormat.V2);
+        var v1 = AssertAccepted("01 02 01 00 04 01 01 74 01 61 04 01 01 74 01 62 00");
+        Assert.Equal(Hex.Of(Wire.Encode(v1, UpdateFormat.V1)), Hex.Of(Wire.Encode(v2, UpdateFormat.V1)));
+    }
 
     [Fact, Covers("ENC-68"), Diverges("ENC-68", adr: "0005")]
     [Requires(Feature.V2)]

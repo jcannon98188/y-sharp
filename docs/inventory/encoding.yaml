@@ -687,14 +687,13 @@
 - id: ENC-67
   title: "Reader at EOF: RleDecoder after final run -> repeats last value forever"
   source: "docs/research/encoding.md:460"
-  kind: diverge
+  kind: match
   layers: [unit, fixture, differential, fuzz]
   wire: true
-  adr: ["0005"]
   owner: 5
   status: active
   ref: "encoding.md 8.3 row"
-  note: "An exhausted Rle column is a decode error; JS repeats the last value forever."
+  note: "The last run repeats: lib0's RleEncoder never writes its count, so valid V2 output relies on it."
 
 - id: ENC-68
   title: "Reader at EOF: StringDecoder.read beyond joined string -> \"\""
