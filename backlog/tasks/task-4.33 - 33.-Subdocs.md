@@ -4,7 +4,7 @@ title: 33. Subdocs
 status: To Do
 assignee: []
 created_date: '2026-10-24 19:42'
-updated_date: '2026-10-24 19:42'
+updated_date: '2026-10-26 05:56'
 labels:
   - spec
   - 'model:sonnet'
@@ -43,3 +43,9 @@ Read first: `docs/handoff-implementation-planning.md`, ADRs 0005, 0006, 0008, 00
 - [ ] #3 Fixture drift check (`npm run check` in `tools/fixture-gen`) is clean
 - [ ] #4 ADR 0022 followed: suite changes in separate `suite:` commits, a Suite changes list in the notes, no open owner decision
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+From TASK-4.28: DiffRun.ReachesUnlandedSubdocs discards mutated-update differential cases that reach the ContentDoc sketch (TypeList.ContentAt) while Subdocs is not landed. When this spec lands Subdocs, delete that check and UnlandedSubdocsDiscardTests' else branch, and rerun the Nightly differential.
+<!-- SECTION:NOTES:END -->
