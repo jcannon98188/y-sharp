@@ -4,7 +4,7 @@ title: 33. Subdocs
 status: To Do
 assignee: []
 created_date: '2026-10-24 19:42'
-updated_date: '2026-10-26 05:56'
+updated_date: '2026-10-26 07:39'
 labels:
   - spec
   - 'model:sonnet'
@@ -48,4 +48,6 @@ Read first: `docs/handoff-implementation-planning.md`, ADRs 0005, 0006, 0008, 00
 
 <!-- SECTION:NOTES:BEGIN -->
 From TASK-4.28: DiffRun.ReachesUnlandedSubdocs discards mutated-update differential cases that reach the ContentDoc sketch (TypeList.ContentAt) while Subdocs is not landed. When this spec lands Subdocs, delete that check and UnlandedSubdocsDiscardTests' else branch, and rerun the Nightly differential.
+
+From TASK-4.29: Doc.Lifecycle.cs declares partial void OnLoadSubdoc() (Load on an unloaded subdoc: add it to the parent transaction's subdocsLoaded) and partial void OnDestroySubdocs() (destroy the subdocs, then detach this subdoc and put an unloaded copy in its ContentDoc). Implement both in Doc.Subdocs.cs. Destroy drops every doc handler except SubdocsChanged, which nothing raises yet (CS0414). Add SubdocsChanged = null there when this spec raises it.
 <!-- SECTION:NOTES:END -->
