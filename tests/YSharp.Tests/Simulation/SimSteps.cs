@@ -56,7 +56,7 @@ internal static class SimSteps
                     foreach (var seg in e.GetPath()) path.Add(seg.Key != null ? JsonValue.Create(seg.Key) : JsonValue.Create(seg.Index));
                     list.Add(new JsonObject { ["type"] = e.GetType().Name, ["path"] = path });
                 }
-                TypeSteps.Events(ctx).Add(new JsonObject { ["observer"] = name, ["deep"] = true, ["events"] = list });
+                TypeSteps.Record(ctx, new JsonObject { ["observer"] = name, ["deep"] = true, ["events"] = list });
             });
         }));
         r.Register(new StepDefinition("text.insertEmbedType", new[] { "doc", "target", "at", "kind" }, new[] { "init", "attributes" }, (ctx, s) =>

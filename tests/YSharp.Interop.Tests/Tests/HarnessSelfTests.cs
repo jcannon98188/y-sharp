@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -36,9 +37,9 @@ public sealed class HarnessSelfTests : IDisposable
     }
 
     /// <summary>"y-sharp" is the oracle again; <paramref name="tamper"/> plants a difference in what it observed.</summary>
-    private Func<string, SharpReply> OracleAsSharp(Action<string, JsonObject>? tamper = null) => script =>
+    private Func<string, IReadOnlyList<string>, SharpReply> OracleAsSharp(Action<string, JsonObject>? tamper = null) => (script, extras) =>
     {
-        var r = _host.RunAsync(script).GetAwaiter().GetResult();
+        var r = _host.RunAsync(script, extras).GetAwaiter().GetResult();
         return r.Status switch
         {
             OracleStatus.Ok => Tamper(script, r.Observations!, tamper),
@@ -54,7 +55,7 @@ public sealed class HarnessSelfTests : IDisposable
         return new SharpReply(SharpStatus.Ok, clone, null);
     }
 
-    private DiffRun NewRun(Func<string, SharpReply>? sharp = null)
+    private DiffRun NewRun(Func<string, IReadOnlyList<string>, SharpReply>? sharp = null)
     {
         _host.RequireOrSkip();
         return new DiffRun(_host, "self-test", _dir) { SharpOverride = sharp ?? OracleAsSharp() };
@@ -70,6 +71,19 @@ public sealed class HarnessSelfTests : IDisposable
             Assert.True(run.CheckPlan(ScriptPlan.Generate(seed)) != null, $"seed {seed} was discarded: {run.LastDiscard}");
         }
         // every update index a delivery schedule names exists: nothing was discarded as a script error
+        Assert.Equal(0, run.Discarded);
+        Assert.Equal(0, run.Misbehaved);
+    }
+
+    [Fact, Covers("DIFF-01", "DIFF-03")]
+    public void GeneratedTreeScripts_RunOnTheRealOracle_WithoutScriptErrors_AndConverge()
+    {
+        var run = NewRun();
+        for (var seed = 0; seed < 150; seed++)
+        {
+            run.CaseSeed = seed;
+            Assert.True(run.CheckTree(TreePlan.Generate(seed)) != null, $"seed {seed} was discarded: {run.LastDiscard}");
+        }
         Assert.Equal(0, run.Discarded);
         Assert.Equal(0, run.Misbehaved);
     }
@@ -112,7 +126,7 @@ public sealed class HarnessSelfTests : IDisposable
     [Fact, Covers("DIFF-06")]
     public void ASavedCandidate_ReplaysWithoutFsCheck_AndReproducesTheDifference()
     {
-        Func<string, SharpReply> planted = OracleAsSharp((_, obs) => obs["sv"]!["value"]!.AsObject().First().Value!["v1"]!["hex"] = "ff");
+        Func<string, IReadOnlyList<string>, SharpReply> planted = OracleAsSharp((_, obs) => obs["sv"]!["value"]!.AsObject().First().Value!["v1"]!["hex"] = "ff");
         var run = NewRun(planted);
         var plan = ScriptPlan.Generate(11);
         var failure = Assert.Throws<DifferentialFailure>(() => run.CheckPlan(plan));
@@ -155,7 +169,7 @@ public sealed class HarnessSelfTests : IDisposable
     public void AnOracleMisbehaving_IsCountedAndSaved_NotAFailure()
     {
         const string script = """{"schema":1,"replicas":[{"name":"a","clientId":1}],"steps":[{"step":"applyForeign","doc":"a","bytes":{"$":"bytes","hex":""}}]}""";
-        var run = NewRun(_ => new SharpReply(SharpStatus.Ok, new JsonObject(), null));
+        var run = NewRun((_, _) => new SharpReply(SharpStatus.Ok, new JsonObject(), null));
         Assert.Null(run.Run(script));
         Assert.Equal(1, run.Misbehaved);
         var saved = run.MisbehavedSaved.Single();
@@ -169,7 +183,7 @@ public sealed class HarnessSelfTests : IDisposable
     public void YSharpHangingOrCrashing_IsAFailure_EvenWhenTheOracleMisbehaves(SharpStatus status)
     {
         const string script = """{"schema":1,"replicas":[{"name":"a","clientId":1}],"steps":[{"step":"applyForeign","doc":"a","bytes":{"$":"bytes","hex":""}}]}""";
-        var run = NewRun(_ => new SharpReply(status, null, "stuck"));
+        var run = NewRun((_, _) => new SharpReply(status, null, "stuck"));
         var failure = Assert.Throws<DifferentialFailure>(() => run.Run(script));
         Assert.Equal(FailureReason.SharpFault, failure.Reason);
         Assert.Equal(0, run.Misbehaved);
@@ -183,10 +197,10 @@ public sealed class HarnessSelfTests : IDisposable
         Assert.Null(both.Run(bad));
         Assert.Equal(1, both.Discarded);
 
-        var onlyOracle = NewRun(_ => new SharpReply(SharpStatus.Ok, new JsonObject(), null));
+        var onlyOracle = NewRun((_, _) => new SharpReply(SharpStatus.Ok, new JsonObject(), null));
         Assert.Equal(FailureReason.Mismatch, Assert.Throws<DifferentialFailure>(() => onlyOracle.Run(bad)).Reason);
 
-        var onlySharp = NewRun(_ => new SharpReply(SharpStatus.ScriptError, null, "refused"));
+        var onlySharp = NewRun((_, _) => new SharpReply(SharpStatus.ScriptError, null, "refused"));
         Assert.Equal(FailureReason.Mismatch, Assert.Throws<DifferentialFailure>(() => onlySharp.Run(ScriptPlan.Generate(1).ToScript().ToJsonString())).Reason);
     }
 

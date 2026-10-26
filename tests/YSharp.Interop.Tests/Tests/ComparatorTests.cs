@@ -66,7 +66,7 @@ public sealed class ComparatorTests
     }
 
     [Fact, Covers("DIFF-01")]
-    public void AnObservationOnlyOneSideProduced_IsADifference_ButExtraOracleObservationsAreIgnored()
+    public void AnObservationOnlyOneSideProduced_IsADifference_ButOnesNeitherComparesAreIgnored()
     {
         var a = Observations();
         var b = Observations();
@@ -75,9 +75,18 @@ public sealed class ComparatorTests
         Assert.Equal("sv", d!.Observation);
         Assert.Contains("missing in y-sharp", d.Detail);
 
-        var withEvents = Observations();
-        withEvents["events"] = new JsonObject { ["api"] = "x", ["value"] = new JsonArray() };
-        Assert.Null(ObservationDiff.Find(withEvents, Observations()));
+        // events, structs and ds are compared too (Spec 40): events the oracle fired and y-sharp did not are a difference
+        foreach (var name in new[] { "events", "structs", "ds" })
+        {
+            var withExtra = Observations();
+            withExtra[name] = new JsonObject { ["api"] = "x", ["value"] = new JsonArray() };
+            Assert.Equal(name, ObservationDiff.Find(withExtra, Observations())!.Observation);
+        }
+
+        // an observation outside the compared list (an area's own, such as awareness) is not
+        var withOther = Observations();
+        withOther["awareness"] = new JsonObject { ["api"] = "x", ["value"] = new JsonObject() };
+        Assert.Null(ObservationDiff.Find(withOther, Observations()));
     }
 
     [Fact, Covers("DIFF-01")]
