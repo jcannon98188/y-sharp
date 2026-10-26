@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@claude'
 created_date: '2026-10-24 19:42'
-updated_date: '2026-10-26 19:25'
+updated_date: '2026-10-26 19:42'
 labels:
   - spec
   - 'model:sonnet'
@@ -86,4 +86,7 @@ Owner sign-off: the BUD-13 array-push margin (8.08 vs Yjs 8.31 bytes per item, a
 Nightly 40379583357 (head 894c911) is green: Nightly tier tests, benchmarks, comparison with the stored baseline (0 regressions, 12 unchanged; TextInserts reads 0.21x only because d3fdbab changed its workload to the Yjs script's, so the baseline measured different work), and the bytes-per-item table (y-sharp / Yjs: text-insert 98.10 / 194.77, array-push 8.08 / 8.31, map-set 156.89 / 312.26).
 
 Open: DoD 4 and AC 4 wait on the owner's SIM-15 sign-off (asked 2026-10-26). After that, set Done and close m-7.
+
+CI flake fixed (gating windows-latest Release, run 40386696436): NodeClientTests.Request_ConcurrentRequests_AreMatchedById timed out ('Node did not answer echo within 10000 ms'), as Request_Timeout_KillsAndRestartsTheChild did twice earlier today, always on Windows. Cause: on Windows a child's stdio pipes are synchronous handles, so NodeClient's ReadLineAsync loops blocked pool threads, and a starved pool held the response; the Task.Delay timer's high-priority callback also beat the answer's continuation in WhenAny. Reproduced locally with 20 concurrent echoes under a starved pool (10 s timeout each run, 26 ms unstarved). Fix: stdout and stderr are read on dedicated background threads, the handshake comes through the stdout reader, a read error fails the pending requests, and the timeout path checks tcs.Task.IsCompleted. The probe now passes every run.
+Suite change: bd91f3a suite: NodeClient reads the child's pipes on dedicated threads and asks whether the answer came.
 <!-- SECTION:NOTES:END -->
