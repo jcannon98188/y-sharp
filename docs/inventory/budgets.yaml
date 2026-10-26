@@ -141,9 +141,9 @@
   layers: [unit]
   wire: false
   owner: 14
-  status: pending
+  status: active
   ref: "adr 0009"
-  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
+  note: "Active at the release gate (TASK-4.44). Ceiling: the Yjs figure on the same workload (bench/yjs-memory/yjs-bytes-per-item.json, Yjs 13.6.33, Node 24); half of it is the goal. Measured in Release, each workload in its own process: text-insert 98.11 bytes per item (Yjs 194.77), array-push 8.08 (Yjs 8.31, 2.8% under the ceiling; owner sign-off 2026-10-26), map-set 156.86 (Yjs 312.26). MemoryTierTests green in the nightly job (run 40365311083); the nightly step summary prints the same table."
 
 - id: BUD-14
   title: "Zero gen2 collections and no large-object-heap growth during 100k steady-state edits"
@@ -152,6 +152,6 @@
   layers: [unit]
   wire: false
   owner: 14
-  status: pending
+  status: active
   ref: "adr 0009"
-  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
+  note: "Active at the release gate (TASK-4.44). Measured in Release over 100k steady-state edits after a 2k warm-up: 0 gen2 collections and 0 bytes of large-object-heap growth (allowance 128 KiB, one chunk). MemoryTierTests green in the nightly job (run 40365311083)."

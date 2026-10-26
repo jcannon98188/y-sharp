@@ -79,6 +79,11 @@ public sealed class FeatureGateTests
     public void Features_Landed_ContainsOnlyDefinedFeatures() =>
         Assert.All(Features.Landed, f => Assert.True(Enum.IsDefined(f)));
 
+    /// <summary>The release gate (TASK-4.44): every feature has landed, each listed once.</summary>
+    [Fact]
+    public void Features_Landed_IsEveryFeature_EachOnce() =>
+        Assert.Equal(Enum.GetValues<Feature>().Order(), Features.Landed.Order());
+
     [Fact]
     public void SkipReasonFor_RequirementNotLanded_NamesTheMissingFeatures() =>
         Assert.Equal("Features not landed yet (ADR 0020): Text, V2.",

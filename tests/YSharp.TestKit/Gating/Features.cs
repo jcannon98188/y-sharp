@@ -52,7 +52,6 @@ public static class Features
     {
         Feature.Encoding,
         Feature.Values,
-        Feature.Values,
         Feature.Json,
         Feature.Store,
         Feature.Transactions,
