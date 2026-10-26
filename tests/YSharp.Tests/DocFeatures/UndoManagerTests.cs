@@ -372,8 +372,9 @@ public sealed class UndoManagerTests
     [Requires(Feature.Text)]
     public void RedoBookkeeping_AfterRedo_IsNotSentOverTheWire()
     {
-        var a = Net.Mk(1);
-        var b = Net.Mk(2);
+        // without gc: the undo manager keeps deleted content from collection on a, which b collects, as in Yjs
+        var a = Net.Mk(1, gc: false);
+        var b = Net.Mk(2, gc: false);
         var ta = a.GetText("t");
         ta.Insert(0, "abc");
         Net.Sync(a, b);
@@ -575,6 +576,7 @@ public sealed class UndoManagerTests
 
     [Fact]
     [Covers("UM-20", "UM-10")]
+    [Requires(Feature.Sync)]
     public void Undo_RemoteInsertionsInsideTheRange_DeletesOnlyTheCapturedOnes()
     {
         var u = Users.Init(2);

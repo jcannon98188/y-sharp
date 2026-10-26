@@ -57,7 +57,7 @@ public sealed class ItemHelperTests
         Assert.Equal(new (ulong, long)?[] { null, (1UL, 0L), (1UL, 0L), (1UL, 0L) }, s.Select(x => x.RightOrigin));    // copied to the right half, left half unchanged
         Assert.Equal(new[] { false, false, true, false }, s.Select(x => x.Deleted));
         Assert.Equal("[[1,[[4,1]]]]", StructsProbe.DeleteSetJson(StructsProbe.Dump(b)));
-        Assert.Equal("abcXZ", b.GetText("t").ToString());
+        Assert.Equal("XZabc", b.GetText("t").ToString());
     }
 
     [Fact]

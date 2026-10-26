@@ -56,6 +56,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testInfiniteCaptureTimeout", "UM-03")]
+    [Requires(Feature.Sync)]
     public void Undo_InfiniteCaptureTimeout_MergesEverythingUntilStopCapturing()
     {
         var u = Users.Init(3);
@@ -97,7 +98,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testTypeScope", "UM-02")]
-    [Requires(Feature.Text)]
+    [Requires(Feature.Text, Feature.Sync)]
     public void Undo_TypeScope_IgnoresChangesOutsideTheScope()
     {
         var u = Users.Init(3);
@@ -119,6 +120,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testTrackClass", "UM-01")]
+    [Requires(Feature.Sync)]
     public void Undo_TrackedOriginClass_TracksOnlyOriginsOfThatType()
     {
         var u = Users.Init(3);
@@ -173,7 +175,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoText", "UM-10", "UM-20", "UM-05")]
-    [Requires(Feature.TextFormat)]
+    [Requires(Feature.TextFormat, Feature.Sync)]
     public void Undo_Text_UndoesAndRedoesInsertsAndDeletes()
     {
         var u = Users.Init(3);
@@ -239,7 +241,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoInEmbed", "UM-18")]
-    [Requires(Feature.TextFormat, Feature.Text)]
+    [Requires(Feature.TextFormat, Feature.Text, Feature.Sync)]
     public void Undo_EmbeddedNestedText_UndoesTheEmbedEdits()
     {
         var u = Users.Init(3);
@@ -292,7 +294,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoMap", "UM-20", "UM-12")]
-    [Requires(Feature.Map)]
+    [Requires(Feature.Map, Feature.Sync)]
     public void Undo_Map_UndoesAndRedoesKeyChanges()
     {
         var u = Users.Init(2);
@@ -335,6 +337,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoDeleteInMap", "UM-10", "UM-12")]
+    [Requires(Feature.Sync)]
     public void Undo_MapKeyDeletedAndSetAgain_UndoesStepByStep()
     {
         var u = Users.Init(3);
@@ -387,7 +390,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoArray", "UM-20", "UM-10")]
-    [Requires(Feature.Map)]
+    [Requires(Feature.Map, Feature.Sync)]
     public void Undo_Array_UndoesAndRedoesInsertsAndDeletes()
     {
         var u = Users.Init(3);
@@ -441,7 +444,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoDeleteFilter", "UM-10")]
-    [Requires(Feature.Map)]
+    [Requires(Feature.Map, Feature.Sync)]
     public void Undo_DeleteFilter_KeepsFilteredItemsWhenUndoingTheirInsert()
     {
         var u = Users.Init(3);
@@ -638,7 +641,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoXml", "UM-18")]
-    [Requires(Feature.TextFormat, Feature.Text, Feature.Xml)]
+    [Requires(Feature.TextFormat, Feature.Text, Feature.Xml, Feature.Sync)]
     public void Undo_Xml_UndoesAndRedoesTreeEdits()
     {
         var u = Users.Init(3);
@@ -773,6 +776,7 @@ public sealed class UndoPortTests
 
     [Fact]
     [PortOf("undo-redo.tests.js:testUndoEvents", "UM-04", "UM-14")]
+    [Requires(Feature.Sync)]
     public void Undo_StackEvents_FireWithTheExpectedMetadata()
     {
         var u = Users.Init(3);
