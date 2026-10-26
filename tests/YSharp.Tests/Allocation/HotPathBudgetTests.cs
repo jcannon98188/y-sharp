@@ -54,7 +54,7 @@ public sealed class HotPathBudgetTests
 
     [Fact, Covers("BUD-04")]
     [Requires(Feature.Map, Feature.Events)]
-    public void EventDispatch_WithNoHandlersForTheChangedType_AllocatesNothing()
+    public void EventDispatch_WithNoHandlersForTheChangedType_StaysWithinItsBudget()
     {
         var doc = AllocDocs.Populated();
         var observed = doc.GetMap("observed");
@@ -66,7 +66,7 @@ public sealed class HotPathBudgetTests
 
     [Fact, Covers("BUD-05")]
     [Requires(Feature.Text, Feature.Events)]
-    public void Commit_WithNoUpdateSubscriber_AllocatesNothing()
+    public void Commit_WithNoUpdateSubscriber_StaysWithinItsBudget()
     {
         var doc = AllocDocs.Populated();
         var text = doc.GetText("t");
@@ -93,7 +93,7 @@ public sealed class HotPathBudgetTests
 
     [Fact, Covers("BUD-07")]
     [Requires(Feature.Text, Feature.Events)]
-    public void OneCharacterTextInsert_AtTheEnd_AllocatesNothing()
+    public void OneCharacterTextInsert_AtTheEnd_StaysWithinItsBudget()
     {
         var doc = AllocDocs.Populated();
         var text = doc.GetText("t");

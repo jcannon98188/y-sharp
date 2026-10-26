@@ -64,6 +64,12 @@ public static class AllocationBudgets
         // TASK-4.20, M3 gate: one-character inserts applied one update at a time (CodecBudgetTests), 1069 bytes per call in Release for V1 and V2.
         ["BUD-08:V1"] = WithHeadroom(1069),
         ["BUD-08:V2"] = WithHeadroom(1069),
+        // TASK-4.27, pending owner sign-off: zero is out of reach while every insert allocates an Item and every transaction its 24-byte
+        // Transaction (BUD-01 option A), so these paths are bounded. Measured in Release once Events landed: a map Set with a handler on
+        // another type 215 bytes, an insert-and-delete commit 974, a one-character insert at the end 606. TASK-4.28 re-measures.
+        ["BUD-04"] = WithHeadroom(215),
+        ["BUD-05"] = WithHeadroom(974),
+        ["BUD-07"] = WithHeadroom(606),
     };
 
     /// <summary>The one-off large-object-heap growth BUD-14 tolerates: a single caller-supplied payload larger than a chunk (ADR 0018). The workload has none, so one chunk is slack.</summary>
@@ -78,10 +84,10 @@ public static class AllocationBudgets
         new("BUD-01", "Transact/ReadTransact with a static lambda, uncontended", BudgetKind.Bounded, "Transact", "ReadTransact"),
         new("BUD-02", "TryTransact, uncontended and contended", BudgetKind.Bounded, "Uncontended", "Contended"),
         new("BUD-03", "Scalar YValue reads and AttributeEquals", BudgetKind.Zero),
-        new("BUD-04", "Event dispatch with no handlers for the changed type", BudgetKind.Zero),
-        new("BUD-05", "Commit with no Update subscriber", BudgetKind.Zero),
+        new("BUD-04", "Event dispatch with no handlers for the changed type", BudgetKind.Bounded),
+        new("BUD-05", "Commit with no Update subscriber", BudgetKind.Bounded),
         new("BUD-06", "EncodeStateAsUpdate into a pre-sized writer", BudgetKind.Zero),
-        new("BUD-07", "One-character YText.Insert at the end", BudgetKind.Zero),
+        new("BUD-07", "One-character YText.Insert at the end", BudgetKind.Bounded),
         new("BUD-08", "TryApplyUpdate", BudgetKind.Bounded, "V1", "V2"),
         new("BUD-09", "Push and Set of scalars", BudgetKind.Bounded, "Push", "Set"),
         new("BUD-10", "Sync Step1/Step2 round trip", BudgetKind.Bounded),

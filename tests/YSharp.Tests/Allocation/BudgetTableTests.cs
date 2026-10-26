@@ -34,8 +34,9 @@ public sealed class BudgetTableTests
         Assert.Equal(11, AllocationBudgets.HotPaths.Count());
         Assert.Equal(ExpectedIds.Take(11), AllocationBudgets.HotPaths.Select(b => b.Id));
         // BUD-01 and BUD-02 became bounded by owner decision (TASK-4.12): a 24-byte Transaction per transaction keeps CC-9 exact
-        Assert.Equal(5, AllocationBudgets.HotPaths.Count(b => b.Kind == BudgetKind.Zero));
-        Assert.Equal(6, AllocationBudgets.HotPaths.Count(b => b.Kind == BudgetKind.Bounded));
+        // BUD-04, 05 and 07 became bounded at TASK-4.27 (pending owner sign-off): every insert allocates an Item
+        Assert.Equal(2, AllocationBudgets.HotPaths.Count(b => b.Kind == BudgetKind.Zero));
+        Assert.Equal(9, AllocationBudgets.HotPaths.Count(b => b.Kind == BudgetKind.Bounded));
     }
 
     [Fact]
