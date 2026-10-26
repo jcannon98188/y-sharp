@@ -282,4 +282,74 @@ public sealed class RelayTests
         AssertSameDoc(DocOf(new[] { Encode(sequential, UpdateFormat.V1) }, UpdateFormat.V1),
             DocOf(new[] { Encode(concurrent, UpdateFormat.V1) }, UpdateFormat.V1), "concurrent folds");
     }
+
+    // ------------------------------------------------------------------ RLY-7: the pending bound, prepare and commit (TASK-5.3)
+
+    private static readonly byte[] Other = Hex.Bytes("01010202840101016300");   // client 2, clock 2: waits on its clocks 0 and 1
+
+    private static byte[] As(byte[] v1, UpdateFormat format)
+    {
+        if (format == UpdateFormat.V1) return v1;
+        var w = new ArrayBufferWriter<byte>();
+        Assert.True(YUpdate.TryConvert(v1, UpdateFormat.V1, UpdateFormat.V2, w).Ok);
+        return w.WrittenSpan.ToArray();
+    }
+
+    [Theory, Covers("RLY-7")]
+    [InlineData(UpdateFormat.V1)]
+    [InlineData(UpdateFormat.V2)]
+    public void ThePendingBound_ExactlyAtTheLimitIsAccepted_OneOverIsRejected_AndAFilledGapFreesIt(UpdateFormat format)
+    {
+        // U2 alone waits on clocks 0 and 1, so all of it is pending: its V1 encoding is U2 itself, 10 bytes
+        Assert.Equal(YError.LimitExceeded, new YRelay(new YLimits { MaxPendingBytes = U2.Length - 1 }).TryApplyUpdate(As(U2, format), format).Error);
+        var relay = new YRelay(new YLimits { MaxPendingBytes = U2.Length });
+        Assert.True(relay.TryApplyUpdate(As(U2, format), format).Ok);
+        var before = Encode(relay, UpdateFormat.V1);
+        Assert.Equal(YError.LimitExceeded, relay.TryApplyUpdate(As(Other, format), format).Error);
+        HexAssert.Equal(before, Encode(relay, UpdateFormat.V1), "a rejected update changes nothing");
+
+        // U0 fills clock 0 and U2 still waits behind the Skip at 1; U1 fills the gap and nothing is pending, so Other fits
+        Assert.True(relay.TryApplyUpdate(As(U0, format), format).Ok);
+        Assert.Equal(YError.LimitExceeded, relay.TryApplyUpdate(As(Other, format), format).Error);
+        Assert.True(relay.TryApplyUpdate(As(U1, format), format).Ok);
+        Assert.True(relay.TryApplyUpdate(As(Other, format), format).Ok);
+        Assert.Equal(3, relay.GetStateVector()[1]);
+    }
+
+    [Fact, Covers("RLY-7")]
+    public void ADeleteRangePastTheState_IsPending_UntilTheStructsArrive()
+    {
+        var delete = Hex.Bytes("000101010001");   // no structs; client 1, clock 0, length 1: 6 bytes
+        Assert.Equal(YError.LimitExceeded, new YRelay(new YLimits { MaxPendingBytes = delete.Length - 1 }).TryApplyUpdate(delete).Error);
+
+        var relay = new YRelay(new YLimits { MaxPendingBytes = delete.Length });
+        Assert.True(relay.TryApplyUpdate(delete).Ok);
+        var second = Hex.Bytes("000102010001");   // the same on client 2
+        Assert.Equal(YError.LimitExceeded, relay.TryApplyUpdate(second).Error);
+        Assert.True(relay.TryApplyUpdate(U0).Ok);     // client 1's clock 0 arrives: its range is no longer pending
+        Assert.True(relay.TryApplyUpdate(second).Ok);
+        Assert.Equal("", DocOf(new[] { Encode(relay, UpdateFormat.V1) }, UpdateFormat.V1).GetText("t").ToString());
+    }
+
+    [Fact, Covers("RLY-7", "RLY-4")]
+    public void Prepare_ChangesNothing_UntilCommit_AndACommitIsSpentOnce()
+    {
+        var relay = new YRelay();
+        Assert.True(relay.TryPrepareUpdate(U0, UpdateFormat.V1, out var prepared).Ok);
+        Assert.True(relay.IsEmpty);
+        Assert.Equal(1, prepared!.StateVector[1]);
+        relay.Commit(prepared);
+        var direct = new YRelay();
+        Assert.True(direct.TryApplyUpdate(U0).Ok);
+        HexAssert.Equal(Encode(direct, UpdateFormat.V1), Encode(relay, UpdateFormat.V1), "prepare then commit is a fold");
+
+        Assert.Throws<InvalidOperationException>(() => relay.Commit(prepared));                 // already committed
+        Assert.True(relay.TryPrepareUpdate(U1, UpdateFormat.V1, out var stale).Ok);
+        Assert.True(relay.TryApplyUpdate(U2).Ok);
+        Assert.Throws<InvalidOperationException>(() => relay.Commit(stale!));                   // the relay changed after it was prepared
+        Assert.Throws<InvalidOperationException>(() => new YRelay().Commit(prepared));          // prepared by another relay
+
+        Assert.Equal(YError.Malformed, relay.TryPrepareUpdate(U1[..^2], UpdateFormat.V1, out var none).Error);
+        Assert.Null(none);
+    }
 }

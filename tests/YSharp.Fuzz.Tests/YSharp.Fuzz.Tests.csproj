@@ -16,6 +16,8 @@
   <ItemGroup>
     <ProjectReference Include="..\YSharp.TestKit\YSharp.TestKit.csproj" />
     <ProjectReference Include="..\..\src\YSharp\YSharp.csproj" />
+    <!-- the server tier's entry points are fuzzed too (TASK-5.3) -->
+    <ProjectReference Include="..\..\src\YSharp.Server\YSharp.Server.csproj" />
     <!-- built for the out-of-process canary tests; started with `dotnet`, never referenced as an assembly -->
     <ProjectReference Include="..\YSharp.Fuzz.Canary\YSharp.Fuzz.Canary.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
