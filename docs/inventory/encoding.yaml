@@ -876,3 +876,15 @@
   owner: 5
   status: active
   ref: "encoding.md 10"
+
+- id: ENC-86
+  title: "Malformed input: out-of-order delete ranges parked as pending -> JS corrupts them on the V2 re-encode"
+  source: "docs/research/encoding.md:313"
+  kind: diverge
+  layers: [unit, fixture, differential]
+  wire: true
+  adr: ["0003"]
+  owner: 5
+  status: active
+  ref: "encoding.md 4.3"
+  note: "Found by the TASK-4.28 Nightly differential. JS writes a negative V2 clock difference as one garbage byte, so the pending delete set and every later state encode carry a wrong range; y-sharp keeps the ranges as sent and exports them sorted. Content and state vector match."

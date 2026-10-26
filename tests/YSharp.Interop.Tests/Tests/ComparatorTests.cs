@@ -173,6 +173,17 @@ public sealed class ComparatorTests
         Assert.False(n.Claims(Case(MutationKind.InsertByte, oracle: true, sharp: true) with { OracleZeroLengthDeleteRange = true }), "both accepting is not a divergence");
     }
 
+    [Fact, Covers("DIFF-05", "ENC-86")]
+    public void Normaliser_UnsortedPendingDeleteSet_ClaimsOnlyWhenBothAcceptOutOfOrderParkedRanges()
+    {
+        var n = new UnsortedPendingDeleteSetNormaliser();
+        var both = Case(MutationKind.FlipByte, oracle: true, sharp: true, validLength: 20, mutatedLength: 20);
+        Assert.True(n.Claims(both with { OracleUnsortedPendingDeleteSet = true }));
+        Assert.False(n.Claims(both), "a state difference without out-of-order parked ranges is a bug");
+        Assert.False(n.Claims(Case(MutationKind.FlipByte, oracle: true, sharp: false) with { OracleUnsortedPendingDeleteSet = true }), "y-sharp rejecting is another class");
+        Assert.Equal(new[] { "sv", "doc", "results" }, UnsortedPendingDeleteSetNormaliser.StillCompared);
+    }
+
     [Fact, Covers("DIFF-05")]
     public void Normaliser_EveryOne_NamesRegisteredInventoryEntries()
     {

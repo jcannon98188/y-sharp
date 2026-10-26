@@ -18,12 +18,15 @@ public sealed record MutationCase(UpdateFormat Format, byte[] Valid, byte[] Muta
 
     /// <summary>The oracle rejected only because it re-encoded a zero-length delete range (the step's <c>zeroLengthDeleteRange</c> result).</summary>
     public bool OracleZeroLengthDeleteRange { get; init; }
+
+    /// <summary>The oracle parked out-of-order delete ranges as pending state (the step's <c>unsortedPendingDeleteSet</c> result).</summary>
+    public bool OracleUnsortedPendingDeleteSet { get; init; }
 }
 
 /// <summary>The classes a mutated valid update falls into (ADR 0012).</summary>
 public enum OutcomeClass
 {
-    /// <summary>Both accept; the state must then be equal.</summary>
+    /// <summary>Both accept; the state must then be equal, unless a normaliser claims a recorded state divergence (ENC-86).</summary>
     BothAccept,
 
     /// <summary>Both reject; y-sharp must also be unchanged (atomic decode, ADR 0005).</summary>
@@ -104,11 +107,32 @@ public sealed class ZeroLengthDeleteRangeNormaliser : IDivergenceNormaliser
     public bool Claims(MutationCase c) => c.OracleZeroLengthDeleteRange && !c.OracleAccepted && c.SharpAccepted;
 }
 
+/// <summary>
+/// Yjs parks delete ranges it cannot apply yet and re-encodes them as V2; a client's ranges that arrive out of order make the V2 writer
+/// write a negative clock difference, which lib0 writes as one garbage byte, so the parked ranges and every later state encode are corrupt
+/// (ENC-86, ADR 0003). y-sharp keeps the ranges as sent. Both accept; the encoded state differs while the state vector and the content
+/// match. Claimed only when the oracle reports that it parked out-of-order ranges, and the harness still compares sv, doc and results.
+/// </summary>
+public sealed class UnsortedPendingDeleteSetNormaliser : IDivergenceNormaliser
+{
+    public string Key => "unsorted-pending-delete-set";
+
+    public IReadOnlyList<string> RegistryIds { get; } = new[] { "ENC-86" };
+
+    public string Description =>
+        "A mutated update whose out-of-order delete ranges are parked as pending state is accepted by both; the oracle's re-encoded pending delete set is corrupt, so only the state encodings differ.";
+
+    /// <summary>The observations still compared when this normaliser claims a case.</summary>
+    public static readonly string[] StillCompared = { "sv", "doc", "results" };
+
+    public bool Claims(MutationCase c) => c.OracleUnsortedPendingDeleteSet && c.OracleAccepted && c.SharpAccepted;
+}
+
 public static class Normalisers
 {
     /// <summary>Every divergence the live differential knows. A divergence nobody registered here is reported as a bug.</summary>
     public static readonly IReadOnlyList<IDivergenceNormaliser> Registered =
-        new IDivergenceNormaliser[] { new LenientTruncationNormaliser(), new LenientColumnEndNormaliser(), new ZeroLengthDeleteRangeNormaliser() };
+        new IDivergenceNormaliser[] { new LenientTruncationNormaliser(), new LenientColumnEndNormaliser(), new ZeroLengthDeleteRangeNormaliser(), new UnsortedPendingDeleteSetNormaliser() };
 
     public static OutcomeClass Classify(bool oracleAccepted, bool sharpAccepted) =>
         (oracleAccepted, sharpAccepted) switch

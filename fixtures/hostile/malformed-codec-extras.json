@@ -22,6 +22,7 @@
       "ENC-69",
       "ENC-22",
       "ENC-56",
+      "ENC-86",
       "Q07"
     ],
     "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
@@ -176,6 +177,18 @@
           "sv": {"$":"bytes","hex":"00"},
           "doc": [["t",{"kind":"text","delta":[]}]],
           "classification": "match"
+        },
+        {
+          "name": "delete-set-pending-out-of-order",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"0001770262632801"},
+          "outcome": "ok",
+          "pendingStructs": false,
+          "pendingDs": true,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "diverge",
+          "divergence": "ENC-86"
         },
         {
           "name": "any-empty-object-from-flattened-date",

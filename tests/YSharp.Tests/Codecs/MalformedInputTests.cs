@@ -181,6 +181,15 @@ public sealed class MalformedInputTests
         Assert.True(YUpdate.TryConvert(update, UpdateFormat.V1, UpdateFormat.V2, w).Ok);
     }
 
+    [Fact, Covers("ENC-86"), Diverges("ENC-86", adr: "0003")]
+    [Requires(Feature.V1)]
+    public void Enc86_OutOfOrderPendingDeleteRanges_AreKeptWhereJsCorruptsThem()
+    {
+        // client 119, ranges (98, 99) then (40, 1), both beyond the known state: Yjs re-exports (98, 99), (296, 1)
+        var doc = AssertAccepted("00 01 77 02 62 63 28 01");
+        Assert.Equal("0001770228016263", Hex.Of(doc.EncodeStateAsUpdate()));
+    }
+
     [Fact, Covers("ENC-52")]
     public void Enc52_ADeleteRangeBeyondKnownState_IsAccepted()=> AssertAccepted("00 01 05 01 00 01");
 

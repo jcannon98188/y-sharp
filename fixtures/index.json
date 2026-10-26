@@ -401,10 +401,11 @@
         "ENC-69",
         "ENC-22",
         "ENC-56",
+        "ENC-86",
         "Q07"
       ],
-      "sha256": "41a3e819fdd24ee603c9e57541ebd99ab6a8921033b845c0bd16c4e46c4cd69c",
-      "bytes": 11083
+      "sha256": "fe1dedb48b66a35d58e50c921953ee3beffef8ca0486d47c8784831cfc750a1b",
+      "bytes": 11518
     },
     {
       "path": "hostile/malformed-v1-updates.json",

@@ -272,6 +272,7 @@ public sealed class DiffRun
         {
             OracleReadPastEnd = oracleValue["readPastEnd"]?.GetValue<bool>() ?? false,
             OracleZeroLengthDeleteRange = oracleValue["zeroLengthDeleteRange"]?.GetValue<bool>() ?? false,
+            OracleUnsortedPendingDeleteSet = oracleValue["unsortedPendingDeleteSet"]?.GetValue<bool>() ?? false,
         };
         Label = $"{kind} at {offset} of {valid.Length} bytes ({format})";
 
@@ -280,8 +281,12 @@ public sealed class DiffRun
             case OutcomeClass.BothAccept:
             {
                 var d = ObservationDiff.Find(oracle.Observations, sharp.Observations);
+                if (d == null) return null;
+                var claim = Normalisers.Claim(c);
+                if (claim is UnsortedPendingDeleteSetNormaliser)
+                    d = ObservationDiff.Find(oracle.Observations, sharp.Observations, UnsortedPendingDeleteSetNormaliser.StillCompared);
                 if (d != null) throw Fail(FailureReason.Mismatch, script, oracle.Observations, sharp.Observations, d, "both implementations accept the mutated update but end in different states.");
-                return null;
+                return claim;
             }
             case OutcomeClass.BothReject:
                 if (!sharpUnchanged)

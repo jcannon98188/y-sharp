@@ -7,7 +7,9 @@
 // past the end of its buffer (a column or the rest buffer; ENC-60..68). y-sharp rejects those (ADR 0005), and the harness's
 // lenient-column-end normaliser claims exactly that case. A rejected update carries `zeroLengthDeleteRange: true` when Yjs threw only
 // because it re-encoded a parked zero-length delete range (UpdateEncoderV2.writeDsLen, ENC-51), which y-sharp ignores by ADR 0003.
-// Both flags are absent otherwise, so other results keep their shape.
+// An accepted update carries `unsortedPendingDeleteSet: true` when Yjs parked delete ranges as pending state and a range of one client
+// starts before the previous one ends: the V2 re-encode then writes a negative clock difference, which lib0 turns into garbage (ENC-86).
+// The flags are absent otherwise, so other results keep their shape.
 import { Y, lib0 } from './oracle.mjs'
 import { untag, ScriptError } from './tagged.mjs'
 import { defineStep } from './steps.mjs'
@@ -29,8 +31,10 @@ defineStep({
     let structDecoder = null
     let accepted = true
     let zeroLengthDeleteRange = false
+    const order = { unsorted: false }
     try {
       structDecoder = enc === 'v1' ? new Y.UpdateDecoderV1(decoder) : new Y.UpdateDecoderV2(decoder)
+      watchDeleteSetOrder(structDecoder, order)
       Y.readUpdateV2(decoder, doc, 'foreign', structDecoder)
     } catch (e) {
       accepted = false
@@ -38,10 +42,23 @@ defineStep({
     }
     const value = accepted && readPastEnd(structDecoder)
       ? { accepted, readPastEnd: true }
-      : zeroLengthDeleteRange ? { accepted, zeroLengthDeleteRange: true } : { accepted }
+      : zeroLengthDeleteRange ? { accepted, zeroLengthDeleteRange: true }
+        : accepted && order.unsorted && doc.store.pendingDs !== null ? { accepted, unsortedPendingDeleteSet: true } : { accepted }
     ctx.results.set(s.name, { api: enc === 'v1' ? 'Y.applyUpdate (foreign bytes)' : 'Y.applyUpdateV2 (foreign bytes)', value })
   }
 })
+
+// readAndApplyDeleteSet reads each client's ranges after resetDsCurVal; a range starting before the previous one ends is out of order.
+const watchDeleteSetOrder = (structDecoder, order) => {
+  const reset = structDecoder.resetDsCurVal.bind(structDecoder)
+  const readClock = structDecoder.readDsClock.bind(structDecoder)
+  const readLen = structDecoder.readDsLen.bind(structDecoder)
+  let end = 0
+  let clock = 0
+  structDecoder.resetDsCurVal = () => { end = 0; reset() }
+  structDecoder.readDsClock = () => { clock = readClock(); if (clock < end) order.unsorted = true; return clock }
+  structDecoder.readDsLen = () => { const len = readLen(); end = clock + len; return len }
+}
 
 // lib0 readers do not check bounds: past the end readUint8 yields undefined (0 in a varint) and a StringDecoder slices an empty string,
 // leaving pos/spos beyond the buffer. Any reader reachable from the update decoder in that state read past its end.

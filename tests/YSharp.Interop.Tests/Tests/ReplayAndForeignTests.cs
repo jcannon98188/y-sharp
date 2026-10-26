@@ -74,6 +74,16 @@ public sealed class ForeignReadPastEndTests(OracleHost host)
             .Observations!["results"]!["value"]!["r"]!["value"]!["accepted"]!.GetValue<bool>(), "y-sharp ignores the range (ENC-51)");
     }
 
+    [Fact, Covers("DIFF-05", "ENC-86")]
+    public void ApplyForeign_OutOfOrderDeleteRangesParkedAsPending_AreFlagged()
+    {
+        // no structs, then client 119 with ranges (98, 99) and (40, 1): the shape of the Nightly find of TASK-4.28
+        var value = Result("0001770262632801", "v1");
+        Assert.True(value["accepted"]!.GetValue<bool>());
+        Assert.True(value["unsortedPendingDeleteSet"]!.GetValue<bool>());
+        Assert.Null(Result("0001770228016263", "v1")["unsortedPendingDeleteSet"]);
+    }
+
     [Fact, Covers("DIFF-05")]
     public void ApplyForeign_AnUpdateDecodedInBounds_CarriesNoFlag()
     {

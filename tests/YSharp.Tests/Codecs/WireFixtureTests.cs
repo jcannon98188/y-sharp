@@ -66,7 +66,7 @@ public sealed class WireFixtureTests
     public void WireFixture_MalformedV2_FollowsTheStrictDecodingContract()=> FixtureReplay.AssertMalformed(FixtureReplay.Load("hostile/malformed-v2-updates.json"));
 
     [Fact, Covers("ENC-22", "ENC-36", "ENC-44", "ENC-46", "ENC-47", "ENC-48", "ENC-49", "ENC-50", "ENC-51", "ENC-56",
-        "ENC-60", "ENC-61", "ENC-62", "ENC-63", "ENC-64", "ENC-65", "ENC-66", "ENC-67", "ENC-68", "ENC-69", "Q07")]
+        "ENC-60", "ENC-61", "ENC-62", "ENC-63", "ENC-64", "ENC-65", "ENC-66", "ENC-67", "ENC-68", "ENC-69", "ENC-86", "Q07")]
     [Requires(Feature.V2)]
     public void WireFixture_MalformedExtras_FollowTheStrictDecodingContract()=> FixtureReplay.AssertMalformed(FixtureReplay.Load("hostile/malformed-codec-extras.json"));
 
