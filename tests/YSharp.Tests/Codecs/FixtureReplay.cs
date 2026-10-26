@@ -198,8 +198,9 @@ internal static class FixtureReplay
     private static void AssertList(JsonElement expected, List<byte[]> actual, string label)
     {
         var want = expected.EnumerateArray().Select(BytesOf).ToList();
+        // the events compare first, so a missing or extra event is reported where the lists part, not only as a count
+        for (var i = 0; i < Math.Min(want.Count, actual.Count); i++) HexAssert.Equal(want[i], actual[i], $"{label} #{i}");
         Assert.True(want.Count == actual.Count, $"{label}: expected {want.Count} update events, got {actual.Count}.");
-        for (var i = 0; i < want.Count; i++) HexAssert.Equal(want[i], actual[i], $"{label} #{i}");
     }
 
     /// <summary>Recorded divergences where y-sharp accepts what the oracle rejects (ADR 0003): a <c>diverge</c> case naming one is accepted.</summary>
