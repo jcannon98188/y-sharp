@@ -82,3 +82,13 @@
   owner: 5
   status: active
   ref: "adr 0024:65"
+
+- id: SRV-12
+  title: "The in-memory store is the non-durable default; one registration replaces it, and the public conformance suite checks any store"
+  source: "docs/adr/0024-server-tier-layering.md:66"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:66"

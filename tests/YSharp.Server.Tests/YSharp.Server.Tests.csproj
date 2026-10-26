@@ -15,5 +15,6 @@
     <ProjectReference Include="..\YSharp.TestKit\YSharp.TestKit.csproj" />
     <ProjectReference Include="..\..\src\YSharp\YSharp.csproj" />
     <ProjectReference Include="..\..\src\YSharp.Server\YSharp.Server.csproj" />
+    <ProjectReference Include="..\..\src\YSharp.Server.Testing\YSharp.Server.Testing.csproj" />
   </ItemGroup>
 </Project>
