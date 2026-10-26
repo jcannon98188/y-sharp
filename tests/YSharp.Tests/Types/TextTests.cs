@@ -626,7 +626,7 @@ public sealed class TextTests
     }
 
     [Fact, PortOf("y-text.tests.js:testSnapshot", "D-3")]
-    [Requires(Feature.TextFormat, Feature.Snapshots)]
+    [Requires(Feature.TextFormat, Feature.Snapshots, Feature.Sync)]
     public void Text_SnapshotsOfEdits_ProduceTheDeltaOfEachVersion()
     {
         var net = Net.Init(1);
@@ -648,7 +648,7 @@ public sealed class TextTests
     }
 
     [Fact, PortOf("y-text.tests.js:testSnapshotDeleteAfter", "D-3")]
-    [Requires(Feature.TextFormat, Feature.Snapshots)]
+    [Requires(Feature.TextFormat, Feature.Snapshots, Feature.Sync)]
     public void Text_DeleteAfterSnapshot_SnapshotStillShowsTheDeletedText()
     {
         var text0 = Net.Init(1).Peers[0].Text;

@@ -359,7 +359,7 @@ public sealed class SnapshotTests
 
     [Fact]
     [PortOf("snapshot.tests.js:testDependentChanges", "SNAP-08", "SNAP-05")]
-    [Requires(Feature.Array)]
+    [Requires(Feature.Array, Feature.Sync)]
     public void Snapshot_DependentChangesFromTwoClients_RestoreConsistently()
     {
         var u = Users.Init(2);
