@@ -108,9 +108,9 @@
   layers: [unit]
   wire: false
   owner: 14
-  status: pending
+  status: active
   ref: "adr 0009"
-  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
+  note: "TASK-4.37, M6 gate: recorded from Release measurements (1464 bytes per round trip) plus 25% headroom."
 
 - id: BUD-11
   title: "Awareness encode and apply stay within a bounded allocation budget"
@@ -119,9 +119,9 @@
   layers: [unit]
   wire: false
   owner: 14
-  status: pending
+  status: active
   ref: "adr 0009"
-  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
+  note: "TASK-4.37, M6 gate: recorded from Release measurements (Encode 376 bytes, Apply 704) plus 25% headroom."
 
 - id: BUD-12
   title: "Hostile input of N bytes allocates at most k*N plus a fixed amount"
