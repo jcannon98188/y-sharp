@@ -97,9 +97,9 @@
   layers: [unit]
   wire: false
   owner: 14
-  status: pending
+  status: active
   ref: "adr 0009"
-  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
+  note: "TASK-4.28, M4 gate: recorded from Release measurements (Push 128 bytes per call, Set 200) plus 25% headroom."
 
 - id: BUD-10
   title: "A sync Step1/Step2 round trip stays within a bounded allocation budget"

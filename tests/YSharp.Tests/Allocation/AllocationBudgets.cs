@@ -70,6 +70,9 @@ public static class AllocationBudgets
         ["BUD-04"] = WithHeadroom(215),
         ["BUD-05"] = WithHeadroom(974),
         ["BUD-07"] = WithHeadroom(606),
+        // TASK-4.28, M4 gate: a scalar Push on an array 128 bytes per call, a scalar Set on a map 200, measured in Release.
+        ["BUD-09:Push"] = WithHeadroom(128),
+        ["BUD-09:Set"] = WithHeadroom(200),
     };
 
     /// <summary>The one-off large-object-heap growth BUD-14 tolerates: a single caller-supplied payload larger than a chunk (ADR 0018). The workload has none, so one chunk is slack.</summary>
