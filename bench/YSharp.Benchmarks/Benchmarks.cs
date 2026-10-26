@@ -1,6 +1,8 @@
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using BenchmarkDotNet.Attributes;
 
 namespace YSharp.Benchmarks;
@@ -138,12 +140,50 @@ public class YjsComparisonBenchmarks
 {
     private const int N = 100_000;
 
-    [Benchmark] public void TextInserts() => Work.Text(new Doc(), N);
+    [Benchmark] public void TextInserts() => YjsWorkloads.Text(N);
     [Benchmark] public void ArrayPushes() => Work.Array(new Doc(), N);
     [Benchmark] public void MapSets() => Work.Map(new Doc(), N);
 }
 
-/// <summary>The bytes-per-item table: y-sharp's managed heap per item next to the Yjs figure, printed by the <c>table</c> command.</summary>
+/// <summary>
+/// The workloads of the Yjs script <c>bench/yjs-memory/measure.mjs</c> (and of <c>MemoryWorkloads</c> in the slow memory tier), operation for
+/// operation, so a y-sharp figure sits next to the Yjs figure for the same edits.
+/// </summary>
+internal static class YjsWorkloads
+{
+    public static readonly (string Name, int Items, Func<int, Doc> Run)[] All =
+    {
+        ("text-insert", 1_000_000, Text),
+        ("array-push", 1_000_000, n => { var doc = new Doc(); Work.Array(doc, n); return doc; }),
+        ("map-set", 100_000, n => { var doc = new Doc(); Work.Map(doc, n); return doc; }),
+    };
+
+    /// <summary>One character each, at a position within 15 of the end, so items fragment as they do under real typing.</summary>
+    public static Doc Text(int n)
+    {
+        var doc = new Doc();
+        var text = doc.GetText("t");
+        for (var i = 0; i < n; i += Work.Batch)
+        {
+            var from = i;
+            doc.Transact(_ =>
+            {
+                for (var j = from; j < Math.Min(n, from + Work.Batch); j++)
+                {
+                    var back = (int)(unchecked((uint)j * 0x9E3779B1u) & 15);
+                    text.Insert(Math.Max(0, text.Length - back), ((char)('a' + j % 26)).ToString());
+                }
+            });
+        }
+
+        return doc;
+    }
+}
+
+/// <summary>
+/// The bytes-per-item table: y-sharp's managed heap per item next to the Yjs figure, printed by the <c>table</c> command. Each workload is
+/// measured in a child process (<c>table-one</c>), as measure.mjs does, so buffers one workload leaves behind never shrink the next one's figure.
+/// </summary>
 internal static class BytesPerItemTable
 {
     public static int Run(System.IO.TextWriter output)
@@ -151,34 +191,52 @@ internal static class BytesPerItemTable
         var yjs = ReadYjs();
         output.WriteLine("| Workload | Items | y-sharp bytes/item | Yjs bytes/item |");
         output.WriteLine("|---|---|---|---|");
-        foreach (var (name, items, build) in new (string, int, Action<Doc>)[]
-                 {
-                     ("text-insert", 1_000_000, d => Work.Text(d, 1_000_000)),
-                     ("array-push", 1_000_000, d => Work.Array(d, 1_000_000)),
-                     ("map-set", 100_000, d => Work.Map(d, 100_000)),
-                 })
+        foreach (var (name, items, _) in YjsWorkloads.All)
+            output.WriteLine($"| {name} | {items} | {InChildProcess(name)} | {(yjs.TryGetValue(name, out var y) ? y.ToString("0.00", CultureInfo.InvariantCulture) : "n/a")} |");
+
+        return 0;
+    }
+
+    /// <summary>The <c>table-one &lt;workload&gt;</c> command: one workload's bytes per item, measured in this process.</summary>
+    public static int MeasureOne(string name, System.IO.TextWriter output)
+    {
+        foreach (var (workload, items, run) in YjsWorkloads.All)
         {
-            string ours;
+            if (workload != name) continue;
             try
             {
                 var before = Heap();
-                var doc = new Doc();
-                build(doc);
+                var doc = run(items);
                 var after = Heap();
                 GC.KeepAlive(doc);
-                ours = ((after - before) / (double)items).ToString("0.00");
+                output.WriteLine(((after - before) / (double)items).ToString("0.00", CultureInfo.InvariantCulture));
             }
-            catch (NotImplementedException) { ours = "n/a (API stub)"; }
-            output.WriteLine($"| {name} | {items} | {ours} | {(yjs.TryGetValue(name, out var y) ? y.ToString("0.00") : "n/a")} |");
+            catch (NotImplementedException) { output.WriteLine("n/a (API stub)"); }
+            return 0;
         }
 
-        return 0;
+        output.WriteLine("unknown workload " + name);
+        return 1;
+    }
+
+    private static string InChildProcess(string name)
+    {
+        var host = Environment.ProcessPath ?? "dotnet";
+        var start = new ProcessStartInfo(host) { RedirectStandardOutput = true, UseShellExecute = false };
+        if (System.IO.Path.GetFileNameWithoutExtension(host) == "dotnet") start.ArgumentList.Add(typeof(BytesPerItemTable).Assembly.Location);
+        start.ArgumentList.Add("table-one");
+        start.ArgumentList.Add(name);
+        using var child = Process.Start(start) ?? throw new InvalidOperationException("could not start " + host);
+        var line = child.StandardOutput.ReadToEnd().Trim();
+        child.WaitForExit();
+        return child.ExitCode == 0 && line.Length > 0 ? line : $"n/a (exit {child.ExitCode})";
     }
 
     private static long Heap()
     {
         GC.Collect(2, GCCollectionMode.Forced, true, true);
         GC.WaitForPendingFinalizers();
+        GC.Collect(2, GCCollectionMode.Forced, true, true);
         return GC.GetTotalMemory(true);
     }
 
