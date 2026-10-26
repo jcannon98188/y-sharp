@@ -80,6 +80,12 @@ internal sealed partial class StructStore
         return new(owner.Structs[owner.FindIndex(clock)]);
     }
 
+    /// <summary>
+    /// Yjs <c>item.redone</c>: the id of the copy an undo manager redid <paramref name="item"/> into, or null. Spec 32 (undo) records it;
+    /// until then nothing is ever redone.
+    /// </summary>
+    public ItemId? RedoneOf(ItemRef item) => null;
+
     /// <summary>Yjs <c>findIndexCleanStart</c> (STR-48): the index of the struct starting at <paramref name="clock"/>, splitting an item if needed.</summary>
     public int FindIndexCleanStart(ulong client, long clock) => FindIndexCleanStart(Owner(client), clock);
 

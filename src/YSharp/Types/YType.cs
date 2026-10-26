@@ -73,7 +73,53 @@ public abstract partial class YType
     public bool IsIntegrated => Doc != null;
 
     // REVIEW (T-0.4): reads on an unintegrated type return the empty value, as JS does (no throw). Writes buffer as prelim content.
-    public RelativePosition CreateRelativePosition(int index, int assoc = 0) => throw Sketch.NI;
+
+    /// <summary>
+    /// Yjs <c>createRelativePositionFromTypeIndex</c> (RP-02): anchors on the item at <paramref name="index"/>, or with a negative
+    /// <paramref name="assoc"/> on the item before it. Past the end, or at the start with a negative association, the position anchors on the
+    /// type: a root by its name, a nested type by the id of its item. Throws when the type is not integrated, where JS fails to find its root.
+    /// </summary>
+    public RelativePosition CreateRelativePosition(int index, int assoc = 0)
+    {
+        if (AttachedDoc is not { } doc) throw new InvalidOperationException("A relative position needs a type that is integrated into a document.");
+        var h = doc.EnterRead();
+        try
+        {
+            return CreateRelativePositionLocked(doc, index, assoc);
+        }
+        finally
+        {
+            doc.Leave(h);
+        }
+    }
+
+    private RelativePosition CreateRelativePositionLocked(Doc doc, int index, int assoc)
+    {
+        long at = index;
+        if (assoc < 0)
+        {
+            if (at == 0) return RelativePositionOn(doc, null, assoc);
+            at--;
+        }
+
+        for (var t = Branch.Start; t is not null; t = t.Right)
+        {
+            if (!t.Deleted && t.Countable)
+            {
+                if (t.Length > at) return RelativePositionOn(doc, new ItemId(doc.Store.Clients[t.Client].Id, t.Clock + at), assoc);
+                at -= t.Length;
+            }
+
+            if (t.Right is null && assoc < 0) return RelativePositionOn(doc, new ItemId(doc.Store.Clients[t.Client].Id, t.LastClock), assoc);
+        }
+
+        return RelativePositionOn(doc, null, assoc);
+    }
+
+    /// <summary>Yjs <c>createRelativePosition</c>: a root is named by its key, a nested type by the id of its item.</summary>
+    private RelativePosition RelativePositionOn(Doc doc, ItemId? item, int assoc) => Branch.Item is { } own
+        ? new RelativePosition(item, null, new ItemId(doc.Store.Clients[own.Client].Id, own.Clock), assoc)
+        : new RelativePosition(item, doc.RootNameOf(Branch), null, assoc);
     public abstract YType Clone();
     public abstract YValue ToJson();
 }
