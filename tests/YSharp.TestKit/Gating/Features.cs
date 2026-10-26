@@ -69,6 +69,7 @@ public static class Features
         Feature.TextFormat,
         Feature.Xml,
         Feature.Events,
+        Feature.DocLifecycle,
     };
 }
 

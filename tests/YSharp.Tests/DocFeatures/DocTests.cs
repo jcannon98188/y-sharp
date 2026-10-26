@@ -549,6 +549,49 @@ public sealed class DocTests
         Assert.Null(copy.CollectionId);                      // collectionid is not serialised
     }
 
+    // ------------------------------------------------------------------ the CollectGarbage seam
+
+    [Fact]
+    [Covers("GC-04")]
+    [Requires(Feature.Text, Feature.Array, Feature.Map, Feature.Events)]
+    public void CollectGarbage_OnADocWithGcOff_CollectsEveryDeletedStruct_AsYjsTryGcDoes_WithoutAnEvent()
+    {
+        var doc = new Doc(new DocOptions { Gc = false, ClientId = 1 });
+        var t = doc.GetText("t");
+        t.Insert(0, "abcdef");
+        t.Delete(1, 2);
+        var a = doc.GetArray("a");
+        var m = new YMap();
+        a.Insert(0, new YEntry[] { m });
+        m.Set("k", "v");
+        a.Delete(0, 1);
+        Assert.Equal("0105010004010174016184010002626384010203646566070101610128000106016b0177017601010201020602", Hex.Of(doc.EncodeStateAsUpdate()));
+        var events = 0;
+        doc.AfterTransaction += (_, _) => events++;
+        doc.CollectGarbage();                                          // JS: Y.tryGc(Y.createDeleteSetFromStructStore(doc.store), doc.store, doc.gcFilter)
+        Assert.Equal("0105010004010174016181010002840102036465660101016101000101010201020602", Hex.Of(doc.EncodeStateAsUpdate()));
+        Assert.Equal(0, events);
+        Assert.False(doc.Gc);
+    }
+
+    [Fact]
+    [Covers("DOC-15")]
+    [Requires(Feature.Text, Feature.Events)]
+    public void Destroy_DropsTheDocumentHandlers_AsObservableV2Does_ButKeepsTypeObservers()
+    {
+        var doc = Net.Mk(1);
+        var t = doc.GetText("t");
+        var updates = 0;
+        var observed = 0;
+        doc.Update += (_, _, _, _) => updates++;
+        t.Observe((_, _) => observed++);
+        doc.Destroy();
+        t.Insert(0, "a");                                              // a destroyed document still accepts changes (CC-17)
+        Assert.Equal(0, updates);
+        Assert.Equal(1, observed);
+        Assert.Equal("a", t.ToString());
+    }
+
     // ------------------------------------------------------------------ DOC-18 event contract
 
     [Fact]
