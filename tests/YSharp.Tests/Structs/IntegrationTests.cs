@@ -4,6 +4,7 @@ using System.Linq;
 using Xunit;
 using YSharp.TestKit.Traceability;
 using YSharp.TestKit.Assertions;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Structs;
 
@@ -11,6 +12,7 @@ namespace YSharp.Tests.Structs;
 /// Item.getMissing and Item.integrate, the YATA conflict resolution (docs/research/structs.md sections C and D).
 /// Expected strings come from running the same operations on the pinned Yjs.
 /// </summary>
+[Requires(Feature.Integrate)]
 public sealed class IntegrationTests
 {
     private static string Text(Doc d) => d.GetText("t").ToString();
@@ -35,7 +37,8 @@ public sealed class IntegrationTests
 
     [Fact]
     [Covers("STR-13")]
-    public void MissingDependency_IsFoundInOrderOrigin_ThenRightOrigin() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Events)]
+    public void MissingDependency_IsFoundInOrderOrigin_ThenRightOrigin()
     {
         var (u1, u2, u3) = TwoDependencies();
 
@@ -56,11 +59,12 @@ public sealed class IntegrationTests
         Assert.Equal(0L, e.GetStateVector()[2]);
         e.ApplyUpdate(u1);
         Assert.Equal("ABC", Text(e));
-    });
+    }
 
     [Fact]
     [Covers("STR-14")]
-    public void ResolvingTheOrigin_OriginInsideAStruct_SplitsThatStruct() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void ResolvingTheOrigin_OriginInsideAStruct_SplitsThatStruct()
     {
         var a = Net.Mk(1, gc: false);
         var b = Net.Mk(2, gc: false);
@@ -76,11 +80,25 @@ public sealed class IntegrationTests
         Assert.Equal(((ulong, long)?)(1UL, 0L), x.Origin);
         Assert.Equal(((ulong, long)?)(1UL, 1L), x.RightOrigin);
         Assert.Equal("aXbc", Text(a));
-    });
+    }
+
+    [Fact]
+    [Covers("STR-14")]
+    [Requires(Feature.Text)]
+    public void ResolvingTheOrigin_BeforeTheRightOriginSplitsTheSameStruct_KeepsTheOriginAsReceived()
+    {
+        // "abc" by client 1, then "x" with origin (1, 2) and right origin (1, 1): Yjs takes origin = left.lastId before the right-origin
+        // lookup cuts "abc" after "a", so the origin stays (1, 2) (a Nightly differential find of TASK-4.28)
+        var d = Net.Mk(9);
+        Assert.True(d.TryApplyUpdate(Hex.Bytes("010201000401017403616263c40102010101780000")).Ok);
+        Assert.Equal("axbc", Text(d));
+        Assert.Equal("01030100040101740161840100026263c401020101017800", Hex.Of(d.EncodeStateAsUpdate()));
+    }
 
     [Fact]
     [Covers("STR-15")]
-    public void AnItemWithAnOrigin_InheritsParentAndParentSub_FromItsNeighbour() => Impl.Run(() =>
+    [Requires(Feature.Map)]
+    public void AnItemWithAnOrigin_InheritsParentAndParentSub_FromItsNeighbour()
     {
         var a = Net.Mk(1);
         var b = Net.Mk(2);
@@ -94,13 +112,14 @@ public sealed class IntegrationTests
         Assert.Equal(((ulong, long)?)(1UL, 0L), s[1].Origin);
         Assert.True(b.GetMap("m").TryGet("k", out var value));
         Assert.Equal(2d, value.Value.AsNumber());
-    });
+    }
 
     // ------------------------------------------------------------------ D: YATA
 
     [Fact]
     [Covers("STR-17")]
-    public void PartiallyKnownStruct_OnIntegration_IntegratesOnlyTheUnseenSuffix() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Events)]
+    public void PartiallyKnownStruct_OnIntegration_IntegratesOnlyTheUnseenSuffix()
     {
         var a = Net.Mk(1);
         var ups = Net.Capture(a);
@@ -117,11 +136,12 @@ public sealed class IntegrationTests
         Assert.Equal("hello", Text(d));
         var s = Assert.Single(StructsProbe.Of(d, 1));
         Assert.Equal((0L, 5L), (s.Clock, s.Len));
-    });
+    }
 
     [Fact]
     [Covers("STR-18", "STR-19", "STR-20")]
-    public void SameOrigin_LowerClientIdGoesLeft_WhateverTheDeliveryOrder() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void SameOrigin_LowerClientIdGoesLeft_WhateverTheDeliveryOrder()
     {
         foreach (var (idA, idB, expected) in new[] { (1u, 2u, "aABb"), (2u, 1u, "aBAb") })
         {
@@ -135,11 +155,12 @@ public sealed class IntegrationTests
             Assert.Equal(expected, Text(a));
             Assert.Equal(expected, Text(b));
         }
-    });
+    }
 
     [Fact]
     [Covers("STR-18", "STR-19", "STR-20")]
-    public void NullOrigin_ConflictsAtTheStart_ResolveByClientId() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void NullOrigin_ConflictsAtTheStart_ResolveByClientId()
     {
         var a = Net.Mk(5);
         var b = Net.Mk(3);
@@ -151,11 +172,12 @@ public sealed class IntegrationTests
 
         foreach (var d in new[] { a, b, c })
             Assert.Equal(new[] { "b1", "c1", "a1" }, d.GetArray("arr").ToArray().Select(e => e.Value.AsString()));
-    });
+    }
 
     [Fact]
     [Covers("STR-18", "STR-19", "STR-20", "STR-23")]
-    public void ConflictZone_ItemsFromAThirdClient_ConvergesUnderEveryDeliveryOrder() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Events)]
+    public void ConflictZone_ItemsFromAThirdClient_ConvergesUnderEveryDeliveryOrder()
     {
         // Three clients type at the same place; two of them then type again inside the conflict zone.
         var baseDoc = Net.Mk(1);
@@ -187,11 +209,12 @@ public sealed class IntegrationTests
         }
         Assert.Equal(new[] { "aAABBxCyCb" }, results);
         Assert.Single(states);
-    });
+    }
 
     [Fact]
     [Covers("STR-18")]
-    public void NaturalSpot_Adjacent_NoConflictScanReordersAnything() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void NaturalSpot_Adjacent_NoConflictScanReordersAnything()
     {
         var a = Net.Mk(2);
         var b = Net.Mk(1);
@@ -201,11 +224,12 @@ public sealed class IntegrationTests
         b.GetText("t").Insert(0, "Y");      // prepended: nothing to the left
         Net.Sync(b, a);
         Assert.Equal("YabX", Text(a));
-    });
+    }
 
     [Fact]
     [Covers("STR-21", "STR-23")]
-    public void MapKeyRace_LastWriterByYataWins_AndTheLoserIsStoredDeleted() => Impl.Run(() =>
+    [Requires(Feature.Map)]
+    public void MapKeyRace_LastWriterByYataWins_AndTheLoserIsStoredDeleted()
     {
         var a = Net.Mk(1);
         var b = Net.Mk(2);
@@ -223,11 +247,12 @@ public sealed class IntegrationTests
             Assert.Equal((2UL, 0L, 1L, false), (s[1].Client, s[1].Clock, s[1].Len, s[1].Deleted));
         }
         Assert.Equal("[[1,[[0,2]]]]", StructsProbe.DeleteSetJson(StructsProbe.Dump(a)));
-    });
+    }
 
     [Fact]
     [Covers("STR-22")]
-    public void ParentLength_DeletedAndUncountableItems_CountsOnlyLiveCountableListItems() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void ParentLength_DeletedAndUncountableItems_CountsOnlyLiveCountableListItems()
     {
         var a = Net.Mk(1);
         var arr = a.GetArray("arr");
@@ -240,11 +265,12 @@ public sealed class IntegrationTests
 
         Assert.Equal(2, arr.Length);        // the deleted item left the count
         Assert.Equal(2, map.Count);         // map entries live outside _length: one live value per key
-    });
+    }
 
     [Fact]
     [Covers("STR-23", "STR-24")]
-    public void ItemIntegratedIntoADeletedParent_IsDeletedAtOnce_OrBecomesGcWhenTheParentWasCollected() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Map, Feature.Events)]
+    public void ItemIntegratedIntoADeletedParent_IsDeletedAtOnce_OrBecomesGcWhenTheParentWasCollected()
     {
         foreach (var gc in new[] { false, true })
         {
@@ -277,11 +303,12 @@ public sealed class IntegrationTests
                 Assert.Equal("[[1,[[0,1]]],[2,[[0,1]]]]", StructsProbe.DeleteSetJson(StructsProbe.Dump(a)));
             }
         }
-    });
+    }
 
     [Fact]
     [Covers("STR-25")]
-    public void ContentDeleted_IsIntegratedAsDeleted_AndNeverCounts() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void ContentDeleted_IsIntegratedAsDeleted_AndNeverCounts()
     {
         var a = Net.Mk(1, gc: false);
         var arr = a.GetArray("arr");
@@ -295,7 +322,7 @@ public sealed class IntegrationTests
         var s = Assert.Single(StructsProbe.Of(d, 1));
         Assert.Equal((0L, 3L, 1, true), (s.Clock, s.Len, s.Ref, s.Deleted));
         Assert.Equal("[[1,[[0,3]]]]", StructsProbe.DeleteSetJson(StructsProbe.Dump(d)));
-    });
+    }
 
     private static IEnumerable<T[]> Permutations<T>(T[] items)
     {

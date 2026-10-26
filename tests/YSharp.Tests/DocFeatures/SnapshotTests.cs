@@ -6,6 +6,7 @@ using Xunit;
 using YSharp.TestKit.Assertions;
 using YSharp.TestKit.Traceability;
 using static YSharp.Tests.DocFeatures.Ds;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.DocFeatures;
 
@@ -14,6 +15,7 @@ namespace YSharp.Tests.DocFeatures;
 /// Wire bytes and delta strings come from running the same operations on the pinned Yjs; the oracle fixtures under <c>fixtures/snapshot</c>
 /// replay the same behaviour end to end.
 /// </summary>
+[Requires(Feature.Snapshots)]
 public sealed class SnapshotTests
 {
     private static Doc NoGc(ulong client = 1) => Net.Mk(client, gc: false);
@@ -35,7 +37,8 @@ public sealed class SnapshotTests
 
     [Fact]
     [Covers("SNAP-01")]
-    public void Create_AnyDoc_CapturesTheStateVectorAndTheDeleteSet() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void Create_AnyDoc_CapturesTheStateVectorAndTheDeleteSet()
     {
         var doc = NoGc();
         var t = doc.GetText("t");
@@ -48,11 +51,12 @@ public sealed class SnapshotTests
         Assert.True(s.DeleteSet.Contains(new ItemId(1, 1)));
         Assert.True(s.DeleteSet.Contains(new ItemId(1, 2)));
         Assert.False(s.DeleteSet.Contains(new ItemId(1, 3)));
-    });
+    }
 
     [Fact]
     [Covers("SNAP-01")]
-    public void Create_CollectedStructs_AreCountedAsDeleted() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void Create_CollectedStructs_AreCountedAsDeleted()
     {
         var doc = Net.Mk(1, gc: true);
         var arr = doc.GetArray("a");
@@ -61,7 +65,7 @@ public sealed class SnapshotTests
         var s = YSnapshot.Create(doc);
         Assert.True(s.DeleteSet.Contains(new ItemId(1, 0)));
         Assert.Equal(1, s.StateVector[1]);
-    });
+    }
 
     // ------------------------------------------------------------------ SNAP-02 wire format
 
@@ -70,7 +74,8 @@ public sealed class SnapshotTests
     [InlineData("world", "00010106", "00010106")]
     [InlineData("world-with-deletion", "0101010102010106", "0101010101010106")]
     [Covers("SNAP-02")]
-    public void Encode_AnySnapshot_WritesTheDeleteSetFirstAndThenTheStateVector(string label, string v1, string v2) => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.V2)]
+    public void Encode_AnySnapshot_WritesTheDeleteSetFirstAndThenTheStateVector(string label, string v1, string v2)
     {
         var doc = NoGc();
         if (label != "empty") doc.GetText("t").Insert(0, "world!");
@@ -82,21 +87,22 @@ public sealed class SnapshotTests
         Assert.True(s.Equals(back1));
         Assert.True(YSnapshot.TryDecode(Encode(s, UpdateFormat.V2), UpdateFormat.V2, out var back2).Ok);
         Assert.True(s.Equals(back2));
-    });
+    }
 
     [Fact]
     [Covers("SNAP-02")]
-    public void TryDecode_TruncatedBytes_AreRejected() => Impl.Run(() =>
+    public void TryDecode_TruncatedBytes_AreRejected()
     {
         Assert.False(YSnapshot.TryDecode(Hex.Bytes("010101"), UpdateFormat.V1, out _).Ok);
         Assert.False(YSnapshot.TryDecode(ReadOnlySpan<byte>.Empty, UpdateFormat.V1, out _).Ok);
-    });
+    }
 
     // ------------------------------------------------------------------ SNAP-03
 
     [Fact]
     [Covers("SNAP-03")]
-    public void Equals_ComparesStateVectorsAndDeleteSets_WithoutNormalising() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void Equals_ComparesStateVectorsAndDeleteSets_WithoutNormalising()
     {
         var doc = NoGc();
         var t = doc.GetText("t");
@@ -117,13 +123,13 @@ public sealed class SnapshotTests
         var merged = Decode("0101010002" + "010102");
         Assert.False(unmerged.Equals(merged));
         Assert.True(unmerged.Equals(Decode("01010200010101" + "010102")));
-    });
+    }
 
     // ------------------------------------------------------------------ SNAP-04
 
     [Fact]
     [Covers("SNAP-04")]
-    public void Empty_AnyUse_IsAnEmptySnapshotThatCannotBeMutated() => Impl.Run(() =>
+    public void Empty_AnyUse_IsAnEmptySnapshotThatCannotBeMutated()
     {
         var empty = YSnapshot.Empty;
         Assert.Equal(0, empty.StateVector[1]);
@@ -131,13 +137,14 @@ public sealed class SnapshotTests
         Assert.Equal("0000", Hex.Of(Encode(empty)));
         Assert.True(empty.Equals(YSnapshot.Create(new Doc())));
         Assert.True(YSnapshot.Empty.Equals(empty));                    // the JS module singleton is shared and mutable; the contract here is content only
-    });
+    }
 
     // ------------------------------------------------------------------ SNAP-05
 
     [Fact]
     [Covers("SNAP-05")]
-    public void ReadingWithASnapshot_AfterLaterEdits_ShowsOnlyWhatWasVisibleThen() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void ReadingWithASnapshot_AfterLaterEdits_ShowsOnlyWhatWasVisibleThen()
     {
         var doc = NoGc();
         var t = doc.GetText("t");
@@ -147,11 +154,12 @@ public sealed class SnapshotTests
         t.Delete(0, 1);
         Assert.Equal("[abc]", Delta(t, s1));
         Assert.Equal("[bcdef]", Delta(t));
-    });
+    }
 
     [Fact]
     [PortOf("snapshot.tests.js:testBasicXmlAttributes", "SNAP-05")]
-    public void Snapshot_XmlAttributeChanges_ReadAsOfEachSnapshot() => Impl.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Map, Feature.Xml)]
+    public void Snapshot_XmlAttributeChanges_ReadAsOfEachSnapshot()
     {
         var ydoc = NoGc(0);
         var yxml = ydoc.GetMap().Set("el", new YXmlElement("div"));
@@ -162,13 +170,14 @@ public sealed class SnapshotTests
         Assert.Equal(new Dictionary<string, string> { ["a"] = "2" }, yxml.GetAttributes().ToDictionary(p => p.Key, p => p.Value.AsString()));
         Assert.Equal(new Dictionary<string, string> { ["a"] = "1" }, yxml.GetAttributes(snapshot2).ToDictionary(p => p.Key, p => p.Value.AsString()));
         Assert.Empty(yxml.GetAttributes(snapshot1));
-    });
+    }
 
     // ------------------------------------------------------------------ SNAP-06, SNAP-07
 
     [Fact]
     [Covers("SNAP-06")]
-    public void ReadingWithASnapshot_MidItemBoundary_SplitsInternallyButChangesNeitherStateNorEvents() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Events)]
+    public void ReadingWithASnapshot_MidItemBoundary_SplitsInternallyButChangesNeitherStateNorEvents()
     {
         var doc = NoGc();
         var t = doc.GetText("t");
@@ -183,11 +192,12 @@ public sealed class SnapshotTests
         Assert.Equal(0, updates);
         Assert.Equal(before, Hex.Of(doc.EncodeStateAsUpdate()));
         Assert.Equal(svBefore, Hex.Of(Net.StateVector(doc)));
-    });
+    }
 
     [Fact]
     [Covers("SNAP-07")]
-    public void ToDelta_MarksAddedAndRemovedRuns_WithTheDefaultOrACustomYChange() => Impl.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Text)]
+    public void ToDelta_MarksAddedAndRemovedRuns_WithTheDefaultOrACustomYChange()
     {
         var doc = NoGc();
         var t = doc.GetText("t");
@@ -203,13 +213,35 @@ public sealed class SnapshotTests
         var custom = string.Concat(t.ToDelta(s2, s1, (type, id) => Attrs(("type", type), ("who", id.Client))).Select(op =>
             "[" + op.Text + (op.Attributes.Kind == YValueKind.Undefined ? "" : Json(op.Attributes)) + "]"));
         Assert.Equal("[a{\"ychange\":{\"type\":\"removed\",\"who\":1}}][bc][def{\"bold\":true,\"ychange\":{\"type\":\"added\",\"who\":1}}]", custom);
-    });
+    }
+
+    [Fact]
+    [Covers("SNAP-07")]
+    [Requires(Feature.TextFormat, Feature.Text)]
+    public void ToDelta_YChangeWithAUserField_JoinsTheSameClientsRuns_WhereTheDefaultSplitsEveryItem()
+    {
+        // from the pinned Yjs: toDelta compares cur.user and cur.type, and the default { type } has no user
+        var doc = NoGc();
+        var t = doc.GetText("t");
+        t.Insert(0, "b");
+        t.Insert(0, "a");                                              // "a" (clock 1) cannot merge with "b" (clock 0)
+        var s1 = YSnapshot.Create(doc);
+        t.Delete(0, 2);
+        var s2 = YSnapshot.Create(doc);
+        Assert.Equal("0101010002010102", Hex.Of(Encode(s2)));
+        Assert.Equal("[a{\"ychange\":{\"type\":\"removed\"}}][b{\"ychange\":{\"type\":\"removed\"}}]", Delta(t, s2, s1));
+        string WithUser(YSnapshot? s, YSnapshot? p) => string.Concat(t.ToDelta(s, p, (type, id) => Attrs(("type", type), ("user", id.Client))).Select(op =>
+            "[" + op.Text + (op.Attributes.Kind == YValueKind.Undefined ? "" : Json(op.Attributes)) + "]"));
+        Assert.Equal("[ab{\"ychange\":{\"type\":\"removed\",\"user\":1}}]", WithUser(s2, s1));
+        Assert.Equal("[ab{\"ychange\":{\"type\":\"added\",\"user\":1}}]", WithUser(s1, s2));
+    }
 
     // ------------------------------------------------------------------ SNAP-08, SNAP-09
 
     [Fact]
     [PortOf("snapshot.tests.js:testBasic", "SNAP-08", "SNAP-01")]
-    public void Snapshot_TextInsertedAfterwards_RestoresTheEarlierText() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void Snapshot_TextInsertedAfterwards_RestoresTheEarlierText()
     {
         var ydoc = new Doc(new DocOptions { Gc = false });
         ydoc.GetText().Insert(0, "world!");
@@ -217,11 +249,12 @@ public sealed class SnapshotTests
         ydoc.GetText().Insert(0, "hello ");
         var restored = YSnapshot.CreateDoc(ydoc, snapshot);
         Assert.Equal("world!", restored.GetText().ToString());
-    });
+    }
 
     [Fact]
     [PortOf("snapshot.tests.js:testBasicRestoreSnapshot", "SNAP-08")]
-    public void Snapshot_ArrayInsertedAfterwards_RestoresTheEarlierArray() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void Snapshot_ArrayInsertedAfterwards_RestoresTheEarlierArray()
     {
         var doc = new Doc(new DocOptions { Gc = false });
         doc.GetArray("array").Insert(0, new YEntry[] { "hello" });
@@ -232,11 +265,12 @@ public sealed class SnapshotTests
 
         Assert.Equal("[\"hello\"]", J(docRestored.GetArray("array")));
         Assert.Equal("[\"hello\",\"world\"]", J(doc.GetArray("array")));
-    });
+    }
 
     [Fact]
     [PortOf("snapshot.tests.js:testEmptyRestoreSnapshot", "SNAP-08", "SNAP-04")]
-    public void Snapshot_UnknownClientStateVector_RestoresAnEmptyArray() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void Snapshot_UnknownClientStateVector_RestoresAnEmptyArray()
     {
         var doc = new Doc(new DocOptions { Gc = false });
         // upstream: snap.sv.set(9999, 0). The snapshot API is read-only, so the same snapshot is decoded from its bytes: ds empty, sv {9999: 0}.
@@ -253,11 +287,12 @@ public sealed class SnapshotTests
         var snap2 = YSnapshot.Create(doc);
         var docRestored2 = YSnapshot.CreateDoc(doc, snap2);
         Assert.Equal("[\"world\"]", J(docRestored2.GetArray()));
-    });
+    }
 
     [Fact]
     [PortOf("snapshot.tests.js:testRestoreSnapshotWithSubType", "SNAP-08")]
-    public void Snapshot_NestedMapEditedAfterwards_RestoresTheEarlierMap() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void Snapshot_NestedMapEditedAfterwards_RestoresTheEarlierMap()
     {
         var doc = new Doc(new DocOptions { Gc = false });
         doc.GetArray("array").Insert(0, new YEntry[] { new YMap() });
@@ -271,11 +306,12 @@ public sealed class SnapshotTests
 
         Assert.Equal("[{\"key1\":\"value1\"}]", J(docRestored.GetArray("array")));
         Assert.Equal("[{\"key1\":\"value1\",\"key2\":\"value2\"}]", J(doc.GetArray("array")));
-    });
+    }
 
     [Fact]
     [PortOf("snapshot.tests.js:testRestoreDeletedItem1", "SNAP-08", "SNAP-05")]
-    public void Snapshot_ItemDeletedAfterwards_RestoresTheDeletedItem() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void Snapshot_ItemDeletedAfterwards_RestoresTheDeletedItem()
     {
         var doc = new Doc(new DocOptions { Gc = false });
         doc.GetArray("array").Insert(0, new YEntry[] { "item1", "item2" });
@@ -287,11 +323,12 @@ public sealed class SnapshotTests
 
         Assert.Equal("[\"item1\",\"item2\"]", J(docRestored.GetArray("array")));
         Assert.Equal("[\"item2\"]", J(doc.GetArray("array")));
-    });
+    }
 
     [Fact]
     [PortOf("snapshot.tests.js:testRestoreLeftItem", "SNAP-08")]
-    public void Snapshot_LeftNeighbourDeletedAfterwards_RestoresTheLeftItem() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void Snapshot_LeftNeighbourDeletedAfterwards_RestoresTheLeftItem()
     {
         var doc = new Doc(new DocOptions { Gc = false });
         doc.GetArray("array").Insert(0, new YEntry[] { "item1" });
@@ -305,11 +342,12 @@ public sealed class SnapshotTests
 
         Assert.Equal("[\"item0\",\"item1\"]", J(docRestored.GetArray("array")));
         Assert.Equal("[\"item0\"]", J(doc.GetArray("array")));
-    });
+    }
 
     [Fact]
     [PortOf("snapshot.tests.js:testDeletedItemsBase", "SNAP-08")]
-    public void Snapshot_ItemDeletedBeforeAndInsertAfter_RestoresAnEmptyArray() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void Snapshot_ItemDeletedBeforeAndInsertAfter_RestoresAnEmptyArray()
     {
         var doc = new Doc(new DocOptions { Gc = false });
         doc.GetArray("array").Insert(0, new YEntry[] { "item1" });
@@ -321,11 +359,12 @@ public sealed class SnapshotTests
 
         Assert.Equal("[]", J(docRestored.GetArray("array")));
         Assert.Equal("[\"item0\"]", J(doc.GetArray("array")));
-    });
+    }
 
     [Fact]
     [PortOf("snapshot.tests.js:testDeletedItems2", "SNAP-08")]
-    public void Snapshot_MiddleItemDeletedBeforeAndInsertAfter_RestoresTheRemainingItems() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void Snapshot_MiddleItemDeletedBeforeAndInsertAfter_RestoresTheRemainingItems()
     {
         var doc = new Doc(new DocOptions { Gc = false });
         doc.GetArray("array").Insert(0, new YEntry[] { "item1", "item2", "item3" });
@@ -337,11 +376,12 @@ public sealed class SnapshotTests
 
         Assert.Equal("[\"item1\",\"item3\"]", J(docRestored.GetArray("array")));
         Assert.Equal("[\"item0\",\"item1\",\"item3\"]", J(doc.GetArray("array")));
-    });
+    }
 
     [Fact]
     [PortOf("snapshot.tests.js:testDependentChanges", "SNAP-08", "SNAP-05")]
-    public void Snapshot_DependentChangesFromTwoClients_RestoreConsistently() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Sync)]
+    public void Snapshot_DependentChangesFromTwoClients_RestoreConsistently()
     {
         var u = Users.Init(2);
         var array0 = u.Array(0);
@@ -369,11 +409,12 @@ public sealed class SnapshotTests
 
         var docRestored1 = YSnapshot.CreateDoc(doc1, snap);
         Assert.Equal("[\"user1item1\",\"user2item1\"]", J(docRestored1.GetArray("array")));
-    });
+    }
 
     [Fact]
     [Covers("SNAP-08")]
-    public void CreateDoc_RequiresGcOff_AndAppliesIntoTheGivenTargetWithTheSnapshotOrigin() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Events)]
+    public void CreateDoc_RequiresGcOff_AndAppliesIntoTheGivenTargetWithTheSnapshotOrigin()
     {
         var gcOn = Net.Mk(1, gc: true);
         gcOn.GetText("t").Insert(0, "a");
@@ -391,11 +432,12 @@ public sealed class SnapshotTests
         Assert.Equal("hello", target.GetText("t").ToString());
         Assert.Equal("snapshot", seen);
         Assert.Equal(77UL, target.ClientId);
-    });
+    }
 
     [Fact]
     [Covers("SNAP-09")]
-    public void CreateDoc_FromASnapshot_LeavesTheOriginsContentStateVectorAndEncodingUnchanged() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void CreateDoc_FromASnapshot_LeavesTheOriginsContentStateVectorAndEncodingUnchanged()
     {
         var doc = NoGc();
         var t = doc.GetText("t");
@@ -409,13 +451,14 @@ public sealed class SnapshotTests
         Assert.Equal("hello brave world", t.ToString());
         Assert.Equal(before, Hex.Of(doc.EncodeStateAsUpdate()));      // the origin may split structs internally; that is not observable here
         Assert.Equal(svBefore, Hex.Of(Net.StateVector(doc)));
-    });
+    }
 
     // ------------------------------------------------------------------ SNAP-10
 
     [Fact]
     [PortOf("snapshot.tests.js:testContainsUpdate", "SNAP-10")]
-    public void ContainsUpdate_SuccessiveSnapshots_ReportsWhichUpdatesAreContained() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Events)]
+    public void ContainsUpdate_SuccessiveSnapshots_ReportsWhichUpdatesAreContained()
     {
         var ydoc = new Doc();
         var updates = new List<byte[]>();
@@ -431,11 +474,12 @@ public sealed class SnapshotTests
         Assert.True(snapshot2.ContainsUpdate(updates[0]));
         Assert.True(snapshotFinal.ContainsUpdate(updates[0]));
         Assert.True(snapshotFinal.ContainsUpdate(updates[1]));
-    });
+    }
 
     [Fact]
     [PortOf("snapshot.tests.js:testContainsUpdate2", "SNAP-10")]
-    public void ContainsUpdate_DeletesAppliedToARemote_ReportsTheContainedDeletes() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void ContainsUpdate_DeletesAppliedToARemote_ReportsTheContainedDeletes()
     {
         var local = new Doc();
         var remote = new Doc();
@@ -446,11 +490,12 @@ public sealed class SnapshotTests
         local.GetText("t").Delete(0, 3);
         var update = local.EncodeStateAsUpdate();
         Assert.False(snap.ContainsUpdate(update));
-    });
+    }
 
     [Fact]
     [Covers("SNAP-10")]
-    public void ContainsUpdate_V1AndV2Updates_GiveTheSameAnswer() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.V2, Feature.UpdateFunctions, Feature.V2Functions, Feature.Events)]
+    public void ContainsUpdate_V1AndV2Updates_GiveTheSameAnswer()
     {
         var doc = Net.Mk(1);
         var updates = new List<byte[]>();
@@ -466,13 +511,14 @@ public sealed class SnapshotTests
                 Assert.True(YUpdate.TryConvert(update, UpdateFormat.V1, UpdateFormat.V2, v2).Ok);
                 Assert.Equal(s.ContainsUpdate(update), s.ContainsUpdate(v2.WrittenSpan, UpdateFormat.V2));
             }
-    });
+    }
 
     // ------------------------------------------------------------------ SNAP-11
 
     [Fact]
     [Covers("SNAP-11")]
-    public void SnapshotReads_OnAGcDoc_LoseTheCollectedContent() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void SnapshotReads_OnAGcDoc_LoseTheCollectedContent()
     {
         var doc = Net.Mk(1, gc: true);
         var t = doc.GetText("t");
@@ -481,11 +527,12 @@ public sealed class SnapshotTests
         t.Delete(1, 1);
         Assert.Equal("[ac]", Delta(t, s1));                             // "b" was visible at the snapshot but its content is gone
         Assert.Equal("[ac]", Delta(t));
-    });
+    }
 
     [Fact]
     [Covers("SNAP-11")]
-    public void Gc_CanBeToggledAtRuntime_AndOnlyAffectsLaterCollections() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void Gc_CanBeToggledAtRuntime_AndOnlyAffectsLaterCollections()
     {
         var doc = Net.Mk(1, gc: false);
         var t = doc.GetText("t");
@@ -497,5 +544,5 @@ public sealed class SnapshotTests
         t.Delete(0, 1);                                                // gc on: this deletion is collected, the earlier one is not (GC scans only the current delete set)
         Assert.Equal("[bc]", Delta(t, s1));
         Assert.Equal("[c]", Delta(t));
-    });
+    }
 }

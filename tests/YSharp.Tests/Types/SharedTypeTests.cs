@@ -6,14 +6,17 @@ using Xunit;
 using YSharp.Tests.Codecs;
 using YSharp.TestKit.Traceability;
 using static YSharp.Tests.Types.TypeTestExtensions;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Types;
 
 /// <summary>Structure shared by every type: event classes, parents, root placeholders, prelim content and what a list or map accepts (T-0.*, Q10, Q29).</summary>
+[Requires(Feature.TypesCore)]
 public sealed class SharedTypeTests
 {
     [Fact, Covers("T-0.1")]
-    public void Events_EachType_RaisesItsOwnEventClassAndXmlTextEventsAreTextEvents() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.Array, Feature.Map, Feature.Xml, Feature.Events)]
+    public void Events_EachType_RaisesItsOwnEventClassAndXmlTextEventsAreTextEvents()
     {
         var doc = new Doc(new DocOptions { ClientId = 1 });
         var array = doc.GetArray("a");
@@ -49,10 +52,11 @@ public sealed class SharedTypeTests
         Assert.Contains("element:YXmlEvent", kinds);
         Assert.Contains("hook:YMapEvent", kinds);
         Assert.DoesNotContain("xmlText:YXmlEvent", kinds);
-    });
+    }
 
     [Fact, Covers("T-0.2")]
-    public void Parent_RootAndNestedTypes_IsNullForRootsAndTheContainerForNested() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.Array, Feature.Map, Feature.Xml)]
+    public void Parent_RootAndNestedTypes_IsNullForRootsAndTheContainerForNested()
     {
         var doc = new Doc(new DocOptions { ClientId = 1 });
         var array = doc.GetArray("a");
@@ -69,10 +73,11 @@ public sealed class SharedTypeTests
         Assert.Same(fragment, child.Parent);
         Assert.Null(fragment.Parent);
         Assert.Null(new YArray().Parent);
-    });
+    }
 
     [Fact, PortOf("y-xml.tests.js:testYtextAttributes", "T-0.3", "X-1")]
-    public void RootPlaceholder_IsUpgradedInPlace_AndConflictingConstructorsThrow() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Text, Feature.Array, Feature.Map, Feature.Xml, Feature.Events)]
+    public void RootPlaceholder_IsUpgradedInPlace_AndConflictingConstructorsThrow()
     {
         // JS: ydoc.get('', Y.XmlText) creates an XmlText root (Doc.GetXmlText); the placeholder part of the test uses the untyped Get.
         var source = new Doc(new DocOptions { ClientId = 1 });
@@ -108,10 +113,11 @@ public sealed class SharedTypeTests
         Assert.Equal("""{"test":42}""", YValue.Object(xmlText.GetAttributes().ToArray()).Json());
         Assert.Equal(KeyChangeAction.Add, Assert.Single(changes).Action);
         Assert.Null(changes[0].OldValue);
-    });
+    }
 
     [Fact, Covers("T-0.4")]
-    public void UnattachedTypes_ReadAsEmpty_WithoutThrowing() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Text, Feature.Array, Feature.Map, Feature.Xml)]
+    public void UnattachedTypes_ReadAsEmpty_WithoutThrowing()
     {
         var array = new YArray();
         array.Push(new YEntry[] { 1, 2 });
@@ -133,10 +139,11 @@ public sealed class SharedTypeTests
         Assert.Equal(1, fragment.Length);
         Assert.False(array.IsIntegrated);
         Assert.Null(array.Doc);
-    });
+    }
 
     [Fact, Covers("T-0.5")]
-    public void Writes_BeforeAttachment_AreBufferedAndAppearAfterIt() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Text, Feature.Array, Feature.Map, Feature.Xml)]
+    public void Writes_BeforeAttachment_AreBufferedAndAppearAfterIt()
     {
         var doc = new Doc(new DocOptions { ClientId = 1 });
         var host = doc.GetArray("host");
@@ -163,10 +170,11 @@ public sealed class SharedTypeTests
         Assert.Equal("v", k.AsString());
         Assert.Equal(1, element.Length);
         Assert.Equal("""[[1,2,3],{"b":"two"},"hello"]""", host.Json());
-    });
+    }
 
     [Fact, Covers("T-0.6")]
-    public void Attaching_ReplaysBufferedContent_InsideTheTransactionThatIntegratesTheParent() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.Array, Feature.Map, Feature.Events)]
+    public void Attaching_ReplaysBufferedContent_InsideTheTransactionThatIntegratesTheParent()
     {
         var doc = new Doc(new DocOptions { ClientId = 1 });
         var host = doc.GetMap("host");
@@ -191,10 +199,11 @@ public sealed class SharedTypeTests
         Assert.Equal("[1,2,3]", array.Json());
         // a type created inside the transaction that inserts it never gets its own event (A-E8)
         Assert.Empty(order);
-    });
+    }
 
     [Fact, PortOf("y-map.tests.js:testMapHavingIterableAsConstructorParamTests", "T-0.7", "M-10")]
-    public void ConstructorSugar_InitialContent_IsBuffered() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.Array, Feature.Map, Feature.Xml, Feature.Sync)]
+    public void ConstructorSugar_InitialContent_IsBuffered()
     {
         var net = Net.Init(1);
         var map0 = net.Peers[0].Map;
@@ -236,20 +245,22 @@ public sealed class SharedTypeTests
         var empty = new YMap();
         map0.Set("empty", empty);
         Assert.Equal(0, empty.Count);
-    });
+    }
 
     [Fact, PortOf("y-array.tests.js:testArrayFrom", "T-0.7")]
-    public void ArrayFrom_Items_AreBuffered() => Stub.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void ArrayFrom_Items_AreBuffered()
     {
         var doc1 = new Doc(new DocOptions { ClientId = 1 });
         var db1 = doc1.GetMap("root");
         var nestedArray1 = YArray.From(new YEntry[] { 0, 1, 2 });
         db1.Set("array", nestedArray1);
         Assert.Equal("[0,1,2]", nestedArray1.Json());
-    });
+    }
 
     [Fact, Covers("T-0.8")]
-    public void NestedPrelimTypes_AreIntegratedRecursively_AsOneChange() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.Array, Feature.Map, Feature.Events)]
+    public void NestedPrelimTypes_AreIntegratedRecursively_AsOneChange()
     {
         var doc = new Doc(new DocOptions { ClientId = 1 });
         var root = doc.GetArray("root");
@@ -266,10 +277,11 @@ public sealed class SharedTypeTests
         Assert.True(inner.IsIntegrated);
         Assert.Same(doc, inner.Doc);
         Assert.Same(outer, inner.Parent);
-    });
+    }
 
     [Fact, Covers("T-0.9", "X-E6")]
-    public void Clone_IsAnUnattachedCopy_ThatIsReadableAfterAttachment() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.Array, Feature.Map, Feature.Xml)]
+    public void Clone_IsAnUnattachedCopy_ThatIsReadableAfterAttachment()
     {
         var doc = new Doc(new DocOptions { ClientId = 1 });
         var array = doc.GetArray("a");
@@ -310,10 +322,11 @@ public sealed class SharedTypeTests
         Assert.True(elCopy.TryGetAttribute("class", out var c));
         Assert.Equal("c", c.AsString());
         Assert.NotSame(el[0], elCopy[0]);
-    });
+    }
 
     [Fact, Covers("T-0.10")]
-    public void ListInsert_AcceptsAnyBinaryAndTypes_AsSeparateElements() => Stub.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void ListInsert_AcceptsAnyBinaryAndTypes_AsSeparateElements()
     {
         var doc = new Doc(new DocOptions { ClientId = 1 });
         var array = doc.GetArray("a");
@@ -333,10 +346,11 @@ public sealed class SharedTypeTests
         // a list rejects undefined (JS: "Unexpected content type in insert operation")
         Assert.ThrowsAny<ArgumentException>(() => array.Push(new YEntry[] { default(YValue) }));
         Assert.Equal(10, array.Length);
-    });
+    }
 
     [Fact, Covers("T-0.11", "M-3", "M-8")]
-    public void MapSet_AcceptsUndefinedAndNull_AndHasStaysTrue() => Stub.Run(() =>
+    [Requires(Feature.Map)]
+    public void MapSet_AcceptsUndefinedAndNull_AndHasStaysTrue()
     {
         var doc = new Doc(new DocOptions { ClientId = 1 });
         var map = doc.GetMap("m");
@@ -354,10 +368,11 @@ public sealed class SharedTypeTests
         Assert.Equal(YValueKind.BigInt, map.Get("big").Kind);
         map.Set("bytes", YValue.Bytes(new byte[] { 1 }));
         Assert.Equal(YEntryKind.Binary, map.TryGet("bytes", out var b) ? b.Kind : default);
-    });
+    }
 
     [Fact, PortOf("y-map.tests.js:testYmapSetsYmap", "T-0.12")]
-    public void Set_ReturnsTheLiveInstance_Map() => Stub.Run(() =>
+    [Requires(Feature.Map, Feature.Sync)]
+    public void Set_ReturnsTheLiveInstance_Map()
     {
         var net = Net.Init(2);
         var map0 = net.Peers[0].Map;
@@ -366,10 +381,11 @@ public sealed class SharedTypeTests
         map.Set("one", 1);
         Assert.Equal(1, map.Get("one").AsNumber());
         net.Compare();
-    });
+    }
 
     [Fact, PortOf("y-map.tests.js:testYmapSetsYarray", "T-0.12")]
-    public void Set_ReturnsTheLiveInstance_Array() => Stub.Run(() =>
+    [Requires(Feature.Array, Feature.Map, Feature.Sync)]
+    public void Set_ReturnsTheLiveInstance_Array()
     {
         var net = Net.Init(2);
         var map0 = net.Peers[0].Map;
@@ -378,10 +394,11 @@ public sealed class SharedTypeTests
         array.Insert(0, new YEntry[] { 1, 2, 3 });
         Assert.Equal("""{"Array":[1,2,3]}""", map0.Json());
         net.Compare();
-    });
+    }
 
     [Fact, Covers("T-0.13")]
-    public void Insert_AnAlreadyIntegratedType_IsRejected() => Stub.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void Insert_AnAlreadyIntegratedType_IsRejected()
     {
         var doc = new Doc(new DocOptions { ClientId = 1 });
         var a = doc.GetArray("a");
@@ -392,10 +409,11 @@ public sealed class SharedTypeTests
         Assert.Equal(0, b.Length);
         Assert.Equal(1, a.Length);
         Assert.ThrowsAny<Exception>(() => doc.GetMap("m").Set("x", map));
-    });
+    }
 
     [Fact, Diverges("Q10", "0003")]
-    public void Q10_InsertionAcceptsOnlyTheEntryKinds_ByConstruction() => Stub.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void Q10_InsertionAcceptsOnlyTheEntryKinds_ByConstruction()
     {
         // JS throws "Unexpected content type" at run time for a Date, a function or a class instance. y-sharp cannot express them:
         // YEntry is Any, Binary, Type or Doc, so these inputs do not compile; undefined is the one runtime case.
@@ -410,10 +428,11 @@ public sealed class SharedTypeTests
         array.Push(new YEntry[] { YValue.Bytes(new byte[] { 1 }), Obj(("b", YValue.Bytes(new byte[] { 2 }))) });
         Assert.Equal(YEntryKind.Binary, array[0].Kind);
         Assert.Equal(YEntryKind.Any, array[1].Kind);
-    });
+    }
 
     [Fact, Covers("Q29", "X-E3")]
-    public void XmlToString_AnyCulture_UsesInvariantLowercasingAndOrdinalAttributeOrder() => Stub.Run(() =>
+    [Requires(Feature.Xml)]
+    public void XmlToString_AnyCulture_UsesInvariantLowercasingAndOrdinalAttributeOrder()
     {
         var saved = CultureInfo.CurrentCulture;
         try
@@ -435,7 +454,7 @@ public sealed class SharedTypeTests
         {
             CultureInfo.CurrentCulture = saved;
         }
-    });
+    }
 }
 
 internal static class SharedTypeHelpers

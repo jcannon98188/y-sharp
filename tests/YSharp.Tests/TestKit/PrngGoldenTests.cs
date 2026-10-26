@@ -6,9 +6,11 @@ using System.Text.Json;
 using Xunit;
 using YSharp.TestKit;
 using YSharp.TestKit.Rng;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.TestKit;
 
+[LibraryIndependent]
 public class PrngGoldenTests
 {
     private static JsonElement LoadGoldens()

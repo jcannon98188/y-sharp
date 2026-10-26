@@ -1,0 +1,953 @@
+{
+  "header": {
+    "schema": 1,
+    "covers": ["SIM-15"],
+    "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
+    "node": "24",
+    "generator": "ysharp-fixture-gen 1.0.0",
+    "seed": 1038235662
+  },
+  "script": {
+    "schema": 1,
+    "replicas": [
+      {"name":"a","clientId":0},
+      {"name":"b","clientId":1},
+      {"name":"c","clientId":2},
+      {"name":"d","clientId":3},
+      {"name":"e","clientId":4}
+    ],
+    "steps": [
+      {
+        "step": "deliver",
+        "schedule": [
+          {"do":"sv","doc":"a","name":"s0"},
+          {"do":"sv","doc":"b","name":"s1"},
+          {"do":"sv","doc":"a","name":"s2"},
+          {"do":"sv","doc":"c","name":"s3"},
+          {"do":"sv","doc":"a","name":"s4"},
+          {"do":"sv","doc":"b","name":"s5"},
+          {"do":"sv","doc":"d","name":"s6"},
+          {"do":"sv","doc":"a","name":"s7"},
+          {"do":"sv","doc":"b","name":"s8"},
+          {"do":"sv","doc":"c","name":"s9"},
+          {"do":"sv","doc":"e","name":"s10"},
+          {"do":"sv","doc":"a","name":"s11"},
+          {"do":"sv","doc":"b","name":"s12"},
+          {"do":"sv","doc":"c","name":"s13"},
+          {"do":"sv","doc":"d","name":"s14"},
+          {"do":"reply","doc":"b","sv":"s6","name":"r0"},
+          {"do":"reply","doc":"e","sv":"s11","name":"r1"},
+          {"do":"reply","doc":"b","sv":"s3","name":"r2"},
+          {"do":"reply","doc":"b","sv":"s10","name":"r3"},
+          {"do":"reply","doc":"e","sv":"s12","name":"r4"},
+          {"do":"reply","doc":"e","sv":"s13","name":"r5"},
+          {"do":"apply","doc":"b","update":"r4"},
+          {"do":"reply","doc":"d","sv":"s7","name":"r6"},
+          {"do":"reply","doc":"d","sv":"s9","name":"r7"},
+          {"do":"reply","doc":"d","sv":"s10","name":"r8"},
+          {"do":"apply","doc":"e","update":"r3"},
+          {"do":"reply","doc":"b","sv":"s2","name":"r9"},
+          {"do":"reply","doc":"e","sv":"s14","name":"r10"},
+          {"do":"reply","doc":"a","sv":"s10","name":"r11"},
+          {"do":"reply","doc":"a","sv":"s6","name":"r12"},
+          {"do":"reply","doc":"a","sv":"s1","name":"r13"},
+          {"do":"apply","doc":"a","update":"r1"},
+          {"do":"reply","doc":"d","sv":"s8","name":"r14"},
+          {"do":"apply","doc":"e","update":"r8"},
+          {"do":"apply","doc":"e","update":"r11"},
+          {"do":"apply","doc":"b","update":"r13"},
+          {"do":"apply","doc":"a","update":"r9"},
+          {"do":"apply","doc":"a","update":"r6"},
+          {"do":"reply","doc":"c","sv":"s6","name":"r15"},
+          {"do":"apply","doc":"b","update":"r14"},
+          {"do":"apply","doc":"d","update":"r10"},
+          {"do":"reply","doc":"c","sv":"s10","name":"r16"},
+          {"do":"reply","doc":"a","sv":"s3","name":"r17"},
+          {"do":"apply","doc":"e","update":"r16"},
+          {"do":"apply","doc":"c","update":"r5"},
+          {"do":"apply","doc":"d","update":"r15"},
+          {"do":"apply","doc":"c","update":"r7"},
+          {"do":"reply","doc":"c","sv":"s5","name":"r18"},
+          {"do":"apply","doc":"d","update":"r12"},
+          {"do":"apply","doc":"b","update":"r18"},
+          {"do":"reply","doc":"c","sv":"s4","name":"r19"},
+          {"do":"apply","doc":"a","update":"r19"},
+          {"do":"apply","doc":"c","update":"r2"},
+          {"do":"apply","doc":"c","update":"r17"},
+          {"do":"apply","doc":"d","update":"r0"}
+        ],
+        "encoding": "v2"
+      },
+      {
+        "step": "text.insert",
+        "doc": "c",
+        "target": {"root":"text","kind":"text"},
+        "at": 0,
+        "value": "0uys",
+        "attributes": {"$":"obj","pairs":[["italic",true],["color","#888"]]}
+      },
+      {
+        "step": "deliver",
+        "schedule": [{"do":"apply","doc":"e","update":{"from":"c","index":0}}],
+        "encoding": "v2"
+      },
+      {
+        "step": "text.applyDelta",
+        "doc": "c",
+        "target": {"root":"text","kind":"text"},
+        "delta": [
+          {"$":"obj","pairs":[["delete",3]]},
+          {"$":"obj","pairs":[["insert","rt"],["attributes",{"$":"obj","pairs":[["italic",true]]}]]},
+          {
+            "$": "obj",
+            "pairs": [["retain",1],["attributes",{"$":"obj","pairs":[["italic",true],["color","#888"]]}]]
+          }
+        ]
+      },
+      {
+        "step": "deliver",
+        "schedule": [
+          {"do":"apply","doc":"b","update":{"from":"c","index":0}},
+          {"do":"apply","doc":"a","update":{"from":"c","index":0}},
+          {"do":"apply","doc":"b","update":{"from":"c","index":1}},
+          {"do":"apply","doc":"a","update":{"from":"c","index":1}},
+          {"do":"apply","doc":"e","update":{"from":"c","index":1}},
+          {"do":"apply","doc":"d","update":{"from":"c","index":0}},
+          {"do":"apply","doc":"d","update":{"from":"c","index":1}}
+        ],
+        "encoding": "v2"
+      }
+    ]
+  },
+  "observations": {
+    "updates": {
+      "api": "Doc.on('update'), Doc.on('updateV2')",
+      "value": {
+        "a": {
+          "v1": [
+            {
+              "$": "bytes",
+              "hex": "0105020006010474657874066974616c6963047472756586020005636f6c6f72062223383838228402010430757973860205066974616c6963046e756c6c86020605636f6c6f72046e756c6c00"
+            },
+            {
+              "$": "bytes",
+              "hex": "01030208c60204020505636f6c6f72046e756c6cc402080205027274c6020a020505636f6c6f72062223383838220102010203"
+            }
+          ],
+          "v2": [
+            {
+              "$": "bytes",
+              "hex": "00030003010242030400020802000706008600840086251e746578746974616c6963636f6c6f72307579736974616c6963636f6c6f7204060504060501010000010500787704233838387e7e00"
+            },
+            {
+              "$": "bytes",
+              "hex": "0002000202420503090004030a010005c600c400c6100c636f6c6f727274636f6c6f720502050000000103087e7704233838380102010202"
+            }
+          ]
+        },
+        "b": {
+          "v1": [
+            {
+              "$": "bytes",
+              "hex": "0105020006010474657874066974616c6963047472756586020005636f6c6f72062223383838228402010430757973860205066974616c6963046e756c6c86020605636f6c6f72046e756c6c00"
+            },
+            {
+              "$": "bytes",
+              "hex": "01030208c60204020505636f6c6f72046e756c6cc402080205027274c6020a020505636f6c6f72062223383838220102010203"
+            }
+          ],
+          "v2": [
+            {
+              "$": "bytes",
+              "hex": "00030003010242030400020802000706008600840086251e746578746974616c6963636f6c6f72307579736974616c6963636f6c6f7204060504060501010000010500787704233838387e7e00"
+            },
+            {
+              "$": "bytes",
+              "hex": "0002000202420503090004030a010005c600c400c6100c636f6c6f727274636f6c6f720502050000000103087e7704233838380102010202"
+            }
+          ]
+        },
+        "c": {
+          "v1": [
+            {
+              "$": "bytes",
+              "hex": "0105020006010474657874066974616c6963047472756586020005636f6c6f72062223383838228402010430757973860205066974616c6963046e756c6c86020605636f6c6f72046e756c6c00"
+            },
+            {
+              "$": "bytes",
+              "hex": "01030208c60204020505636f6c6f72046e756c6cc402080205027274c6020a020505636f6c6f72062223383838220102010203"
+            }
+          ],
+          "v2": [
+            {
+              "$": "bytes",
+              "hex": "00030003010242030400020802000706008600840086251e746578746974616c6963636f6c6f72307579736974616c6963636f6c6f7204060504060501010000010500787704233838387e7e00"
+            },
+            {
+              "$": "bytes",
+              "hex": "0002000202420503090004030a010005c600c400c6100c636f6c6f727274636f6c6f720502050000000103087e7704233838380102010202"
+            }
+          ]
+        },
+        "d": {
+          "v1": [
+            {
+              "$": "bytes",
+              "hex": "0105020006010474657874066974616c6963047472756586020005636f6c6f72062223383838228402010430757973860205066974616c6963046e756c6c86020605636f6c6f72046e756c6c00"
+            },
+            {
+              "$": "bytes",
+              "hex": "01030208c60204020505636f6c6f72046e756c6cc402080205027274c6020a020505636f6c6f72062223383838220102010203"
+            }
+          ],
+          "v2": [
+            {
+              "$": "bytes",
+              "hex": "00030003010242030400020802000706008600840086251e746578746974616c6963636f6c6f72307579736974616c6963636f6c6f7204060504060501010000010500787704233838387e7e00"
+            },
+            {
+              "$": "bytes",
+              "hex": "0002000202420503090004030a010005c600c400c6100c636f6c6f727274636f6c6f720502050000000103087e7704233838380102010202"
+            }
+          ]
+        },
+        "e": {
+          "v1": [
+            {
+              "$": "bytes",
+              "hex": "0105020006010474657874066974616c6963047472756586020005636f6c6f72062223383838228402010430757973860205066974616c6963046e756c6c86020605636f6c6f72046e756c6c00"
+            },
+            {
+              "$": "bytes",
+              "hex": "01030208c60204020505636f6c6f72046e756c6cc402080205027274c6020a020505636f6c6f72062223383838220102010203"
+            }
+          ],
+          "v2": [
+            {
+              "$": "bytes",
+              "hex": "00030003010242030400020802000706008600840086251e746578746974616c6963636f6c6f72307579736974616c6963636f6c6f7204060504060501010000010500787704233838387e7e00"
+            },
+            {
+              "$": "bytes",
+              "hex": "0002000202420503090004030a010005c600c400c6100c636f6c6f727274636f6c6f720502050000000103087e7704233838380102010202"
+            }
+          ]
+        }
+      }
+    },
+    "state": {
+      "api": "Y.encodeStateAsUpdate(doc, sv), Y.encodeStateAsUpdateV2(doc, sv); sv is a V1 state vector for both",
+      "value": {
+        "a": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "0109020006010474657874066974616c6963047472756586020005636f6c6f7206222338383822810201038402040173860205066974616c6963046e756c6c86020605636f6c6f72046e756c6cc60204020505636f6c6f72046e756c6cc402080205027274c6020a020505636f6c6f72062223383838220102010203"
+            },
+            "diff": {
+              "b": {"$":"bytes","hex":"000102010203"},
+              "c": {"$":"bytes","hex":"000102010203"},
+              "d": {"$":"bytes","hex":"000102010203"},
+              "e": {"$":"bytes","hex":"000102010203"}
+            }
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "000300030302420a080002060300440804030a01000f06008600810084008601c600c400c63127746578746974616c6963636f6c6f72736974616c6963636f6c6f72636f6c6f727274636f6c6f720406050106450002050101000103010900787704233838387e7e7e7704233838380102010202"
+            },
+            "diff": {
+              "b": {"$":"bytes","hex":"0000000000000100000000000102010202"},
+              "c": {"$":"bytes","hex":"0000000000000100000000000102010202"},
+              "d": {"$":"bytes","hex":"0000000000000100000000000102010202"},
+              "e": {"$":"bytes","hex":"0000000000000100000000000102010202"}
+            }
+          }
+        },
+        "b": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "0109020006010474657874066974616c6963047472756586020005636f6c6f7206222338383822810201038402040173860205066974616c6963046e756c6c86020605636f6c6f72046e756c6cc60204020505636f6c6f72046e756c6cc402080205027274c6020a020505636f6c6f72062223383838220102010203"
+            },
+            "diff": {
+              "a": {"$":"bytes","hex":"000102010203"},
+              "c": {"$":"bytes","hex":"000102010203"},
+              "d": {"$":"bytes","hex":"000102010203"},
+              "e": {"$":"bytes","hex":"000102010203"}
+            }
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "000300030302420a080002060300440804030a01000f06008600810084008601c600c400c63127746578746974616c6963636f6c6f72736974616c6963636f6c6f72636f6c6f727274636f6c6f720406050106450002050101000103010900787704233838387e7e7e7704233838380102010202"
+            },
+            "diff": {
+              "a": {"$":"bytes","hex":"0000000000000100000000000102010202"},
+              "c": {"$":"bytes","hex":"0000000000000100000000000102010202"},
+              "d": {"$":"bytes","hex":"0000000000000100000000000102010202"},
+              "e": {"$":"bytes","hex":"0000000000000100000000000102010202"}
+            }
+          }
+        },
+        "c": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "0109020006010474657874066974616c6963047472756586020005636f6c6f7206222338383822810201038402040173860205066974616c6963046e756c6c86020605636f6c6f72046e756c6cc60204020505636f6c6f72046e756c6cc402080205027274c6020a020505636f6c6f72062223383838220102010203"
+            },
+            "diff": {
+              "a": {"$":"bytes","hex":"000102010203"},
+              "b": {"$":"bytes","hex":"000102010203"},
+              "d": {"$":"bytes","hex":"000102010203"},
+              "e": {"$":"bytes","hex":"000102010203"}
+            }
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "000300030302420a080002060300440804030a01000f06008600810084008601c600c400c63127746578746974616c6963636f6c6f72736974616c6963636f6c6f72636f6c6f727274636f6c6f720406050106450002050101000103010900787704233838387e7e7e7704233838380102010202"
+            },
+            "diff": {
+              "a": {"$":"bytes","hex":"0000000000000100000000000102010202"},
+              "b": {"$":"bytes","hex":"0000000000000100000000000102010202"},
+              "d": {"$":"bytes","hex":"0000000000000100000000000102010202"},
+              "e": {"$":"bytes","hex":"0000000000000100000000000102010202"}
+            }
+          }
+        },
+        "d": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "0109020006010474657874066974616c6963047472756586020005636f6c6f7206222338383822810201038402040173860205066974616c6963046e756c6c86020605636f6c6f72046e756c6cc60204020505636f6c6f72046e756c6cc402080205027274c6020a020505636f6c6f72062223383838220102010203"
+            },
+            "diff": {
+              "a": {"$":"bytes","hex":"000102010203"},
+              "b": {"$":"bytes","hex":"000102010203"},
+              "c": {"$":"bytes","hex":"000102010203"},
+              "e": {"$":"bytes","hex":"000102010203"}
+            }
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "000300030302420a080002060300440804030a01000f06008600810084008601c600c400c63127746578746974616c6963636f6c6f72736974616c6963636f6c6f72636f6c6f727274636f6c6f720406050106450002050101000103010900787704233838387e7e7e7704233838380102010202"
+            },
+            "diff": {
+              "a": {"$":"bytes","hex":"0000000000000100000000000102010202"},
+              "b": {"$":"bytes","hex":"0000000000000100000000000102010202"},
+              "c": {"$":"bytes","hex":"0000000000000100000000000102010202"},
+              "e": {"$":"bytes","hex":"0000000000000100000000000102010202"}
+            }
+          }
+        },
+        "e": {
+          "v1": {
+            "full": {
+              "$": "bytes",
+              "hex": "0109020006010474657874066974616c6963047472756586020005636f6c6f7206222338383822810201038402040173860205066974616c6963046e756c6c86020605636f6c6f72046e756c6cc60204020505636f6c6f72046e756c6cc402080205027274c6020a020505636f6c6f72062223383838220102010203"
+            },
+            "diff": {
+              "a": {"$":"bytes","hex":"000102010203"},
+              "b": {"$":"bytes","hex":"000102010203"},
+              "c": {"$":"bytes","hex":"000102010203"},
+              "d": {"$":"bytes","hex":"000102010203"}
+            }
+          },
+          "v2": {
+            "full": {
+              "$": "bytes",
+              "hex": "000300030302420a080002060300440804030a01000f06008600810084008601c600c400c63127746578746974616c6963636f6c6f72736974616c6963636f6c6f72636f6c6f727274636f6c6f720406050106450002050101000103010900787704233838387e7e7e7704233838380102010202"
+            },
+            "diff": {
+              "a": {"$":"bytes","hex":"0000000000000100000000000102010202"},
+              "b": {"$":"bytes","hex":"0000000000000100000000000102010202"},
+              "c": {"$":"bytes","hex":"0000000000000100000000000102010202"},
+              "d": {"$":"bytes","hex":"0000000000000100000000000102010202"}
+            }
+          }
+        }
+      }
+    },
+    "sv": {
+      "api": "Y.encodeStateVector, Y.encodeStateVectorV2",
+      "value": {
+        "a": {"v1":{"$":"bytes","hex":"01020c"},"v2":{"$":"bytes","hex":"01020c"}},
+        "b": {"v1":{"$":"bytes","hex":"01020c"},"v2":{"$":"bytes","hex":"01020c"}},
+        "c": {"v1":{"$":"bytes","hex":"01020c"},"v2":{"$":"bytes","hex":"01020c"}},
+        "d": {"v1":{"$":"bytes","hex":"01020c"},"v2":{"$":"bytes","hex":"01020c"}},
+        "e": {"v1":{"$":"bytes","hex":"01020c"},"v2":{"$":"bytes","hex":"01020c"}}
+      }
+    },
+    "doc": {
+      "api": "toDelta, toArray, entries, getAttributes walk of every root",
+      "value": {
+        "a": [
+          [
+            "text",
+            {
+              "kind": "text",
+              "delta": [
+                {"insert":"rt","attributes":{"$":"obj","pairs":[["italic",true]]}},
+                {"insert":"s","attributes":{"$":"obj","pairs":[["italic",true],["color","#888"]]}}
+              ]
+            }
+          ]
+        ],
+        "b": [
+          [
+            "text",
+            {
+              "kind": "text",
+              "delta": [
+                {"insert":"rt","attributes":{"$":"obj","pairs":[["italic",true]]}},
+                {"insert":"s","attributes":{"$":"obj","pairs":[["italic",true],["color","#888"]]}}
+              ]
+            }
+          ]
+        ],
+        "c": [
+          [
+            "text",
+            {
+              "kind": "text",
+              "delta": [
+                {"insert":"rt","attributes":{"$":"obj","pairs":[["italic",true]]}},
+                {"insert":"s","attributes":{"$":"obj","pairs":[["italic",true],["color","#888"]]}}
+              ]
+            }
+          ]
+        ],
+        "d": [
+          [
+            "text",
+            {
+              "kind": "text",
+              "delta": [
+                {"insert":"rt","attributes":{"$":"obj","pairs":[["italic",true]]}},
+                {"insert":"s","attributes":{"$":"obj","pairs":[["italic",true],["color","#888"]]}}
+              ]
+            }
+          ]
+        ],
+        "e": [
+          [
+            "text",
+            {
+              "kind": "text",
+              "delta": [
+                {"insert":"rt","attributes":{"$":"obj","pairs":[["italic",true]]}},
+                {"insert":"s","attributes":{"$":"obj","pairs":[["italic",true],["color","#888"]]}}
+              ]
+            }
+          ]
+        ]
+      }
+    },
+    "structs": {
+      "api": "doc.store.clients",
+      "value": {
+        "a": [
+          [
+            2,
+            [
+              {
+                "id": [2,0],
+                "len": 1,
+                "kind": "item",
+                "parent": "text",
+                "content": {"ref":6,"value":["italic",true]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,1],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,0],
+                "parent": "text",
+                "content": {"ref":6,"value":["color","#888"]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,2],
+                "len": 3,
+                "kind": "item",
+                "origin": [2,1],
+                "parent": "text",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [2,5],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,4],
+                "parent": "text",
+                "content": {"ref":4,"value":"s"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,6],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,5],
+                "parent": "text",
+                "content": {"ref":6,"value":["italic",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,7],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,6],
+                "parent": "text",
+                "content": {"ref":6,"value":["color",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,8],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,4],
+                "rightOrigin": [2,5],
+                "parent": "text",
+                "content": {"ref":6,"value":["color",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,9],
+                "len": 2,
+                "kind": "item",
+                "origin": [2,8],
+                "rightOrigin": [2,5],
+                "parent": "text",
+                "content": {"ref":4,"value":"rt"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,11],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,10],
+                "rightOrigin": [2,5],
+                "parent": "text",
+                "content": {"ref":6,"value":["color","#888"]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ],
+        "b": [
+          [
+            2,
+            [
+              {
+                "id": [2,0],
+                "len": 1,
+                "kind": "item",
+                "parent": "text",
+                "content": {"ref":6,"value":["italic",true]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,1],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,0],
+                "parent": "text",
+                "content": {"ref":6,"value":["color","#888"]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,2],
+                "len": 3,
+                "kind": "item",
+                "origin": [2,1],
+                "parent": "text",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [2,5],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,4],
+                "parent": "text",
+                "content": {"ref":4,"value":"s"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,6],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,5],
+                "parent": "text",
+                "content": {"ref":6,"value":["italic",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,7],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,6],
+                "parent": "text",
+                "content": {"ref":6,"value":["color",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,8],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,4],
+                "rightOrigin": [2,5],
+                "parent": "text",
+                "content": {"ref":6,"value":["color",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,9],
+                "len": 2,
+                "kind": "item",
+                "origin": [2,8],
+                "rightOrigin": [2,5],
+                "parent": "text",
+                "content": {"ref":4,"value":"rt"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,11],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,10],
+                "rightOrigin": [2,5],
+                "parent": "text",
+                "content": {"ref":6,"value":["color","#888"]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ],
+        "c": [
+          [
+            2,
+            [
+              {
+                "id": [2,0],
+                "len": 1,
+                "kind": "item",
+                "parent": "text",
+                "content": {"ref":6,"value":["italic",true]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,1],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,0],
+                "parent": "text",
+                "content": {"ref":6,"value":["color","#888"]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,2],
+                "len": 3,
+                "kind": "item",
+                "origin": [2,1],
+                "parent": "text",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [2,5],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,4],
+                "parent": "text",
+                "content": {"ref":4,"value":"s"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,6],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,5],
+                "parent": "text",
+                "content": {"ref":6,"value":["italic",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,7],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,6],
+                "parent": "text",
+                "content": {"ref":6,"value":["color",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,8],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,4],
+                "rightOrigin": [2,5],
+                "parent": "text",
+                "content": {"ref":6,"value":["color",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,9],
+                "len": 2,
+                "kind": "item",
+                "origin": [2,8],
+                "rightOrigin": [2,5],
+                "parent": "text",
+                "content": {"ref":4,"value":"rt"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,11],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,10],
+                "rightOrigin": [2,5],
+                "parent": "text",
+                "content": {"ref":6,"value":["color","#888"]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ],
+        "d": [
+          [
+            2,
+            [
+              {
+                "id": [2,0],
+                "len": 1,
+                "kind": "item",
+                "parent": "text",
+                "content": {"ref":6,"value":["italic",true]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,1],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,0],
+                "parent": "text",
+                "content": {"ref":6,"value":["color","#888"]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,2],
+                "len": 3,
+                "kind": "item",
+                "origin": [2,1],
+                "parent": "text",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [2,5],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,4],
+                "parent": "text",
+                "content": {"ref":4,"value":"s"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,6],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,5],
+                "parent": "text",
+                "content": {"ref":6,"value":["italic",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,7],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,6],
+                "parent": "text",
+                "content": {"ref":6,"value":["color",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,8],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,4],
+                "rightOrigin": [2,5],
+                "parent": "text",
+                "content": {"ref":6,"value":["color",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,9],
+                "len": 2,
+                "kind": "item",
+                "origin": [2,8],
+                "rightOrigin": [2,5],
+                "parent": "text",
+                "content": {"ref":4,"value":"rt"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,11],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,10],
+                "rightOrigin": [2,5],
+                "parent": "text",
+                "content": {"ref":6,"value":["color","#888"]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ],
+        "e": [
+          [
+            2,
+            [
+              {
+                "id": [2,0],
+                "len": 1,
+                "kind": "item",
+                "parent": "text",
+                "content": {"ref":6,"value":["italic",true]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,1],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,0],
+                "parent": "text",
+                "content": {"ref":6,"value":["color","#888"]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,2],
+                "len": 3,
+                "kind": "item",
+                "origin": [2,1],
+                "parent": "text",
+                "content": {"ref":1,"value":null},
+                "deleted": true,
+                "keep": false
+              },
+              {
+                "id": [2,5],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,4],
+                "parent": "text",
+                "content": {"ref":4,"value":"s"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,6],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,5],
+                "parent": "text",
+                "content": {"ref":6,"value":["italic",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,7],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,6],
+                "parent": "text",
+                "content": {"ref":6,"value":["color",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,8],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,4],
+                "rightOrigin": [2,5],
+                "parent": "text",
+                "content": {"ref":6,"value":["color",null]},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,9],
+                "len": 2,
+                "kind": "item",
+                "origin": [2,8],
+                "rightOrigin": [2,5],
+                "parent": "text",
+                "content": {"ref":4,"value":"rt"},
+                "deleted": false,
+                "keep": false
+              },
+              {
+                "id": [2,11],
+                "len": 1,
+                "kind": "item",
+                "origin": [2,10],
+                "rightOrigin": [2,5],
+                "parent": "text",
+                "content": {"ref":6,"value":["color","#888"]},
+                "deleted": false,
+                "keep": false
+              }
+            ]
+          ]
+        ]
+      }
+    },
+    "ds": {
+      "api": "Y.createDeleteSetFromStructStore",
+      "value": {"a":[[2,[[2,3]]]],"b":[[2,[[2,3]]]],"c":[[2,[[2,3]]]],"d":[[2,[[2,3]]]],"e":[[2,[[2,3]]]]}
+    }
+  }
+}

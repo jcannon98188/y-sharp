@@ -9,17 +9,19 @@ known-good update that stops applying. Hangs, out-of-memory and stack overflows 
 
 ```
 dotnet build tools/sharpfuzz/YSharp.SharpFuzz.csproj -c Release -o fuzz-out
+cp -r fuzz-out fuzz-replay                                  # an uninstrumented copy for replay and minimise
 dotnet tool install --global SharpFuzz.CommandLine
 sharpfuzz fuzz-out/YSharp.dll                              # instrument the library
-dotnet fuzz-out/YSharp.SharpFuzz.dll --export-seeds seeds  # fixtures/hostile as AFL seeds
+dotnet fuzz-replay/YSharp.SharpFuzz.dll --export-seeds seeds  # fixtures/hostile as AFL seeds
 afl-fuzz -i seeds -o findings -t 5000 -m none -- dotnet fuzz-out/YSharp.SharpFuzz.dll
 ```
 
-Reproduce and minimise a finding, then commit it:
+Reproduce and minimise a finding with the uninstrumented copy (the instrumented `YSharp.dll` only runs under afl-fuzz), then commit it.
+The nightly job does this for every finding and uploads `sharpfuzz-findings`: per finding the raw input, its minimised form and the replay output:
 
 ```
-dotnet fuzz-out/YSharp.SharpFuzz.dll --replay findings/default/crashes/id:000000,...
-dotnet fuzz-out/YSharp.SharpFuzz.dll --minimise findings/default/crashes/id:000000,... minimised.bin
+dotnet fuzz-replay/YSharp.SharpFuzz.dll --replay findings/default/crashes/id:000000,...
+dotnet fuzz-replay/YSharp.SharpFuzz.dll --minimise findings/default/crashes/id:000000,... minimised.bin
 ```
 
 Drop the mode byte, add the bytes as one case under the matching `HOS-*` class in `tools/fixture-gen/scenarios/hostile-corpus.mjs`

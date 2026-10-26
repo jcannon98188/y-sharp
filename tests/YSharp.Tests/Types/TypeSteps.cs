@@ -23,6 +23,16 @@ internal static class TypeSteps
     /// <summary>The events the <c>observe</c> steps recorded, in firing order, in the shape of the <c>events</c> observation.</summary>
     public static List<JsonNode> Events(OpsContext ctx) => Recorded.GetValue(ctx, _ => new List<JsonNode>());
 
+    /// <summary>
+    /// Records an event in firing order, here and in the doc-feature event log, so a script that mixes type observers with <c>subdoc.observe</c>
+    /// or <c>undo.*</c> events keeps the one order of the Node side's <c>ctx.events</c>.
+    /// </summary>
+    public static void Record(OpsContext ctx, JsonNode e)
+    {
+        Events(ctx).Add(e);
+        DocFeatureSteps.Of(ctx).Events.Add(e.ToJsonString());
+    }
+
     public static OpsRegistry CreateRegistry()
     {
         var codec = CodecSteps.CreateRegistry();
@@ -41,7 +51,7 @@ internal static class TypeSteps
         Add("observe", new[] { "doc", "target", "name" }, Array.Empty<string>(), (ctx, s) =>
         {
             var name = s.String("name");
-            Target(ctx, s).Observe((e, _) => Events(ctx).Add(EventNode(name, e)));
+            Target(ctx, s).Observe((e, _) => Record(ctx, EventNode(name, e)));
         });
 
         Add("text.applyDelta", new[] { "doc", "target", "delta" }, Array.Empty<string>(), (ctx, s) =>

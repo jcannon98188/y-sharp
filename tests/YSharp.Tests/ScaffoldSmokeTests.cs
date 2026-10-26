@@ -2,9 +2,11 @@ using System;
 using System.Linq;
 using System.Reflection;
 using Xunit;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests;
 
+[LibraryIndependent]
 public class ScaffoldSmokeTests
 {
     [Fact]
@@ -15,12 +17,6 @@ public class ScaffoldSmokeTests
         {
             Assert.Contains(expected, names);
         }
-    }
-
-    [Fact]
-    public void ApiStub_Members_Throw_NotImplemented()
-    {
-        Assert.Throws<NotImplementedException>(() => YValue.Null);
     }
 
     [Fact]

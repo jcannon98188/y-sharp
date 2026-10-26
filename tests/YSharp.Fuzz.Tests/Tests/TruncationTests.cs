@@ -8,6 +8,7 @@ using YSharp.Fuzz.Corpus;
 using YSharp.Fuzz.Guards;
 using YSharp.TestKit.Traceability;
 using YSharp.TestKit.Assertions;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Fuzz.Tests;
 
@@ -17,11 +18,13 @@ namespace YSharp.Fuzz.Tests;
 /// The oracle's per-offset outcome table is stored in the fixtures (ADR 0011) and compared in the smoke tier; this tier asserts
 /// y-sharp's contract only.
 /// </summary>
+[Requires(Feature.V1)]
 public sealed class TruncationTests
 {
     private static readonly string[] Malformed = { "Malformed" };
 
     [Fact]
+    [LibraryIndependent]
     public void Seeds_GeneratedFixtures_AreHarvested()
     {
         Assert.True(SeedUpdates.Collect().Count >= 50, "expected at least 50 distinct valid updates in fixtures/");
@@ -31,7 +34,8 @@ public sealed class TruncationTests
     }
 
     [Fact, Covers("HOS-TRUNC", Layer = CoverLayer.Unit)]
-    public void Updates_EveryProperPrefix_IsMalformedAndChangesNothing() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.V2)]
+    public void Updates_EveryProperPrefix_IsMalformedAndChangesNothing()
     {
         var failures = new List<string>();
         var cuts = 0;
@@ -54,10 +58,11 @@ public sealed class TruncationTests
         }
         Assert.True(cuts > 1000, $"only {cuts} cuts were swept");
         if (failures.Count > 0) Assert.Fail($"{failures.Count} failing seeds:{Environment.NewLine}{string.Join(Environment.NewLine, failures.Take(20))}");
-    });
+    }
 
     [Fact, Covers("HOS-TRUNC", Layer = CoverLayer.Unit)]
-    public void StateVectors_EveryProperPrefix_IsMalformed() => Stub.Run(() =>
+    [Requires(Feature.UpdateFunctions)]
+    public void StateVectors_EveryProperPrefix_IsMalformed()
     {
         var target = UpdateBuilder.V1(UpdateBuilder.TextInsert(1, "t", "hi"));
         foreach (var sv in SeedUpdates.StateVectors().Append(UpdateBuilder.StateVector((1, 5), (900, 3), (4294967295, 1))))
@@ -70,10 +75,11 @@ public sealed class TruncationTests
                 Assert.True(!status.Ok && status.Error == YError.Malformed, $"the {cut}-byte prefix of state vector {Hex.Of(sv)} gave {(status.Ok ? "ok" : status.Error.ToString())}");
             }
         }
-    });
+    }
 
     [Fact, Covers("HOS-TRUNC", Layer = CoverLayer.Unit)]
-    public void SyncFrames_EveryProperPrefixInsideTheFrame_IsMalformedAndChangesNothing() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.Sync)]
+    public void SyncFrames_EveryProperPrefixInsideTheFrame_IsMalformedAndChangesNothing()
     {
         var frames = new List<(string Name, byte[] Frame)>();
         foreach (var seed in SeedUpdates.Small(200).Where(s => s.Format == UpdateFormat.V1).Take(40))
@@ -96,10 +102,11 @@ public sealed class TruncationTests
                 Assert.True(Wire.Equal(Hostile.StateVector(fresh), Hostile.StateVector(Hostile.NewDoc())), $"{name}: a truncated frame changed the document");
             }
         }
-    });
+    }
 
     [Fact, Covers("HOS-TRUNC", Layer = CoverLayer.Unit)]
-    public void AwarenessFrames_EveryProperPrefix_IsMalformedAndChangesNothing() => Stub.Run(() =>
+    [Requires(Feature.Snapshots, Feature.Awareness, Feature.Sync)]
+    public void AwarenessFrames_EveryProperPrefix_IsMalformedAndChangesNothing()
     {
         var frames = new[]
         {
@@ -122,7 +129,7 @@ public sealed class TruncationTests
                 Hostile.AssertPostCondition(doc, $"awareness cut {cut}");
             }
         }
-    });
+    }
 
     private static string SyncOutcome(Doc doc, byte[] frame, string label)
     {

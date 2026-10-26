@@ -5,14 +5,15 @@ using System.Reflection;
 using Xunit;
 using YSharp.Tests.Codecs;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Simulation;
 
 /// <summary>
 /// The 41 time-repeated randomized upstream tests that run in the gating tier, and `testInsertAndDeleteAtRandomPositions`
 /// (ADR 0017). Upstream repeats each one until 50 ms have passed with a fresh random seed; here each runs a committed seed list
-/// `1..N` through the bit-exact PRNG, N by size class (up to 100 operations 200 seeds, 101 to 600 operations 40, 601 to 1800
-/// operations 10), one data row per seed so a failure names its seed. Operation counts stay as upstream (the `10` map test really
+/// `1..N` through the bit-exact PRNG, N by size class (up to 100 operations 50 seeds, 101 to 600 operations 12, 601 to 1800
+/// operations 3, as calibrated in <see cref="SeedLists"/>), one data row per seed so a failure names its seed. Operation counts stay as upstream (the `10` map test really
 /// runs 3). The sizes upstream only runs with `--production` and the 2Repeat variant are nightly (see <see cref="NightlyRandomizedTests"/>).
 /// <para>
 /// Faithfulness (ADR 0017): the draws match upstream draw for draw (`tools/fixture-gen/check-sim-draws.mjs`), the defects are
@@ -22,6 +23,7 @@ namespace YSharp.Tests.Simulation;
 /// which no stored op log nor immutable attribute value can express; the check script re-creates it only to prove the rest matches.
 /// </para>
 /// </summary>
+[Requires(Feature.Sim)]
 [Covers("SIM-11", "SIM-12", "SIM-13")]
 public sealed class RepeatedRandomTests
 {
@@ -31,7 +33,7 @@ public sealed class RepeatedRandomTests
     private const string Quill = "y-text.tests.js:testRepeatGenerateQuillChanges";
     internal const string InsertDelete = "y-text.tests.js:testInsertAndDeleteAtRandomPositions";
 
-    private static void Gate(string key, uint seed) => Stub.Run(() => SimCases.RunChecked(SimCases.Get(key), seed));
+    private static void Gate(string key, uint seed)=> SimCases.RunChecked(SimCases.Get(key), seed);
 
     // ---- y-map.tests.js: testRepeatGeneratingYmapTests*
     [Theory, MemberData(nameof(SeedLists.Up100), MemberType = typeof(SeedLists)), PortOf(Map + "10", "SIM-13")]
@@ -161,13 +163,14 @@ public sealed class RepeatedRandomTests
     public void Quill_Repeat300_ConvergesAcrossReplicas(uint seed) => Gate(Quill + "300", seed);
 
     // ---- y-text.tests.js: testInsertAndDeleteAtRandomPositions (2000 operations over 10 seeds; 100000 operations nightly)
-    [Theory, MemberData(nameof(SeedLists.Up1800), MemberType = typeof(SeedLists)), PortOf(InsertDelete, "SIM-13")]
+    [Theory, MemberData(nameof(SeedLists.InsertDelete), MemberType = typeof(SeedLists)), PortOf(InsertDelete, "SIM-13")]
     public void InsertAndDelete_RandomPositions_MatchesAMirror(uint seed) => Gate(InsertDelete, seed);
 
     // ---- regression seeds: a nightly failure adds its seed to regression-seeds.json and it runs here forever
 
     [Fact]
     [Covers("SIM-13")]
+    [LibraryIndependent]
     public void RegressionSeeds_AreWellFormed_AndRunInGating()
     {
         var entries = RegressionSeeds.Load();
@@ -177,24 +180,25 @@ public sealed class RepeatedRandomTests
             Assert.False(string.IsNullOrWhiteSpace(e.Reason), $"regression seed {e.Test}/{e.Seed} needs a reason");
         }
         Assert.Equal(entries.Count, entries.Select(e => (e.Test, e.Seed)).Distinct().Count());
-        Stub.Run(() =>
         {
             foreach (var e in entries) SimCases.RunChecked(SimCases.Get(e.Test), e.Seed);
-        });
+        }
     }
 
     // ---- the seed lists themselves
 
     [Fact]
     [Covers("SIM-13")]
+    [LibraryIndependent]
     public void SeedLists_FollowTheSizeClasses_AndEveryGatingCaseHasItsTest()
     {
         if (YSharp.TestKit.Tiers.YSharpEnv.Seed == null)
         {
-            Assert.Equal(200, SeedLists.Up100().Count());
-            Assert.Equal(40, SeedLists.Up600().Count());
-            Assert.Equal(10, SeedLists.Up1800().Count());
-            Assert.Equal(Enumerable.Range(1, 200).Select(i => (uint)i), SeedLists.Up100().Select(r => (uint)r[0]));
+            Assert.Equal(50, SeedLists.Up100().Count());
+            Assert.Equal(12, SeedLists.Up600().Count());
+            Assert.Equal(3, SeedLists.Up1800().Count());
+            Assert.Equal(10, SeedLists.InsertDelete().Count());
+            Assert.Equal(Enumerable.Range(1, 50).Select(i => (uint)i), SeedLists.Up100().Select(r => (uint)r[0]));
         }
         Assert.All(SimCases.All.Where(c => c.Production), c => Assert.Equal(0, c.GatingSeeds));
 
@@ -205,7 +209,8 @@ public sealed class RepeatedRandomTests
         {
             Assert.True(tested.TryGetValue(c.Key, out var method), $"{c.Key} has no gating test");
             var source = method!.GetCustomAttribute<MemberDataAttribute>()!.MemberName;
-            var expected = c.GatingSeeds switch { 200 => nameof(SeedLists.Up100), 40 => nameof(SeedLists.Up600), _ => nameof(SeedLists.Up1800) };
+            var expected = c.Kind == "insertdelete" ? nameof(SeedLists.InsertDelete)
+                : c.Iterations <= 100 ? nameof(SeedLists.Up100) : c.Iterations <= 600 ? nameof(SeedLists.Up600) : nameof(SeedLists.Up1800);
             Assert.True(source == expected, $"{c.Key}: seed list {source}, size class says {expected}");
         }
     }

@@ -8,13 +8,15 @@ using YSharp.Tests.Structs;
 using YSharp.TestKit.Rng;
 using YSharp.TestKit.Sim;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Simulation;
 
 /// <summary>
-/// The five simulation divergences of ADR 0017 (<c>SIM-01</c> to <c>SIM-05</c>): where the port fixes a defect of the upstream test
+/// The simulation divergences of ADR 0017 (<c>SIM-01</c> to <c>SIM-05</c>, <c>SIM-15</c>): where the port fixes a defect of the upstream test
 /// machinery (<c>docs/research/js-tests.md</c> section 6.7) instead of reproducing it. Each test names the upstream behaviour.
 /// </summary>
+[Requires(Feature.Sim)]
 public sealed class SimDivergenceTests
 {
     // ------------------------------------------------------------------ SIM-01
@@ -25,6 +27,7 @@ public sealed class SimDivergenceTests
     /// </summary>
     [Fact]
     [Diverges("SIM-01", adr: "0017")]
+    [LibraryIndependent]
     public void CheckResult_ComparesDifferentReplicas_UpstreamComparedEachWithItself()
     {
         Assert.Equal(-1, SimChecks.FirstDivergentReplica(new[] { "x", "x", "x" }));
@@ -50,7 +53,7 @@ public sealed class SimDivergenceTests
     /// </summary>
     [Fact]
     [Diverges("SIM-02", adr: "0017")]
-    public void Compare_AssertsStoresAndDeleteSets_ForEveryPair_UpstreamDiscardedTheDeleteSetResult() => Stub.Run(() =>
+    public void Compare_AssertsStoresAndDeleteSets_ForEveryPair_UpstreamDiscardedTheDeleteSetResult()
     {
         var sim = SimHarness.Init(Prng.Create(1), users: 3);
         var internals = new RecordingInternals();
@@ -58,10 +61,11 @@ public sealed class SimDivergenceTests
         // 3 real replicas + 3 rebuilt from merged updates = 6 docs: no pending state in any, 5 consecutive pairs compared
         Assert.Equal(6, internals.Pending);
         Assert.Equal(5, internals.Stores);
-    });
+    }
 
     [Fact]
     [Covers("SIM-02")]
+    [LibraryIndependent]
     public void DeleteSetDumps_AreMergedAndSorted_SoUnequalDeletionsAreUnequal()
     {
         static List<ClientStructs> Dump(params (long Clock, long Len, bool Deleted)[] structs) =>
@@ -80,6 +84,7 @@ public sealed class SimDivergenceTests
     /// </summary>
     [Fact]
     [Diverges("SIM-03", adr: "0017")]
+    [LibraryIndependent]
     public void CodeBlockDelta_UsesAttributes_UpstreamPassedTheIgnoredKeyFormat()
     {
         var delta = SimPlans.CodeBlockDelta(3, "0abc");
@@ -101,6 +106,7 @@ public sealed class SimDivergenceTests
     /// </summary>
     [Fact]
     [Diverges("SIM-04", adr: "0017")]
+    [LibraryIndependent]
     public void CoinFlip_SelectsV1OrV2ForTheWholeRun_UpstreamFellBackToV1()
     {
         Assert.Equal(UpdateFormat.V1, SimHarness.ChooseEncoding(new ScriptedPrng(0.25)));
@@ -121,7 +127,8 @@ public sealed class SimDivergenceTests
     [InlineData(false)]
     [InlineData(true)]
     [Covers("SIM-04", "SIM-14")]
-    public void Run_EitherEncoding_Converges(bool v2) => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.V2)]
+    public void Run_EitherEncoding_Converges(bool v2)
     {
         // find a seed whose first draw (the coin flip) picks the wanted encoding
         var seed = Enumerable.Range(1, 100).Select(i => (uint)i).First(s => Prng.Bool(Prng.Create(s)) == v2);
@@ -130,7 +137,7 @@ public sealed class SimDivergenceTests
         sim.Users[0].Doc.GetText("text").Insert(0, "hello");
         sim.Users[1].Doc.GetText("text").Insert(0, "world");
         SimHarness.Compare(sim.Users, new StructsSimInternals());
-    });
+    }
 
     // ------------------------------------------------------------------ SIM-05
 
@@ -140,6 +147,7 @@ public sealed class SimDivergenceTests
     /// </summary>
     [Fact]
     [Diverges("SIM-05", adr: "0017")]
+    [LibraryIndependent]
     public void PayloadCounters_StartAtZeroForEveryRun_UpstreamLeakedThemBetweenTests()
     {
         // the same plan on the same draws yields the same payload in a second run: "0..." both times (upstream: "0..." then "1...")
@@ -155,6 +163,25 @@ public sealed class SimDivergenceTests
         Assert.Equal(first, Payload());
         Assert.NotSame(new TestConnector(Prng.Create(1)).Counters, new TestConnector(Prng.Create(1)).Counters);
         Assert.Equal(0, new TestConnector(Prng.Create(1)).Counters.NextChar());
+    }
+
+    // ------------------------------------------------------------------ SIM-15
+
+    /// <summary>
+    /// Upstream <c>testRepeatGenerateQuillChanges2</c> asserts <c>cleanupYTextFormatting(...) === 0</c>. On seed 1038235662 Yjs's own
+    /// <c>applyDelta</c> leaves two redundant format markers (the fixture's generator checks that count in Yjs), so the upstream test fails
+    /// in Yjs on that draw. The replay must hold the oracle's struct store, markers included; the port's check then finds the same two,
+    /// changes no content and leaves nothing for a second cleanup.
+    /// </summary>
+    [Fact]
+    [Diverges("SIM-15", adr: "0017")]
+    public void QuillCleanup_Seed1038235662_FindsTheTwoMarkersYjsLeaves_UpstreamAssertedNone()
+    {
+        var fixture = FixtureReplay.Load(GoldenSet.Path("quill-cleanup-1038235662"));
+        var replay = SimSteps.Run(fixture);
+        FixtureReplay.AssertWire(fixture, replay);
+        SimAsserts.Structs(fixture, replay);
+        Assert.Equal(2, SimChecks.CheckCleanup(replay.Context.Doc("a").GetText("text")));
     }
 
     private sealed class FixedView : ISimView

@@ -325,8 +325,8 @@
       "area": "hostile",
       "name": "hos-clock",
       "covers": ["HOS-CLOCK","Q22","ERR-21"],
-      "sha256": "057ea8cf57fc7ad7d40f705b1fb9a5326a39ff278aaf7e18ee2fd976f32d0e04",
-      "bytes": 10203
+      "sha256": "02ffb6f3bdb4b49c3b0d3dda585bceb715d67aea52b640c2689d2ba69da0a59c",
+      "bytes": 11165
     },
     {
       "path": "hostile/hos-len.json",
@@ -341,8 +341,8 @@
       "area": "hostile",
       "name": "hos-mut",
       "covers": ["HOS-MUT","ERR-21"],
-      "sha256": "f8cb1abe01f96e5b91ef2c243293341e2aea691dace1320d854b9daea40bddfc",
-      "bytes": 202742
+      "sha256": "2402a9bca63c3d36a9ce17aaa9df59fdd832425aeb1f3c1ba4961a9f104d08f8",
+      "bytes": 203516
     },
     {
       "path": "hostile/hos-proto.json",
@@ -357,8 +357,8 @@
       "area": "hostile",
       "name": "hos-ref",
       "covers": ["HOS-REF","ERR-06","ERR-07","ERR-21"],
-      "sha256": "d4824fd361ebf2dacd74411a6bbe8cacc17257cb7c1a3fd18c308406277b9cbc",
-      "bytes": 9084
+      "sha256": "17ddb8cda324f84fd814fb6e630688c9d2d194c643b77610f37b2a03eaf33e39",
+      "bytes": 9076
     },
     {
       "path": "hostile/hos-sem.json",
@@ -401,10 +401,13 @@
         "ENC-69",
         "ENC-22",
         "ENC-56",
+        "ENC-86",
+        "ENC-87",
+        "ENC-88",
         "Q07"
       ],
-      "sha256": "54ca8eb54a1e0d730044e547042d2eeb43a16e0cdb69d03e5acaf69992a4e924",
-      "bytes": 11047
+      "sha256": "baf3a2fdd21ac0a495176623788ef95065452b3094d2c854b232509623b016ab",
+      "bytes": 14403
     },
     {
       "path": "hostile/malformed-v1-updates.json",
@@ -600,6 +603,14 @@
       "covers": ["SIM-10","SIM-11","SIM-12","SIM-13","SIM-14"],
       "sha256": "f9357110413ec82a7a8d91531bcf6f443a7150734edd39bfc73700d8d3a6bb9e",
       "bytes": 122825
+    },
+    {
+      "path": "sim/quill-cleanup-1038235662.json",
+      "area": "sim",
+      "name": "quill-cleanup-1038235662",
+      "covers": ["SIM-15"],
+      "sha256": "4ca4d17caf0a461223ca2393e8a1d226d784a6e0e5f5e9f618ad720e4ec9f2a2",
+      "bytes": 33952
     },
     {
       "path": "sim/quill-large.json",

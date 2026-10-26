@@ -11,6 +11,7 @@ using YSharp.Fuzz.Builder;
 using YSharp.Fuzz.Generators;
 using YSharp.Fuzz.Guards;
 using YSharp.TestKit.Ops;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Fuzz.Tests;
 
@@ -18,6 +19,7 @@ namespace YSharp.Fuzz.Tests;
 /// Self-tests of the guards (time, allocation, stack, heap), the candidate writer and the three generator layers. None needs a
 /// y-sharp implementation: a guard that never fires, or a generator that cannot build its input, would make every other test here worthless.
 /// </summary>
+[LibraryIndependent]
 public sealed class GuardAndGeneratorSelfTests
 {
     // ------------------------------------------------------------------ guards

@@ -12,7 +12,6 @@ using YSharp.TestKit.Fixtures;
 using YSharp.TestKit.Rng;
 using YSharp.TestKit.Sim;
 using YSharp.TestKit.Tiers;
-using YSharp.TestKit.Stubs;
 
 namespace YSharp.Tests.Simulation;
 
@@ -27,10 +26,11 @@ internal sealed record SimCase(string Key, string Kind, int Iterations, bool Pro
     public string Name => Key[(Key.IndexOf(':') + 1)..];
 
     /// <summary>
-    /// ADR 0017 size classes: up to 100 operations 200 seeds, 101 to 600 operations 40, 601 to 1800 operations 10. The 2000-operation
-    /// gating variant of testInsertAndDeleteAtRandomPositions runs 10 seeds.
+    /// ADR 0017 size classes, with N calibrated in TASK-4.38 (<see cref="SeedLists"/>): up to 100 operations, 101 to 600 and 601 to 1800. The
+    /// 2000-operation gating variant of testInsertAndDeleteAtRandomPositions runs 10 seeds.
     /// </summary>
-    public int GatingSeeds => Production ? 0 : Kind == "insertdelete" ? 10 : Iterations <= 100 ? 200 : Iterations <= 600 ? 40 : Iterations <= 1800 ? 10 : 0;
+    public int GatingSeeds => Production ? 0 : Kind == "insertdelete" ? 10
+        : Iterations <= 100 ? SeedLists.Up100Count : Iterations <= 600 ? SeedLists.Up600Count : Iterations <= 1800 ? SeedLists.Up1800Count : 0;
 }
 
 /// <summary>The 48 <c>testRepeat*</c> tests and <c>testInsertAndDeleteAtRandomPositions</c> (2Repeat is merged into Quill2).</summary>
@@ -112,7 +112,7 @@ internal static class SimCases
     public static void RunChecked(SimCase c, uint seed, bool nightly = false)
     {
         try { Run(c, seed, nightly: nightly); }
-        catch (Exception e) when (e is not NotImplementedException || !ApiStub.IsStub)
+        catch (Exception e)
         {
             var saved = SaveRepro(c, seed, nightly, e);
             throw new XunitException($"{c.Key} failed for seed {seed}{(nightly ? " (nightly)" : "")}: {e.GetType().Name}: {e.Message}{Environment.NewLine}repro: {saved ?? "none"}", e);
@@ -134,7 +134,7 @@ internal static class SimCases
                     ["nightly"] = nightly,
                     ["encoding"] = log.Format.ToString().ToLowerInvariant(),
                     ["error"] = error.Message,
-                    ["replay"] = $"YSHARP_SEED={seed} dotnet test --solution YSharp.slnx --filter-method *{c.Name}",
+                    ["replay"] = $"YSHARP_SEED={seed} dotnet test --project tests/YSharp.Tests -- --filter-trait \"PortOf={c.Key}\"",
                 },
             };
             if (c.Kind != "insertdelete") repro["script"] = log.ToScript();
@@ -154,14 +154,25 @@ public static class SeedLists
     private static IEnumerable<object[]> Rows(int n) =>
         YSharpEnv.Seed is { } pinned ? new[] { new object[] { pinned } } : Enumerable.Range(1, n).Select(i => new object[] { (uint)i });
 
+    // ADR 0017 calibration (TASK-4.38). The first measured run of 200 / 40 / 10 seeds took 202 s serial in Release (one xUnit class runs its
+    // rows in turn): 109 s in the first class, 71 s in the second, 23 s in the third, far over the ~60 s budget. As the ADR says, N falls
+    // within each class and the boundaries stay: 50 / 12 / 3 seeds measure about 55 s. Seed 1 stays in every list (the golden fixtures replay it);
+    // the nightly tier time-boxes far more seeds.
+    public const int Up100Count = 50;
+    public const int Up600Count = 12;
+    public const int Up1800Count = 3;
+
     /// <summary>Up to 100 operations.</summary>
-    public static IEnumerable<object[]> Up100() => Rows(200);
+    public static IEnumerable<object[]> Up100() => Rows(Up100Count);
 
     /// <summary>101 to 600 operations.</summary>
-    public static IEnumerable<object[]> Up600() => Rows(40);
+    public static IEnumerable<object[]> Up600() => Rows(Up600Count);
 
-    /// <summary>601 to 1800 operations (also the 2000-operation gating variant of testInsertAndDeleteAtRandomPositions).</summary>
-    public static IEnumerable<object[]> Up1800() => Rows(10);
+    /// <summary>601 to 1800 operations.</summary>
+    public static IEnumerable<object[]> Up1800() => Rows(Up1800Count);
+
+    /// <summary>The 2000-operation gating variant of testInsertAndDeleteAtRandomPositions: 10 seeds, 0.1 s in all.</summary>
+    public static IEnumerable<object[]> InsertDelete() => Rows(10);
 }
 
 /// <summary>A nightly failure adds its seed here (<c>regression-seeds.json</c>) and it runs in gating forever (ADR 0017).</summary>

@@ -10,6 +10,7 @@ using YSharp.TestKit.Fixtures;
 using YSharp.TestKit.Rng;
 using YSharp.TestKit.Sim;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Simulation;
 
@@ -55,6 +56,7 @@ internal sealed class RecordedView : ISimView
 /// generator, the same draws and the same document answers give the same ops steps, and every draw is consumed. No document is
 /// involved, so these run without an implementation. Regenerate with <c>npm run gen</c> in <c>tools/fixture-gen</c>.
 /// </summary>
+[LibraryIndependent]
 public sealed class SimPlanTests
 {
     private static readonly string GoldensPath = Path.Combine(RepoRoot.Find(), "tests", "YSharp.Tests", "Simulation", "plan-goldens.json");

@@ -6,6 +6,7 @@ using YSharp.TestKit.Rng;
 using YSharp.TestKit.Sim;
 using YSharp.TestKit.Traceability;
 using YSharp.TestKit.Assertions;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Structs;
 
@@ -13,6 +14,7 @@ namespace YSharp.Tests.Structs;
 /// Garbage collection, tombstone merging and deletion (docs/research/structs.md E1-E3, J7, J8 and the GC-* entries of
 /// docs/research/doc-features.md section 7). Expected structures come from the pinned Yjs.
 /// </summary>
+[Requires(Feature.Gc)]
 public sealed class GarbageCollectionTests
 {
     private static string Text(Doc d) => d.GetText("t").ToString();
@@ -21,7 +23,8 @@ public sealed class GarbageCollectionTests
 
     [Fact]
     [Covers("STR-26")]
-    public void Delete_IsIdempotent_OneDeleteSetEntryAndTheLengthDecrementsOnce() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void Delete_IsIdempotent_OneDeleteSetEntryAndTheLengthDecrementsOnce()
     {
         var a = Net.Mk(1);
         var b = Net.Mk(2);
@@ -38,13 +41,14 @@ public sealed class GarbageCollectionTests
             Assert.Equal("[[1,[[1,1]]]]", StructsProbe.DeleteSetJson(StructsProbe.Dump(d)));
             Assert.Equal(new[] { false, true, false }, StructsProbe.Of(d, 1).Select(s => s.Deleted));
         }
-    });
+    }
 
     // ------------------------------------------------------------------ GC flag, filter, scope, eligibility
 
     [Fact]
     [Covers("GC-01", "STR-27", "STR-59")]
-    public void CollectedItem_KeepsItsIdAndLength_ButLosesItsContent() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void CollectedItem_KeepsItsIdAndLength_ButLosesItsContent()
     {
         var on = Net.Mk(1);
         on.GetText("t").Insert(0, "abc");
@@ -62,11 +66,12 @@ public sealed class GarbageCollectionTests
         filtered.GetText("t").Insert(0, "abc");
         filtered.GetText("t").Delete(1, 1);
         Assert.Equal("b", StructsProbe.Of(filtered, 3).Single(s => s.Deleted).Text);     // the filter refused this item
-    });
+    }
 
     [Fact]
     [Covers("GC-02")]
-    public void Gc_OnlyLooksAtTheCurrentTransactionsDeleteSet_SoEarlierTombstonesAreNeverCollectedRetroactively() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void Gc_OnlyLooksAtTheCurrentTransactionsDeleteSet_SoEarlierTombstonesAreNeverCollectedRetroactively()
     {
         var d = Net.Mk(1, gc: false);
         var t = d.GetText("t");
@@ -89,11 +94,12 @@ public sealed class GarbageCollectionTests
         a.GetText("t").Delete(1, 1);
         Net.Sync(a, b);
         Assert.Equal(1, StructsProbe.Of(b, 2).Single(s => s.Deleted).Ref);
-    });
+    }
 
     [Fact]
     [Covers("GC-03")]
-    public void OnlyDeletedItemsWithoutKeep_AndAcceptedByTheFilter_AreCollected() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void OnlyDeletedItemsWithoutKeep_AndAcceptedByTheFilter_AreCollected()
     {
         var seen = new List<(long Clock, bool Deleted)>();
         var d = new Doc(new DocOptions { ClientId = 1, GcFilter = view => { seen.Add((view.Id.Clock, view.IsDeleted)); return true; } });
@@ -103,11 +109,12 @@ public sealed class GarbageCollectionTests
         Assert.All(seen, x => Assert.True(x.Deleted));        // the filter is only consulted for deleted items
         Assert.NotEmpty(seen);
         Assert.Equal(1, StructsProbe.Of(d, 1).First(s => s.Deleted).Ref);
-    });
+    }
 
     [Fact]
     [Covers("GC-04")]
-    public void CollectionForms_TopLevelDeletedItemsKeepAShell_ChildrenOfDeletedTypesBecomeGc() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Array, Feature.Map)]
+    public void CollectionForms_TopLevelDeletedItemsKeepAShell_ChildrenOfDeletedTypesBecomeGc()
     {
         var a = Net.Mk(1);
         a.GetText("t").Insert(0, "abc");
@@ -124,13 +131,14 @@ public sealed class GarbageCollectionTests
         var s = StructsProbe.Of(b, 2);
         Assert.True(s[0].IsItem);
         Assert.True(s[1].IsGc);                             // the type's content is bare GC structs
-    });
+    }
 
     // ------------------------------------------------------------------ wire effects, orphans, merging
 
     [Fact]
     [Covers("GC-07")]
-    public void ChildrenOfACollectedType_AreDiscardedWhenGcIsOn_AndKeptHiddenWhenItIsOff() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void ChildrenOfACollectedType_AreDiscardedWhenGcIsOn_AndKeptHiddenWhenItIsOff()
     {
         var visible = new List<string>();
         var states = new List<string>();
@@ -143,7 +151,8 @@ public sealed class GarbageCollectionTests
             Net.Sync(a, b);
             ((YMap)b.GetArray("arr")[0].Type!).Set("k", "late");
             arr.Delete(0, 1);
-            Net.Both(a, b);
+            Net.Sync(b, a);                                 // b sends its set before it learns of the delete (it would collect it)
+            Net.Sync(a, b);
 
             visible.Add($"{a.GetArray("arr").Length}/{b.GetArray("arr").Length}");
             states.Add(Hex.Of(a.EncodeStateAsUpdate()));
@@ -153,11 +162,12 @@ public sealed class GarbageCollectionTests
         }
         Assert.Equal(new[] { "0/0", "0/0" }, visible);       // the visible state converges either way
         Assert.NotEqual(states[0], states[1]);               // the bytes differ
-    });
+    }
 
     [Fact]
     [Covers("GC-08", "STR-28", "STR-60")]
-    public void AdjacentDeletedStructs_MergeAfterEveryTransaction_WhateverTheGcFlag() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void AdjacentDeletedStructs_MergeAfterEveryTransaction_WhateverTheGcFlag()
     {
         foreach (var gc in new[] { false, true })
         {
@@ -172,11 +182,12 @@ public sealed class GarbageCollectionTests
             Assert.Equal(gc ? 1 : 4, s[1].Ref);
             if (!gc) Assert.Equal("bc", s[1].Text);
         }
-    });
+    }
 
     [Fact]
     [Covers("STR-28")]
-    public void MergeWith_AnyCondition_RequiresEveryConditionToHold() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Array)]
+    public void MergeWith_AnyCondition_RequiresEveryConditionToHold()
     {
         // same client, adjacent ids, origin chain, same deleted state, same content kind: merges
         var ok = Net.Mk(1);
@@ -211,11 +222,12 @@ public sealed class GarbageCollectionTests
         kinds.GetArray("arr").Push(new YEntry[] { 1 });
         kinds.GetArray("arr").Push(new YEntry[] { YValue.Bytes(new byte[] { 1 }) });
         Assert.Equal(2, StructsProbe.Of(kinds, 1).Count);
-    });
+    }
 
     [Fact]
     [Covers("GC-09")]
-    public void SubdocOptions_AreCarriedByTheItem_AndTheItemIsCollectedLikeAnyOther() => Impl.Run(() =>
+    [Requires(Feature.Map, Feature.Subdocs)]
+    public void SubdocOptions_AreCarriedByTheItem_AndTheItemIsCollectedLikeAnyOther()
     {
         var a = Net.Mk(1);
         a.GetMap("m").Set("s", new Doc(new DocOptions { Guid = "g1", Gc = false }));
@@ -226,11 +238,12 @@ public sealed class GarbageCollectionTests
 
         a.GetMap("m").Delete("s");                         // ContentDoc.gc itself does nothing; the item still becomes ContentDeleted
         Assert.Equal(1, StructsProbe.Of(a, 1).Single().Ref);
-    });
+    }
 
     [Fact]
     [Covers("GC-10")]
-    public void Snapshots_GcOn_NeedGcOffAndTurningItOffLaterDoesNotBringContentBack() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Snapshots)]
+    public void Snapshots_GcOn_NeedGcOffAndTurningItOffLaterDoesNotBringContentBack()
     {
         var on = Net.Mk(1);
         on.GetText("t").Insert(0, "abc");
@@ -246,11 +259,12 @@ public sealed class GarbageCollectionTests
         var kept = YSnapshot.Create(off);
         off.GetText("t").Delete(1, 1);
         Assert.Equal("abc", YSnapshot.CreateDoc(off, kept).GetText("t").ToString());
-    });
+    }
 
     [Fact]
     [Covers("GC-11")]
-    public void ConvergenceHelper_ChecksStoresAndPending_WithGcOnByDefault_AndAGcOffRunByHand() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Sync)]
+    public void ConvergenceHelper_ChecksStoresAndPending_WithGcOnByDefault_AndAGcOffRunByHand()
     {
         var internals = new StructsSimInternals();
         for (uint seed = 1; seed <= 3; seed++)
@@ -279,5 +293,5 @@ public sealed class GarbageCollectionTests
         internals.AssertNoPending(a);
         internals.AssertNoPending(b);
         internals.AssertStoresEqual(a, b);
-    });
+    }
 }

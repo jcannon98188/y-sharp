@@ -10,6 +10,7 @@ using YSharp.TestKit.Fixtures;
 using YSharp.TestKit.Traceability;
 using YSharp.TestKit.Values;
 using YSharp.TestKit.Assertions;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Fuzz.Tests;
 
@@ -19,6 +20,7 @@ namespace YSharp.Fuzz.Tests;
 /// reads strictly (ADR 0005): EOF is always an error and a failed decode changes nothing. The stored oracle outcomes show the JS side:
 /// every fixture case classified <c>diverge</c> with divergence Q15 is one the oracle accepts (or leaves half applied) and y-sharp rejects.
 /// </summary>
+[Requires(Feature.V1)]
 public sealed class LenientDecodingDivergenceTests
 {
     private sealed record Q15Case(string File, string Name, UpdateFormat Format, byte[] Bytes, string Oracle);
@@ -43,6 +45,7 @@ public sealed class LenientDecodingDivergenceTests
     }
 
     [Fact]
+    [LibraryIndependent]
     public void Q15_StoredOracleOutcomes_RecordJsBeingLenient()
     {
         var cases = Cases();
@@ -53,7 +56,8 @@ public sealed class LenientDecodingDivergenceTests
     }
 
     [Fact, Covers("Q15", Layer = CoverLayer.Unit), Diverges("Q15", adr: "0005")]
-    public void Q15_EveryLenientlyDecodedInput_IsRejectedWithoutChange_InYSharp() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.V2)]
+    public void Q15_EveryLenientlyDecodedInput_IsRejectedWithoutChange_InYSharp()
     {
         foreach (var c in Cases())
         {
@@ -63,13 +67,13 @@ public sealed class LenientDecodingDivergenceTests
             Assert.Equal(applied.StateBefore, applied.StateAfter);
             Hostile.AssertPostCondition(applied.Doc, c.Name);
         }
-    });
+    }
 
     [Fact, Covers("Q15", Layer = CoverLayer.Unit)]
-    public void Q15_AVarintAtEof_IsAnErrorNotZero() => Stub.Run(() =>
+    public void Q15_AVarintAtEof_IsAnErrorNotZero()
     {
         // JS reads these as numClients=1, numStructs=0 and so on; y-sharp does not invent the missing bytes
         foreach (var hex in new[] { "01", "01 01", "01 01 01", "01 01 01 00 04 01 01 74 02 68" })
             Assert.Equal(YError.Malformed, new Doc().TryApplyUpdate(Hex.Bytes(hex)).Error);
-    });
+    }
 }

@@ -50,10 +50,39 @@ public static class AllocationBudgets
     public const double Headroom = 1.25;
 
     /// <summary>
-    /// The recorded limits, keyed <c>BUD-nn</c> or <c>BUD-nn:part</c>. Empty until the implementation exists (ADR 0018 milestone gate);
-    /// every bounded budget is therefore pending. Fill in <c>WithHeadroom(measured)</c> values as each milestone closes.
+    /// The recorded limits, keyed <c>BUD-nn</c> or <c>BUD-nn:part</c>. A bounded budget without one is pending. Fill in
+    /// <c>WithHeadroom(measured)</c> values as each milestone closes (ADR 0018 milestone gate).
     /// </summary>
-    public static readonly IReadOnlyDictionary<string, long> Limits = new Dictionary<string, long>();
+    public static readonly IReadOnlyDictionary<string, long> Limits = new Dictionary<string, long>
+    {
+        // TASK-4.12, owner decision (option A): each transaction hands its body a fresh 24-byte Transaction over pooled state, so a kept
+        // reference stays stale for good (CC-9). Measured 24 bytes per operation in Release; recorded with headroom. Contended TryTransact runs no body: 0.
+        ["BUD-01:Transact"] = WithHeadroom(24),
+        ["BUD-01:ReadTransact"] = WithHeadroom(24),
+        ["BUD-02:Uncontended"] = WithHeadroom(24),
+        ["BUD-02:Contended"] = 0,
+        // TASK-4.20, M3 gate: one-character inserts applied one update at a time (CodecBudgetTests), 1069 bytes per call in Release for V1 and V2.
+        ["BUD-08:V1"] = WithHeadroom(1069),
+        ["BUD-08:V2"] = WithHeadroom(1069),
+        // TASK-4.27, owner sign-off 2026-10-26 (TASK-8 tries for zero after TASK-5): zero is out of reach while every insert allocates an Item and every transaction its 24-byte
+        // Transaction (BUD-01 option A), so these paths are bounded. Measured in Release once Events landed: a map Set with a handler on
+        // another type 215 bytes, an insert-and-delete commit 974, a one-character insert at the end 606. TASK-4.28 re-measures.
+        ["BUD-04"] = WithHeadroom(215),
+        ["BUD-05"] = WithHeadroom(974),
+        ["BUD-07"] = WithHeadroom(606),
+        // TASK-4.28, M4 gate: a scalar Push on an array 128 bytes per call, a scalar Set on a map 200, measured in Release.
+        ["BUD-09:Push"] = WithHeadroom(128),
+        ["BUD-09:Set"] = WithHeadroom(200),
+        // TASK-4.37, M6 gate: a sync Step1/Step2 round trip 1464 bytes, awareness encode 376 and apply 704 per operation, measured in Release.
+        ["BUD-10"] = WithHeadroom(1464),
+        ["BUD-11:Encode"] = WithHeadroom(376),
+        ["BUD-11:Apply"] = WithHeadroom(704),
+        // TASK-4.42, M7 gate: the fuzz guard's bound (ADR 0013: 64 bytes per input byte plus 1 MiB), so the corpus and the fuzz inputs are held
+        // to one figure. Measured in Release over fixtures/hostile: at most 56.5 bytes per input byte above the 1 MiB (hos-amp
+        // 5000-structs-waiting-on-missing-origins), 16% under k = 64 rather than the usual 25% (owner sign-off in the task notes).
+        ["BUD-12:k"] = 64,
+        ["BUD-12:fixed"] = 1024 * 1024,
+    };
 
     /// <summary>The one-off large-object-heap growth BUD-14 tolerates: a single caller-supplied payload larger than a chunk (ADR 0018). The workload has none, so one chunk is slack.</summary>
     public const long LohAllowanceBytes = 128 * 1024;
@@ -64,13 +93,13 @@ public static class AllocationBudgets
 
     public static readonly IReadOnlyList<Budget> All = new Budget[]
     {
-        new("BUD-01", "Transact/ReadTransact with a static lambda, uncontended", BudgetKind.Zero, "Transact", "ReadTransact"),
-        new("BUD-02", "TryTransact, uncontended and contended", BudgetKind.Zero, "Uncontended", "Contended"),
+        new("BUD-01", "Transact/ReadTransact with a static lambda, uncontended", BudgetKind.Bounded, "Transact", "ReadTransact"),
+        new("BUD-02", "TryTransact, uncontended and contended", BudgetKind.Bounded, "Uncontended", "Contended"),
         new("BUD-03", "Scalar YValue reads and AttributeEquals", BudgetKind.Zero),
-        new("BUD-04", "Event dispatch with no handlers for the changed type", BudgetKind.Zero),
-        new("BUD-05", "Commit with no Update subscriber", BudgetKind.Zero),
+        new("BUD-04", "Event dispatch with no handlers for the changed type", BudgetKind.Bounded),
+        new("BUD-05", "Commit with no Update subscriber", BudgetKind.Bounded),
         new("BUD-06", "EncodeStateAsUpdate into a pre-sized writer", BudgetKind.Zero),
-        new("BUD-07", "One-character YText.Insert at the end", BudgetKind.Zero),
+        new("BUD-07", "One-character YText.Insert at the end", BudgetKind.Bounded),
         new("BUD-08", "TryApplyUpdate", BudgetKind.Bounded, "V1", "V2"),
         new("BUD-09", "Push and Set of scalars", BudgetKind.Bounded, "Push", "Set"),
         new("BUD-10", "Sync Step1/Step2 round trip", BudgetKind.Bounded),

@@ -5,6 +5,8 @@ using Xunit;
 using YSharp.TestKit.Allocation;
 using YSharp.TestKit.Tiers;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
+using YSharp.Tests.Allocation;
 
 namespace YSharp.Tests.Concurrency;
 
@@ -12,6 +14,7 @@ namespace YSharp.Tests.Concurrency;
 /// CC-6 and CC-7: the blocking and non-blocking acquire forms and their allocation. Timeouts here are real time (50 to 100 ms): the contract
 /// is about the wait, not a latency bound. Tier: gating. No seeds.
 /// </summary>
+[Requires(Feature.Transactions)]
 [Collection(ConcurrencyCollection.Name)]
 [Tier(Tier.Gating)]
 public sealed class AcquireTests
@@ -23,7 +26,7 @@ public sealed class AcquireTests
     // ------------------------------------------------------------------ CC-6
 
     [Fact, Covers("CC-6")]
-    public void ABlockingTransact_WithATimeout_ThrowsTimeoutException_WhileTheLockIsHeld() => Impl.Run(() =>
+    public void ABlockingTransact_WithATimeout_ThrowsTimeoutException_WhileTheLockIsHeld()
     {
         var doc = Conc.NewDoc();
         using var holder = Holder.Write(doc);
@@ -32,19 +35,19 @@ public sealed class AcquireTests
         Assert.Throws<TimeoutException>(() => Conc.TransactFor(doc, _ => ran = true, Short));
         Assert.True(clock.Elapsed >= TimeSpan.FromMilliseconds(40), $"gave up after {clock.Elapsed.TotalMilliseconds} ms, long before the {Short.TotalMilliseconds} ms timeout");
         Assert.False(ran);
-    });
+    }
 
     [Fact, Covers("CC-6")]
-    public void ABlockingTransact_WithATimeout_RunsTheBodyWhenTheLockIsFree() => Impl.Run(() =>
+    public void ABlockingTransact_WithATimeout_RunsTheBodyWhenTheLockIsFree()
     {
         var doc = Conc.NewDoc();
         var ran = false;
-        doc.TransactWithTimeout(_ => ran = true, "origin", Short);
+        doc.TransactWithTimeout(_ => ran = true, "origin", Short, TestContext.Current.CancellationToken);
         Assert.True(ran);
-    });
+    }
 
     [Fact, Covers("CC-6")]
-    public void ABlockingTransact_ThrowsOperationCanceledException_WhenTheTokenIsCancelledWhileWaiting() => Impl.Run(() =>
+    public void ABlockingTransact_ThrowsOperationCanceledException_WhenTheTokenIsCancelledWhileWaiting()
     {
         var doc = Conc.NewDoc();
         using var holder = Holder.Write(doc);
@@ -53,10 +56,10 @@ public sealed class AcquireTests
         var ran = false;
         Assert.ThrowsAny<OperationCanceledException>(() => Conc.TransactUntilCancelled(doc, _ => ran = true, cts.Token));
         Assert.False(ran);
-    });
+    }
 
     [Fact, Covers("CC-6")]
-    public void AGiveUp_LeavesTheLockIntact_NoStaleWaitingWriterBlocksLaterReaders() => Impl.Run(() =>
+    public void AGiveUp_LeavesTheLockIntact_NoStaleWaitingWriterBlocksLaterReaders()
     {
         var doc = Conc.NewDoc();
         using var holder = Holder.Read(doc);
@@ -68,10 +71,10 @@ public sealed class AcquireTests
         Conc.AssertDoesNotWait(() => doc.ReadTransact(Nop), "a reader after two writers gave up");
         holder.Release();
         doc.Transact(Nop);
-    });
+    }
 
     [Fact, Covers("CC-6")]
-    public void TryTransact_ReturnsAcquired_AndRunsTheBody_WhenTheLockIsFree() => Impl.Run(() =>
+    public void TryTransact_ReturnsAcquired_AndRunsTheBody_WhenTheLockIsFree()
     {
         var doc = Conc.NewDoc();
         var ran = false;
@@ -79,10 +82,10 @@ public sealed class AcquireTests
         Assert.True(result.Acquired);
         Assert.Equal(TryTransactStatus.Acquired, result.Status);
         Assert.True(ran);
-    });
+    }
 
     [Fact, Covers("CC-6")]
-    public void TryTransact_ReturnsContended_WithoutBlockingOrRunningTheBody_WhenAnotherThreadHoldsTheLock() => Impl.Run(() =>
+    public void TryTransact_ReturnsContended_WithoutBlockingOrRunningTheBody_WhenAnotherThreadHoldsTheLock()
     {
         var doc = Conc.NewDoc();
         foreach (var holderIsWriter in new[] { true, false })
@@ -96,10 +99,10 @@ public sealed class AcquireTests
             Assert.Equal(TryTransactStatus.Contended, result.Status);
             Assert.False(ran);
         }
-    });
+    }
 
     [Fact, Covers("CC-6", "CC-2")]
-    public void TryTransact_OnTheOwningThread_JoinsTheTransaction() => Impl.Run(() =>
+    public void TryTransact_OnTheOwningThread_JoinsTheTransaction()
     {
         var doc = Conc.NewDoc();
         doc.Transact(_ =>
@@ -108,30 +111,33 @@ public sealed class AcquireTests
             Assert.True(doc.TryTransact(_ => ran = true).Acquired);
             Assert.True(ran);
         });
-    });
+    }
 
     // ------------------------------------------------------------------ CC-7 (BUD-01, BUD-02)
 
-    [Fact, Covers("CC-7")]
-    public void Acquire_UncontendedAcquireAndRelease_AllocatesNothing() => Impl.Run(() =>
-    {
-        var doc = Conc.NewDoc();
-        AllocationAssert.AtMost("BUD-01", 0, () => doc.Transact(0, static (_, _) => { }));
-        AllocationAssert.AtMost("BUD-01", 0, () => doc.ReadTransact(Nop));
-    });
+    // Owner decision (TASK-4.12): an uncontended acquire allocates only the small Transaction its body receives (BUD-01, BUD-02 limits);
+    // a contended TryTransact runs no body and allocates nothing.
 
     [Fact, Covers("CC-7")]
-    public void TryTransact_AllocatesNothing_Uncontended() => Impl.Run(() =>
+    public void Acquire_UncontendedAcquireAndRelease_StaysWithinItsBudget()
     {
         var doc = Conc.NewDoc();
-        AllocationAssert.AtMost("BUD-02", 0, () => doc.TryTransact(Nop));
-    });
+        AllocationBudgets.Check("BUD-01", "Transact", () => doc.Transact(0, static (_, _) => { }));
+        AllocationBudgets.Check("BUD-01", "ReadTransact", () => doc.ReadTransact(Nop));
+    }
 
     [Fact, Covers("CC-7")]
-    public void TryTransact_AllocatesNothing_EvenWhenContended() => Impl.Run(() =>
+    public void TryTransact_Uncontended_StaysWithinItsBudget()
+    {
+        var doc = Conc.NewDoc();
+        AllocationBudgets.Check("BUD-02", "Uncontended", () => doc.TryTransact(Nop));
+    }
+
+    [Fact, Covers("CC-7")]
+    public void TryTransact_AllocatesNothing_EvenWhenContended()
     {
         var doc = Conc.NewDoc();
         using var holder = Holder.Write(doc);
         AllocationAssert.AtMost("BUD-02", 0, () => doc.TryTransact(Nop));
-    });
+    }
 }

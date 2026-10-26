@@ -1,0 +1,69 @@
+---
+id: TASK-4.9
+title: '9. YValue, StateVector, ids, errors and limits'
+status: Done
+assignee: []
+created_date: '2026-10-24 19:41'
+updated_date: '2026-10-24 21:20'
+labels:
+  - spec
+  - 'model:sonnet'
+milestone: m-1
+dependencies:
+  - TASK-4.8
+parent_task_id: TASK-4
+ordinal: 9000
+---
+
+## Description
+
+<!-- SECTION:DESCRIPTION:BEGIN -->
+The value layer every other area uses (ADR 0007, ADR 0008), plus the error family and `YLimits` (ADR 0005).
+
+**Features:** `Values`
+**Owns:** `src/YSharp/Values/` (except JSON)
+**Registry:** `V`, `Q` value quirks (`quirks-values.yaml`), value-level `ERR` entries
+**Test files:** `Codecs/ValueQuirkTests.cs`, `TestKit/TaggedValueTests.cs`, `TestKit/TierTests.cs`, `ScaffoldSmokeTests.cs`
+**Budgets:** BUD-03 (scalar `YValue` reads and `AttributeEquals`, zero) recorded at M1 close by this spec
+**Suggested model:** sonnet (override freely)
+
+Read first: `docs/handoff-implementation-planning.md`, ADRs 0005, 0006, 0008, 0018 (amendments), 0020, 0021, 0022, and the research notes for this area.
+<!-- SECTION:DESCRIPTION:END -->
+
+## Acceptance Criteria
+<!-- AC:BEGIN -->
+- [x] #1 Every test whose required features have all landed passes, and no test requiring this spec's features skips
+- [x] #2 This spec's features are added to `Features.Landed`
+- [x] #3 The traceability gate passes and no pending registry entry is added
+- [x] #4 BUD-03 reads 0 bytes and its entry is active
+<!-- AC:END -->
+
+## Definition of Done
+<!-- DOD:BEGIN -->
+- [x] #1 `dotnet build YSharp.slnx` has 0 warnings
+- [x] #2 `dotnet test --solution YSharp.slnx` is green in Debug and in Release
+- [x] #3 Fixture drift check (`npm run check` in `tools/fixture-gen`) is clean
+- [x] #4 ADR 0022 followed: suite changes in separate `suite:` commits, a Suite changes list in the notes, no open owner decision
+<!-- DOD:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: @orchestrator
+created: 2026-10-24 20:59
+---
+Owner decision needed: confirm two feature-gate edits (ADR 0022 'gate changes'). (1) ValueQuirkTests class gate Values -> Values,V1,Map (it builds values through Doc/Map/V1; Values-only went red with 36 failures). (2) BUD-03 test moved from HotPathBudgetTests (Transactions gate) to new ValueBudgetTests (Values gate), body identical. Doc-free YValueAnyTests cover the same bytes meanwhile.
+---
+
+author: @orchestrator
+created: 2026-10-24 21:10
+---
+Owner confirmed both feature-gate edits (ValueQuirkTests gate; BUD-03 test move).
+---
+<!-- COMMENTS:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Implemented on the impl/task-4 integration branch and merged; verified by the implementer with a 0-warning build, green Debug and Release test runs, clean fixture drift check and the traceability gate (see PR #1 and the task comments).
+<!-- SECTION:FINAL_SUMMARY:END -->

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Coverage (ADR 0015) by static instrumentation only: the assemblies are rewritten on disk before the run, so no profiler rewrites IL at
+     run time. Dynamic instrumentation crashed the Linux test host at random points (AccessViolationException) in safe managed code. -->
+<Configuration>
+  <CodeCoverage>
+    <EnableStaticManagedInstrumentation>True</EnableStaticManagedInstrumentation>
+    <EnableDynamicManagedInstrumentation>False</EnableDynamicManagedInstrumentation>
+  </CodeCoverage>
+</Configuration>

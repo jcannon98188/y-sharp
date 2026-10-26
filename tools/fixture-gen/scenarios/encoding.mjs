@@ -276,8 +276,19 @@ const hostileExtra = [
   c('parent-info-2', textStruct('04', '02 01 00 01 61')),
   c('parent-info-5', textStruct('04', '05 01 00 01 61')),
   c('delete-set-zero-deletes-for-client', '00 01 05 00'),
-  c('delete-set-len-0', '00 01 05 01 00 00'),
+  c('delete-set-len-0', '00 01 05 01 00 00', { classification: 'diverge', divergence: 'ENC-51', expect: ['ok'] }),
   c('delete-set-two-clients-one-truncated', '00 02 05 01 00 01 06'),
+  // both accept; JS re-encodes the parked ranges with a negative V2 clock difference and re-exports (98, 99), (296, 1)
+  c('delete-set-pending-out-of-order', '00 01 77 02 62 63 28 01', { classification: 'diverge', divergence: 'ENC-86', expect: ['ok'] }),
+  // ENC-87: 'x' with the format b = 5n, then b = undefined. V2 carries a format value as Any; JS stores both and then cannot encode the
+  // document in V1 (JSON.stringify throws on a BigInt and gives no text for undefined); y-sharp rejects them as V1 JSON cannot hold them
+  c('v2-format-value-bigint', '00 02 00 02 02 41 01 02 00 02 00 05 06 00 84 00 86 07 04 74 62 78 62 41 02 01 01 00 00 01 03 00 7a 00 00 00 00 00 00 00 05 7e 00', { encoding: 'v2', classification: 'diverge', divergence: 'ENC-87', expect: ['Malformed'] }),
+  c('v2-format-value-undefined', '00 02 00 02 02 41 01 02 00 02 00 05 06 00 84 00 86 07 04 74 62 78 62 41 02 01 01 00 00 01 03 00 7f 7e 00', { encoding: 'v2', classification: 'diverge', divergence: 'ENC-87', expect: ['Malformed'] }),
+  // ENC-88: an item of length 0 ("" text, Deleted 0, an empty Any list) in root 't'. JS stores it, but it owns no clock and the state encode
+  // drops it; y-sharp rejects it (found by SharpFuzz, TASK-4.43)
+  c('item-zero-length-string', '01 01 01 00 04 01 01 74 00 00', { classification: 'diverge', divergence: 'ENC-88', expect: ['Malformed'] }),
+  c('item-zero-length-deleted', '01 01 01 00 01 01 01 74 00 00', { classification: 'diverge', divergence: 'ENC-88', expect: ['Malformed'] }),
+  c('item-zero-length-any', '01 01 01 00 08 01 01 74 00 00', { classification: 'diverge', divergence: 'ENC-88', expect: ['Malformed'] }),
   // Q07: Date, Map and ArrayBuffer reach the wire as the empty object; the bytes decode as an empty object
   c('any-empty-object-from-flattened-date', '01 01 01 00 28 01 01 6d 01 6b 01 76 00 00', { roots: [['m', 'map']] }),
   c('eof-after-struct-header', '01 01 01 00'),
@@ -346,7 +357,7 @@ export default () => [
   {
     area: 'hostile',
     name: 'malformed-codec-extras',
-    covers: ['ENC-36', 'ENC-44', 'ENC-46', 'ENC-47', 'ENC-48', 'ENC-49', 'ENC-50', 'ENC-51', 'ENC-60', 'ENC-61', 'ENC-62', 'ENC-63', 'ENC-64', 'ENC-65', 'ENC-66', 'ENC-67', 'ENC-68', 'ENC-69', 'ENC-22', 'ENC-56', 'Q07'],
+    covers: ['ENC-36', 'ENC-44', 'ENC-46', 'ENC-47', 'ENC-48', 'ENC-49', 'ENC-50', 'ENC-51', 'ENC-60', 'ENC-61', 'ENC-62', 'ENC-63', 'ENC-64', 'ENC-65', 'ENC-66', 'ENC-67', 'ENC-68', 'ENC-69', 'ENC-22', 'ENC-56', 'ENC-86', 'ENC-87', 'ENC-88', 'Q07'],
     malformed: hostileExtra
   }
 ]

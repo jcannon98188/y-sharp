@@ -2,6 +2,7 @@ using System.Linq;
 using Xunit;
 using YSharp.TestKit.Traceability;
 using YSharp.TestKit.Assertions;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Structs;
 
@@ -9,11 +10,13 @@ namespace YSharp.Tests.Structs;
 /// StructStore lookup and split behaviour (docs/research/structs.md section I). The store is internal, so lookups are
 /// observed through what callers do with them: applying delete sets, integrating with offsets and re-exporting pending state.
 /// </summary>
+[Requires(Feature.Store)]
 public sealed class StructStoreTests
 {
     [Fact]
     [Covers("STR-46", "STR-47")]
-    public void LookupByClock_FindsFirstMiddleAndLastStructs_WhenDeleteRangesAreApplied() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void LookupByClock_FindsFirstMiddleAndLastStructs_WhenDeleteRangesAreApplied()
     {
         var a = Net.Mk(1);
         var b = Net.Mk(2);
@@ -28,11 +31,12 @@ public sealed class StructStoreTests
         Assert.Equal(Enumerable.Range(0, 10).Select(i => i % 2 == 1), s.Select(x => x.Deleted));
         Assert.Equal("acegi", b.GetText("t").ToString());
         Assert.Equal("[[1,[[1,1],[3,1],[5,1],[7,1],[9,1]]]]", StructsProbe.DeleteSetJson(StructsProbe.Dump(b)));
-    });
+    }
 
     [Fact]
     [Covers("STR-47")]
-    public void LookupOfAnUnknownClient_IsHeldAsPending_InsteadOfFailing() => Impl.Run(() =>
+    [Requires(Feature.V1)]
+    public void LookupOfAnUnknownClient_IsHeldAsPending_InsteadOfFailing()
     {
         var d = Net.Mk(1);
         // No structs; a delete set for client 7, range [0, 1): JS would fail a lookup in the store, y-sharp keeps it pending.
@@ -41,11 +45,12 @@ public sealed class StructStoreTests
         Assert.Empty(StructsProbe.Dump(d));
         Assert.Equal(0L, d.GetStateVector()[7]);
         Assert.Equal("000107010001", Hex.Of(d.EncodeStateAsUpdate()));    // re-exported as pending delete set
-    });
+    }
 
     [Fact]
     [Covers("STR-48", "STR-49", "STR-51")]
-    public void ADeleteRangeInTheMiddleOfAnItem_SplitsItThreeWays_OnlyAtTheRangeEdges() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void ADeleteRangeInTheMiddleOfAnItem_SplitsItThreeWays_OnlyAtTheRangeEdges()
     {
         var a = Net.Mk(1, gc: false);
         var b = Net.Mk(2, gc: false);
@@ -67,11 +72,12 @@ public sealed class StructStoreTests
         var merged = StructsProbe.Of(b, 1);
         Assert.Equal(new[] { (0L, 3L), (3L, 2L) }, merged.Select(x => (x.Clock, x.Len)));
         Assert.Equal(new[] { "hel", "lo" }, merged.Select(x => x.Text));
-    });
+    }
 
     [Fact]
     [Covers("STR-50", "GC-04")]
-    public void ReplacingAStruct_KeepsItsIdAndLength_WhenItBecomesGc() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void ReplacingAStruct_KeepsItsIdAndLength_WhenItBecomesGc()
     {
         var a = Net.Mk(1);
         var arr = a.GetArray("arr");
@@ -85,11 +91,12 @@ public sealed class StructStoreTests
         Assert.Equal(new[] { (0L, 1L), (1L, 1L) }, after.Select(s => (s.Clock, s.Len)));   // same ids and lengths, nothing lost or invented
         Assert.False(after[0].IsGc);                                                       // the type's own item stays an Item (ContentDeleted)
         Assert.True(after[1].IsGc);                                                        // its child slot was replaced by a GC
-    });
+    }
 
     [Fact]
     [Covers("STR-52")]
-    public void PendingStructsAndPendingDeleteSet_AreStoreState_ReExportedByEncodeStateAsUpdate() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Events)]
+    public void PendingStructsAndPendingDeleteSet_AreStoreState_ReExportedByEncodeStateAsUpdate()
     {
         // pendingStructs
         var a = Net.Mk(1);
@@ -117,5 +124,19 @@ public sealed class StructStoreTests
         f.ApplyUpdate(e.EncodeStateAsUpdate());
         f.ApplyUpdate(ups2[0]);
         Assert.Equal("ac", f.GetText("t").ToString());
-    });
+    }
+
+    [Fact]
+    [Covers("STR-52")]
+    [Requires(Feature.V2, Feature.Map)]
+    public void EncodeStateAsUpdate_WithPendingState_WritesItemsAsYjsReadsThemBack()
+    {
+        // the first live Nightly differential's find (TASK-4.28): with a pending delete set (client 101 is unknown) Yjs merges the state through
+        // mergeUpdates, which decodes the map item 102:1 (origin 102:0, parentSub "k1") without its parentSub, so info bit 6 is clear (0x88, not 0xa8)
+        var d = Net.Mk(7000);
+        d.ApplyUpdate(Hex.Bytes("000005e60100a503010000072100a8002100080c076d6b316dc3bc6101024101010100034101020202007702626302007d3c7704f09f9880026601000065010000"), null, UpdateFormat.V2);
+        Assert.Equal(
+            "0202e501002101016d02c3bc0108010161027d3c7704f09f98800266002101016d026b3101886600017702626303e5010100016601000165010001",
+            Hex.Of(d.EncodeStateAsUpdate()));
+    }
 }

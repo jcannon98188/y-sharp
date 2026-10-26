@@ -687,14 +687,13 @@
 - id: ENC-67
   title: "Reader at EOF: RleDecoder after final run -> repeats last value forever"
   source: "docs/research/encoding.md:460"
-  kind: diverge
+  kind: match
   layers: [unit, fixture, differential, fuzz]
   wire: true
-  adr: ["0005"]
   owner: 5
   status: active
   ref: "encoding.md 8.3 row"
-  note: "An exhausted Rle column is a decode error; JS repeats the last value forever."
+  note: "The last run repeats: lib0's RleEncoder never writes its count, so valid V2 output relies on it."
 
 - id: ENC-68
   title: "Reader at EOF: StringDecoder.read beyond joined string -> \"\""
@@ -877,3 +876,39 @@
   owner: 5
   status: active
   ref: "encoding.md 10"
+
+- id: ENC-86
+  title: "Malformed input: out-of-order delete ranges parked as pending -> JS corrupts them on the V2 re-encode"
+  source: "docs/research/encoding.md:313"
+  kind: diverge
+  layers: [unit, fixture, differential]
+  wire: true
+  adr: ["0003"]
+  owner: 5
+  status: active
+  ref: "encoding.md 4.3"
+  note: "Found by the TASK-4.28 Nightly differential. JS writes a negative V2 clock difference as one garbage byte, so the pending delete set and every later state encode carry a wrong range; y-sharp keeps the ranges as sent and exports them sorted. Content and state vector match."
+
+- id: ENC-87
+  title: "V2 format or embed value that V1 JSON cannot hold (BigInt at any depth, top-level undefined) -> JS stores it, then cannot encode V1"
+  source: "docs/research/quirks.md:358"
+  kind: diverge
+  layers: [unit, fixture]
+  wire: true
+  adr: ["0005"]
+  owner: 5
+  status: active
+  ref: "quirks.md Q30"
+  note: "Found by the TASK-4.42 Nightly fuzz. V2 reads a format or embed value as Any; Yjs stores a BigInt or undefined value and every later V1 encode of the document throws. y-sharp rejects the update as Malformed and the text API rejects such attribute values (embeds already were), so a document always encodes in V1 and V2."
+
+- id: ENC-88
+  title: "Item of length 0 (\"\" text, Deleted 0, empty JSON or Any list) -> JS stores it, but the state encode drops it and releases what waited behind it"
+  source: "docs/research/encoding.md:340"
+  kind: diverge
+  layers: [unit, fixture, differential]
+  wire: true
+  adr: ["0005"]
+  owner: 5
+  status: active
+  ref: "encoding.md 5"
+  note: "Found by the TASK-4.43 SharpFuzz run. An item of length 0 owns no clock: a pending one vanishes from the merged state encode, so a struct waiting behind it no longer waits and the document's own state could be rejected on re-apply (STR-71). Yjs never writes one (inserting \"\" or [] is skipped); y-sharp rejects the update as Malformed. GC and Skip of length 0 are still accepted: a GC never waits and a Skip is dropped."

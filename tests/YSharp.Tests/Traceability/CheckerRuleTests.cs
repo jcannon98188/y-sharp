@@ -1,11 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
+using YSharp.TestKit.Gating;
 using YSharp.TestKit.Traceability;
 
 namespace YSharp.Tests.Traceability;
 
 /// <summary>One test per ADR 0010 failure condition, against synthetic registries.</summary>
+[LibraryIndependent]
 public class CheckerRuleTests
 {
     private static RegistryEntry E(string id, string status = "active", string kind = "match", string[]? layers = null, bool wire = false, int owner = 5) =>
@@ -235,5 +237,29 @@ public class CheckerRuleTests
         Assert.Contains("TR-INVALID-ENTRY", Codes(i));
         e.Source = "yjs/src/real.js:10";
         Assert.Empty(Codes(i));
+    }
+
+    [Fact]
+    public void Checker_TestWithoutAFeatureRequirement_Fails_UnlessLibraryIndependent()
+    {
+        var i = Input(new RegistryEntry[0]);
+        i.Gates.Add(new TestGate("Ns.C.Bare", new string[0], false));
+        Assert.Contains("TR-NO-FEATURE", Codes(i));
+
+        var ok = Input(new RegistryEntry[0]);
+        ok.Gates.Add(new TestGate("Ns.C.Gated", new[] { "Text" }, false));
+        ok.Gates.Add(new TestGate("Ns.C.SelfTest", new string[0], true));
+        Assert.Empty(Codes(ok));
+    }
+
+    [Fact]
+    public void Report_CarriesTheLandedList_AndTheMatrixShowsIt()
+    {
+        var i = Input(new RegistryEntry[0]);
+        i.Landed = new List<string> { "Values", "Json" };
+        var report = TraceabilityChecker.Check(i);
+        Assert.Equal(new[] { "Values", "Json" }, report.Landed);
+        Assert.Contains("Landed features: Values, Json", MatrixWriter.ToMarkdown(report, new string[0]));
+        Assert.Contains("Landed features: none", MatrixWriter.ToMarkdown(TraceabilityChecker.Check(Input(new RegistryEntry[0])), new string[0]));
     }
 }

@@ -38,8 +38,8 @@ public sealed record ScriptPlan(int Replicas, IReadOnlyList<Edit> Edits, Exchang
     public const string TextRoot = "t", ArrayRoot = "a", MapRoot = "m";
     public static readonly string[] Names = { "a", "b", "c" };
 
-    private static readonly string[] Words = { "a", "bc", "hello", "x y", "é", "€", "日本", "😀", "naïve", "z" };
-    private static readonly string[] Keys = { "k0", "k1", "k2", "key", "ü" };
+    internal static readonly string[] Words = { "a", "bc", "hello", "x y", "é", "€", "日本", "😀", "naïve", "z" };
+    internal static readonly string[] Keys = { "k0", "k1", "k2", "key", "ü" };
 
     public override string ToString() =>
         $"{Replicas} replicas, {Edits.Count} edits, {Exchange}{(Exchange == Exchange.Schedule ? $" (seed {ExchangeSeed}{(Reorder ? ", reorder" : "")}{(Duplicate ? ", duplicate" : "")}{(Drop ? ", drop" : "")})" : "")}, {(V2 ? "v2" : "v1")}, gc {(Gc ? "on" : "off")}";
@@ -85,18 +85,18 @@ public sealed record ScriptPlan(int Replicas, IReadOnlyList<Edit> Edits, Exchang
         public int Updates;
     }
 
-    private static JsonObject Target(string root, string kind) => new() { ["root"] = root, ["kind"] = kind };
+    internal static JsonObject Target(string root, string kind) => new() { ["root"] = root, ["kind"] = kind };
 
-    private static JsonValue Plain(string s) => JsonValue.Create(s);
+    internal static JsonValue Plain(string s) => JsonValue.Create(s);
 
     /// <summary>A snap to a UTF-16 boundary that never splits a surrogate pair (splitting is a registered divergence area, not the default).</summary>
-    private static int Snap(StringBuilder text, int at)
+    internal static int Snap(StringBuilder text, int at)
     {
         if (at > 0 && at < text.Length && char.IsLowSurrogate(text[at]) && char.IsHighSurrogate(text[at - 1])) return at - 1;
         return at;
     }
 
-    private static JsonNode MapValue(int pick) => (pick % 5) switch
+    internal static JsonNode MapValue(int pick) => (pick % 5) switch
     {
         0 => JsonValue.Create(pick),
         1 => JsonValue.Create(Words[pick % Words.Length]),
@@ -105,7 +105,7 @@ public sealed record ScriptPlan(int Replicas, IReadOnlyList<Edit> Edits, Exchang
         _ => new JsonObject { ["$"] = "obj", ["pairs"] = new JsonArray(new JsonArray(Plain("x"), JsonValue.Create(pick % 9)), new JsonArray(Plain("y"), JsonValue.Create((string?)null))) },
     };
 
-    private static JsonNode? ArrayValue(int pick) => (pick % 4) switch
+    internal static JsonNode? ArrayValue(int pick) => (pick % 4) switch
     {
         0 => JsonValue.Create(pick % 100),
         1 => JsonValue.Create(Words[pick % Words.Length]),
@@ -220,19 +220,7 @@ public sealed record ScriptPlan(int Replicas, IReadOnlyList<Edit> Edits, Exchang
             }
         }
         Flush();
-
-        var rng = new Random(ExchangeSeed);
-        if (Exchange == Exchange.Schedule) steps.Add(ScheduleStep(locals.Select(l => l.Updates).ToArray(), rng));
-        else
-        {
-            var pairs = AllPairs().OrderBy(_ => rng.Next()).Take(Math.Max(1, Replicas)).ToList();
-            foreach (var (from, to) in pairs) steps.Add(new JsonObject { ["step"] = "sync", ["from"] = Names[from], ["to"] = Names[to] });
-        }
-
-        // convergence: every replica hears from every other, twice, so the final state is the union however the exchange went
-        for (var round = 0; round < 2; round++)
-            foreach (var (from, to) in AllPairs())
-                steps.Add(new JsonObject { ["step"] = "sync", ["from"] = Names[from], ["to"] = Names[to] });
+        AppendExchange(steps, Replicas, locals.Select(l => l.Updates).ToArray(), Exchange, ExchangeSeed, Reorder, Duplicate, Drop, V2);
 
         return new JsonObject
         {
@@ -243,27 +231,47 @@ public sealed record ScriptPlan(int Replicas, IReadOnlyList<Edit> Edits, Exchang
         };
     }
 
-    private IEnumerable<(int From, int To)> AllPairs()
+    /// <summary>
+    /// The exchange of concurrent work, then convergence: <paramref name="updates"/> is the number of update events each replica has fired
+    /// so far, which a <c>deliver</c> schedule indexes. Every replica then hears from every other, twice, so the final state is the union
+    /// however the exchange went.
+    /// </summary>
+    internal static void AppendExchange(JsonArray steps, int replicas, int[] updates, Exchange exchange, int seed, bool reorder, bool duplicate, bool drop, bool v2)
     {
-        for (var i = 0; i < Replicas; i++)
-            for (var j = 0; j < Replicas; j++)
+        var rng = new Random(seed);
+        if (exchange == Exchange.Schedule) steps.Add(ScheduleStep(replicas, updates, rng, reorder, duplicate, drop, v2));
+        else
+        {
+            var pairs = AllPairs(replicas).OrderBy(_ => rng.Next()).Take(Math.Max(1, replicas)).ToList();
+            foreach (var (from, to) in pairs) steps.Add(new JsonObject { ["step"] = "sync", ["from"] = Names[from], ["to"] = Names[to] });
+        }
+
+        for (var round = 0; round < 2; round++)
+            foreach (var (from, to) in AllPairs(replicas))
+                steps.Add(new JsonObject { ["step"] = "sync", ["from"] = Names[from], ["to"] = Names[to] });
+    }
+
+    internal static IEnumerable<(int From, int To)> AllPairs(int replicas)
+    {
+        for (var i = 0; i < replicas; i++)
+            for (var j = 0; j < replicas; j++)
                 if (i != j) yield return (i, j);
     }
 
     /// <summary>The <c>deliver</c> step: every other replica's update events to each receiver, shuffled / duplicated / thinned by the plan.</summary>
-    private JsonObject ScheduleStep(int[] updates, Random rng)
+    private static JsonObject ScheduleStep(int replicas, int[] updates, Random rng, bool reorder, bool duplicate, bool drop, bool v2)
     {
         var entries = new List<(int To, int From, int Index)>();
-        foreach (var (from, to) in AllPairs())
+        foreach (var (from, to) in AllPairs(replicas))
             for (var i = 0; i < updates[from]; i++) entries.Add((to, from, i));
-        if (Reorder)
+        if (reorder)
             for (var i = entries.Count - 1; i > 0; i--)
             {
                 var j = rng.Next(i + 1);
                 (entries[i], entries[j]) = (entries[j], entries[i]);
             }
-        if (Drop) entries = entries.Where(_ => rng.Next(3) != 0).ToList();
-        if (Duplicate)
+        if (drop) entries = entries.Where(_ => rng.Next(3) != 0).ToList();
+        if (duplicate)
             for (var n = rng.Next(1, 4); n > 0 && entries.Count > 0; n--) entries.Insert(rng.Next(entries.Count + 1), entries[rng.Next(entries.Count)]);
 
         var schedule = new JsonArray(entries.Select(e => (JsonNode)new JsonObject
@@ -273,11 +281,11 @@ public sealed record ScriptPlan(int Replicas, IReadOnlyList<Edit> Edits, Exchang
             ["update"] = new JsonObject { ["from"] = Names[e.From], ["index"] = e.Index },
         }).ToArray());
         var step = new JsonObject { ["step"] = "deliver", ["schedule"] = schedule };
-        if (V2) step["encoding"] = "v2";
+        if (v2) step["encoding"] = "v2";
         return step;
     }
 
-    private static JsonObject Step(string kind, string doc, JsonObject target, params (string Name, JsonNode? Value)[] fields)
+    internal static JsonObject Step(string kind, string doc, JsonNode target, params (string Name, JsonNode? Value)[] fields)
     {
         var o = new JsonObject { ["step"] = kind, ["doc"] = doc, ["target"] = target };
         foreach (var (name, value) in fields) o[name] = value;

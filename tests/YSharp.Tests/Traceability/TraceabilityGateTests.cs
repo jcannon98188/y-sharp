@@ -2,11 +2,13 @@ using System;
 using System.Linq;
 using Xunit;
 using YSharp.TestKit.Fixtures;
+using YSharp.TestKit.Gating;
 using YSharp.TestKit.Traceability;
 
 namespace YSharp.Tests.Traceability;
 
 /// <summary>The ADR 0010 gate: reads the real registry, ledger, fixtures, upstream sources and built test assemblies.</summary>
+[LibraryIndependent]
 public class TraceabilityGateTests
 {
     [Fact]
@@ -22,6 +24,8 @@ public class TraceabilityGateTests
             Entries = InventoryLoader.LoadEntries(root),
             Ledger = InventoryLoader.LoadLedger(root),
             Tests = TestScanner.Scan(assemblies),
+            Gates = TestScanner.ScanGates(assemblies),
+            Landed = Features.Landed.Select(f => f.ToString()).ToList(),
             Fixtures = InventoryLoader.LoadFixtureTags(root),
             UpstreamKeys = upstream,
             PendingMark = InventoryLoader.LoadHighWater(root),

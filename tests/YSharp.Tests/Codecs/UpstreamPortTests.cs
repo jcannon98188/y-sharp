@@ -11,6 +11,7 @@ using YSharp.TestKit.Rng;
 using YSharp.TestKit.Sim;
 using YSharp.TestKit.Traceability;
 using YSharp.TestKit.Assertions;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Codecs;
 
@@ -19,6 +20,7 @@ namespace YSharp.Tests.Codecs;
 /// assertions; the places where the public API of ADR 0008 has no equivalent are noted on the test. The three V1 documents of the
 /// compatibility tests are read from the pinned <c>yjs/tests/compatibility.tests.js</c> rather than copied, so they cannot drift.
 /// </summary>
+[Requires(Feature.V1)]
 public sealed class UpstreamPortTests
 {
     private static string Json(YValue v)
@@ -56,7 +58,7 @@ public sealed class UpstreamPortTests
     // ------------------------------------------------------------------ encoding.tests.js
 
     [Fact, PortOf("encoding.tests.js:testStructReferences", "ENC-22", "ENC-12")]
-    public void StructRefs_EveryContentRefSlot_DecodesAndReencodesUnchanged() => Stub.Run(() =>
+    public void StructRefs_EveryContentRefSlot_DecodesAndReencodesUnchanged()
     {
         // JS asserts the contentRefs table: 11 slots, ref 0 GC, 1 deleted, 2 JSON, 3 binary, 4 string, 5 embed, 6 format, 7 type,
         // 8 any, 9 doc, 10 reserved for Skip. The table is internal, so this checks each slot through the wire: every ref decodes
@@ -83,10 +85,11 @@ public sealed class UpstreamPortTests
             Assert.True(c.Reencoded == Hex.Of(doc.EncodeStateAsUpdate()), $"{c.Name}: re-encoded as {Hex.Of(doc.EncodeStateAsUpdate())}");
         }
         Malformed.AssertRejected("01 01 01 00 0b 01 01 74 00");
-    });
+    }
 
     [Fact, PortOf("encoding.tests.js:testPermanentUserData", "ENC-21")]
-    public void PermanentUserData_TwoUsersWithDeletions_RoundTripThroughUpdates() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.UserData)]
+    public void PermanentUserData_TwoUsersWithDeletions_RoundTripThroughUpdates()
     {
         // JS waits 10 ms so the setTimeout(0) work of PermanentUserData runs; the options seam flushes it synchronously.
         var options = new PermanentUserDataOptions { Defer = flush => flush() };
@@ -109,10 +112,11 @@ public sealed class UpstreamPortTests
         var pd3 = new PermanentUserData(ydoc3, options);
         pd3.SetUserMapping(ydoc3, ydoc3.ClientId, "user a");
         Assert.Equal("user a", pd3.GetUserByClientId(ydoc3.ClientId));
-    });
+    }
 
     [Fact, PortOf("encoding.tests.js:testDiffStateVectorOfUpdateIsEmpty", "ENC-09", "ENC-24")]
-    public void StateVectorOfUpdate_UpdateWithMissingPredecessors_IsEmpty() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.Events)]
+    public void StateVectorOfUpdate_UpdateWithMissingPredecessors_IsEmpty()
     {
         var ydoc = new Doc();
         byte[]? sv = null;
@@ -121,10 +125,11 @@ public sealed class UpstreamPortTests
         // should produce an update with an empty state vector (because previous ops are missing)
         ydoc.GetText().Insert(0, "a");
         Assert.True(sv is { Length: 1 } && sv[0] == 0);
-    });
+    }
 
     [Fact, PortOf("encoding.tests.js:testDiffStateVectorOfUpdateIgnoresSkips", "ENC-09", "ENC-24", "ENC-81")]
-    public void StateVectorOfUpdate_MergedUpdateWithSkips_IgnoresTheSkippedRange() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.Events)]
+    public void StateVectorOfUpdate_MergedUpdateWithSkips_IgnoresTheSkippedRange()
     {
         var ydoc = new Doc();
         var updates = new List<byte[]>();
@@ -136,7 +141,7 @@ public sealed class UpstreamPortTests
         var state = StateVector.Decode(Wire.StateVectorOfUpdate(update13));
         Assert.Equal(1L, state[ydoc.ClientId]);
         Assert.Single(state.Clients);
-    });
+    }
 
     // ------------------------------------------------------------------ compatibility.tests.js
 
@@ -160,31 +165,34 @@ public sealed class UpstreamPortTests
     }
 
     [Fact, PortOf("compatibility.tests.js:testArrayCompatibilityV1", "ENC-21", "ENC-11")]
-    public void Decode_OldV1ArrayDocument_YieldsTheStoredArray() => Stub.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void Decode_OldV1ArrayDocument_YieldsTheStoredArray()
     {
         var block = CompatBlock("testArrayCompatibilityV1");
         var expected = Regex.Match(block, @"JSON\.parse\('(.+)'\)").Groups[1].Value;
         var doc = LoadCompatDoc(block);
         Assert.Equal(Json(ParseJson(expected)), Json(doc.GetArray("array").ToJson()));
-    });
+    }
 
     [Fact, PortOf("compatibility.tests.js:testMapDecodingCompatibilityV1", "ENC-21", "ENC-11")]
-    public void Decode_OldV1MapDocument_YieldsTheStoredMap() => Stub.Run(() =>
+    [Requires(Feature.Map)]
+    public void Decode_OldV1MapDocument_YieldsTheStoredMap()
     {
         var block = CompatBlock("testMapDecodingCompatibilityV1");
         var expected = Regex.Match(block, @"\(\{(.+)\}\)\r?\n").Groups[1].Value;
         var doc = LoadCompatDoc(block);
         Assert.Equal(Json(ParseJson("{" + expected + "}")), Json(doc.GetMap("map").ToJson()));
-    });
+    }
 
     [Fact, PortOf("compatibility.tests.js:testTextDecodingCompatibilityV1", "ENC-21", "ENC-11", "ENC-12")]
-    public void Decode_OldV1TextDocument_YieldsTheStoredDelta() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.Array, Feature.V2)]
+    public void Decode_OldV1TextDocument_YieldsTheStoredDelta()
     {
         var block = CompatBlock("testTextDecodingCompatibilityV1");
         var expected = Regex.Match(block, @"const oldVal = (\[.+\])\r?\n").Groups[1].Value;
         var doc = LoadCompatDoc(block);
         Assert.Equal(Json(ParseJson(expected)), DeltaJson(doc.GetText("text")));
-    });
+    }
 
     // ------------------------------------------------------------------ updates.tests.js
 
@@ -228,7 +236,8 @@ public sealed class UpstreamPortTests
     private static string[] ArrayJson(YArray array) => array.ToArray().Select(e => Json(e.Value)).ToArray();
 
     [Fact, PortOf("updates.tests.js:testMergeUpdates", "ENC-23")]
-    public void MergeUpdates_ConcurrentArrayInserts_EqualsApplyingBothUpdates() => Stub.Run(() =>
+    [Requires(Feature.Array, Feature.Sync)]
+    public void MergeUpdates_ConcurrentArrayInserts_EqualsApplyingBothUpdates()
     {
         var sim = SimHarness.Init(Prng.Create(1), users: 3);
         var array0 = sim.Users[0].Doc.GetArray("array");
@@ -243,10 +252,12 @@ public sealed class UpstreamPortTests
             var merged = FromUpdates(sim.Users, enc);
             Assert.Equal(ArrayJson(array0), ArrayJson(merged.GetArray("array")));
         }
-    });
+    }
 
     [Fact, PortOf("updates.tests.js:testKeyEncoding", "ENC-76", "ENC-14")]
-    public void KeyEncoding_FormattedText_RoundTripsThroughEveryEncoder() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.Array, Feature.V2, Feature.Events)]
+    [Requires(Feature.Sync)]
+    public void KeyEncoding_FormattedText_RoundTripsThroughEveryEncoder()
     {
         var sim = SimHarness.Init(Prng.Create(1), users: 2);
         var text0 = sim.Users[0].Doc.GetText("text");
@@ -264,7 +275,7 @@ public sealed class UpstreamPortTests
             DeltaJson(text1));
 
         SimHarness.Compare(sim.Users);
-    });
+    }
 
     /// <summary>
     /// <c>checkUpdateCases</c>. Two parts of the JS helper have no public equivalent and are replaced by their public consequence:
@@ -320,7 +331,8 @@ public sealed class UpstreamPortTests
     }
 
     [Fact, PortOf("updates.tests.js:testMergeUpdates1", "ENC-23", "ENC-24", "ENC-81")]
-    public void MergeUpdates_SequentialArrayInserts_MatchesTheMergedDoc() => Stub.Run(() =>
+    [Requires(Feature.Array, Feature.Events)]
+    public void MergeUpdates_SequentialArrayInserts_MatchesTheMergedDoc()
     {
         foreach (var enc in Encoders())
         {
@@ -336,10 +348,11 @@ public sealed class UpstreamPortTests
 
             CheckUpdateCases(ydoc, updates, enc);
         }
-    });
+    }
 
     [Fact, PortOf("updates.tests.js:testMergeUpdates2", "ENC-23", "ENC-24", "ENC-81")]
-    public void MergeUpdates_InsertThenDelete_MatchesTheMergedDoc() => Stub.Run(() =>
+    [Requires(Feature.Array, Feature.Events)]
+    public void MergeUpdates_InsertThenDelete_MatchesTheMergedDoc()
     {
         foreach (var enc in Encoders())
         {
@@ -355,10 +368,11 @@ public sealed class UpstreamPortTests
 
             CheckUpdateCases(ydoc, updates, enc);
         }
-    });
+    }
 
     [Fact, PortOf("updates.tests.js:testMergePendingUpdates", "ENC-84", "ENC-21", "ENC-23")]
-    public void MergeUpdates_PendingOutOfOrderUpdates_AreMergedAndApplyCleanly() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.Events)]
+    public void MergeUpdates_PendingOutOfOrderUpdates_AreMergedAndApplyCleanly()
     {
         var yDoc = new Doc();
         var serverUpdates = new List<byte[]>();
@@ -392,5 +406,5 @@ public sealed class UpstreamPortTests
         _ = yDoc5.EncodeStateAsUpdate();
 
         Assert.Equal("nenor", yDoc5.GetText("textBlock").ToString());
-    });
+    }
 }

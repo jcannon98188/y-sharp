@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    The process host of the spike harness (ADR 0018 spike amendment, ADR 0023). The harness runs every workload in a fresh process, so it needs an
+    executable; this one replaces the deleted spike/YSharp.StoreSpike project. The harness, the driver interface and the driver adapters stay in
+    tests/YSharp.Tests/Allocation/Spike and are compiled into the test assembly, which sees the library's internals. This host references
+    nothing: it loads that assembly by path and runs one measurement, so the library grants no new InternalsVisibleTo.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>YSharp.StoreHarness</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <!-- ADR 0018 spike measurement settings: Release, TieredCompilation off, workstation GC. -->
+    <TieredCompilation>false</TieredCompilation>
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+  </PropertyGroup>
+</Project>

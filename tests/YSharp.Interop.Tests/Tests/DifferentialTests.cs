@@ -6,15 +6,17 @@ using Xunit;
 using YSharp.Interop.Generation;
 using YSharp.TestKit.Tiers;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Interop.Tests;
 
 /// <summary>
 /// The live differential (ADR 0012): FsCheck-generated ops scripts replayed on a Node child (the oracle) and on y-sharp, and the observations
 /// compared. Smoke tier: fixed seeds, about a minute for the tier. Nightly tier: random seeds, a time box, failing scripts uploaded. Until
-/// y-sharp exists the API stub answers <see cref="NotImplementedException"/> and every property skips (ADR 0019). The <c>[Covers]</c> lists
+/// the features it needs have landed, every property skips (ADR 0020). The <c>[Covers]</c> lists
 /// name the behaviours the generator really draws on, so the differential layer of those entries is reported (ADR 0010).
 /// </summary>
+[Requires(Feature.V1, Feature.V2, Feature.UpdateFunctions, Feature.V2Functions, Feature.Array, Feature.Map, Feature.Text, Feature.TextFormat, Feature.Events, Feature.Xml, Feature.Subdocs)]
 [NeedsNode]
 [Tier(Tier.Smoke)]
 public sealed class DifferentialTests(OracleHost host)
@@ -36,6 +38,22 @@ public sealed class DifferentialTests(OracleHost host)
     [Fact, Covers("DIFF-03", "SY-14", "SY-17", "SY-18")]
     public void DeliverySchedules_ReorderedDuplicatedOrDropped_ConvergeToTheSameState() =>
         DiffProperty.Check(host, "delivery-schedules", Schedules(), (run, plan) => run.CheckPlan(plan));
+
+    private static Arbitrary<TreePlan> Trees(Func<TreePlan, bool>? filter = null) =>
+        filter == null ? TreePlan.Arbitrary() : TreePlan.Arbitrary().Filter(filter);
+
+    [Fact, Covers("DIFF-01", "DIFF-03", "T-0.1", "T-0.8", "T-0.11", "STR-21", "STR-67")]
+    public void Differential_NestedTypesXmlAndSubdocs_ProduceEqualObservations() =>
+        DiffProperty.Check(host, "tree-scripts", Trees(), (run, plan) => run.CheckTree(plan));
+
+    [Fact, Covers("DIFF-01", "X-1", "X-2", "X-E2", "X-E5", "X-E7")]
+    public void Differential_XmlEdits_ProduceEqualDumpsAndEvents() =>
+        DiffProperty.Check(host, "xml-edits", Trees(p => p.Observe && p.Base.Concat(p.Edits).Count(e => e.Kind >= TreeEditKind.XmlInsertElement && e.Kind <= TreeEditKind.XmlRemoveAttribute) >= 2),
+            (run, plan) => run.CheckTree(plan), cases: 80);
+
+    [Fact, Covers("DIFF-01", "SUB-01", "SUB-02", "SUB-03", "SUB-04", "SUB-06")]
+    public void Differential_Subdocs_ProduceEqualStateEventsAndInspection() =>
+        DiffProperty.Check(host, "subdoc-edits", Trees(p => p.Base.Concat(p.Edits).Any(e => e.Kind == TreeEditKind.SubdocAdd)), (run, plan) => run.CheckTree(plan), cases: 80);
 
     [Fact, Covers("DIFF-02", "ENC-21", "ENC-27")]
     public void ApplyForeign_BytesOfOneSideApplyToTheOther_InV1AndV2() =>

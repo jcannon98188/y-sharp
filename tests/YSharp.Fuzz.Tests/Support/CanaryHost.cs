@@ -7,7 +7,7 @@ using Xunit;
 
 namespace YSharp.Fuzz;
 
-public enum CanaryVerdict { Passed, Failed, StackOverflow, Crashed, TimedOut, Stub, UnknownCase }
+public enum CanaryVerdict { Passed, Failed, StackOverflow, Crashed, TimedOut, UnknownCase }
 
 /// <summary>What a canary run did, classified from its exit code and output.</summary>
 internal sealed record CanaryRun(CanaryVerdict Verdict, int ExitCode, string Stdout, string Stderr)
@@ -74,23 +74,24 @@ internal static class CanaryHost
     public static CanaryRun Classify(int exitCode, string stdout, string stderr)
     {
         // .NET prints "Stack overflow." to stderr and aborts: STATUS_STACK_OVERFLOW on Windows, SIGABRT (134) or SIGSEGV (139) elsewhere
-        var overflow = stderr.Contains("Stack overflow", StringComparison.OrdinalIgnoreCase) || exitCode == unchecked((int)0xC00000FD);
+        // On Windows an overflow that hits the guard page while the runtime cannot handle it dies silently with STATUS_ACCESS_VIOLATION;
+        // managed code reports any other access violation as an exception on stderr, so a silent one is the overflow (seen on CI)
+        var overflow = stderr.Contains("Stack overflow", StringComparison.OrdinalIgnoreCase) || exitCode == unchecked((int)0xC00000FD) ||
+                       (exitCode == unchecked((int)0xC0000005) && stderr.Length == 0);
         if (overflow) return new CanaryRun(CanaryVerdict.StackOverflow, exitCode, stdout, stderr);
         return exitCode switch
         {
             0 when stdout.Contains("OK", StringComparison.Ordinal) => new CanaryRun(CanaryVerdict.Passed, exitCode, stdout, stderr),
             1 => new CanaryRun(CanaryVerdict.Failed, exitCode, stdout, stderr),
             2 => new CanaryRun(CanaryVerdict.UnknownCase, exitCode, stdout, stderr),
-            3 => new CanaryRun(CanaryVerdict.Stub, exitCode, stdout, stderr),
             _ => new CanaryRun(CanaryVerdict.Crashed, exitCode, stdout, stderr),
         };
     }
 
-    /// <summary>Asserts the canary case passed, naming a stack overflow or crash as such; skips on the stub.</summary>
+    /// <summary>Asserts the canary case passed, naming a stack overflow or crash as such.</summary>
     public static void AssertPasses(string caseName, int? depth = null, TimeSpan? timeout = null)
     {
         var run = Run(caseName, depth, timeout);
-        if (run.Verdict == CanaryVerdict.Stub) Assert.Skip(Stub.Reason);
         Assert.True(run.Verdict == CanaryVerdict.Passed, $"HOS-DEEP canary '{caseName}' (depth {depth?.ToString() ?? "default"}): {run}");
     }
 }

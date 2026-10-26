@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.TestKit.Traceability;
 
@@ -26,6 +27,26 @@ public static class TestScanner
                     if (tag != null) tags.Add(tag);
                 }
         return tags;
+    }
+
+    /// <summary>Every test with its feature requirement and library-independent mark (ADR 0020), whether or not it carries registry tags.</summary>
+    public static List<TestGate> ScanGates(IEnumerable<Assembly> assemblies, bool includeSamples = false)
+    {
+        var gates = new List<TestGate>();
+        foreach (var asm in assemblies)
+            foreach (var type in SafeTypes(asm).Where(t => t.IsClass && (includeSamples || !IsSample(t))))
+                foreach (var m in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly))
+                    if (IsTest(m))
+                        gates.Add(new TestGate(Name(type, m), FeatureGate.Required(m).Select(f => f.ToString()).ToArray(), IsLibraryIndependent(m)));
+        return gates;
+    }
+
+    private static bool IsLibraryIndependent(MethodInfo m)
+    {
+        if (m.GetCustomAttributes<LibraryIndependentAttribute>(true).Any()) return true;
+        for (var t = m.DeclaringType; t != null; t = t.DeclaringType)
+            if (t.GetCustomAttributes<LibraryIndependentAttribute>(true).Any()) return true;
+        return false;
     }
 
     public static TestTag Read(MethodInfo m) => ReadTag(m.DeclaringType!.Assembly, m.DeclaringType, m) ?? new TestTag(Name(m.DeclaringType, m), CoverLayer.Unit, new string[0], new string[0], new string[0]);
@@ -124,6 +145,7 @@ public static class MatrixWriter
         {
             pendingEntries = report.PendingEntries,
             pendingLedgerRows = report.PendingLedgerRows,
+            landedFeatures = report.Landed,
             violations = report.Violations,
             rows = report.Matrix,
         }, new JsonSerializerOptions { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }), new UTF8Encoding(false));
@@ -136,6 +158,7 @@ public static class MatrixWriter
         sb.AppendLine("# Traceability matrix").AppendLine();
         sb.AppendLine($"- Registry entries: {report.Matrix.Count} ({report.Matrix.Count(r => r.Status == "active")} active, {report.PendingEntries} pending, {report.Matrix.Count(r => r.Status == "excluded")} excluded, {report.Matrix.Count(r => r.Status == "retired")} retired)");
         sb.AppendLine($"- Pending ledger rows: {report.PendingLedgerRows}");
+        sb.AppendLine($"- Landed features: {(report.Landed.Count == 0 ? "none" : string.Join(", ", report.Landed))}");
         sb.AppendLine($"- Violations: {report.Violations.Count}");
         foreach (var n in notes) sb.AppendLine($"- Note: {n}");
         sb.AppendLine().AppendLine("## By owner").AppendLine().AppendLine("| Spec | Entries | Active | Pending |").AppendLine("|---|---|---|---|");

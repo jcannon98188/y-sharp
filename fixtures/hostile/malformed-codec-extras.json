@@ -22,6 +22,9 @@
       "ENC-69",
       "ENC-22",
       "ENC-56",
+      "ENC-86",
+      "ENC-87",
+      "ENC-88",
       "Q07"
     ],
     "versions": {"yjs":"13.6.33","lib0":"0.2.99","y-protocols":"1.0.7"},
@@ -156,13 +159,15 @@
           "name": "delete-set-len-0",
           "encoding": "v1",
           "bytes": {"$":"bytes","hex":"000105010000"},
+          "expect": ["ok"],
           "outcome": "throws",
           "error": "Error",
           "pendingStructs": false,
           "pendingDs": false,
           "sv": {"$":"bytes","hex":"00"},
           "doc": [["t",{"kind":"text","delta":[]}]],
-          "classification": "match"
+          "classification": "diverge",
+          "divergence": "ENC-51"
         },
         {
           "name": "delete-set-two-clients-one-truncated",
@@ -175,6 +180,101 @@
           "sv": {"$":"bytes","hex":"00"},
           "doc": [["t",{"kind":"text","delta":[]}]],
           "classification": "match"
+        },
+        {
+          "name": "delete-set-pending-out-of-order",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"0001770262632801"},
+          "expect": ["ok"],
+          "outcome": "ok",
+          "pendingStructs": false,
+          "pendingDs": true,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "diverge",
+          "divergence": "ENC-86"
+        },
+        {
+          "name": "v2-format-value-bigint",
+          "encoding": "v2",
+          "bytes": {
+            "$": "bytes",
+            "hex": "00020002024101020002000506008400860704746278624102010100000103007a00000000000000057e00"
+          },
+          "expect": ["Malformed"],
+          "outcome": "ok",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"010103"},
+          "doc": [
+            [
+              "t",
+              {
+                "kind": "text",
+                "delta": [{"insert":"x","attributes":{"$":"obj","pairs":[["b",{"$":"bigint","v":"5"}]]}}]
+              }
+            ]
+          ],
+          "classification": "diverge",
+          "divergence": "ENC-87"
+        },
+        {
+          "name": "v2-format-value-undefined",
+          "encoding": "v2",
+          "bytes": {"$":"bytes","hex":"00020002024101020002000506008400860704746278624102010100000103007f7e00"},
+          "expect": ["Malformed"],
+          "outcome": "ok",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"010103"},
+          "doc": [
+            [
+              "t",
+              {"kind":"text","delta":[{"insert":"x","attributes":{"$":"obj","pairs":[["b",{"$":"undefined"}]]}}]}
+            ]
+          ],
+          "classification": "diverge",
+          "divergence": "ENC-87"
+        },
+        {
+          "name": "item-zero-length-string",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"01010100040101740000"},
+          "expect": ["Malformed"],
+          "outcome": "ok",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"010100"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "diverge",
+          "divergence": "ENC-88"
+        },
+        {
+          "name": "item-zero-length-deleted",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"01010100010101740000"},
+          "expect": ["Malformed"],
+          "outcome": "throws",
+          "error": "Error",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"010100"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "diverge",
+          "divergence": "ENC-88"
+        },
+        {
+          "name": "item-zero-length-any",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"01010100080101740000"},
+          "expect": ["Malformed"],
+          "outcome": "ok",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"010100"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "diverge",
+          "divergence": "ENC-88"
         },
         {
           "name": "any-empty-object-from-flattened-date",

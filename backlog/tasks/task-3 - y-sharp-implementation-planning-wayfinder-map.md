@@ -1,10 +1,10 @@
 ---
 id: TASK-3
 title: 'y-sharp implementation planning: wayfinder map'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-10-24 16:51'
-updated_date: '2026-10-24 19:36'
+updated_date: '2026-10-24 19:43'
 labels:
   - 'wayfinder:map'
 dependencies: []
@@ -38,16 +38,20 @@ A spec-ready **y-sharp implementation plan** in Backlog: a parent task whose chi
 - [Module boundaries and file ownership in src/YSharp](TASK-3.6): module folders per milestone; storage hidden behind an ItemRef handle; generic V1/V2 codec seam; partial-method lifecycle hooks; one owner per file, partial classes for shared public types; an M0 layout-skeleton spec (ADR 0021).
 - [M0 spike design](TASK-3.5): both models spiked local-only over a shared content layer behind a driver the real store later reuses; bytes per operation, median of 3; eliminate failures, prefer headroom, then simplicity (ADR 0018 spike amendment, ADR 0009 wording).
 - [Rules for changing the suite during implementation](TASK-3.7): free / with-evidence / owner levels; the oracle decides disputed tests; new divergences, retirements, budget raises and any weakening need the owner; suite: commits and a Suite changes list in every spec's DoD (ADR 0022).
+- [Package the map into the implementation plan](TASK-3.8): 44 specs under TASK-4 across milestones M0-M7, with gate specs per budgeted milestone, the first live differential at the M4 gate, all differential generators in scope, model: and hitl labels, and TASK-2.2's sim criterion moved to TASK-4.38.
 
 ## Not yet specified
 
-- Which differential generators (XML, nested types, subdocs, `sync.*`, awareness) and which extra compared fields (`events`, `structs`, `ds`) get built, and at which milestone.
-- The spec template: what each plan task contains beyond acceptance criteria (owned IDs, test files, seams, budgets, file ownership) and the per-spec definition of done.
-- Closing TASK-2.2 and TASK-2 once the plan task that absorbs the sim-harness criterion exists.
-- How the reflection seams (`DocSeams`, `UndoSeams`, `ScheduleSeam` adapter) and `ISimInternals` are wired as the implementation lands.
+Nothing. The destination is reached: see TASK-4.
 
 ## Out of scope
 
 - NuGet packaging, versioning and publishing.
 - Yjs v14.
 <!-- SECTION:DESCRIPTION:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Destination reached: the implementation plan is TASK-4 (44 specs, milestones m-0 to m-7). Decisions are in ADRs 0005, 0009, 0018, 0020, 0021 and 0022 and in two research notes.
+<!-- SECTION:FINAL_SUMMARY:END -->

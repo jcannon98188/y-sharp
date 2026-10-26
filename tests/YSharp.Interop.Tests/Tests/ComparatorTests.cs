@@ -8,10 +8,12 @@ using System.Threading;
 using Xunit;
 using YSharp.TestKit.Fixtures;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Interop.Tests;
 
 /// <summary>Equivalence of observations and the first-difference report (ADR 0012 "Compared", "Reporting"). No Node needed.</summary>
+[LibraryIndependent]
 public sealed class ComparatorTests
 {
     private static JsonNode Bytes(string hex) => JsonNode.Parse($"{{\"$\":\"bytes\",\"hex\":\"{hex}\"}}")!;
@@ -64,7 +66,7 @@ public sealed class ComparatorTests
     }
 
     [Fact, Covers("DIFF-01")]
-    public void AnObservationOnlyOneSideProduced_IsADifference_ButExtraOracleObservationsAreIgnored()
+    public void AnObservationOnlyOneSideProduced_IsADifference_ButOnesNeitherComparesAreIgnored()
     {
         var a = Observations();
         var b = Observations();
@@ -73,9 +75,18 @@ public sealed class ComparatorTests
         Assert.Equal("sv", d!.Observation);
         Assert.Contains("missing in y-sharp", d.Detail);
 
-        var withEvents = Observations();
-        withEvents["events"] = new JsonObject { ["api"] = "x", ["value"] = new JsonArray() };
-        Assert.Null(ObservationDiff.Find(withEvents, Observations()));
+        // events, structs and ds (Spec 40) and awareness (Spec 41) are compared too: events the oracle fired and y-sharp did not are a difference
+        foreach (var name in new[] { "events", "awareness", "structs", "ds" })
+        {
+            var withExtra = Observations();
+            withExtra[name] = new JsonObject { ["api"] = "x", ["value"] = new JsonArray() };
+            Assert.Equal(name, ObservationDiff.Find(withExtra, Observations())!.Observation);
+        }
+
+        // an observation outside the compared list (one only the oracle can make, such as an undo stack dump) is not
+        var withOther = Observations();
+        withOther["undoStack"] = new JsonObject { ["api"] = "x", ["value"] = new JsonObject() };
+        Assert.Null(ObservationDiff.Find(withOther, Observations()));
     }
 
     [Fact, Covers("DIFF-01")]
@@ -120,6 +131,19 @@ public sealed class ComparatorTests
         docs["b"] = docs["a"]!.DeepClone();
         state["b"]!["v1"]!["full"] = Bytes("0101");
         Assert.Contains("encoded state of b", DiffRun.Convergence(obs, "the oracle")!.Detail);
+
+        // Yjs leaves GC runs from separate transactions unmerged on one replica: equal stores with the runs joined still converge
+        static JsonNode Gc(int clock, int len) => JsonNode.Parse($"{{\"id\":[101,{clock}],\"len\":{len},\"kind\":\"gc\"}}")!;
+        static JsonNode Store(params JsonNode[] structs) => new JsonArray(new JsonArray(101, new JsonArray(structs)));
+        var item = JsonNode.Parse("{\"id\":[101,5],\"len\":1,\"kind\":\"item\",\"parent\":\"t\",\"deleted\":false}")!;
+        obs["structs"] = new JsonObject { ["value"] = new JsonObject { ["a"] = Store(Gc(1, 2), Gc(3, 2), item.DeepClone()), ["b"] = Store(Gc(1, 4), item.DeepClone()) } };
+        obs["ds"] = new JsonObject { ["value"] = new JsonObject { ["a"] = JsonNode.Parse("[[101,[[1,4]]]]"), ["b"] = JsonNode.Parse("[[101,[[1,4]]]]") } };
+        Assert.Null(DiffRun.Convergence(obs, "the oracle"));
+        obs["ds"]!["value"]!["b"] = JsonNode.Parse("[[101,[[1,5]]]]");
+        Assert.Contains("encoded state of b", DiffRun.Convergence(obs, "the oracle")!.Detail);
+        obs["ds"]!["value"]!["b"] = JsonNode.Parse("[[101,[[1,4]]]]");
+        obs["structs"]!["value"]!["b"] = Store(Gc(1, 3), item.DeepClone());
+        Assert.Contains("encoded state of b", DiffRun.Convergence(obs, "the oracle")!.Detail);
     }
 
     // ------------------------------------------------------------------ outcome classes and normalisers
@@ -148,6 +172,62 @@ public sealed class ComparatorTests
         Assert.False(n.Claims(Case(MutationKind.Truncate, oracle: true, sharp: false, validLength: 12, mutatedLength: 12)), "a prefix must be proper");
     }
 
+    [Fact, Covers("DIFF-05", "ENC-64")]
+    public void Normaliser_LenientColumnEnd_ClaimsOnlyWhenTheOracleReadPastTheEnd()
+    {
+        var n = new LenientColumnEndNormaliser();
+        var flip = Case(MutationKind.FlipByte, oracle: true, sharp: false, validLength: 20, mutatedLength: 20);
+        Assert.True(n.Claims(flip with { OracleReadPastEnd = true }));
+        Assert.False(n.Claims(flip), "a mutation the oracle decodes in bounds is not the EOF divergence");
+        Assert.False(n.Claims(Case(MutationKind.FlipByte, oracle: true, sharp: true) with { OracleReadPastEnd = true }), "both accepting is not a divergence");
+        Assert.False(n.Claims(Case(MutationKind.FlipByte, oracle: false, sharp: false) with { OracleReadPastEnd = true }), "both rejecting is the match case");
+        Assert.False(n.Claims(Case(MutationKind.FlipByte, oracle: true, sharp: false, unchanged: false) with { OracleReadPastEnd = true }), "a rejected update must leave y-sharp unchanged");
+    }
+
+    [Fact, Covers("DIFF-05", "ENC-51")]
+    public void Normaliser_ZeroLengthDeleteRange_ClaimsOnlyTheReEncodeRejection()
+    {
+        var n = new ZeroLengthDeleteRangeNormaliser();
+        var insert = Case(MutationKind.InsertByte, oracle: false, sharp: true, validLength: 20, mutatedLength: 21);
+        Assert.True(n.Claims(insert with { OracleZeroLengthDeleteRange = true }));
+        Assert.False(n.Claims(insert), "any other oracle rejection that y-sharp accepts is a bug");
+        Assert.False(n.Claims(Case(MutationKind.InsertByte, oracle: false, sharp: false) with { OracleZeroLengthDeleteRange = true }), "both rejecting is the match case");
+        Assert.False(n.Claims(Case(MutationKind.InsertByte, oracle: true, sharp: true) with { OracleZeroLengthDeleteRange = true }), "both accepting is not a divergence");
+    }
+
+    [Fact, Covers("DIFF-05", "ENC-86")]
+    public void Normaliser_UnsortedPendingDeleteSet_ClaimsOnlyWhenBothAcceptOutOfOrderParkedRanges()
+    {
+        var n = new UnsortedPendingDeleteSetNormaliser();
+        var both = Case(MutationKind.FlipByte, oracle: true, sharp: true, validLength: 20, mutatedLength: 20);
+        Assert.True(n.Claims(both with { OracleUnsortedPendingDeleteSet = true }));
+        Assert.False(n.Claims(both), "a state difference without out-of-order parked ranges is a bug");
+        Assert.False(n.Claims(Case(MutationKind.FlipByte, oracle: true, sharp: false) with { OracleUnsortedPendingDeleteSet = true }), "y-sharp rejecting is another class");
+        Assert.Equal(new[] { "sv", "doc" }, UnsortedPendingDeleteSetNormaliser.StillCompared);
+    }
+
+    [Fact, Covers("DIFF-05", "Q15")]
+    public void Normaliser_SelfDependentStruct_ClaimsOnlyAParkedSelfDependency()
+    {
+        var n = new SelfDependentStructNormaliser();
+        var rejects = Case(MutationKind.InsertByte, oracle: true, sharp: false, validLength: 20, mutatedLength: 21);
+        Assert.True(n.Claims(rejects with { OracleSelfDependentPending = true }));
+        Assert.False(n.Claims(rejects), "any other y-sharp rejection of an update the oracle accepts is a bug");
+        Assert.False(n.Claims(Case(MutationKind.InsertByte, oracle: true, sharp: false, unchanged: false) with { OracleSelfDependentPending = true }), "a rejection must change nothing");
+        Assert.False(n.Claims(Case(MutationKind.InsertByte, oracle: true, sharp: true) with { OracleSelfDependentPending = true }), "both accepting is not this divergence");
+    }
+
+    [Fact, Covers("DIFF-05", "ENC-88")]
+    public void Normaliser_ZeroLengthItem_ClaimsOnlyAnUnchangedRejection()
+    {
+        var n = new ZeroLengthItemNormaliser();
+        var rejects = Case(MutationKind.FlipByte, oracle: true, sharp: false, validLength: 20, mutatedLength: 20);
+        Assert.True(n.Claims(rejects with { OracleZeroLengthItem = true }));
+        Assert.False(n.Claims(rejects), "any other y-sharp rejection of an update the oracle accepts is a bug");
+        Assert.False(n.Claims(Case(MutationKind.FlipByte, oracle: true, sharp: false, unchanged: false) with { OracleZeroLengthItem = true }), "a rejection must change nothing");
+        Assert.False(n.Claims(Case(MutationKind.FlipByte, oracle: true, sharp: true) with { OracleZeroLengthItem = true }), "both accepting is not this divergence");
+    }
+
     [Fact, Covers("DIFF-05")]
     public void Normaliser_EveryOne_NamesRegisteredInventoryEntries()
     {
@@ -167,10 +247,12 @@ public sealed class ComparatorTests
     {
         Assert.Equal("lenient-truncation", Normalisers.Claim(Case(MutationKind.Truncate, true, false))!.Key);
         Assert.Null(Normalisers.Claim(Case(MutationKind.DeleteByte, true, false)));
+        Assert.Equal("lenient-column-end", Normalisers.Claim(Case(MutationKind.DeleteByte, true, false) with { OracleReadPastEnd = true })!.Key);
     }
 }
 
 /// <summary>Candidates, reports and replay input (ADR 0012 "Reporting"). No Node needed.</summary>
+[LibraryIndependent]
 public sealed class ReportingTests : IDisposable
 {
     private readonly string _dir = Path.Combine(Path.GetTempPath(), "ysharp-reporting-" + Guid.NewGuid().ToString("N"));
@@ -270,6 +352,7 @@ public sealed class ReportingTests : IDisposable
 }
 
 /// <summary>The y-sharp side's case timeout and error mapping (ADR 0012 "Hangs"). No Node needed.</summary>
+[LibraryIndependent]
 public sealed class SharpSideGuardTests
 {
     [Fact, Covers("DIFF-07")]
@@ -307,11 +390,11 @@ public sealed class SharpSideGuardTests
     }
 
     [Fact, Covers("DIFF-01")]
-    public void ApiStub_WhileUnimplemented_IsReportedSoTheTestSkips()
+    [Requires(Feature.Events)]
+    public void AGeneratedScript_IsAcceptedByTheInterpreter_NeverReportedAsAScriptError()
     {
         var reply = SharpSide.Run(ScriptPlanScript());
-        // before the implementation exists the stub throws NotImplementedException (ADR 0019); after, the script runs
-        Assert.True(reply.Status is SharpStatus.Stub or SharpStatus.Ok, $"{reply.Status}: {reply.Message}");
+        Assert.NotEqual(SharpStatus.ScriptError, reply.Status);   // Ok once the library works; a Fault only while it does not
     }
 
     private static string ScriptPlanScript() => Generation.ScriptPlan.Generate(3).ToScript().ToJsonString();

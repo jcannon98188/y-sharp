@@ -4,6 +4,7 @@ using System.Linq;
 using Xunit;
 using YSharp.TestKit.Traceability;
 using YSharp.TestKit.Assertions;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Structs;
 
@@ -12,13 +13,15 @@ namespace YSharp.Tests.Structs;
 /// by the callers, so they are asserted as "held pending / ignored instead of failing"; the JS undefined-behaviour sites
 /// (TypeError) become defined errors under ADR 0005. Hostile-input breadth belongs to Spec 11.
 /// </summary>
+[Requires(Feature.Integrate)]
 public sealed class ErrorPathTests
 {
     private static string Text(Doc d) => d.GetText("t").ToString();
 
     [Fact]
     [Covers("STR-69", "STR-72")]
-    public void TheUnexpectedCaseSites_AreGuardedByTheirCallers_ThePayloadWaitsOrIsIgnored() => Impl.Run(() =>
+    [Requires(Feature.V1)]
+    public void TheUnexpectedCaseSites_AreGuardedByTheirCallers_ThePayloadWaitsOrIsIgnored()
     {
         // addStruct clock gap and findIndexSS miss: a struct beyond the known state, and a delete range for an unknown client.
         var gap = Net.Mk(1);
@@ -35,11 +38,12 @@ public sealed class ErrorPathTests
         var skip = Net.Mk(1);
         Assert.True(skip.TryApplyUpdate(Hex.Bytes("010205000a0204010174017900")).Ok);
         Assert.DoesNotContain(StructsProbe.All(skip), s => s.Kind == "skip");
-    });
+    }
 
     [Fact]
     [Covers("STR-70")]
-    public void StructsThatCannotBeSplit_NeverNeedToBe_EvenWhenAPeerSyncsFromEveryIntermediateState() => Impl.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Text, Feature.Array, Feature.Map)]
+    public void StructsThatCannotBeSplit_NeverNeedToBe_EvenWhenAPeerSyncsFromEveryIntermediateState()
     {
         var a = Net.Mk(1);
         var ups = Net.Capture(a);
@@ -56,7 +60,7 @@ public sealed class ErrorPathTests
             Net.Sync(a, d);                                                                                       // the diff may start anywhere between structs
             Assert.Equal(Hex.Of(a.EncodeStateAsUpdate()), Hex.Of(d.EncodeStateAsUpdate()));
         }
-    });
+    }
 
     [Theory]
     [InlineData("01 01 05 00 0b 01 01 74 00")]               // content ref 11: JS indexes an undefined table slot (TypeError)
@@ -65,7 +69,8 @@ public sealed class ErrorPathTests
     [InlineData("01 01 05 00 00 03")]                        // delete set missing at the end of the update
     [Covers("STR-71")]
     [Diverges("STR-71", adr: "0005")]
-    public void JsUndefinedBehaviourSites_BecomeDefinedErrors_AndTheDocumentIsUntouched(string hex) => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void JsUndefinedBehaviourSites_BecomeDefinedErrors_AndTheDocumentIsUntouched(string hex)
     {
         var d = Net.Mk(1);
         d.GetText("t").Insert(0, "x");
@@ -79,12 +84,13 @@ public sealed class ErrorPathTests
         Assert.Equal(before, Hex.Of(d.EncodeStateAsUpdate()));
         Assert.False(d.IsFaulted);
         Assert.Throws<YDecodeException>(() => d.ApplyUpdate(Hex.Bytes(hex.Replace(" ", ""))));
-    });
+    }
 
     [Fact]
     [Covers("STR-71")]
     [Diverges("STR-71", adr: "0005")]
-    public void AStructWhoseParentIsNotAType_IsRejected_WhileTheRestOfTheUpdateApplies() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void AStructWhoseParentIsNotAType_IsRejected_WhileTheRestOfTheUpdateApplies()
     {
         // JS turns this struct into a GC without complaint; ADR 0005 rejects it (and anything depending on it) and keeps going.
         var d = Net.Mk(1);
@@ -95,11 +101,12 @@ public sealed class ErrorPathTests
         Assert.Equal("x", Text(d));
         Assert.False(d.IsFaulted);
         Assert.DoesNotContain(StructsProbe.All(d), s => s.Client == 5);
-    });
+    }
 
     [Fact]
     [Covers("STR-72")]
-    public void SilentlyAcceptedCases_AnyInput_StayAccepted() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void SilentlyAcceptedCases_AnyInput_StayAccepted()
     {
         var a = Net.Mk(1);
         a.GetText("t").Insert(0, "ab");
@@ -115,17 +122,18 @@ public sealed class ErrorPathTests
         Assert.True(d.TryApplyUpdate(update).Ok);
         Assert.Equal("ab", Text(d));
 
-        // bit 6 (parentSub) is ignored when an origin exists
+        // bit 6 (parentSub) is ignored when an origin exists (the origin is e's own "x", client 3 clock 0)
         var e = Net.Mk(3);
         e.GetText("t").Insert(0, "x");
-        Assert.True(e.TryApplyUpdate(Hex.Bytes("01010500a40100017900")).Ok);
+        Assert.True(e.TryApplyUpdate(Hex.Bytes("01010500a40300017900")).Ok);
         Assert.Equal("xy", Text(e));
-    });
+    }
 
     [Fact]
     [Covers("STR-73")]
     [Diverges("STR-73", adr: "0005")]
-    public void AnObserverThatThrows_DoesNotUnwindThroughTheMutation_AndEveryoneElseStillRuns() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Events)]
+    public void AnObserverThatThrows_DoesNotUnwindThroughTheMutation_AndEveryoneElseStillRuns()
     {
         // JS (pinned Yjs): observer 1 throws, observer 2 still runs, the update is emitted, and the FIRST error is rethrown
         // from the mutating call. y-sharp contains the fault instead (ADR 0005, ERR-13/14).
@@ -144,5 +152,5 @@ public sealed class ErrorPathTests
         Assert.Equal(new[] { "observer 1", "observer 2", "update" }, log);
         Assert.Equal("x", Text(a));
         Assert.Equal("o1", Assert.Single(faults).Message);
-    });
+    }
 }

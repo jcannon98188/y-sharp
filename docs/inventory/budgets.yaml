@@ -3,26 +3,26 @@
 # Initial population (TASK-2.3): every entry starts pending with an owning spec (ADR 0019). Fields are best-effort; the owning spec refines them.
 
 - id: BUD-01
-  title: "Uncontended Transact/ReadTransact with a static lambda allocates zero bytes"
+  title: "Uncontended Transact/ReadTransact with a static lambda allocates at most its recorded limit"
   source: "docs/adr/0009-allocation-and-memory-budgets.md:1"
   kind: y-sharp-own
   layers: [unit]
   wire: false
   owner: 14
-  status: pending
+  status: active
   ref: "adr 0009"
-  note: "BUD-01..11 are the eleven named hot paths; BUD-12..14 are the other ADR 0009 budgets."
+  note: "BUD-01..11 are the eleven named hot paths; BUD-12..14 are the other ADR 0009 budgets. active (TASK-4.12): bounded, not zero, by owner decision (option A): the body receives a fresh 24-byte Transaction over pooled state so a kept reference stays stale (CC-9). Measured 24 bytes per operation in Release for Transact and ReadTransact; limit 30 (plus 25%)."
 
 - id: BUD-02
-  title: "TryTransact allocates zero bytes, also when contended"
+  title: "TryTransact allocates at most its recorded limit uncontended, and zero bytes when contended"
   source: "docs/adr/0009-allocation-and-memory-budgets.md:1"
   kind: y-sharp-own
   layers: [unit]
   wire: false
   owner: 14
-  status: pending
+  status: active
   ref: "adr 0009"
-  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
+  note: "active (TASK-4.12): bounded by owner decision (option A), as BUD-01. Measured 24 bytes per operation uncontended (limit 30, plus 25%) and 0 contended (limit 0) in Release."
 
 - id: BUD-03
   title: "Scalar YValue reads and AttributeEquals allocate zero bytes"
@@ -31,31 +31,31 @@
   layers: [unit]
   wire: false
   owner: 14
-  status: pending
+  status: active
   ref: "adr 0009"
-  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
+  note: "active (TASK-4.9): the test measures 0 bytes per operation in Release, the zero budget of ADR 0009."
 
 - id: BUD-04
-  title: "Event dispatch with no handlers allocates zero bytes"
+  title: "Event dispatch with no handlers stays within its recorded limit"
   source: "docs/adr/0009-allocation-and-memory-budgets.md:1"
   kind: y-sharp-own
   layers: [unit]
   wire: false
   owner: 14
-  status: pending
+  status: active
   ref: "adr 0009"
-  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
+  note: "active (TASK-4.27), bounded by owner sign-off (2026-10-26; TASK-8 tries for zero after TASK-5): every insert allocates an Item and every transaction its Transaction (BUD-01 option A), so zero is out of reach. Measured 215 bytes per operation in Release; limit plus 25%. TASK-4.28 re-measures."
 
 - id: BUD-05
-  title: "A commit with no Update subscriber allocates zero bytes"
+  title: "A commit with no Update subscriber stays within its recorded limit"
   source: "docs/adr/0009-allocation-and-memory-budgets.md:1"
   kind: y-sharp-own
   layers: [unit]
   wire: false
   owner: 14
-  status: pending
+  status: active
   ref: "adr 0009"
-  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
+  note: "active (TASK-4.27), bounded by owner sign-off (2026-10-26; TASK-8 tries for zero after TASK-5): every insert allocates an Item and every transaction its Transaction (BUD-01 option A), so zero is out of reach. Measured 974 bytes per operation in Release; limit plus 25%. TASK-4.28 re-measures."
 
 - id: BUD-06
   title: "EncodeStateAsUpdate into a pre-sized writer allocates zero bytes"
@@ -64,20 +64,20 @@
   layers: [unit]
   wire: false
   owner: 14
-  status: pending
+  status: active
   ref: "adr 0009"
-  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
+  note: "Active at the M2 gate (TASK-4.17): measured 0 bytes per call in Release (CodecBudgetTests, a populated doc built from one V1 update); HotPathBudgetTests checks the same path once Text, Array and Map land."
 
 - id: BUD-07
-  title: "A one-character YText.Insert at the end allocates zero bytes"
+  title: "A one-character YText.Insert at the end stays within its recorded limit"
   source: "docs/adr/0009-allocation-and-memory-budgets.md:1"
   kind: y-sharp-own
   layers: [unit]
   wire: false
   owner: 14
-  status: pending
+  status: active
   ref: "adr 0009"
-  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
+  note: "active (TASK-4.27), bounded by owner sign-off (2026-10-26; TASK-8 tries for zero after TASK-5): every insert allocates an Item and every transaction its Transaction (BUD-01 option A), so zero is out of reach. Measured 606 bytes per operation in Release; limit plus 25%. TASK-4.28 re-measures."
 
 - id: BUD-08
   title: "TryApplyUpdate (V1 and V2) stays within a bounded allocation budget"
@@ -86,9 +86,9 @@
   layers: [unit]
   wire: false
   owner: 14
-  status: pending
+  status: active
   ref: "adr 0009"
-  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
+  note: "Active at the M3 gate (TASK-4.20): measured 1069 bytes per call in Release for V1 and V2 (CodecBudgetTests, one-character inserts applied one update at a time), recorded with 25% headroom; HotPathBudgetTests checks the same path once Text lands."
 
 - id: BUD-09
   title: "Push and Set of scalars stay within a bounded allocation budget"
@@ -97,9 +97,9 @@
   layers: [unit]
   wire: false
   owner: 14
-  status: pending
+  status: active
   ref: "adr 0009"
-  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
+  note: "TASK-4.28, M4 gate: recorded from Release measurements (Push 128 bytes per call, Set 200) plus 25% headroom."
 
 - id: BUD-10
   title: "A sync Step1/Step2 round trip stays within a bounded allocation budget"
@@ -108,9 +108,9 @@
   layers: [unit]
   wire: false
   owner: 14
-  status: pending
+  status: active
   ref: "adr 0009"
-  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
+  note: "TASK-4.37, M6 gate: recorded from Release measurements (1464 bytes per round trip) plus 25% headroom."
 
 - id: BUD-11
   title: "Awareness encode and apply stay within a bounded allocation budget"
@@ -119,9 +119,9 @@
   layers: [unit]
   wire: false
   owner: 14
-  status: pending
+  status: active
   ref: "adr 0009"
-  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
+  note: "TASK-4.37, M6 gate: recorded from Release measurements (Encode 376 bytes, Apply 704) plus 25% headroom."
 
 - id: BUD-12
   title: "Hostile input of N bytes allocates at most k*N plus a fixed amount"
@@ -130,9 +130,9 @@
   layers: [unit]
   wire: false
   owner: 14
-  status: pending
+  status: active
   ref: "adr 0009"
-  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
+  note: "Active at the M7 gate (TASK-4.42): k = 64 and 1 MiB fixed, the fuzz guard's bound (ADR 0013). Measured in Release over fixtures/hostile at most 56.5 bytes per input byte above the fixed MiB (HostileAllocationTests); headroom 16%, under the usual 25%, owner sign-off 2026-10-26."
 
 - id: BUD-13
   title: "Managed heap per item after forced collection does not exceed the figure Yjs produced on the same workload (1M text inserts, 1M array pushes, 100k map keys)"
@@ -141,9 +141,9 @@
   layers: [unit]
   wire: false
   owner: 14
-  status: pending
+  status: active
   ref: "adr 0009"
-  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
+  note: "Active at the release gate (TASK-4.44). Ceiling: the Yjs figure on the same workload (bench/yjs-memory/yjs-bytes-per-item.json, Yjs 13.6.33, Node 24); half of it is the goal. Measured in Release, each workload in its own process: text-insert 98.11 bytes per item (Yjs 194.77), array-push 8.08 (Yjs 8.31, 2.8% under the ceiling; owner sign-off 2026-10-26), map-set 156.86 (Yjs 312.26). MemoryTierTests green in the nightly job (run 40365311083); the nightly step summary prints the same table."
 
 - id: BUD-14
   title: "Zero gen2 collections and no large-object-heap growth during 100k steady-state edits"
@@ -152,6 +152,6 @@
   layers: [unit]
   wire: false
   owner: 14
-  status: pending
+  status: active
   ref: "adr 0009"
-  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
+  note: "Active at the release gate (TASK-4.44). Measured in Release over 100k steady-state edits after a 2k warm-up: 0 gen2 collections and 0 bytes of large-object-heap growth (allowance 128 KiB, one chunk). MemoryTierTests green in the nightly job (run 40365311083)."

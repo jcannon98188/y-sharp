@@ -11,6 +11,7 @@
     <PackageVersion Include="FsCheck.Xunit.v3" Version="3.3.2" />
     <PackageVersion Include="YamlDotNet" Version="16.3.0" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="17.14.2" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.0.6" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="1.9.1" />
   </ItemGroup>
 </Project>

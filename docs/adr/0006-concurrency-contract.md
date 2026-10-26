@@ -17,7 +17,7 @@ Each guarantee has an ID. Tests carry the ID in the traceability tag (TASK-1.8).
 **Acquiring**
 
 - **CC-6** Blocking `Transact` forms take an optional timeout and `CancellationToken`, and throw `TimeoutException` or `OperationCanceledException`. `TryTransact*` never blocks and returns a result struct (`Acquired`, `Contended` when another thread holds the lock, or `UpgradeRefused`, see CC-3). Signatures belong to TASK-1.14.
-- **CC-7** An uncontended acquire and release allocates nothing. `TryTransact*` allocates nothing even when contended. Both are named hot paths for TASK-1.15. The contract has no numeric latency bound.
+- **CC-7** An uncontended acquire and release allocates only the small `Transaction` object its body receives, a fresh one per transaction over pooled state so CC-9 holds exactly (owner decision, TASK-4.12; bounded by BUD-01 and BUD-02). `TryTransact*` allocates nothing when contended. Both are named hot paths for TASK-1.15. The contract has no numeric latency bound.
 
 **Handles and options**
 

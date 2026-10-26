@@ -2,10 +2,12 @@ using System;
 using System.Linq;
 using Xunit;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Structs;
 
 /// <summary>Item helper functions (docs/research/structs.md section B): followRedone, keepItem, splitItem, redoItem.</summary>
+[Requires(Feature.Undo)]
 public sealed class ItemHelperTests
 {
     private static readonly UndoManagerOptions Immediate = new() { CaptureTimeout = TimeSpan.Zero };
@@ -14,7 +16,8 @@ public sealed class ItemHelperTests
 
     [Fact]
     [Covers("STR-05", "STR-10", "GC-03")]
-    public void KeepItem_MarksTheItemAndEveryAncestor_AndStopsAtTheRoot() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void KeepItem_MarksTheItemAndEveryAncestor_AndStopsAtTheRoot()
     {
         var a = Net.Mk(1);
         var arr = a.GetArray("arr");
@@ -32,11 +35,12 @@ public sealed class ItemHelperTests
         Assert.Equal(new[] { false, true, false }, s.Select(x => x.Deleted));
         Assert.Equal("k", s[1].ParentSub);
         Assert.Equal(7, s[0].Ref);
-    });
+    }
 
     [Fact]
     [Covers("STR-11")]
-    public void SplitItem_KeepsOriginsAndRightOrigin_AndOnlyTheDeletedPartEntersTheDeleteSet() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void SplitItem_KeepsOriginsAndRightOrigin_AndOnlyTheDeletedPartEntersTheDeleteSet()
     {
         var a = Net.Mk(1, gc: false);
         var b = Net.Mk(2, gc: false);
@@ -53,12 +57,13 @@ public sealed class ItemHelperTests
         Assert.Equal(new (ulong, long)?[] { null, (1UL, 0L), (1UL, 0L), (1UL, 0L) }, s.Select(x => x.RightOrigin));    // copied to the right half, left half unchanged
         Assert.Equal(new[] { false, false, true, false }, s.Select(x => x.Deleted));
         Assert.Equal("[[1,[[4,1]]]]", StructsProbe.DeleteSetJson(StructsProbe.Dump(b)));
-        Assert.Equal("abcXZ", b.GetText("t").ToString());
-    });
+        Assert.Equal("XZabc", b.GetText("t").ToString());
+    }
 
     [Fact]
     [Covers("STR-12")]
-    public void RedoItem_ReinsertsADeletedArrayItem_InTheSameNeighbourhood() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void RedoItem_ReinsertsADeletedArrayItem_InTheSameNeighbourhood()
     {
         var a = Net.Mk(1);
         var arr = a.GetArray("arr");
@@ -78,11 +83,12 @@ public sealed class ItemHelperTests
         Assert.Equal(((ulong, long)?)(1UL, 0L), last.Origin);
         Assert.False(last.Deleted);
         Assert.True(last.Keep);
-    });
+    }
 
     [Fact]
     [Covers("STR-12")]
-    public void RedoItem_OfAMapEntry_DoesNotOverrideAConcurrentRemoteChange() => Impl.Run(() =>
+    [Requires(Feature.Map)]
+    public void RedoItem_OfAMapEntry_DoesNotOverrideAConcurrentRemoteChange()
     {
         var a = Net.Mk(1);
         var b = Net.Mk(2);
@@ -102,11 +108,12 @@ public sealed class ItemHelperTests
 
         Assert.True(ma.TryGet("k", out var finalValue));
         Assert.Equal("B", finalValue.Value.AsString());
-    });
+    }
 
     [Fact]
     [Covers("STR-12")]
-    public void RedoItem_ChasesARedoneParent_WhenTheParentWasDeletedAndRestored() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void RedoItem_ChasesARedoneParent_WhenTheParentWasDeletedAndRestored()
     {
         var a = Net.Mk(1);
         var arr = a.GetArray("arr");
@@ -126,11 +133,12 @@ public sealed class ItemHelperTests
         Assert.True(((YMap)arr[0].Type!).Has("k"));
         um.Redo();                                   // redoes the deletion of the map
         Assert.Equal(0, arr.Length);
-    });
+    }
 
     [Fact]
     [Covers("STR-09")]
-    public void FollowRedone_DeleteAndUndo_LetsARelativePositionSurvive() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Positions)]
+    public void FollowRedone_DeleteAndUndo_LetsARelativePositionSurvive()
     {
         var a = Net.Mk(1);
         var t = a.GetText("t");
@@ -145,11 +153,12 @@ public sealed class ItemHelperTests
         Assert.Equal("abcd", t.ToString());
         Assert.Equal(2, position.Resolve(a, followUndoneDeletions: true)!.Value.Index);
         Assert.Equal(3, position.Resolve(a, followUndoneDeletions: false)!.Value.Index);
-    });
+    }
 
     [Fact]
     [Covers("GC-05", "GC-02")]
-    public void UndoKeep_ProtectsDeletedItems_ButClearDoesNotCollectThemRetroactively() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void UndoKeep_ProtectsDeletedItems_ButClearDoesNotCollectThemRetroactively()
     {
         var a = Net.Mk(1);
         var t = a.GetText("t");
@@ -167,5 +176,5 @@ public sealed class ItemHelperTests
         Assert.False(after.Keep);
         Assert.Equal("bc", after.Text);
         um.Dispose();
-    });
+    }
 }

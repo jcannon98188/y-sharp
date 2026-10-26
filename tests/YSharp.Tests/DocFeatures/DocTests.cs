@@ -7,6 +7,7 @@ using Xunit;
 using YSharp.TestKit.Ops;
 using YSharp.TestKit.Traceability;
 using YSharp.TestKit.Assertions;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.DocFeatures;
 
@@ -14,6 +15,7 @@ namespace YSharp.Tests.DocFeatures;
 /// Doc behaviour (DOC-01..DOC-18, docs/research/doc-features.md section 1) and the ports of the upstream <c>doc.tests.js</c> tests that
 /// exercise it. Expected bytes and event orders were produced by running the same operations on the pinned Yjs.
 /// </summary>
+[Requires(Feature.DocLifecycle)]
 public sealed class DocTests
 {
     private static string Json(YValue v)
@@ -27,9 +29,9 @@ public sealed class DocTests
 
     [Fact]
     [Covers("DOC-01")]
-    public void Constructor_Defaults_AreGcOnAutoLoadOffShouldLoadOnAndEmptyCollections() => Impl.Run(() =>
+    [Requires(Feature.Subdocs)]
+    public void Constructor_Defaults_AreGcOnAutoLoadOffShouldLoadOnAndEmptyCollections()
     {
-        Impl.RequireImplementation();
         var doc = new Doc();
         Assert.True(doc.Gc);
         Assert.False(doc.IsLoaded);
@@ -44,11 +46,11 @@ public sealed class DocTests
         Assert.False(doc.AutoLoad);
         Assert.Null(doc.CollectionId);
         Assert.True(doc.Meta.Kind is YValueKind.Undefined or YValueKind.Null);
-    });
+    }
 
     [Fact]
     [Covers("DOC-01")]
-    public void Constructor_Options_AreHonoured() => Impl.Run(() =>
+    public void Constructor_Options_AreHonoured()
     {
         var doc = new Doc(new DocOptions { Guid = "g", Gc = false, ClientId = 7, AutoLoad = true, ShouldLoad = false, CollectionId = "col", Meta = "m" });
         Assert.Equal("g", doc.Guid);
@@ -58,13 +60,13 @@ public sealed class DocTests
         Assert.False(doc.ShouldLoad);
         Assert.Equal("col", doc.CollectionId);
         Assert.Equal("\"m\"", Json(doc.Meta));
-    });
+    }
 
     [Fact]
     [Covers("DOC-02")]
-    public void ClientId_IsAnUnsignedThirtyTwoBitValue_WrittenAsAVarUint() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void ClientId_IsAnUnsignedThirtyTwoBitValue_WrittenAsAVarUint()
     {
-        Impl.RequireImplementation();
         var draws = Enumerable.Range(0, 40).Select(_ => new Doc().ClientId).ToList();
         Assert.Equal(draws.Count, draws.Distinct().Count());
         Assert.Contains(draws, id => id > int.MaxValue);   // the range is 0..2^32-1, so about half of the draws exceed 2^31
@@ -74,13 +76,14 @@ public sealed class DocTests
         doc.GetText("t").Insert(0, "x");
         Assert.Equal("01ffffffff0f01", Hex.Of(Net.StateVector(doc)));
         Assert.Equal("0101ffffffff0f0004010174017800", Hex.Of(doc.EncodeStateAsUpdate()));
-    });
+    }
 
     // ------------------------------------------------------------------ DOC-03..DOC-06 root types
 
     [Fact]
     [Covers("DOC-03")]
-    public void Get_ReturnsTheSameInstance_AndRegistersItInShare() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void Get_ReturnsTheSameInstance_AndRegistersItInShare()
     {
         var doc = new Doc();
         var a = doc.Get("x");
@@ -91,11 +94,12 @@ public sealed class DocTests
         Assert.Same(text, doc.Get("t"));
         Assert.Same(text, doc.Share["t"]);
         Assert.Equal(new[] { "x", "t" }, doc.Share.Keys.ToArray());   // insertion order
-    });
+    }
 
     [Fact]
     [Covers("DOC-04")]
-    public void GenericRoot_FromADecodedUpdate_IsPromotedByALaterTypedGet() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void GenericRoot_FromADecodedUpdate_IsPromotedByALaterTypedGet()
     {
         var a = Net.Mk(1);
         a.GetText("t").Insert(0, "hello");
@@ -111,11 +115,12 @@ public sealed class DocTests
         Assert.Equal("hello!", b.GetText("t").ToString());
         Net.Sync(b, a);
         Assert.Equal("hello!", a.GetText("t").ToString());
-    });
+    }
 
     [Fact]
     [Covers("DOC-05")]
-    public void Get_WithADifferentConcreteType_Throws_AndGenericGetReturnsTheTypedRoot() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Array, Feature.Map)]
+    public void Get_WithADifferentConcreteType_Throws_AndGenericGetReturnsTheTypedRoot()
     {
         var doc = new Doc();
         var text = doc.GetText("x");
@@ -123,27 +128,32 @@ public sealed class DocTests
         Assert.Throws<YTypeConflictException>(() => doc.GetMap("x"));
         Assert.Same(text, doc.Get("x"));                              // asking for the generic type never conflicts
         Assert.Same(text, doc.GetText("x"));
-    });
+    }
 
     [Fact]
     [Covers("DOC-06")]
-    public void TypedGetters_DefaultToTheEmptyName_WhichIsADistinctKey() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Array, Feature.Map, Feature.Xml)]
+    public void TypedGetters_DefaultToTheEmptyName_WhichIsADistinctKey()
     {
         var doc = new Doc();
         Assert.Same(doc.GetText(), doc.GetText(""));
         Assert.NotSame(doc.GetText(), doc.GetText("a"));
-        Assert.Same(doc.GetArray(), doc.GetArray(""));
-        Assert.Same(doc.GetMap(), doc.GetMap(""));
+        Assert.Throws<YTypeConflictException>(() => doc.GetArray());   // "" is already a text, as in Yjs
+        var arrays = new Doc();
+        Assert.Same(arrays.GetArray(), arrays.GetArray(""));
+        var maps = new Doc();
+        Assert.Same(maps.GetMap(), maps.GetMap(""));
         Assert.Same(doc.GetXmlFragment("f"), doc.GetXmlFragment("f"));
         var element = doc.GetXmlElement("e");
         Assert.Same(element, doc.GetXmlElement("e"));
         Assert.Equal("UNDEFINED", element.NodeName);
         Assert.Contains("", doc.Share.Keys);
-    });
+    }
 
     [Fact]
     [PortOf("doc.tests.js:testGetTypeEmptyId", "DOC-03", "DOC-06")]
-    public void GetText_EmptyRootName_IsTheSameTypeAsTheDefaultRoot() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void GetText_EmptyRootName_IsTheSameTypeAsTheDefaultRoot()
     {
         var doc1 = new Doc();
         doc1.GetText("").Insert(0, "h");
@@ -152,13 +162,14 @@ public sealed class DocTests
         doc2.ApplyUpdate(doc1.EncodeStateAsUpdate());
         Assert.Equal("hi", doc2.GetText().ToString());
         Assert.Equal("hi", doc2.GetText("").ToString());
-    });
+    }
 
     // ------------------------------------------------------------------ DOC-07 toJSON
 
     [Fact]
     [PortOf("doc.tests.js:testToJSON", "DOC-07")]
-    public void Port_ToJson_IsEmptyObjectThenArrayAndRecursiveMap() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void Port_ToJson_IsEmptyObjectThenArrayAndRecursiveMap()
     {
         var doc = new Doc();
         Assert.Equal("{}", Json(doc.ToJson()));
@@ -172,11 +183,12 @@ public sealed class DocTests
         map2.Set("m2k1", "m2v1");
 
         Assert.Equal("{\"array\":[\"test1\"],\"map\":{\"k1\":\"v1\",\"k2\":{\"m2k1\":\"m2v1\"}}}", Json(doc.ToJson()));
-    });
+    }
 
     [Fact]
     [Covers("DOC-07")]
-    public void ToJson_IncludesEmptyTypedRoots_AndTextAsPlainStrings() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Array)]
+    public void ToJson_IncludesEmptyTypedRoots_AndTextAsPlainStrings()
     {
         var doc = new Doc();
         doc.GetArray("a");
@@ -184,13 +196,13 @@ public sealed class DocTests
         var json = Json(doc.ToJson());
         Assert.Contains("\"a\":[]", json);
         Assert.Contains("\"t\":\"hi\"", json);
-    });
+    }
 
     // ------------------------------------------------------------------ DOC-08, DOC-09 transactions and event order
 
     [Fact]
     [Covers("DOC-08")]
-    public void Transact_DefaultsToANullOrigin_AndANestedCallJoinsTheOuterTransactionIgnoringItsOrigin() => Impl.Run(() =>
+    public void Transact_DefaultsToANullOrigin_AndANestedCallJoinsTheOuterTransactionIgnoringItsOrigin()
     {
         var doc = new Doc();
         Transaction? outer = null, inner = null;
@@ -206,11 +218,12 @@ public sealed class DocTests
         Assert.Equal("outer", outerOrigin);
         Assert.Equal("outer", innerOrigin);                            // the inner origin is ignored
         Assert.Same(outer, inner);
-    });
+    }
 
     [Fact]
     [PortOf("doc.tests.js:testOriginInTransaction", "DOC-08", "DOC-09")]
-    public void Port_OriginInTransaction_ASnapshotReadAddsACleanupTransaction() => Impl.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Text, Feature.Events, Feature.Snapshots)]
+    public void Port_OriginInTransaction_ASnapshotReadAddsACleanupTransaction()
     {
         var doc = new Doc();
         var ytext = doc.GetText();
@@ -226,11 +239,12 @@ public sealed class DocTests
         };
         doc.Transact(_ => ytext.Insert(0, "0"), "first");
         Assert.Equal(new object?[] { "first", "cleanup", "nested" }, origins);
-    });
+    }
 
     [Fact]
     [PortOf("doc.tests.js:testAfterTransactionRecursion", "DOC-09")]
-    public void Port_AfterTransactionRecursion_ReadingTheTreeFromAnObserverOf15000InsertsDoesNotOverflow() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Xml, Feature.Events)]
+    public void Port_AfterTransactionRecursion_ReadingTheTreeFromAnObserverOf15000InsertsDoesNotOverflow()
     {
         var doc = new Doc();
         var xml = doc.GetXmlFragment("");
@@ -243,11 +257,12 @@ public sealed class DocTests
             for (var i = 0; i < 15000; i++) xml.Push(new YType[] { new YXmlText("a") });
         }, "test");
         Assert.Equal(15000, xml.Length);
-    });
+    }
 
     [Fact]
     [Covers("DOC-09")]
-    public void TransactionEvents_AnyTransaction_FireInTheDocumentedOrder() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.V2, Feature.Events, Feature.Subdocs)]
+    public void TransactionEvents_AnyTransaction_FireInTheDocumentedOrder()
     {
         var doc = Net.Mk(1);
         var log = new List<string>();
@@ -269,16 +284,17 @@ public sealed class DocTests
             "beforeAllTransactions", "beforeTransaction", "body", "beforeObserverCalls", "observe", "observeDeep",
             "afterTransaction", "afterTransactionCleanup", "update", "updateV2", "afterAllTransactions",
         }, log);
-    });
+    }
 
     [Fact]
     [Covers("DOC-09")]
-    public void ATransactionOpenedByAnObserver_RunsItsBodyAtOnce_ButItsCleanupWaitsForTheOuterOne() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Events)]
+    public void ATransactionOpenedByAnObserver_RunsItsBodyAtOnce_ButItsCleanupWaitsForTheOuterOne()
     {
         var doc = Net.Mk(1);
         var log = new List<string>();
         string O(Transaction tx) => tx.Origin as string ?? "";
-        doc.BeforeAllTransactions += (tx, _) => log.Add("beforeAllTransactions:" + O(tx));
+        doc.BeforeAllTransactions += (tx, _) => log.Add("beforeAllTransactions:" + O(tx));   // Yjs passes no transaction; y-sharp passes the first one
         doc.BeforeTransaction += (tx, _) => log.Add("beforeTransaction:" + O(tx));
         doc.BeforeObserverCalls += (tx, _) => log.Add("beforeObserverCalls:" + O(tx));
         doc.AfterTransaction += (tx, _) => log.Add("afterTransaction:" + O(tx));
@@ -297,17 +313,18 @@ public sealed class DocTests
         doc.Transact(_ => t.Insert(0, "a"), "first");
         Assert.Equal(new[]
         {
-            "beforeAllTransactions:", "beforeTransaction:first", "beforeObserverCalls:first", "observe", "beforeTransaction:second", "inner-body",
-            "afterTransaction:first", "afterTransactionCleanup:first", "update:", "beforeObserverCalls:second", "observe",
-            "afterTransaction:second", "afterTransactionCleanup:second", "update:", "afterAllTransactions:first,second",
+            "beforeAllTransactions:first", "beforeTransaction:first", "beforeObserverCalls:first", "observe", "beforeTransaction:second", "inner-body",
+            "afterTransaction:first", "afterTransactionCleanup:first", "update:first", "beforeObserverCalls:second", "observe",
+            "afterTransaction:second", "afterTransactionCleanup:second", "update:second", "afterAllTransactions:first,second",
         }, log);
-    });
+    }
 
     // ------------------------------------------------------------------ DOC-10 update events
 
     [Fact]
     [Covers("DOC-10")]
-    public void UpdateEvents_CarryBytesOriginDocAndTransaction_AndFireOnlyForRealChanges() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.V2, Feature.Events)]
+    public void UpdateEvents_CarryBytesOriginDocAndTransaction_AndFireOnlyForRealChanges()
     {
         var doc = Net.Mk(1);
         var v1 = new List<string>();
@@ -326,11 +343,12 @@ public sealed class DocTests
         t.Delete(0, 0);                                                // nothing deleted: no event
         Assert.Equal(new[] { "01010100040101740361626300|", "0101010384010201640101010002|o" }, v1);
         Assert.Equal(new[] { "000001010000010407047461626301030101000001010000", "00000241000104000184030164010000000101030101010001" }, v2);
-    });
+    }
 
     [Fact]
     [Covers("DOC-10")]
-    public void UpdateEvents_NoSubscriber_AreNotEncoded() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Events)]
+    public void UpdateEvents_NoSubscriber_AreNotEncoded()
     {
         var doc = Net.Mk(1);
         var t = doc.GetText("t");
@@ -342,7 +360,7 @@ public sealed class DocTests
         doc.Update -= handler;
         t.Insert(2, "c");
         Assert.Equal(1, seen);
-    });
+    }
 
     // ------------------------------------------------------------------ DOC-11 client id collision
 
@@ -355,7 +373,8 @@ public sealed class DocTests
 
     [Fact]
     [PortOf("doc.tests.js:testClientIdDuplicateChange", "DOC-11")]
-    public void Port_ClientIdDuplicateChange_ReceivingAnUpdateFromTheSameClientIdPicksANewId() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void Port_ClientIdDuplicateChange_ReceivingAnUpdateFromTheSameClientIdPicksANewId()
     {
         var doc1 = new Doc();
         doc1.ClientId = 0;
@@ -365,11 +384,12 @@ public sealed class DocTests
         doc1.GetArray("a").Insert(0, new YEntry[] { 1, 2 });
         doc2.ApplyUpdate(doc1.EncodeStateAsUpdate());
         Assert.NotEqual(doc1.ClientId, doc2.ClientId);
-    });
+    }
 
     [Fact]
     [Covers("DOC-11")]
-    public void ClientIdRecovery_RemoteUpdateAdvancedOurOwnClock_HappensOnlyThen() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void ClientIdRecovery_RemoteUpdateAdvancedOurOwnClock_HappensOnlyThen()
     {
         var generator = new ScriptedIds(1, 77);
         var b = new Doc(new DocOptions { ClientIdGenerator = generator });
@@ -381,13 +401,14 @@ public sealed class DocTests
         same.GetText("t").Insert(0, "y");
         b.ApplyUpdate(same.EncodeStateAsUpdate());
         Assert.Equal(77UL, b.ClientId);
-    });
+    }
 
     // ------------------------------------------------------------------ DOC-12..DOC-14 load and sync
 
     [Fact]
     [Covers("DOC-12")]
-    public void Load_OnARootDoc_DoesNothing_AndIsIdempotent() => Impl.Run(() =>
+    [Requires(Feature.Subdocs)]
+    public void Load_OnARootDoc_DoesNothing_AndIsIdempotent()
     {
         var doc = new Doc();
         var events = 0;
@@ -396,11 +417,11 @@ public sealed class DocTests
         doc.Load();
         Assert.Equal(0, events);
         Assert.True(doc.ShouldLoad);
-    });
+    }
 
     [Fact]
     [PortOf("doc.tests.js:testLoadDocsEvent", "DOC-13")]
-    public void Port_LoadDocsEvent_IsLoadedFlipsOnTheLoadedEvent() => Impl.Run(() =>
+    public void Port_LoadDocsEvent_IsLoadedFlipsOnTheLoadedEvent()
     {
         var ydoc = new Doc();
         Assert.False(ydoc.IsLoaded);
@@ -409,11 +430,11 @@ public sealed class DocTests
         ydoc.SignalLoaded();                                   // JS: ydoc.emit('load', [ydoc])
         Assert.True(loadedEvent);
         Assert.True(ydoc.IsLoaded);
-    });
+    }
 
     [Fact]
     [PortOf("doc.tests.js:testSyncDocsEvent", "DOC-14")]
-    public void Port_SyncDocsEvent_SyncTrueLoadsAndSyncsAndSyncFalseOnlyUnsyncs() => Impl.Run(() =>
+    public void Port_SyncDocsEvent_SyncTrueLoadsAndSyncsAndSyncFalseOnlyUnsyncs()
     {
         var ydoc = new Doc();
         Assert.False(ydoc.IsLoaded);
@@ -433,13 +454,12 @@ public sealed class DocTests
         Assert.Equal(new[] { true, false }, syncedEvents);
         Assert.True(ydoc.IsLoaded);
         Assert.False(ydoc.IsSynced);
-    });
+    }
 
     [Fact]
     [Covers("DOC-13", "DOC-14")]
-    public void Synced_WhileAlreadyLoaded_DoesNotRaiseLoadedAgain() => Impl.Run(() =>
+    public void Synced_WhileAlreadyLoaded_DoesNotRaiseLoadedAgain()
     {
-        Impl.RequireImplementation();
         var doc = new Doc();
         var loaded = 0;
         doc.Loaded += _ => loaded++;
@@ -447,13 +467,14 @@ public sealed class DocTests
         doc.SignalSynced(true);
         Assert.Equal(1, loaded);
         Assert.True(doc.IsSynced);
-    });
+    }
 
     // ------------------------------------------------------------------ DOC-15..DOC-17
 
     [Fact]
     [Covers("DOC-15")]
-    public void Destroy_MarksTheDocDestroyed_RaisesTheEventsOnce_AndDestroysSubdocsFirst() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Subdocs)]
+    public void Destroy_MarksTheDocDestroyed_RaisesTheEventsOnce_AndDestroysSubdocsFirst()
     {
         var parent = Net.Mk(1);
         var arr = parent.GetArray("arr");
@@ -467,21 +488,22 @@ public sealed class DocTests
         Assert.True(parent.IsDestroyed);
         Assert.True(sub.IsDestroyed);
         Assert.Equal(new[] { "sub-destroying", "parent-destroying:True", "parent-destroyed" }, log);
-    });
+    }
 
     [Fact]
     [Covers("DOC-15")]
-    public void Destroy_CalledTwice_DoesNotThrow() => Impl.Run(() =>
+    public void Destroy_CalledTwice_DoesNotThrow()
     {
         var doc = new Doc();
         doc.Destroy();
         doc.Destroy();
         Assert.True(doc.IsDestroyed);
-    });
+    }
 
     [Fact]
     [Covers("DOC-16")]
-    public void Subdocs_AreTheLiveSet_AndGuidsCollapseDuplicates() => Impl.Run(() =>
+    [Requires(Feature.Map, Feature.Subdocs)]
+    public void Subdocs_AreTheLiveSet_AndGuidsCollapseDuplicates()
     {
         var doc = Net.Mk(1);
         var map = doc.GetMap("m");
@@ -497,24 +519,25 @@ public sealed class DocTests
         map.Set("d", new Doc(new DocOptions { Guid = "z" }));
         Assert.Equal(2, guids.Count);                                  // GetSubdocGuids returns a new set, not a live view
         Assert.Equal(3, doc.GetSubdocGuids().Count);
-    });
+    }
 
     [Fact]
     [Covers("DOC-17")]
-    public void CollectionId_SubdocHasNone_IsInheritedFromTheParent() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Subdocs)]
+    public void CollectionId_SubdocHasNone_IsInheritedFromTheParent()
     {
-        Impl.RequireImplementation();
         var parent = new Doc(new DocOptions { ClientId = 1, CollectionId = "parent-col" });
         var inherits = new Doc(new DocOptions { Guid = "i" });
         var keeps = new Doc(new DocOptions { Guid = "k", CollectionId = "own" });
         parent.GetArray("arr").Push(new YEntry[] { inherits, keeps });
         Assert.Equal("parent-col", inherits.CollectionId);
         Assert.Equal("own", keeps.CollectionId);
-    });
+    }
 
     [Fact]
     [Covers("DOC-17")]
-    public void Meta_SubdocWithOptions_IsPersisted() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Subdocs)]
+    public void Meta_SubdocWithOptions_IsPersisted()
     {
         var parent = Net.Mk(1);
         var sub = new Doc(new DocOptions { Guid = "m", Meta = "meta-value" });
@@ -524,13 +547,57 @@ public sealed class DocTests
         var copy = remote.Subdocs.Single();
         Assert.Equal("\"meta-value\"", Json(copy.Meta));
         Assert.Null(copy.CollectionId);                      // collectionid is not serialised
-    });
+    }
+
+    // ------------------------------------------------------------------ the CollectGarbage seam
+
+    [Fact]
+    [Covers("GC-04")]
+    [Requires(Feature.Text, Feature.Array, Feature.Map, Feature.Events)]
+    public void CollectGarbage_OnADocWithGcOff_CollectsEveryDeletedStruct_AsYjsTryGcDoes_WithoutAnEvent()
+    {
+        var doc = new Doc(new DocOptions { Gc = false, ClientId = 1 });
+        var t = doc.GetText("t");
+        t.Insert(0, "abcdef");
+        t.Delete(1, 2);
+        var a = doc.GetArray("a");
+        var m = new YMap();
+        a.Insert(0, new YEntry[] { m });
+        m.Set("k", "v");
+        a.Delete(0, 1);
+        Assert.Equal("0105010004010174016184010002626384010203646566070101610128000106016b0177017601010201020602", Hex.Of(doc.EncodeStateAsUpdate()));
+        var events = 0;
+        doc.AfterTransaction += (_, _) => events++;
+        doc.CollectGarbage();                                          // JS: Y.tryGc(Y.createDeleteSetFromStructStore(doc.store), doc.store, doc.gcFilter)
+        Assert.Equal("0105010004010174016181010002840102036465660101016101000101010201020602", Hex.Of(doc.EncodeStateAsUpdate()));
+        Assert.Equal(0, events);
+        Assert.False(doc.Gc);
+    }
+
+    [Fact]
+    [Covers("DOC-15")]
+    [Requires(Feature.Text, Feature.Events)]
+    public void Destroy_DropsTheDocumentHandlers_AsObservableV2Does_ButKeepsTypeObservers()
+    {
+        var doc = Net.Mk(1);
+        var t = doc.GetText("t");
+        var updates = 0;
+        var observed = 0;
+        doc.Update += (_, _, _, _) => updates++;
+        t.Observe((_, _) => observed++);
+        doc.Destroy();
+        t.Insert(0, "a");                                              // a destroyed document still accepts changes (CC-17)
+        Assert.Equal(0, updates);
+        Assert.Equal(1, observed);
+        Assert.Equal("a", t.ToString());
+    }
 
     // ------------------------------------------------------------------ DOC-18 event contract
 
     [Fact]
     [Covers("DOC-18")]
-    public void Handlers_RunInRegistrationOrder_AndStopAfterBeingRemoved() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Events)]
+    public void Handlers_RunInRegistrationOrder_AndStopAfterBeingRemoved()
     {
         var doc = Net.Mk(1);
         var order = new List<string>();
@@ -542,11 +609,12 @@ public sealed class DocTests
         doc.AfterTransaction -= first;
         doc.GetText("t").Insert(1, "b");
         Assert.Equal(new[] { "first", "second", "second" }, order);
-    });
+    }
 
     [Fact]
     [Covers("DOC-18")]
-    public void EventArguments_AnyDocEvent_AreTheDocAndATransactionBoundToIt() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Events)]
+    public void EventArguments_AnyDocEvent_AreTheDocAndATransactionBoundToIt()
     {
         var doc = Net.Mk(1);
         var checkedOnce = false;
@@ -560,5 +628,5 @@ public sealed class DocTests
         };
         doc.GetText("t").Insert(0, "a");
         Assert.True(checkedOnce);
-    });
+    }
 }

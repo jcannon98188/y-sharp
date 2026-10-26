@@ -6,7 +6,7 @@ using Xunit;
 using YSharp.TestKit.Rng;
 using YSharp.TestKit.Sim;
 using YSharp.TestKit.Traceability;
-using YSharp.TestKit.Stubs;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.TestKit;
 
@@ -15,6 +15,7 @@ namespace YSharp.Tests.TestKit;
 /// Covers SIM-10 (TestConnector), SIM-11 (init), SIM-12 (compare), SIM-13 (applyRandomTests), SIM-14 (V2 framing), and the
 /// fixes SIM-02 and SIM-04 (names proposed here; the registry assigns the final IDs).
 /// </summary>
+[LibraryIndependent]
 public class SimHarnessTests
 {
     /// <summary>Plays back fixed draws so the exact consumption order can be asserted.</summary>
@@ -45,6 +46,7 @@ public class SimHarnessTests
 
     [Fact]
     [Covers("SIM-14")]
+    [LibraryIndependent]
     public void V2Framing_UsesSyncMessageTypeNumbers_AndRoundTripsPayloads()
     {
         var payload = Enumerable.Range(0, 300).Select(i => (byte)i).ToArray();
@@ -62,6 +64,7 @@ public class SimHarnessTests
 
     [Fact]
     [Covers("SIM-14")]
+    [LibraryIndependent]
     public void V2Framing_TruncatedFrame_Throws()
     {
         var frame = SimFraming.FrameV2(SyncMessageType.Update, new byte[] { 1, 2, 3 });
@@ -96,6 +99,7 @@ public class SimHarnessTests
 
     [Fact]
     [Covers("SIM-11")]
+    [LibraryIndependent]
     public void ChooseEncoding_OneBoolDraw_SelectsV1OrV2ForTheWholeRun()
     {
         var low = new ScriptedPrng(0.1);
@@ -115,13 +119,7 @@ public class SimHarnessTests
         Assert.Equal(0, new PayloadCounters().NextUniqueNumber());
     }
 
-    // ------------------------------------------------------------ against the implementation (skips on the stub)
-
-    private static void RunOrSkip(Action body)
-    {
-        try { body(); }
-        catch (NotImplementedException) when (ApiStub.IsStub) { Assert.Skip(ApiStub.Reason); }
-    }
+    // ------------------------------------------------------------ against the implementation
 
     [Theory]
     [Covers("SIM-11")]
@@ -129,23 +127,23 @@ public class SimHarnessTests
     [InlineData(1u)]
     [InlineData(2u)]
     [InlineData(3u)]
+    [Requires(Feature.Sim)]
     public void Init_ThenCompare_FreshUsers_Converge(uint seed)
     {
-        RunOrSkip(() =>
         {
             var gen = Prng.Create(seed);
             var sim = SimHarness.Init(gen, users: 3);
             Assert.Equal(3, sim.Users.Count);
             Assert.Equal(new ulong[] { 0, 1, 2 }, sim.Users.Select(u => u.Doc.ClientId));
             SimHarness.Compare(sim.Users);
-        });
+        }
     }
 
     [Fact]
     [Covers("SIM-13")]
+    [Requires(Feature.Sim, Feature.Text)]
     public void ApplyRandomTests_TextEdits_ConvergeForFixedSeeds()
     {
-        RunOrSkip(() =>
         {
             for (uint seed = 1; seed <= 5; seed++)
             {
@@ -157,6 +155,6 @@ public class SimHarnessTests
                         (u, g, _) => { var t = u.Doc.GetText("text"); if (t.Length > 0) t.Delete((int)Prng.Int32(g, 0, t.Length - 1), 1); },
                     }, iterations: 50);
             }
-        });
+        }
     }
 }

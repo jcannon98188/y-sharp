@@ -24,8 +24,16 @@ namespace YSharp.SharpFuzzHarness;
 /// </summary>
 internal static class Program
 {
-    /// <summary>The "hi" text update of client 1: the valid reference of the fixtures.</summary>
-    private static readonly byte[] KnownGood = Hex("010101000401017402686900");
+    /// <summary>The known-good update of the post-condition, as in the fuzz suite: its client id and root key do not collide with anything a
+    /// hostile input uses (the fixtures' client 1 and root "t" do).</summary>
+    private static readonly byte[] KnownGood = BuildKnownGood();
+
+    private static byte[] BuildKnownGood()
+    {
+        var doc = new Doc(new DocOptions { ClientId = 0x5eed5eed });
+        doc.GetText("__post").Insert(0, "ok");
+        return doc.EncodeStateAsUpdate();
+    }
 
     private static int Main(string[] args)
     {

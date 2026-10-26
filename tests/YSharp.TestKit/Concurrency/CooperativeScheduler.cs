@@ -204,8 +204,21 @@ public sealed class CooperativeScheduler
         }
     }
 
+    /// <summary>True while the named thread is parked on the <see cref="Block"/> called <paramref name="id"/> and its predicate does not hold.</summary>
+    public bool IsBlockedAt(string name, string id)
+    {
+        lock (_sync)
+        {
+            var c = _threads.FirstOrDefault(t => t.Name == name);
+            return c is { Finished: false, Wait: { } w } && c.LastId == id && !w();
+        }
+    }
+
     /// <summary>Blocks the calling controlled thread until the named thread is blocked (inside the library or in a test Block).</summary>
     public void WaitUntilBlocked(string name) => Block("wait-until-blocked:" + name, () => IsBlocked(name));
+
+    /// <summary>Blocks the calling controlled thread until the named thread is blocked at the block point <paramref name="id"/>.</summary>
+    public void WaitUntilBlockedAt(string name, string id) => Block($"wait-until-blocked:{name}@{id}", () => IsBlockedAt(name, id));
 
     public ScheduleResult Run(TimeSpan watchdog)
     {

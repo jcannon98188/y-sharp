@@ -6,10 +6,12 @@ using YSharp.Tests.Codecs;
 using YSharp.TestKit.Assertions;
 using YSharp.TestKit.Traceability;
 using static YSharp.Tests.Types.TypeTestExtensions;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Types;
 
 /// <summary>Behaviour of <see cref="YText"/>: plain text, formats, embeds, deltas (T-*, F-*, E-*, D-*, X-1, X-2) and the y-text.tests.js ports.</summary>
+[Requires(Feature.Text)]
 public sealed class TextTests
 {
     private static Doc NewDoc(ulong client = 1) => new(new DocOptions { ClientId = client });
@@ -19,7 +21,8 @@ public sealed class TextTests
     // ------------------------------------------------------------------ plain text
 
     [Fact, Covers("T-1")]
-    public void Insert_UsesUtf16Offsets_ClampsBeyondTheEnd_AndIgnoresEmptyStrings() => Stub.Run(() =>
+    [Requires(Feature.Events)]
+    public void Insert_UsesUtf16Offsets_ClampsBeyondTheEnd_AndIgnoresEmptyStrings()
     {
         var doc = NewDoc();
         var text = doc.GetText("t");
@@ -29,18 +32,19 @@ public sealed class TextTests
         text.Insert(1, "b");
         text.Insert(100, "d");
         Assert.Equal("abcd", text.ToString());
-        Assert.Equal(4, updates);
+        Assert.Equal(3, updates);
         text.Insert(2, "");
-        Assert.Equal(4, updates);
+        Assert.Equal(3, updates);
         text.Insert(0, "\U0001F600");
         Assert.Equal(6, text.Length);
         text.Insert(2, "|");
         Assert.Equal("\U0001F600|abcd", text.ToString());
         Assert.Throws<ArgumentOutOfRangeException>(() => text.Insert(-1, "x"));
-    });
+    }
 
     [Fact, Covers("T-2")]
-    public void Delete_ZeroIsANoOp_AndOverflowDeletesWhatExistsWithoutThrowing() => Stub.Run(() =>
+    [Requires(Feature.Events)]
+    public void Delete_ZeroIsANoOp_AndOverflowDeletesWhatExistsWithoutThrowing()
     {
         var doc = NewDoc();
         var text = doc.GetText("t");
@@ -57,10 +61,11 @@ public sealed class TextTests
         text.Delete(5, 3);
         Assert.Equal("ad", text.ToString());
         Assert.Throws<ArgumentOutOfRangeException>(() => text.Delete(-1, 1));
-    });
+    }
 
     [Fact, Covers("T-3", "E-1")]
-    public void ToString_SkipsEmbeds_AndLengthCountsThem() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Map)]
+    public void ToString_SkipsEmbeds_AndLengthCountsThem()
     {
         var text = NewDoc().GetText("t");
         text.Insert(0, "ab");
@@ -72,10 +77,11 @@ public sealed class TextTests
         var buffer = new char[2];
         text.CopyTo(buffer);
         Assert.Equal("ab", new string(buffer));
-    });
+    }
 
     [Fact, Covers("T-4")]
-    public void NewText_WithInitialContent_IsEmptyUntilAttached() => Stub.Run(() =>
+    [Requires(Feature.Map)]
+    public void NewText_WithInitialContent_IsEmptyUntilAttached()
     {
         var doc = NewDoc();
         var text = new YText("x");
@@ -86,10 +92,11 @@ public sealed class TextTests
         Assert.Equal(1, text.Length);
         text.Insert(1, "yz");
         Assert.Equal("xyz", text.ToString());
-    });
+    }
 
     [Fact, PortOf("y-text.tests.js:testSplitSurrogateCharacter", "T-5")]
-    public void Text_SplitSurrogatePair_SurvivesDisconnectAndSync() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Sync)]
+    public void Text_SplitSurrogatePair_SurvivesDisconnectAndSync()
     {
         {
             var net = Net.Init(2);
@@ -119,10 +126,11 @@ public sealed class TextTests
             text0.Format(1, 2, Bold); // formatting will also split surrogates
             net.Compare();
         }
-    });
+    }
 
     [Fact, Covers("T-6")]
-    public void ApplyDelta_AcceptsInsertRetainAndDelete_InOneTransaction() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Events)]
+    public void ApplyDelta_AcceptsInsertRetainAndDelete_InOneTransaction()
     {
         var doc = NewDoc();
         var text = doc.GetText("t");
@@ -141,10 +149,11 @@ public sealed class TextTests
         var dropped = NewDoc(3).GetText("t");
         dropped.ApplyDelta(new[] { Insert("a\n") }, sanitize: false);
         Assert.Equal("a", dropped.ToString());
-    });
+    }
 
     [Fact, Covers("T-7")]
-    public void ApplyDelta_BeforeAttachment_IsQueued_AndTheSanitizeOptionIsLost() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Map)]
+    public void ApplyDelta_BeforeAttachment_IsQueued_AndTheSanitizeOptionIsLost()
     {
         var doc = NewDoc();
         var text = new YText();
@@ -152,10 +161,11 @@ public sealed class TextTests
         doc.GetMap("m").Set("t", text);
         // JS re-calls applyDelta(delta) with default options when it replays the queue
         Assert.Equal("a\n", text.ToString());
-    });
+    }
 
     [Fact, Covers("T-8")]
-    public void ApplyDelta_EmptyInserts_AreSkipped() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Events)]
+    public void ApplyDelta_EmptyInserts_AreSkipped()
     {
         var doc = NewDoc();
         var text = doc.GetText("t");
@@ -166,10 +176,11 @@ public sealed class TextTests
         Assert.Equal("[]", text.DeltaJson());
         text.ApplyDelta(new[] { Insert("a"), Insert(""), Insert("b") });
         Assert.Equal("ab", text.ToString());
-    });
+    }
 
     [Fact, Covers("T-9")]
-    public void ApplyDelta_RetainBeyondTheEnd_AppendsNewlines_AndDeleteBeyondTheEndStops() => Stub.Run(() =>
+    [Requires(Feature.TextFormat)]
+    public void ApplyDelta_RetainBeyondTheEnd_AppendsNewlines_AndDeleteBeyondTheEndStops()
     {
         var doc = NewDoc();
         var text = doc.GetText("t");
@@ -183,12 +194,14 @@ public sealed class TextTests
         deleted.Insert(0, "abc");
         deleted.ApplyDelta(new[] { Delete(10) });
         Assert.Equal("[]", deleted.DeltaJson());
-    });
+    }
 
     // ------------------------------------------------------------------ formats
 
     [Fact, PortOf("y-text.tests.js:testBasicFormat", "F-1", "F-3", "F-2")]
-    public void Text_FormatRanges_ReportDeltasForEachChange() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Events)]
+    [Requires(Feature.Sync)]
+    public void Text_FormatRanges_ReportDeltasForEachChange()
     {
         var net = Net.Init(2);
         var text0 = net.Peers[0].Text;
@@ -221,10 +234,10 @@ public sealed class TextTests
         Assert.Equal("""[{"insert":"yz"},{"insert":"b","attributes":{"bold":true}}]""", text0.DeltaJson());
         Assert.Equal("""[{"retain":1},{"retain":1,"attributes":{"bold":null}}]""", delta);
         net.Compare();
-    });
+    }
 
     [Fact, Covers("F-2")]
-    public void Insert_WithoutAttributes_InheritsTheFormatting_ButAnExplicitObjectDoesNot() => Stub.Run(() =>
+    public void Insert_WithoutAttributes_InheritsTheFormatting_ButAnExplicitObjectDoesNot()
     {
         var text = NewDoc().GetText("t");
         text.Insert(0, "ab", Bold);
@@ -234,10 +247,12 @@ public sealed class TextTests
         Assert.Equal("""[{"insert":"a","attributes":{"bold":true}},{"insert":"Y"},{"insert":"Xb","attributes":{"bold":true}}]""", text.DeltaJson());
         text.Insert(1, "Z", Obj(("bold", YValue.Null)));
         Assert.Equal("""[{"insert":"a","attributes":{"bold":true}},{"insert":"ZY"},{"insert":"Xb","attributes":{"bold":true}}]""", text.DeltaJson());
-    });
+    }
 
     [Fact, PortOf("y-text.tests.js:testFalsyFormats", "F-4")]
-    public void Text_FalsyFormatValues_AreKeptInTheDelta() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Events)]
+    [Requires(Feature.Sync)]
+    public void Text_FalsyFormatValues_AreKeptInTheDelta()
     {
         var net = Net.Init(2);
         var text0 = net.Peers[0].Text;
@@ -253,10 +268,11 @@ public sealed class TextTests
         Assert.Equal("""[{"insert":"a","attributes":{"falsy":false}},{"insert":"b","attributes":{"falsy":true}},{"insert":"c","attributes":{"falsy":false}},{"insert":"d","attributes":{"falsy":true}},{"insert":"e","attributes":{"falsy":false}}]""", text0.DeltaJson());
         Assert.Equal("""[{"retain":2},{"retain":1,"attributes":{"falsy":false}}]""", delta);
         net.Compare();
-    });
+    }
 
     [Fact, PortOf("y-xml.tests.js:testFormattingBug", "F-5", "Q27")]
-    public void XmlText_FormattingRegression_RendersTheExpectedDelta() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Xml)]
+    public void XmlText_FormattingRegression_RendersTheExpectedDelta()
     {
         var ydoc = NewDoc();
         var yxml = ydoc.GetXmlText("");   // upstream: ydoc.get('', Y.XmlText)
@@ -268,10 +284,11 @@ public sealed class TextTests
         };
         yxml.ApplyDelta(delta);
         Assert.Equal(DeltaJson(delta), yxml.DeltaJson());
-    });
+    }
 
     [Fact, Covers("F-5", "Q27")]
-    public void AttributeEquality_IsShallow_SoFlatObjectsAreEqualAndNestedOnesAreNot() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Sync)]
+    public void AttributeEquality_IsShallow_SoFlatObjectsAreEqualAndNestedOnesAreNot()
     {
         var net = Net.Init(1);
         var doc = net.Peers[0].Doc;
@@ -296,10 +313,11 @@ public sealed class TextTests
         Assert.False(((YValue)1).AttributeEquals(YValue.Null));
         Assert.False(YValue.Null.AttributeEquals(default));
         net.Compare();
-    });
+    }
 
     [Fact, Covers("F-6")]
-    public void Format_ZeroLengthAndPastTheEnd_AreNoOps_AndRangesSplitStrings() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Events)]
+    public void Format_ZeroLengthAndPastTheEnd_AreNoOps_AndRangesSplitStrings()
     {
         var doc = NewDoc();
         var text = doc.GetText("t");
@@ -321,10 +339,11 @@ public sealed class TextTests
         Assert.Equal(
             """[{"insert":"ab"},{"insert":"c","attributes":{"bold":true}},{"insert":"d","attributes":{"bold":true,"color":"red"}},{"insert":{"image":"x.png"},"attributes":{"color":"red"}},{"insert":"e","attributes":{"color":"red"}},{"insert":"f"}]""",
             text.DeltaJson());
-    });
+    }
 
     [Fact, PortOf("y-text.tests.js:testFormattingRemoved", "F-7")]
-    public void Text_FormattedTextDeleted_LeavesNothingBehind() => Stub.Run(() =>
+    [Requires(Feature.Sync)]
+    public void Text_FormattedTextDeleted_LeavesNothingBehind()
     {
         var text0 = Net.Init(1).Peers[0].Text;
         text0.Insert(0, "ab", Bold);
@@ -332,10 +351,11 @@ public sealed class TextTests
         // JS: Y.getTypeChildren(text0).length === 1 (a test-only walk of the item list, not public API). Observable here: nothing is left.
         Assert.Equal("[]", text0.DeltaJson());
         Assert.Equal(0, text0.Length);
-    });
+    }
 
     [Fact, PortOf("y-text.tests.js:testFormattingRemovedInMidText", "F-7")]
-    public void Text_FormattedMiddleDeleted_LeavesNoFormattingMarkers() => Stub.Run(() =>
+    [Requires(Feature.Sync)]
+    public void Text_FormattedMiddleDeleted_LeavesNoFormattingMarkers()
     {
         var text0 = Net.Init(1).Peers[0].Text;
         text0.Insert(0, "1234");
@@ -343,10 +363,11 @@ public sealed class TextTests
         text0.Delete(2, 2);
         // JS: getTypeChildren(text0).length === 3 (the two string items and the surviving format-free gap)
         Assert.Equal("""[{"insert":"1234"}]""", text0.DeltaJson());
-    });
+    }
 
     [Fact, PortOf("y-text.tests.js:testFormattingBug", "F-8", "F-7")]
-    public void Text_FormattingOnNewlines_ConvergesAcrossTwoDocs() => Stub.Run(() =>
+    [Requires(Feature.TextFormat)]
+    public void Text_FormattingOnNewlines_ConvergesAcrossTwoDocs()
     {
         var ydoc1 = NewDoc(1);
         var ydoc2 = NewDoc(2);
@@ -361,10 +382,11 @@ public sealed class TextTests
             """[{"insert":"\n","attributes":{"url":"http://example.com"}},{"insert":"\n","attributes":{"url":"http://docs.yjs.dev"}},{"insert":"\n","attributes":{"url":"http://example.com"}}]""";
         Assert.Equal(expected, text1.DeltaJson());
         Assert.Equal(text1.DeltaJson(), text2.DeltaJson());
-    });
+    }
 
     [Fact, PortOf("y-text.tests.js:testDeleteFormatting", "F-7", "F-8")]
-    public void Text_DeletedFormattedRange_SyncsToThePeer() => Stub.Run(() =>
+    [Requires(Feature.TextFormat)]
+    public void Text_DeletedFormattedRange_SyncsToThePeer()
     {
         var doc = NewDoc(1);
         var text = doc.GetText();
@@ -380,10 +402,65 @@ public sealed class TextTests
             """[{"insert":"Attack ships "},{"insert":"on ","attributes":{"bold":true}},{"insert":"fire off the shoulder of Orion."}]""";
         Assert.Equal(expected, text.DeltaJson());
         Assert.Equal(expected, text2.DeltaJson());
-    });
+    }
+
+    [Fact, Covers("F-8")]
+    [Requires(Feature.TextFormat)]
+    public void RemoteChange_SameConcurrentFormat_DeletesTheDuplicateFormatItems()
+    {
+        // Yjs cleanupYTextAfterTransaction runs in a follow-up transaction of each doc that applies the other's format; the state, delete
+        // set included, is the oracle's (yjs 13.6.33)
+        var a = NewDoc(1);
+        var b = NewDoc(2);
+        a.GetText("text").Insert(0, "hello world");
+        Exchange(a, b);
+        a.GetText("text").Format(0, 5, Bold);
+        b.GetText("text").Format(0, 5, Bold);
+        Exchange(a, b);
+        Exchange(a, b);
+        const string expected =
+            "0202020046010004626f6c640474727565c60104010504626f6c64046e756c6c040100040104746578740568656c6c6f8401040620776f726c6441010001" +
+            "c60104010504626f6c64046e756c6c0101010b01";
+        Assert.Equal(expected, Convert.ToHexString(a.EncodeStateAsUpdate()).ToLowerInvariant());
+        Assert.Equal(expected, Convert.ToHexString(b.EncodeStateAsUpdate()).ToLowerInvariant());
+    }
+
+    [Fact, Covers("F-8")]
+    [Requires(Feature.TextFormat, Feature.Map)]
+    public void RemoteChange_ToANestedTextNobodyRead_StillCleansUpItsFormatting()
+    {
+        // the relay never reads the map or the text, so no shared type object wraps them; Yjs has one for every type and still cleans up
+        var a = NewDoc(1);
+        var c = NewDoc(3);
+        var relay = NewDoc(2);
+        a.GetMap("m").Set("t", new YText("abcdefgh"));
+        Exchange(a, c);
+        Nested(a).Format(1, 4, Obj(("b", 1)));
+        Nested(c).Delete(1, 4);
+        relay.ApplyUpdate(a.EncodeStateAsUpdate());
+        relay.ApplyUpdate(c.EncodeStateAsUpdate());
+        Assert.Equal("010601002701016d0174020400010001618101010484010503666768c10101010201c6010501060162046e756c6c01010202040901",
+            Convert.ToHexString(relay.EncodeStateAsUpdate()).ToLowerInvariant());
+
+        static YText Nested(Doc doc)
+        {
+            Assert.True(doc.GetMap("m").TryGet("t", out var entry));
+            return (YText)entry.Type!;
+        }
+    }
+
+    private static void Exchange(Doc a, Doc b)
+    {
+        var fromA = a.EncodeStateAsUpdate();
+        var fromB = b.EncodeStateAsUpdate();
+        b.ApplyUpdate(fromA);
+        a.ApplyUpdate(fromB);
+    }
 
     [Fact, PortOf("y-text.tests.js:testDeltaAfterConcurrentFormatting", "F-9", "Y-6")]
-    public void Text_ConcurrentFormatting_ProducesTheExpectedDelta() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Events)]
+    [Requires(Feature.Sync)]
+    public void Text_ConcurrentFormatting_ProducesTheExpectedDelta()
     {
         var net = Net.Init(2);
         var (text0, text1) = (net.Peers[0].Text, net.Peers[1].Text);
@@ -399,10 +476,12 @@ public sealed class TextTests
         });
         net.Flush();
         Assert.Equal(new[] { """[{"retain":3,"attributes":{"bold":true}},{"retain":2,"attributes":{"bold":null}}]""" }, deltas);
-    });
+    }
 
     [Fact, PortOf("y-text.tests.js:testFormattingDeltaUnnecessaryAttributeChange", "Y-6", "F-9")]
-    public void Text_ReappliedSameFormat_ProducesNoUnnecessaryAttributeChange() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Events)]
+    [Requires(Feature.Sync)]
+    public void Text_ReappliedSameFormat_ProducesNoUnnecessaryAttributeChange()
     {
         var net = Net.Init(2);
         var (text0, text1) = (net.Peers[0].Text, net.Peers[1].Text);
@@ -418,12 +497,13 @@ public sealed class TextTests
         Assert.Equal(2, filtered.Count);
         Assert.Equal("""[{"retain":1,"attributes":{"LIST_STYLES":"number"}}]""", filtered[0]);
         Assert.Equal(filtered[0], filtered[1]);
-    });
+    }
 
     // ------------------------------------------------------------------ embeds
 
     [Fact, Covers("E-1", "E-2")]
-    public void InsertEmbed_OccupiesOneUnit_AndTakesAnyValueOrAType() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Map)]
+    public void InsertEmbed_OccupiesOneUnit_AndTakesAnyValueOrAType()
     {
         var text = NewDoc().GetText("t");
         text.Insert(0, "ab");
@@ -440,10 +520,11 @@ public sealed class TextTests
         Assert.Equal(YEntryKind.Type, delta[4].Embed.Kind);
         Assert.Same(map, delta[4].Embed.Type);
         Assert.Equal("""{"k":"v"}""", map.Json());
-    });
+    }
 
     [Fact, PortOf("y-text.tests.js:testToDeltaEmbedAttributes", "E-3", "D-1", "D-2")]
-    public void ToDelta_EmbedWithAttributes_IncludesTheAttributes() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Sync)]
+    public void ToDelta_EmbedWithAttributes_IncludesTheAttributes()
     {
         var text0 = Net.Init(1).Peers[0].Text;
         text0.Insert(0, "ab", Bold);
@@ -451,10 +532,11 @@ public sealed class TextTests
         Assert.Equal(
             """[{"insert":"a","attributes":{"bold":true}},{"insert":{"image":"imageSrc.png"},"attributes":{"width":100}},{"insert":"b","attributes":{"bold":true}}]""",
             text0.DeltaJson());
-    });
+    }
 
     [Fact, PortOf("y-text.tests.js:testToDeltaEmbedNoAttributes", "E-3", "D-2", "E-6")]
-    public void ToDelta_EmbedWithoutAttributes_OmitsTheAttributesKey() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Sync)]
+    public void ToDelta_EmbedWithoutAttributes_OmitsTheAttributesKey()
     {
         var text0 = Net.Init(1).Peers[0].Text;
         text0.Insert(0, "ab", Bold);
@@ -463,18 +545,21 @@ public sealed class TextTests
         Assert.Equal(
             """[{"insert":"a","attributes":{"bold":true}},{"insert":{"image":"imageSrc.png"}},{"insert":"b","attributes":{"bold":true}}]""",
             text0.DeltaJson());
-    });
+    }
 
     [Fact, PortOf("y-text.tests.js:testGetDeltaWithEmbeds", "E-4")]
-    public void ToDelta_ApplyDeltaEmbed_ReturnsTheEmbed() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Sync)]
+    public void ToDelta_ApplyDeltaEmbed_ReturnsTheEmbed()
     {
         var text0 = Net.Init(1).Peers[0].Text;
         text0.ApplyDelta(new[] { new TextDeltaOp(DeltaKind.Insert, 1, null, (YEntry)Obj(("linebreak", "s"))) });
         Assert.Equal("""[{"insert":{"linebreak":"s"}}]""", text0.DeltaJson());
-    });
+    }
 
     [Fact, PortOf("y-text.tests.js:testTypesAsEmbed", "E-4", "E-3")]
-    public void Text_TypeInsertedAsEmbed_SyncsAndReadsBack() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Map, Feature.Events)]
+    [Requires(Feature.Sync)]
+    public void Text_TypeInsertedAsEmbed_SyncsAndReadsBack()
     {
         var net = Net.Init(2);
         var (text0, text1) = (net.Peers[0].Text, net.Peers[1].Text);
@@ -493,10 +578,11 @@ public sealed class TextTests
         Assert.Single(delta);
         Assert.Equal("""{"key":"val"}""", delta[0].Embed.Type!.Json());
         Assert.True(firedEvent, "fired the event observer containing a Type-Embed");
-    });
+    }
 
     [Fact, Covers("E-5")]
-    public void EmbeddedType_Deleted_DeletesItsSubtree() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Array, Feature.Map)]
+    public void EmbeddedType_Deleted_DeletesItsSubtree()
     {
         var doc = NewDoc();
         var text = doc.GetText("t");
@@ -510,22 +596,24 @@ public sealed class TextTests
         Assert.Equal(0, inner.Length);
         Assert.Equal("[]", text.DeltaJson());
         Assert.Equal(0, text.Length);
-    });
+    }
 
     [Fact, Covers("E-6")]
-    public void Embeds_NeighbouringStrings_AreNotMerged() => Stub.Run(() =>
+    [Requires(Feature.TextFormat)]
+    public void Embeds_NeighbouringStrings_AreNotMerged()
     {
         var text = NewDoc().GetText("t");
         text.Insert(0, "abcd");
         text.InsertEmbed(2, Obj(("e", 1)));
         text.InsertEmbed(3, Obj(("e", 2)));
         Assert.Equal("""[{"insert":"ab"},{"insert":{"e":1}},{"insert":{"e":2}},{"insert":"cd"}]""", text.DeltaJson());
-    });
+    }
 
     // ------------------------------------------------------------------ toDelta
 
     [Fact, Covers("D-1", "D-2", "D-4")]
-    public void ToDelta_MergesAdjacentRunsWithEqualAttributes_AndOmitsEmptyAttributes() => Stub.Run(() =>
+    [Requires(Feature.TextFormat)]
+    public void ToDelta_MergesAdjacentRunsWithEqualAttributes_AndOmitsEmptyAttributes()
     {
         var text = NewDoc().GetText("t");
         Assert.Equal("[]", text.DeltaJson());
@@ -535,10 +623,11 @@ public sealed class TextTests
         text.Insert(2, "c", Obj());
         Assert.Equal("""[{"insert":"ab","attributes":{"b":true}},{"insert":"c"}]""", text.DeltaJson());
         Assert.All(text.ToDelta(), op => Assert.Equal(DeltaKind.Insert, op.Kind));
-    });
+    }
 
     [Fact, PortOf("y-text.tests.js:testSnapshot", "D-3")]
-    public void Text_SnapshotsOfEdits_ProduceTheDeltaOfEachVersion() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Snapshots, Feature.Sync)]
+    public void Text_SnapshotsOfEdits_ProduceTheDeltaOfEachVersion()
     {
         var net = Net.Init(1);
         var text0 = net.Peers[0].Text;
@@ -556,10 +645,11 @@ public sealed class TextTests
         Assert.Equal(
             """[{"insert":"a"},{"insert":"x","attributes":{"ychange":{"type":"added"}}},{"insert":"b","attributes":{"ychange":{"type":"removed"}}},{"insert":"cd"}]""",
             DeltaJson(diff));
-    });
+    }
 
     [Fact, PortOf("y-text.tests.js:testSnapshotDeleteAfter", "D-3")]
-    public void Text_DeleteAfterSnapshot_SnapshotStillShowsTheDeletedText() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Snapshots, Feature.Sync)]
+    public void Text_DeleteAfterSnapshot_SnapshotStillShowsTheDeletedText()
     {
         var text0 = Net.Init(1).Peers[0].Text;
         var doc0 = text0.Doc!;
@@ -568,12 +658,13 @@ public sealed class TextTests
         var snapshot1 = YSnapshot.Create(doc0);
         text0.ApplyDelta(new[] { Retain(4), Insert("e") });
         Assert.Equal("""[{"insert":"abcd"}]""", DeltaJson(text0.ToDelta(snapshot1)));
-    });
+    }
 
     // ------------------------------------------------------------------ attributes (map side)
 
     [Fact, Covers("X-1", "X-2")]
-    public void Attributes_UseTheMapMachinery_AndListOnlyLiveOnes() => Stub.Run(() =>
+    [Requires(Feature.TextFormat)]
+    public void Attributes_UseTheMapMachinery_AndListOnlyLiveOnes()
     {
         var doc = NewDoc();
         var text = doc.GetText("t");
@@ -594,12 +685,14 @@ public sealed class TextTests
         text.SetAttribute("align", "right");
         Assert.True(text.TryGetAttribute("align", out align));
         Assert.Equal("right", align.AsString());
-    });
+    }
 
     // ------------------------------------------------------------------ remaining ports
 
     [Fact, PortOf("y-text.tests.js:testBasicInsertAndDelete", "Y-2", "Y-5", "A-E4", "TX-5", "T-1", "T-2")]
-    public void Text_InsertAndDelete_ReportDeltasForEachChange() => Stub.Run(() =>
+    [Requires(Feature.Events)]
+    [Requires(Feature.Sync)]
+    public void Text_InsertAndDelete_ReportDeltasForEachChange()
     {
         var net = Net.Init(2);
         var text0 = net.Peers[0].Text;
@@ -628,10 +721,11 @@ public sealed class TextTests
         Assert.Equal("[]", delta);
 
         net.Compare();
-    });
+    }
 
     [Fact, PortOf("y-text.tests.js:testMultilineFormat", "F-6", "T-6")]
-    public void Text_FormatAcrossLines_KeepsTheLineBreaksUnformatted() => Stub.Run(() =>
+    [Requires(Feature.TextFormat)]
+    public void Text_FormatAcrossLines_KeepsTheLineBreaksUnformatted()
     {
         var testText = NewDoc().GetText("test");
         testText.Insert(0, "Test\nMulti-line\nFormatting");
@@ -639,47 +733,53 @@ public sealed class TextTests
         Assert.Equal(
             """[{"insert":"Test","attributes":{"bold":true}},{"insert":"\n"},{"insert":"Multi-line","attributes":{"bold":true}},{"insert":"\n"},{"insert":"Formatting","attributes":{"bold":true}}]""",
             testText.DeltaJson());
-    });
+    }
 
     [Fact, PortOf("y-text.tests.js:testNotMergeEmptyLinesFormat", "D-1", "T-6")]
-    public void Text_EmptyLinesWithTheSameFormat_AreNotMerged() => Stub.Run(() =>
+    [Requires(Feature.TextFormat)]
+    public void Text_EmptyLinesWithTheSameFormat_AreNotMerged()
     {
         var testText = NewDoc().GetText("test");
         var title = Obj(("title", true));
         var delta = new[] { Insert("Text"), Insert("\n", title), Insert("\nText"), Insert("\n", title) };
         testText.ApplyDelta(delta);
         Assert.Equal(DeltaJson(delta), testText.DeltaJson());
-    });
+    }
 
     [Fact, PortOf("y-text.tests.js:testPreserveAttributesThroughDelete", "F-7", "T-6")]
-    public void Text_DeleteBetweenFormattedLines_PreservesTheAttributes() => Stub.Run(() =>
+    [Requires(Feature.TextFormat)]
+    public void Text_DeleteBetweenFormattedLines_PreservesTheAttributes()
     {
         var testText = NewDoc().GetText("test");
         var title = Obj(("title", true));
         testText.ApplyDelta(new[] { Insert("Text"), Insert("\n", title), Insert("\n") });
         testText.ApplyDelta(new[] { Retain(4), Delete(1), Retain(1, title) });
         Assert.Equal(DeltaJson(new[] { Insert("Text"), Insert("\n", title) }), testText.DeltaJson());
-    });
+    }
 
     [Fact, PortOf("y-text.tests.js:testToJson", "T-3")]
-    public void ToJson_FormattedText_ReturnsTheUnformattedText() => Stub.Run(() =>
+    [Requires(Feature.Sync)]
+    public void ToJson_FormattedText_ReturnsTheUnformattedText()
     {
         var text0 = Net.Init(1).Peers[0].Text;
         text0.Insert(0, "abc", Bold);
         Assert.Equal("abc", text0.ToJson().AsString()); // toJSON returns the unformatted text
-    });
+    }
 
     [Fact, PortOf("y-text.tests.js:testAppendChars", "T-1")]
-    public void Text_TenThousandAppends_KeepTheLengthCorrect() => Stub.Run(() =>
+    [Requires(Feature.Sync)]
+    public void Text_TenThousandAppends_KeepTheLengthCorrect()
     {
         const int n = 10000;
         var text0 = Net.Init(1).Peers[0].Text;
         for (var i = 0; i < n; i++) text0.Insert(text0.Length, "a");
         Assert.Equal(n, text0.Length);
-    });
+    }
 
     [Fact, PortOf("y-text.tests.js:testSearchMarkerBug1", "A-14")]
-    public void Text_SearchMarkerRegression_ConvergesAcrossPeers() => Stub.Run(() =>
+    [Requires(Feature.Events)]
+    [Requires(Feature.Sync)]
+    public void Text_SearchMarkerRegression_ConvergesAcrossPeers()
     {
         var net = Net.Init(2);
         var (text0, text1) = (net.Peers[0].Text, net.Peers[1].Text);
@@ -712,10 +812,11 @@ public sealed class TextTests
         Assert.Equal(text0.ToString(), text1.ToString());
         Assert.Equal("a_sda", text0.ToString());
         net.Compare();
-    });
+    }
 
     [Fact, PortOf("y-text.tests.js:testDeltaBug", "D-1", "F-2")]
-    public void Text_DeltaRegression_AppliesTheStoredDeltaCleanly() => Stub.Run(() =>
+    [Requires(Feature.TextFormat)]
+    public void Text_DeltaRegression_AppliesTheStoredDeltaCleanly()
     {
         const string file = "y-text.tests.js";
         string Literal(string name) => JsSource.ConstAsJson(file, "testDeltaBug", name);
@@ -726,10 +827,11 @@ public sealed class TextTests
         ytext.ApplyDelta(JsSource.DeltaOps(Literal("addingSpace")));
         ytext.ApplyDelta(JsSource.DeltaOps(Literal("addingList")));
         StructuralAssert.Equal(Literal("expectedResult"), ytext.DeltaJson());
-    });
+    }
 
     [Fact, PortOf("y-text.tests.js:testDeltaBug2", "D-1", "F-2")]
-    public void Text_SecondDeltaRegression_AppliesTheStoredDeltaCleanly() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Array)]
+    public void Text_SecondDeltaRegression_AppliesTheStoredDeltaCleanly()
     {
         const string file = "y-text.tests.js";
         string Literal(string name) => JsSource.ConstAsJson(file, "testDeltaBug2", name);
@@ -742,5 +844,22 @@ public sealed class TextTests
         StructuralAssert.Equal(
             """{"insert":"\n","attributes":{"block-id":"block-9d6566a1-be55-4e20-999a-b990bc15e143"}}""",
             items[41].Json());
-    });
+    }
+
+    [Fact, Covers("ENC-87"), Diverges("ENC-87", adr: "0005")]
+    [Requires(Feature.TextFormat)]
+    public void FormatValues_ThatV1JsonCannotHold_AreRejected_AndChangeNothing()
+    {
+        // Yjs stores a BigInt or undefined attribute value and then cannot encode the document in V1
+        var doc = new Doc(new DocOptions { ClientId = 1 });
+        var text = doc.GetText("t");
+        text.Insert(0, "ab");
+        var before = doc.EncodeStateAsUpdate();
+        Assert.Throws<ArgumentException>(() => text.Insert(1, "x", Obj(("b", YValue.BigInt(5)))));
+        Assert.Throws<ArgumentException>(() => text.Format(0, 2, Obj(("b", YValue.Undefined))));
+        Assert.Throws<ArgumentException>(() => text.Format(0, 2, Obj(("b", Obj(("deep", YValue.Array(new[] { YValue.BigInt(1) })))))));
+        Assert.Equal(before, doc.EncodeStateAsUpdate());
+        text.Format(0, 2, Obj(("b", Obj(("ok", YValue.Null)))));   // nested null and objects are fine
+        Assert.NotEmpty(doc.EncodeStateAsUpdate());
+    }
 }

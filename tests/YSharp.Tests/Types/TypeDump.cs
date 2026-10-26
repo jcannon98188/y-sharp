@@ -36,12 +36,20 @@ internal static class TypeDump
             default:
             {
                 v.TryGetObject(out var view);
+                // a JS object enumerates its array-index keys first (Q08); the C# value keeps insertion order until output (ADR 0007)
+                var order = Enumerable.Range(0, view.Count).OrderBy(i => ArrayIndex(view[i].Key) ?? uint.MaxValue).ToList();
                 var pairs = new List<KeyValuePair<string, TaggedValue>>();
-                for (var i = 0; i < view.Count; i++) pairs.Add(new(view[i].Key, ToTagged(view[i].Value)));
+                foreach (var i in order) pairs.Add(new(view[i].Key, ToTagged(view[i].Value)));
                 return TaggedValue.FromObject(pairs);
             }
         }
     }
+
+    /// <summary>The value of a canonical array-index key ("0" or no leading zero, below 2^32-1), else null.</summary>
+    private static uint? ArrayIndex(string key) =>
+        key.Length is > 0 and <= 10 && (key == "0" || key[0] != '0') && key.All(char.IsAsciiDigit) && ulong.Parse(key) < uint.MaxValue
+            ? (uint)ulong.Parse(key)
+            : null;
 
     public static JsonNode Value(YValue v) => Tagged(ToTagged(v));
 
@@ -49,7 +57,7 @@ internal static class TypeDump
     public static JsonNode Entry(YEntry e) => e.Kind switch
     {
         YEntryKind.Type => Type(e.Type!),
-        YEntryKind.Doc => throw new NotSupportedException("Subdocument entries are not part of the type dumps."),
+        YEntryKind.Doc => new JsonObject { ["kind"] = "subdoc", ["guid"] = e.Doc!.Guid },   // observe.mjs yvalueOut
         _ => Value(e.Value),
     };
 

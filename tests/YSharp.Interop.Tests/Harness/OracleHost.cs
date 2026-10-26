@@ -40,6 +40,7 @@ public sealed class OracleHost : IAsyncDisposable
     private readonly List<string> _stderr = new();
     private NodeClient? _client;
     private string? _unavailable;
+    private readonly object _probeLock = new();
     private bool _probed;
 
     public OracleHost() : this(new OracleOptions()) { }
@@ -66,14 +67,18 @@ public sealed class OracleHost : IAsyncDisposable
     {
         get
         {
-            if (_probed) return _unavailable;
-            _probed = true;
-            _unavailable = NodeAvailability.Check(RepoRoot);
-            if (_unavailable == null && !Directory.Exists(Path.Combine(RepoRoot, "tools", "fixture-gen", "node_modules", "ajv")))
-                _unavailable = "tools/fixture-gen has no node_modules (run `npm ci` there)";
-            if (_unavailable == null && !File.Exists(Path.Combine(RepoRoot, "yjs", "src", "index.js")))
-                _unavailable = "the yjs submodule is not checked out (git submodule update --init)";
-            return _unavailable;
+            lock (_probeLock)
+            {
+                if (_probed) return _unavailable;
+                var reason = NodeAvailability.Check(RepoRoot);
+                if (reason == null && !Directory.Exists(Path.Combine(RepoRoot, "tools", "fixture-gen", "node_modules", "ajv")))
+                    reason = "tools/fixture-gen has no node_modules (run `npm ci` there)";
+                if (reason == null && !File.Exists(Path.Combine(RepoRoot, "yjs", "src", "index.js")))
+                    reason = "the yjs submodule is not checked out (git submodule update --init)";
+                _unavailable = reason;
+                _probed = true;
+                return _unavailable;
+            }
         }
     }
 

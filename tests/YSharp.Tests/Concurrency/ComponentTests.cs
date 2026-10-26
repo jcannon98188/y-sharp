@@ -7,10 +7,12 @@ using Xunit;
 using YSharp.TestKit.Time;
 using YSharp.TestKit.Tiers;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Concurrency;
 
 /// <summary>CC-18..CC-20: subdoc locks, awareness, UndoManager and PermanentUserData. Tier: gating. No seeds (the schedule-driven versions are in <see cref="ScheduleScenarioTests"/>).</summary>
+[Requires(Feature.Concurrency)]
 [Collection(ConcurrencyCollection.Name)]
 [Tier(Tier.Gating)]
 public sealed class ComponentTests
@@ -29,25 +31,27 @@ public sealed class ComponentTests
     // ------------------------------------------------------------------ CC-18
 
     [Fact, Covers("CC-18")]
-    public void ASubdoc_HasItsOwnLock_NeitherDocumentBlocksTheOther() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Subdocs)]
+    public void ASubdoc_HasItsOwnLock_NeitherDocumentBlocksTheOther()
     {
         var (parent, child) = Pair();
         using (var holder = Holder.Write(parent))
             Conc.AssertDoesNotWait(() => child.Transact(_ => child.GetArray("c").Push(Conc.One)), "the subdoc while the parent was write-locked");
         using (var holder = Holder.Write(child))
             Conc.AssertDoesNotWait(() => parent.Transact(_ => parent.GetArray("a").Push(Conc.One)), "the parent while the subdoc was write-locked");
-    });
+    }
 
     [Fact, Covers("CC-18")]
-    public void TheHierarchy_ParentBeforeChild_IsAllowedOnOneThread() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void TheHierarchy_ParentBeforeChild_IsAllowedOnOneThread()
     {
         var (parent, child) = Pair();
         parent.Transact(_ => child.Transact(_ => child.GetArray("c").Push(Conc.One)));
         Assert.Equal(1, child.GetArray("c").Length);
-    });
+    }
 
     [Fact, Covers("CC-18")]
-    public void TakingTheParentWhileHoldingTheChild_IsRejectedByTheDebugChecker_NotAHang() => Impl.Run(() =>
+    public void TakingTheParentWhileHoldingTheChild_IsRejectedByTheDebugChecker_NotAHang()
     {
 #if DEBUG
         var (parent, child) = Pair();
@@ -63,12 +67,13 @@ public sealed class ComponentTests
 #else
         Assert.Skip("The lock-order checker is a debug-build feature (CC-18); the Debug run covers this test.");
 #endif
-    });
+    }
 
     // ------------------------------------------------------------------ CC-19
 
     [Fact, Covers("CC-19")]
-    public void Awareness_AnyOperation_NeverTakesTheDocLock() => Impl.Run(() =>
+    [Requires(Feature.Awareness)]
+    public void Awareness_AnyOperation_NeverTakesTheDocLock()
     {
         var doc = Conc.NewDoc();
         var aware = new Awareness(doc, new VirtualTimeProvider());
@@ -81,10 +86,11 @@ public sealed class ComponentTests
             GC.KeepAlive(aware.LocalState);
             aware.EncodeUpdate(new ArrayBufferWriter<byte>());
         }, "awareness calls while a document writer held the doc lock");
-    });
+    }
 
     [Fact, Covers("CC-19")]
-    public void AwarenessEvents_FireSynchronously_OnTheCallingThread() => Impl.Run(() =>
+    [Requires(Feature.Events, Feature.Awareness)]
+    public void AwarenessEvents_FireSynchronously_OnTheCallingThread()
     {
         var aware = new Awareness(Conc.NewDoc(), new VirtualTimeProvider());
         var threads = new List<int>();
@@ -94,10 +100,11 @@ public sealed class ComponentTests
         bg.Join();
         Assert.NotEmpty(threads);
         Assert.All(threads, t => Assert.Equal(bg.ThreadId, t));
-    });
+    }
 
     [Fact, Covers("CC-19")]
-    public void TimeoutTimer_InjectedTimeProviderAdvanced_FiresOnTheAdvancingThread() => Impl.Run(() =>
+    [Requires(Feature.Awareness)]
+    public void TimeoutTimer_InjectedTimeProviderAdvanced_FiresOnTheAdvancingThread()
     {
         var time = new VirtualTimeProvider();
         var aware = new Awareness(Conc.NewDoc(1), time);
@@ -117,10 +124,11 @@ public sealed class ComponentTests
         var (origin, thread) = Assert.Single(removed);
         Assert.Equal("timeout", origin);
         Assert.Equal(bg.ThreadId, thread);
-    });
+    }
 
     [Fact, Covers("CC-19")]
-    public void TheAwarenessLock_IsExclusive_AndReentrantOnTheOwner() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Undo, Feature.Awareness)]
+    public void TheAwarenessLock_IsExclusive_AndReentrantOnTheOwner()
     {
         var aware = new Awareness(Conc.NewDoc(), new VirtualTimeProvider());
         using var inHandler = new ManualResetEventSlim(false);
@@ -137,13 +145,13 @@ public sealed class ComponentTests
             }
         };
         var first = Bg.Start(() => aware.SetLocalState(State("a", 1)));
-        Assert.True(inHandler.Wait(Bg.Generous));
+        Assert.True(inHandler.Wait(Bg.Generous, TestContext.Current.CancellationToken));
         var second = Bg.Start(() => aware.SetLocalStateField("b", 2));
         second.AssertStillBlocked();                    // exclusive: another thread waits while an event is being delivered
         proceed.Set();
         first.Join();
         second.Join();
-    });
+    }
 
     // ------------------------------------------------------------------ CC-20
 
@@ -158,7 +166,8 @@ public sealed class ComponentTests
     }
 
     [Fact, Covers("CC-20")]
-    public void UndoManagerMembers_RunUnderTheDocLock_AnImplicitTransactionEach() => Impl.Run(() =>
+    [Requires(Feature.Undo)]
+    public void UndoManagerMembers_RunUnderTheDocLock_AnImplicitTransactionEach()
     {
         var (doc, _, um) = Undoable();
         foreach (var member in new Action[] { () => GC.KeepAlive(um.CanUndo), () => GC.KeepAlive(um.CanRedo), () => GC.KeepAlive(um.UndoStack), () => GC.KeepAlive(um.RedoStack), um.StopCapturing })
@@ -166,10 +175,11 @@ public sealed class ComponentTests
             using var holder = Holder.Write(doc);
             Conc.AssertWaitsFor(holder, member, "an UndoManager member while a writer held the doc lock");
         }
-    });
+    }
 
     [Fact, Covers("CC-20")]
-    public void UndoAndRedo_AnyCall_AreWriteTransactions() => Impl.Run(() =>
+    [Requires(Feature.Undo)]
+    public void UndoAndRedo_AnyCall_AreWriteTransactions()
     {
         var (doc, arr, um) = Undoable();
         using (var reader = Holder.Read(doc))
@@ -181,10 +191,11 @@ public sealed class ComponentTests
             Conc.AssertWaitsFor(reader, () => um.Redo(), "Redo while a reader held the doc lock");
         }
         Assert.Equal(2, arr.Length);
-    });
+    }
 
     [Fact, Covers("CC-20")]
-    public void Undo_AnyCall_RunsOnTheCallingThreadAndItsEventsFireThere() => Impl.Run(() =>
+    [Requires(Feature.Events)]
+    public void Undo_AnyCall_RunsOnTheCallingThreadAndItsEventsFireThere()
     {
         var (doc, _, um) = Undoable();
         var threads = new List<int>();
@@ -193,10 +204,11 @@ public sealed class ComponentTests
         bg.Join();
         Assert.NotEmpty(threads);
         Assert.All(threads, t => Assert.Equal(bg.ThreadId, t));
-    });
+    }
 
     [Fact, Covers("CC-20")]
-    public void PermanentUserDataMembers_AnyCall_RunUnderTheDocLock() => Impl.Run(() =>
+    [Requires(Feature.UserData)]
+    public void PermanentUserDataMembers_AnyCall_RunUnderTheDocLock()
     {
         var doc = Conc.NewDoc();
         var pud = new PermanentUserData(doc, new PermanentUserDataOptions { Defer = static f => f() });
@@ -205,9 +217,10 @@ public sealed class ComponentTests
         Conc.AssertWaitsFor(holder, () => Assert.Equal("alice", pud.GetUserByClientId(doc.ClientId)), "GetUserByClientId while a writer held the doc lock");
         using var writer = Holder.Write(doc);
         Conc.AssertWaitsFor(writer, () => pud.SetUserMapping(doc, 99, "bob"), "SetUserMapping while a writer held the doc lock");
-    });
+    }
 
     [Fact, Covers("CC-20")]
+    [LibraryIndependent]
     public void StackItemMeta_IsCallerOwned_AndNotProtected()
     {
         // ADR 0006 CC-20: the library neither locks nor copies StackItem.Meta. It is a plain dictionary the caller guards.

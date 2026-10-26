@@ -120,7 +120,7 @@ public static class SimHarness
     /// </summary>
     public static void Compare(IReadOnlyList<TestYInstance> users, ISimInternals? internals = null, Action? beforeDestroy = null)
     {
-        Assert.True(users.Count >= 2, "compare needs at least two replicas");
+        Assert.True(users.Count >= 1, "compare needs a replica");   // one user is fine: it is compared with its merged rebuild, as upstream (users: 1)
         var connector = users[0].Tc;
         var format = connector.Format;
         foreach (var u in users) u.Connect();
@@ -149,8 +149,8 @@ public static class SimHarness
             // SIM-01 spirit: never compare a replica with itself.
             Assert.False(ReferenceEquals(docs[i], docs[i + 1]), "compare must pair different replicas");
             var where = $"replicas {i} and {i + 1}";
-            Assert.True(arrays[i].Equals(arrays[i + 1]), $"array differs between {where}");
-            Assert.True(maps[i].Equals(maps[i + 1]), $"map differs between {where}");
+            Assert.True(JsEquals(arrays[i], arrays[i + 1]), $"array differs between {where}");
+            Assert.True(JsEquals(maps[i], maps[i + 1]), $"map differs between {where}");
             Assert.Equal(xmls[i], xmls[i + 1]);
             AssertDeltasEqual(texts[i], texts[i + 1], where);
             Assert.Equal(StateVectorBytes(docs[i]), StateVectorBytes(docs[i + 1]));
@@ -160,6 +160,29 @@ public static class SimHarness
 
         beforeDestroy?.Invoke();
         foreach (var d in docs) d.Destroy();
+    }
+
+    /// <summary>
+    /// lib0 <c>t.compare</c> on toJSON values: object members match by key whatever their order, since YMap.toJSON order follows each replica's
+    /// insertion history in JS too. <see cref="YValue.Equals(YValue)"/> is wire equality and keeps member order, so it is too strict here.
+    /// </summary>
+    public static bool JsEquals(YValue a, YValue b)
+    {
+        if (a.Kind != b.Kind) return false;
+        if (a.TryGetArray(out var xa) && b.TryGetArray(out var xb))
+        {
+            if (xa.Length != xb.Length) return false;
+            for (var i = 0; i < xa.Length; i++) if (!JsEquals(xa[i], xb[i])) return false;
+            return true;
+        }
+        if (a.TryGetObject(out var oa) && b.TryGetObject(out var ob))
+        {
+            if (oa.Count != ob.Count) return false;
+            for (var i = 0; i < oa.Count; i++)
+                if (!ob.TryGetValue(oa[i].Key, out var v) || !JsEquals(oa[i].Value, v)) return false;
+            return true;
+        }
+        return a.Equals(b);
     }
 
     private static byte[] StateVectorBytes(Doc doc)

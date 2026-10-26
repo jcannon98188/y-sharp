@@ -5,6 +5,7 @@ using Xunit;
 using YSharp.TestKit.Ops;
 using YSharp.TestKit.Traceability;
 using YSharp.TestKit.Assertions;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.DocFeatures;
 
@@ -12,6 +13,7 @@ namespace YSharp.Tests.DocFeatures;
 /// Subdocuments (SUB-01..SUB-14, docs/research/doc-features.md section 2) and the ports of the upstream subdoc tests. Wire bytes come from
 /// running the same operations on the pinned Yjs; the oracle fixtures under <c>fixtures/subdocs</c> cover the same entries end to end.
 /// </summary>
+[Requires(Feature.Subdocs)]
 public sealed class SubdocTests
 {
     private static Doc Sub(string guid, bool? gc = null, bool autoLoad = false, bool shouldLoad = true, YValue meta = default, string? collectionId = null) =>
@@ -52,7 +54,8 @@ public sealed class SubdocTests
 
     [Fact]
     [Covers("SUB-01")]
-    public void ContentDoc_IsRef9_WithGuidAndAnOptionsMap_AndHasLengthOne() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.V2)]
+    public void ContentDoc_IsRef9_WithGuidAndAnOptionsMap_AndHasLengthOne()
     {
         var parent = Net.Mk(1);
         parent.GetArray("arr").Push(new YEntry[] { Sub("g") });
@@ -63,7 +66,7 @@ public sealed class SubdocTests
         var remote = Net.Mk(2);
         remote.ApplyUpdate(parent.EncodeStateAsUpdate());
         Assert.Equal(new[] { "g", "h" }, remote.Subdocs.Select(d => d.Guid).ToArray());
-    });
+    }
 
     [Theory]
     [InlineData("default", false, false, null, "010101000901036172720167760000")]
@@ -72,38 +75,42 @@ public sealed class SubdocTests
     [InlineData("meta", false, false, "m", "0101010009010361727201677601046d65746177016d00")]
     [InlineData("all", true, true, "m", "010101000901036172720167760302676379086175746f4c6f616478046d65746177016d00")]
     [Covers("SUB-02")]
-    public void Options_OnlyNonDefaultFlagsAreWritten_InTheOrderGcAutoLoadMeta(string label, bool gcOff, bool autoLoad, string? meta, string expectedHex) => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void Options_OnlyNonDefaultFlagsAreWritten_InTheOrderGcAutoLoadMeta(string label, bool gcOff, bool autoLoad, string? meta, string expectedHex)
     {
         _ = label;
         var parent = Net.Mk(1);
         parent.GetArray("arr").Push(new YEntry[] { Sub("g", gc: !gcOff, autoLoad: autoLoad, meta: meta) });
         Assert.Equal(expectedHex, UpdateHex(parent));
-    });
+    }
 
     [Fact]
     [Covers("SUB-02")]
-    public void Options_ShouldLoadAndCollectionId_AreNotSerialised() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void Options_ShouldLoadAndCollectionId_AreNotSerialised()
     {
         var parent = Net.Mk(1);
         parent.GetArray("arr").Push(new YEntry[] { Sub("g", shouldLoad: false, collectionId: "c") });
         Assert.Equal("010101000901036172720167760000", UpdateHex(parent));
-    });
+    }
 
     [Fact]
     [Covers("SUB-02")]
-    public void Options_AnObjectMeta_IsWrittenAsAnAnyValue() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void Options_AnObjectMeta_IsWrittenAsAnAnyValue()
     {
         var parent = Net.Mk(1);
         var meta = YValue.Object(new[] { new KeyValuePair<string, YValue>("a", 1) });
         parent.GetArray("arr").Push(new YEntry[] { Sub("g", meta: meta) });
         Assert.Equal("0101010009010361727201677601046d657461760101617d0100", UpdateHex(parent));
-    });
+    }
 
     // ------------------------------------------------------------------ SUB-03, SUB-04
 
     [Fact]
     [Covers("SUB-03")]
-    public void RemoteSubdoc_DoesNotLoadUnlessAutoLoad_AndKeepsGcAndMeta() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void RemoteSubdoc_DoesNotLoadUnlessAutoLoad_AndKeepsGcAndMeta()
     {
         var a = Net.Mk(1);
         a.GetArray("arr").Push(new YEntry[] { Sub("plain"), Sub("auto", autoLoad: true, gc: false, meta: "m") });
@@ -120,11 +127,12 @@ public sealed class SubdocTests
         Assert.True(plain.Gc);
         Assert.Equal(new[] { "plain", "auto" }, w.Added.Select(d => d.Guid).ToArray());
         Assert.Equal(new[] { "auto" }, w.Loaded.Select(d => d.Guid).ToArray());
-    });
+    }
 
     [Fact]
     [Covers("SUB-04")]
-    public void LocalSubdoc_IsReportedAddedAndLoaded_AndPointsAtItsParent() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void LocalSubdoc_IsReportedAddedAndLoaded_AndPointsAtItsParent()
     {
         var parent = Net.Mk(1);
         var w = new Watch(parent);
@@ -134,13 +142,14 @@ public sealed class SubdocTests
         AssertEvent(w, new[] { "g" }, Array.Empty<string>(), new[] { "g" });
         Assert.Same(parent, sub.ParentDoc);
         Assert.Contains(sub, parent.Subdocs);
-    });
+    }
 
     // ------------------------------------------------------------------ SUB-05
 
     [Fact]
     [Covers("SUB-05")]
-    public void AddingTheSameDocTwice_IsOnlyLogged_NeverThrown() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void AddingTheSameDocTwice_IsOnlyLogged_NeverThrown()
     {
         var parent = Net.Mk(1);
         var arr = parent.GetArray("arr");
@@ -149,13 +158,14 @@ public sealed class SubdocTests
         var ex = Record.Exception(() => arr.Push(new YEntry[] { sub }));   // JS only calls console.error here
         Assert.Null(ex);
         Assert.Equal(2, arr.Length);
-    });
+    }
 
     // ------------------------------------------------------------------ SUB-06
 
     [Fact]
     [Covers("SUB-06")]
-    public void SubdocsEvent_FiresInCleanupAfterTheUpdateEvents_AndAdoptsTheParentsClientId() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.V2, Feature.Events)]
+    public void SubdocsEvent_FiresInCleanupAfterTheUpdateEvents_AndAdoptsTheParentsClientId()
     {
         var parent = Net.Mk(1);
         var log = new List<string>();
@@ -169,23 +179,25 @@ public sealed class SubdocTests
         Assert.True(log.IndexOf("updateV2") < log.IndexOf("subdocs"));
         Assert.Equal(1UL, sub.ClientId);                                 // adopted from the parent at add time
         Assert.NotEqual(before, sub.ClientId);
-    });
+    }
 
     [Fact]
     [Covers("SUB-06")]
-    public void SubdocsEvent_NothingChanged_IsNotRaised() => Impl.Run(() =>
+    [Requires(Feature.Text)]
+    public void SubdocsEvent_NothingChanged_IsNotRaised()
     {
         var parent = Net.Mk(1);
         var w = new Watch(parent);
         parent.GetText("t").Insert(0, "no subdocs here");
         Assert.Equal(0, w.Count);
-    });
+    }
 
     // ------------------------------------------------------------------ SUB-07, SUB-08
 
     [Fact]
     [PortOf("doc.tests.js:testSubdoc", "SUB-03", "SUB-04", "SUB-06", "SUB-07", "SUB-08", "DOC-12", "DOC-16")]
-    public void Subdoc_AddLoadAndDestroy_RaisesTheDocumentedSubdocsEvents() => Impl.Run(() =>
+    [Requires(Feature.Map)]
+    public void Subdoc_AddLoadAndDestroy_RaisesTheDocumentedSubdocsEvents()
     {
         var doc = new Doc();
         doc.Load();                                                      // doesn't do anything
@@ -236,11 +248,12 @@ public sealed class SubdocTests
             AssertEvent(w, Array.Empty<string>(), new[] { "a" }, Array.Empty<string>());
             Assert.Equal(new[] { "a", "c" }, doc2.GetSubdocGuids().OrderBy(g => g, StringComparer.Ordinal).ToArray());   // key "b" still holds a doc with guid a
         }
-    });
+    }
 
     [Fact]
     [Covers("SUB-07")]
-    public void SameGuid_AtSeveralPositions_GivesEachItsOwnInstance() => Impl.Run(() =>
+    [Requires(Feature.Map)]
+    public void SameGuid_AtSeveralPositions_GivesEachItsOwnInstance()
     {
         var a = Net.Mk(1);
         var map = a.GetMap("m");
@@ -252,11 +265,12 @@ public sealed class SubdocTests
         Assert.NotSame(DocAt(m, "x"), DocAt(m, "y"));
         Assert.Equal("same", DocAt(m, "x").Guid);
         Assert.Equal(2, b.Subdocs.Count);
-    });
+    }
 
     [Fact]
     [Covers("SUB-08")]
-    public void AddAndDelete_InOneTransaction_CancelOut() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void AddAndDelete_InOneTransaction_CancelOut()
     {
         var parent = Net.Mk(1);
         var w = new Watch(parent);
@@ -267,17 +281,14 @@ public sealed class SubdocTests
             arr.Delete(0, 1);
         });
         Assert.Empty(parent.Subdocs);
-        if (w.Count > 0)                                                 // JS still reports an event, but one with no added, removed or loaded docs
-        {
-            Assert.Empty(w.Added);
-            Assert.Empty(w.Removed);
-            Assert.Empty(w.Loaded);
-        }
-    });
+        // the add and the delete cancel out, but the load stays: Yjs reports an event with only the loaded doc (fixtures/subdocs/add-and-delete-in-one-transaction)
+        AssertEvent(w, Array.Empty<string>(), Array.Empty<string>(), new[] { "gone" });
+    }
 
     [Fact]
     [Covers("SUB-08")]
-    public void Delete_ReportsTheSubdocRemoved_AndDestroysIt() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void Delete_ReportsTheSubdocRemoved_AndDestroysIt()
     {
         var parent = Net.Mk(1);
         var arr = parent.GetArray("arr");
@@ -288,13 +299,33 @@ public sealed class SubdocTests
         AssertEvent(w, Array.Empty<string>(), new[] { "g" }, Array.Empty<string>());
         Assert.True(sub.IsDestroyed);
         Assert.Empty(parent.Subdocs);
-    });
+    }
+
+    [Fact]
+    [Covers("SUB-08", "M-6")]
+    [Requires(Feature.Map)]
+    public void DeletingAMap_RemovesItsSubdocsInTheOrderTheirKeysWereFirstSet()
+    {
+        // Yjs ContentType.delete walks parent._map, a JS Map, so the removed set follows key insertion order (not key or hash order)
+        var parent = Net.Mk(1);
+        var root = parent.GetMap("m");
+        var keys = new[] { "key", "k0", "zz", "a", "q9", "b", "m", "k1", "x", "c" };
+        var holder = root.Set("h", new YMap());
+        foreach (var k in keys) holder.Set(k, Sub("g-" + k));
+        var removed = new List<string[]>();
+        parent.SubdocsChanged += (c, _, _) => removed.Add(c.Removed.Select(d => d.Guid).ToArray());
+        root.Delete("h");
+        // the deleting transaction's event, then one per removed subdocument as cleanup destroys each, in the same order (SUB-11)
+        Assert.Equal(keys.Select(k => "g-" + k).ToArray(), removed[0]);
+        Assert.Equal(keys.Select(k => new[] { "g-" + k }), removed.Skip(1));
+    }
 
     // ------------------------------------------------------------------ SUB-09
 
     [Fact]
     [Covers("SUB-09")]
-    public void DeletedSubdocItem_IsCollectedLikeAnyDeletedItem_AndDoesNotReachANewReplica() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void DeletedSubdocItem_IsCollectedLikeAnyDeletedItem_AndDoesNotReachANewReplica()
     {
         var parent = Net.Mk(1);
         var arr = parent.GetArray("arr");
@@ -304,13 +335,14 @@ public sealed class SubdocTests
         var fresh = Net.Mk(2);
         fresh.ApplyUpdate(parent.EncodeStateAsUpdate());
         Assert.Empty(fresh.Subdocs);
-    });
+    }
 
     // ------------------------------------------------------------------ SUB-10
 
     [Fact]
     [PortOf("doc.tests.js:testSubdocsUndo", "SUB-10", "UM-19")]
-    public void Port_SubdocsUndo_UndoThenRedoLeavesOneElement() => Impl.Run(() =>
+    [Requires(Feature.Xml, Feature.Undo)]
+    public void Port_SubdocsUndo_UndoThenRedoLeavesOneElement()
     {
         var ydoc = new Doc();
         var elems = ydoc.GetXmlFragment("elems");
@@ -321,11 +353,12 @@ public sealed class SubdocTests
         undoManager.Redo();
         Assert.Equal(1, elems.Length);
         Assert.Single(ydoc.Subdocs);
-    });
+    }
 
     [Fact]
     [Covers("SUB-10")]
-    public void Redo_AfterUndoOfASubdoc_CreatesANewDocWithTheSameGuidAndOptions() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Undo)]
+    public void Redo_AfterUndoOfASubdoc_CreatesANewDocWithTheSameGuidAndOptions()
     {
         var parent = Net.Mk(1);
         var arr = parent.GetArray("arr");
@@ -343,13 +376,14 @@ public sealed class SubdocTests
         Assert.False(copy.Gc);
         Assert.Equal(YValueKind.String, copy.Meta.Kind);
         Assert.True(copy.ShouldLoad);                          // derived from autoLoad
-    });
+    }
 
     // ------------------------------------------------------------------ SUB-11, SUB-12
 
     [Fact]
     [PortOf("doc.tests.js:testSubdocLoadEdgeCases", "SUB-03", "SUB-04", "SUB-11", "DOC-12")]
-    public void Subdoc_LoadEdgeCases_FollowTheLoadRules() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void Subdoc_LoadEdgeCases_FollowTheLoadRules()
     {
         var ydoc = new Doc();
         var yarray = ydoc.GetArray();
@@ -384,11 +418,12 @@ public sealed class SubdocTests
         Assert.True(subdoc3.ShouldLoad);
         Assert.DoesNotContain(subdoc3, w2.Added);
         Assert.Contains(subdoc3, w2.Loaded);
-    });
+    }
 
     [Fact]
     [PortOf("doc.tests.js:testSubdocLoadEdgeCasesAutoload", "SUB-03", "SUB-11")]
-    public void Subdoc_AutoloadLoadEdgeCases_FollowTheLoadRules() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void Subdoc_AutoloadLoadEdgeCases_FollowTheLoadRules()
     {
         var ydoc = new Doc();
         var yarray = ydoc.GetArray();
@@ -415,11 +450,12 @@ public sealed class SubdocTests
         Assert.True(subdoc1.AutoLoad);
         Assert.Contains(subdoc3, w2.Added);
         Assert.Contains(subdoc3, w2.Loaded);
-    });
+    }
 
     [Fact]
     [Covers("SUB-11")]
-    public void Destroy_OnASubdoc_ResurrectsAFreshInstanceThatIsAddedButNotLoaded() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void Destroy_OnASubdoc_ResurrectsAFreshInstanceThatIsAddedButNotLoaded()
     {
         var parent = Net.Mk(1);
         var arr = parent.GetArray("arr");
@@ -433,11 +469,12 @@ public sealed class SubdocTests
         Assert.True(sub.IsDestroyed);
         Assert.Single(parent.Subdocs);
         Assert.Same(again, parent.Subdocs.Single());
-    });
+    }
 
     [Fact]
     [Covers("SUB-12")]
-    public void Destroy_OfASubdocWhoseItemWasDeleted_DoesNotReportAReplacementAsAdded() => Impl.Run(() =>
+    [Requires(Feature.Array)]
+    public void Destroy_OfASubdocWhoseItemWasDeleted_DoesNotReportAReplacementAsAdded()
     {
         var parent = Net.Mk(1);
         var arr = parent.GetArray("arr");
@@ -452,13 +489,14 @@ public sealed class SubdocTests
         Assert.Empty(w.Added);
         Assert.Equal(new[] { "g" }, w.Removed.Select(d => d.Guid).ToArray());
         Assert.Empty(parent.Subdocs);
-    });
+    }
 
     // ------------------------------------------------------------------ SUB-13, SUB-14
 
     [Fact]
     [Covers("SUB-13")]
-    public void Parent_Destroyed_DestroysEverySubdoc() => Impl.Run(() =>
+    [Requires(Feature.Array, Feature.Map)]
+    public void Parent_Destroyed_DestroysEverySubdoc()
     {
         var parent = Net.Mk(1);
         var one = Sub("one");
@@ -469,11 +507,12 @@ public sealed class SubdocTests
         Assert.True(one.IsDestroyed);
         Assert.True(two.IsDestroyed);
         Assert.True(parent.IsDestroyed);
-    });
+    }
 
     [Fact]
     [Covers("SUB-14")]
-    public void SubdocContent_IsIndependent_AndNeverPartOfTheParentUpdate() => Impl.Run(() =>
+    [Requires(Feature.Text, Feature.Array)]
+    public void SubdocContent_IsIndependent_AndNeverPartOfTheParentUpdate()
     {
         var parent = Net.Mk(1);
         var sub = Sub("g");
@@ -487,5 +526,5 @@ public sealed class SubdocTests
         var remote = Net.Mk(2);
         remote.ApplyUpdate(parent.EncodeStateAsUpdate());
         Assert.Equal("", remote.Subdocs.Single().GetText("x").ToString());
-    });
+    }
 }

@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Text.Json;
 using Xunit;
 using YSharp.TestKit.Values;
-using YSharp.TestKit.Stubs;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.TestKit;
 
+[LibraryIndependent]
 public class TaggedValueTests
 {
     private static TaggedValue Read(string json)
@@ -103,16 +104,10 @@ public class TaggedValueTests
     }
 
     [Fact]
-    public void ToYValue_AgainstStub_ConvertsOrSkips()
+    [Requires(Feature.Values)]
+    public void ToYValue_ConvertsATaggedArray()
     {
-        try
-        {
-            var v = Read("[1,\"a\",null]").ToYValue();
-            Assert.Equal(YValueKind.Array, v.Kind);
-        }
-        catch (NotImplementedException) when (ApiStub.IsStub)
-        {
-            Assert.Skip(ApiStub.Reason);
-        }
+        var v = Read("[1,\"a\",null]").ToYValue();
+        Assert.Equal(YValueKind.Array, v.Kind);
     }
 }

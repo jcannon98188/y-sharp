@@ -1,1 +1,7 @@
-[]
+[
+  {
+    "test": "y-text.tests.js:testRepeatGenerateQuillChanges2",
+    "seed": 1038235662,
+    "reason": "Nightly 2026-10-26: two redundant format markers after applyDelta, in Yjs as in y-sharp; upstream's cleanups === 0 is not an invariant (SIM-15)."
+  }
+]

@@ -25,12 +25,15 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y afl++
       - name: Install the SharpFuzz instrumenter
         run: dotnet tool install --global SharpFuzz.CommandLine
+      # Two copies: fuzz-out is instrumented for AFL++, fuzz-replay is not. The instrumented YSharp.dll writes to AFL's coverage map, so
+      # outside afl-fuzz (replay, minimise) it fails with an AccessViolationException before any input runs.
       - name: Build the harness and instrument YSharp.dll
         run: |
           dotnet build tools/sharpfuzz/YSharp.SharpFuzz.csproj -c Release -o fuzz-out
+          cp -r fuzz-out fuzz-replay
           sharpfuzz fuzz-out/YSharp.dll
       - name: Seeds from the fixed corpus
-        run: dotnet fuzz-out/YSharp.SharpFuzz.dll --export-seeds fuzz-seeds
+        run: dotnet fuzz-replay/YSharp.SharpFuzz.dll --export-seeds fuzz-seeds
       - name: Fuzz
         env:
           AFL_SKIP_BIN_CHECK: "1"
@@ -40,19 +43,24 @@ jobs:
           mkdir -p fuzz-findings
           timeout --preserve-status $(( ${{ github.event.inputs.seconds || '1200' }} + 120 )) \
             afl-fuzz -i fuzz-seeds -o fuzz-findings -t 5000 -m none -V ${{ github.event.inputs.seconds || '1200' }} -- dotnet fuzz-out/YSharp.SharpFuzz.dll
-      - name: Minimise findings
+      # Artifact paths may not contain AFL's ':' and ',' so each finding is copied under a safe name, next to its minimised form and the
+      # exception it raises on replay. The step summary lists every finding with the first line of that exception.
+      - name: Replay and minimise findings
         if: always()
         run: |
-          mkdir -p fuzz-minimised
+          mkdir -p fuzz-upload
+          echo "### SharpFuzz findings" >> "$GITHUB_STEP_SUMMARY"
           for f in fuzz-findings/default/crashes/id:* fuzz-findings/default/hangs/id:*; do
-            [ -f "$f" ] && dotnet fuzz-out/YSharp.SharpFuzz.dll --minimise "$f" "fuzz-minimised/$(basename "$f" | tr ':,' '__')" || true
+            [ -f "$f" ] || continue
+            name="$(basename "$(dirname "$f")")-$(basename "$f" | cut -d, -f1 | tr ':' '_')"
+            cp "$f" "fuzz-upload/$name.bin"
+            timeout 60 dotnet fuzz-replay/YSharp.SharpFuzz.dll --replay "$f" > "fuzz-upload/$name.txt" 2>&1 || true
+            timeout 600 dotnet fuzz-replay/YSharp.SharpFuzz.dll --minimise "$f" "fuzz-upload/$name.min.bin" >> "fuzz-upload/$name.txt" 2>&1 || true
+            echo "- \`$name\`: $(grep -m1 -E 'Exception|exception' "fuzz-upload/$name.txt" || head -1 "fuzz-upload/$name.txt")" >> "$GITHUB_STEP_SUMMARY"
           done
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: sharpfuzz-findings
-          path: |
-            fuzz-findings/default/crashes/
-            fuzz-findings/default/hangs/
-            fuzz-minimised/
+          path: fuzz-upload/
           if-no-files-found: ignore

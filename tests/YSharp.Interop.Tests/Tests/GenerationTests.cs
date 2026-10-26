@@ -6,6 +6,7 @@ using Xunit;
 using YSharp.Interop.Generation;
 using YSharp.TestKit.Ops;
 using YSharp.TestKit.Traceability;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Interop.Tests;
 
@@ -13,6 +14,7 @@ namespace YSharp.Interop.Tests;
 /// The FsCheck script generator (ADR 0012 "Generation") needs no Node: it must produce scripts both interpreters accept, deterministically
 /// per seed, and shrink to smaller valid scripts. These run in every tier.
 /// </summary>
+[LibraryIndependent]
 public sealed class GenerationTests
 {
     private static readonly OpsRegistry Registry = SharpSide.CreateRegistry();
@@ -175,6 +177,102 @@ public sealed class GenerationTests
         if (o["steps"] is JsonArray children)
             foreach (var c in children.SelectMany(Flatten)) yield return c;
         else yield return o;
+    }
+
+    [Fact, Covers("DIFF-01")]
+    public void ProtocolPlans_AreDeterministic_ParseOnTheCSharpInterpreter_AndUseEveryProtocolStep()
+    {
+        var steps = new HashSet<string>(StringComparer.Ordinal);
+        bool appended = false, withStates = false, settled = false, awarenessOnly = false, syncOnly = false;
+        for (var seed = 0; seed < 2000; seed++)
+        {
+            var plan = ProtocolPlan.Generate(seed);
+            var json = plan.ToScript().ToJsonString();
+            Assert.Equal(json, ProtocolPlan.Generate(seed).ToScript().ToJsonString());
+            var ex = Record.Exception(() => OpsScript.Parse(json, Registry));
+            Assert.True(ex == null, $"seed {seed} ({plan}): {ex?.Message}{Environment.NewLine}{json}");
+            foreach (var step in plan.ToScript()["steps"]!.AsArray())
+            {
+                steps.Add(step!["step"]!.GetValue<string>());
+                appended |= step["append"] != null;
+                withStates |= step["states"] != null;
+            }
+            settled |= plan.Settle && !plan.Hostile;
+            awarenessOnly |= plan.Awareness;
+            syncOnly |= !plan.Awareness;
+        }
+        foreach (var kind in new[]
+                 {
+                     "text.insert", "text.delete", "sync.step1", "sync.step2", "sync.update", "sync.read", "auth.permissionDenied", "awareness.new",
+                     "awareness.setLocal", "awareness.setLocalField", "awareness.applyUpdate", "awareness.removeStates", "awareness.encode",
+                     "awareness.modify", "awareness.destroy", "tick",
+                 })
+            Assert.Contains(kind, steps);
+        Assert.True(appended && withStates && settled && awarenessOnly && syncOnly);
+    }
+
+    [Fact, Covers("DIFF-01")]
+    public void ProtocolPlan_Shrink_YieldsSmallerPlans_ThatStillParse()
+    {
+        var plan = Enumerable.Range(0, 200).Select(ProtocolPlan.Generate).First(p => p.Actions.Count > 10 && p.Awareness);
+        var shrunk = ProtocolPlan.Shrink(plan).ToList();
+        Assert.NotEmpty(shrunk);
+        Assert.Contains(shrunk, p => p.Actions.Count < plan.Actions.Count);
+        foreach (var p in shrunk) OpsScript.Parse(p.ToScript().ToJsonString(), Registry);
+    }
+
+    [Fact, Covers("DIFF-01", "DIFF-03")]
+    public void TreePlans_AreDeterministic_ParseOnTheCSharpInterpreter_AndUseEveryEditKind()
+    {
+        var steps = new HashSet<string>(StringComparer.Ordinal);
+        for (var seed = 0; seed < 2000; seed++)
+        {
+            var plan = TreePlan.Generate(seed);
+            var json = plan.ToScript().ToJsonString();
+            Assert.Equal(json, TreePlan.Generate(seed).ToScript().ToJsonString());
+            var ex = Record.Exception(() => OpsScript.Parse(json, Registry));
+            Assert.True(ex == null, $"seed {seed} ({plan}): {ex?.Message}{Environment.NewLine}{json}");
+            void Walk(JsonNode? list)
+            {
+                foreach (var step in list?.AsArray() ?? new JsonArray())
+                {
+                    var kind = step!["step"]!.GetValue<string>();
+                    steps.Add(kind == "xml.insert" ? "xml.insert." + step["kind"]!.GetValue<string>() : kind);
+                    Walk(step["steps"]);
+                }
+            }
+            Walk(plan.ToScript()["steps"]);
+        }
+        foreach (var kind in new[]
+                 {
+                     "text.insert", "text.delete", "text.format", "array.insert", "array.insertType", "array.delete", "map.set", "map.insertType", "map.delete",
+                     "xml.insert.element", "xml.insert.text", "xml.delete", "xml.setAttribute", "xml.removeAttribute", "subdoc.add", "subdoc.load",
+                     "observe", "observeDeep", "subdoc.observe", "subdoc.inspect", "transact", "deliver", "sync",
+                 })
+            Assert.Contains(kind, steps);
+    }
+
+    [Fact, Covers("DIFF-01")]
+    public void TreePlans_AddressNestedTypesAndXmlNodes_ByPath()
+    {
+        var depths = new HashSet<int>();
+        for (var seed = 0; seed < 500; seed++)
+            foreach (var step in TreePlan.Generate(seed).ToScript()["steps"]!.AsArray())
+                if (step!["target"] is JsonArray path) depths.Add(path.Count - 1);
+        // a root, a type inside a root, and a type two levels down are all addressed
+        Assert.Contains(1, depths);
+        Assert.Contains(2, depths);
+    }
+
+    [Fact, Covers("DIFF-01")]
+    public void TreePlan_Shrink_YieldsSmallerPlans_ThatStillParse()
+    {
+        var plan = TreePlan.Generate(7);
+        foreach (var smaller in TreePlan.Shrink(plan))
+        {
+            Assert.True(smaller.Edits.Count + smaller.Base.Count <= plan.Edits.Count + plan.Base.Count);
+            OpsScript.Parse(smaller.ToScript().ToJsonString(), Registry);
+        }
     }
 
     [Fact, Covers("DIFF-04")]

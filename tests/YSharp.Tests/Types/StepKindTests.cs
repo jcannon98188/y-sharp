@@ -9,6 +9,7 @@ using YSharp.TestKit.Fixtures;
 using YSharp.TestKit.Ops;
 using YSharp.TestKit.Traceability;
 using static YSharp.Tests.Types.TypeTestExtensions;
+using YSharp.TestKit.Gating;
 
 namespace YSharp.Tests.Types;
 
@@ -18,6 +19,7 @@ namespace YSharp.Tests.Types;
 /// <c>xml.removeAttribute</c> and <c>text.*</c> on an XML text. Each kind has a schema entry (tools/fixture-gen/schema/ops.schema.json)
 /// and a Node implementation (tools/fixture-gen/lib/steps.mjs); the fixtures in fixtures/{text,array,map,xml,events} replay them.
 /// </summary>
+[Requires(Feature.TypesCore)]
 public sealed class StepKindTests
 {
     private static OpsContext Run(string stepsJson)
@@ -34,6 +36,7 @@ public sealed class StepKindTests
     private const string Xml = """{"root":"x","kind":"xmlFragment"}""";
 
     [Fact]
+    [LibraryIndependent]
     public void StepKinds_CSharpRegistryAndSchema_DeclareTheSameOnes()
     {
         var path = Path.Combine(RepoRoot.Find(), "tools", "fixture-gen", "schema", "ops.schema.json");
@@ -57,29 +60,32 @@ public sealed class StepKindTests
     }
 
     [Fact, Covers("E-1")]
-    public void TextInsertEmbed_WithAttributes_InsertsAnEmbed() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Text)]
+    public void TextInsertEmbed_WithAttributes_InsertsAnEmbed()
     {
         var ctx = Run($$$"""
             [{"step":"text.insert","doc":"a","target":{{{Text}}},"at":0,"value":"ab"},
              {"step":"text.insertEmbed","doc":"a","target":{{{Text}}},"at":1,"value":{"$":"obj","pairs":[["image","x.png"]]},"attributes":{"$":"obj","pairs":[["width",100]]}}]
             """);
         Assert.Equal("""[{"insert":"a"},{"insert":{"image":"x.png"},"attributes":{"width":100}},{"insert":"b"}]""", ctx.Doc("a").GetText("t").DeltaJson());
-    });
+    }
 
     [Fact, Covers("T-6", "E-4")]
-    public void TextApplyDelta_InsertRetainDeleteAndAttributes_AreApplied() => Stub.Run(() =>
+    [Requires(Feature.TextFormat, Feature.Text)]
+    public void TextApplyDelta_InsertRetainDeleteAndAttributes_AreApplied()
     {
         var ctx = Run($$$"""
-            [{"step":"text.applyDelta","doc":"a","target":{{{Text}}},"delta":[{"insert":"hello"},{"insert":{"$":"obj","pairs":[["linebreak","s"]]}}]},
-             {"step":"text.applyDelta","doc":"a","target":{{{Text}}},"delta":[{"retain":1},{"delete":1},{"retain":2,"attributes":{"$":"obj","pairs":[["bold",true]]}}]}]
+            [{"step":"text.applyDelta","doc":"a","target":{{{Text}}},"delta":[{"$":"obj","pairs":[["insert","hello"]]},{"$":"obj","pairs":[["insert",{"$":"obj","pairs":[["linebreak","s"]]}]]}]},
+             {"step":"text.applyDelta","doc":"a","target":{{{Text}}},"delta":[{"$":"obj","pairs":[["retain",1]]},{"$":"obj","pairs":[["delete",1]]},{"$":"obj","pairs":[["retain",2],["attributes",{"$":"obj","pairs":[["bold",true]]}]]}]}]
             """);
         Assert.Equal(
             """[{"insert":"h"},{"insert":"ll","attributes":{"bold":true}},{"insert":"o"},{"insert":{"linebreak":"s"}}]""",
             ctx.Doc("a").GetText("t").DeltaJson());
-    });
+    }
 
     [Fact, Covers("A-9", "T-0.8")]
-    public void ArrayInsertType_NestedType_IsReachableByPath() => Stub.Run(() =>
+    [Requires(Feature.Array, Feature.Map, Feature.Text)]
+    public void ArrayInsertType_NestedType_IsReachableByPath()
     {
         var ctx = Run($$$"""
             [{"step":"array.insertType","doc":"a","target":{{{Arr}}},"at":0,"kind":"map"},
@@ -89,10 +95,11 @@ public sealed class StepKindTests
              {"step":"text.insert","doc":"a","target":[{{{Arr}}},1],"at":5,"value":"!"}]
             """);
         Assert.Equal("""[{"n":7},"inner!",[1,2]]""", ctx.Doc("a").GetArray("arr").Json());
-    });
+    }
 
     [Fact, Covers("M-12", "T-0.8")]
-    public void MapInsertType_NestedType_IsReachableByPath() => Stub.Run(() =>
+    [Requires(Feature.Map)]
+    public void MapInsertType_NestedType_IsReachableByPath()
     {
         var ctx = Run($$$"""
             [{"step":"map.insertType","doc":"a","target":{{{Map}}},"key":"list","kind":"array"},
@@ -100,10 +107,11 @@ public sealed class StepKindTests
              {"step":"map.insertType","doc":"a","target":{{{Map}}},"key":"cfg","kind":"map","init":{"$":"obj","pairs":[["k",1]]}}]
             """);
         Assert.Equal("""{"list":["deep"],"cfg":{"k":1}}""", ctx.Doc("a").GetMap("m").Json());
-    });
+    }
 
     [Fact, Covers("X-E4", "X-E1")]
-    public void XmlInsertAndDelete_AnyTree_BuildAndTrimIt() => Stub.Run(() =>
+    [Requires(Feature.Xml)]
+    public void XmlInsertAndDelete_AnyTree_BuildAndTrimIt()
     {
         var ctx = Run($$$"""
             [{"step":"xml.insert","doc":"a","target":{{{Xml}}},"at":0,"kind":"element","name":"p"},
@@ -115,10 +123,11 @@ public sealed class StepKindTests
         var root = ctx.Doc("a").GetXmlFragment("x");
         Assert.Equal(2, root.Length);
         Assert.Equal("lead<p><span></span></p>", root.ToString());
-    });
+    }
 
     [Fact, Covers("X-E2")]
-    public void XmlSetAndRemoveAttribute_ElementsAndXmlText_Work() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.Xml)]
+    public void XmlSetAndRemoveAttribute_ElementsAndXmlText_Work()
     {
         var ctx = Run($$$"""
             [{"step":"xml.insert","doc":"a","target":{{{Xml}}},"at":0,"kind":"element","name":"div"},
@@ -135,10 +144,11 @@ public sealed class StepKindTests
         Assert.False(div.HasAttribute("gone"));
         Assert.True(((YXmlText)root[1]).TryGetAttribute("align", out var align));
         Assert.Equal("left", align.AsString());
-    });
+    }
 
     [Fact, Covers("X-1", "F-1")]
-    public void TextSteps_XmlTextReachedByPath_Run() => Stub.Run(() =>
+    [Requires(Feature.Text, Feature.Xml)]
+    public void TextSteps_XmlTextReachedByPath_Run()
     {
         var ctx = Run($$$"""
             [{"step":"xml.insert","doc":"a","target":{{{Xml}}},"at":0,"kind":"text"},
@@ -148,10 +158,11 @@ public sealed class StepKindTests
             """);
         var xmlText = (YXmlText)ctx.Doc("a").GetXmlFragment("x")[0];
         Assert.Equal("""[{"insert":"a","attributes":{"bold":true}},{"insert":"b"}]""", xmlText.DeltaJson());
-    });
+    }
 
     [Fact, Covers("Y-1")]
-    public void Observe_AnyEvents_AreRecordedInFiringOrder() => Stub.Run(() =>
+    [Requires(Feature.Xml, Feature.Events)]
+    public void Observe_AnyEvents_AreRecordedInFiringOrder()
     {
         var ctx = Run($$$"""
             [{"step":"observe","doc":"a","target":{{{Xml}}},"name":"x"},
@@ -162,5 +173,5 @@ public sealed class StepKindTests
         var first = Assert.Single(events);
         Assert.Equal("YXmlEvent", first["type"]!.GetValue<string>());
         Assert.True(first["childListChanged"]!.GetValue<bool>());
-    });
+    }
 }

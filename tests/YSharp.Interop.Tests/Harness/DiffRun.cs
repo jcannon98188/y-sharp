@@ -46,9 +46,13 @@ public sealed class DiffRun
     public string Property { get; }
 
     /// <summary>Replaces the y-sharp side (tests of the harness itself use a second oracle run, with injected faults, as a stand-in).</summary>
-    public Func<string, SharpReply>? SharpOverride { get; set; }
+    public Func<string, IReadOnlyList<string>, SharpReply>? SharpOverride { get; set; }
 
-    private SharpReply RunSharp(string scriptJson) => (SharpOverride ?? (s => SharpSide.Run(s)))(scriptJson);
+    private SharpReply RunSharp(string scriptJson, IReadOnlyList<string> extras) =>
+        (SharpOverride ?? ((s, x) => SharpSide.Run(s, extras: x)))(scriptJson, extras);
+
+    /// <summary>The opt-in observations a generated plan asks both sides for: the struct store and its delete set (ADR 0012).</summary>
+    public static readonly IReadOnlyList<string> PlanExtras = Protocol.Extras;
 
     /// <summary>The FsCheck replay seed of the chunk being run (set by the driver), repeated in every report.</summary>
     public string? ReplaySeed { get; set; }
@@ -70,13 +74,15 @@ public sealed class DiffRun
     // ------------------------------------------------------------------ one script on both sides
 
     /// <summary>The two replies of one script; <paramref name="extra"/> adds a check on top (convergence, a source dump) and returns a difference.</summary>
-    public (OracleReply Oracle, SharpReply Sharp)? Run(string scriptJson, Func<JsonObject, JsonObject, Difference?>? extra = null, IEnumerable<string>? extras = null)
+    /// <remarks><paramref name="oracleScript"/>, when given, is what the oracle runs instead: a normaliser's rewrite (AW-51).</remarks>
+    public (OracleReply Oracle, SharpReply Sharp)? Run(string scriptJson, Func<JsonObject, JsonObject, Difference?>? extra = null, IEnumerable<string>? extras = null,
+        string? oracleScript = null)
     {
         Cases++;
-        var oracle = _host.RunAsync(scriptJson, extras).GetAwaiter().GetResult();
-        var sharp = RunSharp(scriptJson);
+        var x = extras?.ToList() ?? new List<string>();
+        var oracle = _host.RunAsync(oracleScript ?? scriptJson, x).GetAwaiter().GetResult();
+        var sharp = RunSharp(scriptJson, x);
 
-        if (sharp.Status == SharpStatus.Stub) throw new NotImplementedException(sharp.Message);
         if (sharp.Status == SharpStatus.Hang) throw Fail(FailureReason.SharpFault, scriptJson, oracle.Observations, null, null, "y-sharp hung: " + sharp.Message);
         if (sharp.Status == SharpStatus.Fault) throw Fail(FailureReason.SharpFault, scriptJson, oracle.Observations, null, null, "y-sharp threw " + sharp.Message + Environment.NewLine + sharp.Exception);
 
@@ -115,10 +121,62 @@ public sealed class DiffRun
     {
         Label = plan.ToString();
         var script = plan.ToScript().ToJsonString();
-        return Run(script, (oracle, sharp) => Convergence(oracle, "the oracle") ?? Convergence(sharp, "y-sharp"));
+        return Run(script, (oracle, sharp) => Convergence(oracle, "the oracle") ?? Convergence(sharp, "y-sharp"), PlanExtras);
     }
 
-    /// <summary>All replicas of a finished plan hold the same document and the same encoded state (convergence, ADR 0012).</summary>
+    /// <summary>A plan over nested types, XML and subdocuments (Spec 40): the same check, with every observation compared, events included.</summary>
+    public (OracleReply Oracle, SharpReply Sharp)? CheckTree(Generation.TreePlan plan)
+    {
+        Label = plan.ToString();
+        var script = plan.ToScript().ToJsonString();
+        return Run(script, (oracle, sharp) => Convergence(oracle, "the oracle") ?? Convergence(sharp, "y-sharp"), PlanExtras);
+    }
+
+    /// <summary>
+    /// A protocol plan (Spec 41): sync and awareness messages flow by name on each side, so every result, the awareness dumps and the
+    /// event log are compared; a settled plan with no hostile bytes must also converge (SY-14).
+    /// </summary>
+    public (OracleReply Oracle, SharpReply Sharp)? CheckProtocol(Generation.ProtocolPlan plan)
+    {
+        Label = plan.ToString();
+        var script = plan.ToScript().ToJsonString();
+        var converge = plan.Settle && !plan.Hostile;
+        return Run(script, converge ? (oracle, sharp) => Convergence(oracle, "the oracle") ?? Convergence(sharp, "y-sharp") : null, PlanExtras);
+    }
+
+    /// <summary>
+    /// The AW-51 targeting check (recorded divergence, ADR 0005): a hand-built awareness batch that fails after good entries is applied up to
+    /// the bad entry by Node and not at all by y-sharp. The oracle runs the script once to find the rejected batches, then again with each
+    /// replaced by one that fails on its first entry; y-sharp, on the real script, must equal that run exactly, and the documents (updates,
+    /// state, state vectors, dumps) of the two oracle runs must agree, so the divergence is confined to awareness.
+    /// </summary>
+    public (OracleReply Oracle, SharpReply Sharp)? CheckPartialAwareness(Generation.ProtocolPlan plan)
+    {
+        Label = plan.ToString();
+        var script = plan.ToScript();
+        var json = script.ToJsonString();
+        var probe = _host.RunAsync(json, PlanExtras).GetAwaiter().GetResult();
+        var rejected = probe.Status == OracleStatus.Ok && probe.Observations!["results"]?["value"] is JsonObject results
+            ? results.Where(kv => kv.Value?["api"]?.GetValue<string>() == "applyAwarenessUpdate" && kv.Value["threw"]?.GetValue<bool>() == true)
+                .Select(kv => kv.Key).ToHashSet(StringComparer.Ordinal)
+            : new HashSet<string>(StringComparer.Ordinal);
+        if (rejected.Count == 0) return Run(json, null, PlanExtras);
+
+        var atomic = (JsonObject)script.DeepClone();
+        foreach (var step in atomic["steps"]!.AsArray().OfType<JsonObject>())
+            if (step["step"]?.GetValue<string>() == "awareness.applyUpdate" && step["name"]?.GetValue<string>() is { } name && rejected.Contains(name) && step["bytes"] != null)
+                step["bytes"] = new JsonObject { ["$"] = "bytes", ["hex"] = "01" };   // one entry declared, none present: fails before any is applied
+        return Run(json, (oracle, _) => ObservationDiff.Find(probe.Observations!, oracle, new[] { "updates", "state", "sv", "doc" }) is { } d
+            ? d with { Detail = "AW-51: rewriting the rejected batches changed the oracle's documents, not only its awareness: " + d.Detail }
+            : null, PlanExtras, atomic.ToJsonString());
+    }
+
+    /// <summary>
+    /// All replicas of a finished plan hold the same document and the same encoded state (convergence, ADR 0012). One byte difference is
+    /// Yjs's own: garbage collection replaces deleted items per transaction and merges the resulting GC runs only when cleanup happens to
+    /// visit them together, so a replica can keep <c>GC(1,2) GC(3,2)</c> where another holds <c>GC(1,4)</c>. When the observations carry the
+    /// store dumps, states that differ are still converged if the stores are equal with adjacent GC runs joined and the delete sets agree.
+    /// </summary>
     public static Difference? Convergence(JsonObject observations, string side)
     {
         var docs = (JsonObject)observations["doc"]!["value"]!;
@@ -129,10 +187,48 @@ public sealed class DiffRun
             var d = ObservationDiff.CompareValues(docs[first], dump, $"$.{name}", isDoc: true);
             if (d != null) return new Difference("convergence", d.Path, $"{side}: replica {name} differs from {first}: {d.Detail}");
             var f = ObservationDiff.CompareValues(states[first]!["v1"]!["full"], states[name]!["v1"]!["full"], $"$.{name}.v1.full");
-            if (f != null) return new Difference("convergence", f.Path, $"{side}: the encoded state of {name} differs from {first}: {f.Detail}");
+            if (f != null && !EqualUpToGcRuns(observations, first, name))
+                return new Difference("convergence", f.Path, $"{side}: the encoded state of {name} differs from {first}: {f.Detail}");
         }
         return null;
     }
+
+    /// <summary>Both replicas' store dumps agree once adjacent GC runs are joined, and their delete sets agree; false without the dumps.</summary>
+    private static bool EqualUpToGcRuns(JsonObject observations, string a, string b)
+    {
+        if (observations["structs"]?["value"] is not JsonObject structs || observations["ds"]?["value"] is not JsonObject ds) return false;
+        return ObservationDiff.CompareValues(JoinGcRuns(structs[a]), JoinGcRuns(structs[b]), "$") == null
+            && ObservationDiff.CompareValues(ds[a], ds[b], "$") == null;
+    }
+
+    /// <summary>A store dump (<c>[[client, [struct...]]...]</c>) sorted by client, with each run of adjacent GC structs as one.</summary>
+    private static JsonArray JoinGcRuns(JsonNode? dump)
+    {
+        var clients = new JsonArray();
+        foreach (var entry in (dump as JsonArray ?? new JsonArray()).OfType<JsonArray>().OrderBy(e => Num(e[0])))
+        {
+            var joined = new JsonArray();
+            JsonObject? gc = null;
+            foreach (var s in entry[1]!.AsArray().OfType<JsonObject>())
+            {
+                if (s["kind"]?.GetValue<string>() == "gc" && gc != null)
+                {
+                    gc["len"] = Num(gc["len"]) + Num(s["len"]);
+                    continue;
+                }
+
+                var copy = (JsonObject)s.DeepClone();
+                gc = copy["kind"]?.GetValue<string>() == "gc" ? copy : null;
+                joined.Add(copy);
+            }
+
+            clients.Add(new JsonArray(entry[0]!.DeepClone(), joined));
+        }
+
+        return clients;
+    }
+
+    private static double Num(JsonNode? n) => double.Parse(n!.ToJsonString(), System.Globalization.CultureInfo.InvariantCulture);
 
     private static JsonNode Tagged(JsonNode bytesObject) => bytesObject.DeepClone();
 
@@ -255,8 +351,7 @@ public sealed class DiffRun
         }.ToJsonString();
         Cases++;
         var oracle = _host.RunAsync(script).GetAwaiter().GetResult();
-        var sharp = RunSharp(script);
-        if (sharp.Status == SharpStatus.Stub) throw new NotImplementedException(sharp.Message);
+        var sharp = RunSharp(script, Array.Empty<string>());
         if (sharp.Status is SharpStatus.Hang or SharpStatus.Fault or SharpStatus.ScriptError)
             throw Fail(FailureReason.SharpFault, script, oracle.Observations, null, null, $"y-sharp {sharp.Status} on a mutated update ({kind} at {offset}): {sharp.Message}");
         if (oracle.Misbehaved)
@@ -269,7 +364,16 @@ public sealed class DiffRun
         var oracleAccepted = oracle.Observations!["results"]!["value"]!["mutated"]!["value"]!["accepted"]!.GetValue<bool>();
         var sharpAccepted = sharp.Observations!["results"]!["value"]!["mutated"]!["value"]!["accepted"]!.GetValue<bool>();
         var sharpUnchanged = sharp.Observations["sv"]!["value"]!["x"]!["v1"]!["hex"]!.GetValue<string>() == "00";
-        var c = new MutationCase(format, valid, mutated, kind, offset, oracleAccepted, sharpAccepted, sharpUnchanged);
+        var oracleValue = oracle.Observations["results"]!["value"]!["mutated"]!["value"]!;
+        var c = new MutationCase(format, valid, mutated, kind, offset, oracleAccepted, sharpAccepted, sharpUnchanged)
+        {
+            OracleReadPastEnd = oracleValue["readPastEnd"]?.GetValue<bool>() ?? false,
+            OracleZeroLengthDeleteRange = oracleValue["zeroLengthDeleteRange"]?.GetValue<bool>() ?? false,
+            OracleUnsortedPendingDeleteSet = oracleValue["unsortedPendingDeleteSet"]?.GetValue<bool>() ?? false,
+            OracleSelfDependentPending = oracleValue["selfDependentPending"]?.GetValue<bool>() ?? false,
+            OracleParentNotAType = oracleValue["parentNotAType"]?.GetValue<bool>() ?? false,
+            OracleZeroLengthItem = oracleValue["zeroLengthItem"]?.GetValue<bool>() ?? false,
+        };
         Label = $"{kind} at {offset} of {valid.Length} bytes ({format})";
 
         switch (Normalisers.Classify(oracleAccepted, sharpAccepted))
@@ -277,8 +381,12 @@ public sealed class DiffRun
             case OutcomeClass.BothAccept:
             {
                 var d = ObservationDiff.Find(oracle.Observations, sharp.Observations);
+                if (d == null) return null;
+                var claim = Normalisers.Claim(c);
+                if (claim is UnsortedPendingDeleteSetNormaliser)
+                    d = ObservationDiff.Find(oracle.Observations, sharp.Observations, UnsortedPendingDeleteSetNormaliser.StillCompared);
                 if (d != null) throw Fail(FailureReason.Mismatch, script, oracle.Observations, sharp.Observations, d, "both implementations accept the mutated update but end in different states.");
-                return null;
+                return claim;
             }
             case OutcomeClass.BothReject:
                 if (!sharpUnchanged)
@@ -293,7 +401,12 @@ public sealed class DiffRun
                 return claim;
             }
             default:
-                throw Fail(FailureReason.OutcomeClass, script, oracle.Observations, sharp.Observations, null, $"y-sharp accepts a mutated update ({kind} at {offset}) that the oracle rejects.");
+            {
+                var claim = Normalisers.Claim(c);
+                if (claim == null)
+                    throw Fail(FailureReason.OutcomeClass, script, oracle.Observations, sharp.Observations, null, $"y-sharp accepts a mutated update ({kind} at {offset}) that the oracle rejects.");
+                return claim;
+            }
         }
     }
 }

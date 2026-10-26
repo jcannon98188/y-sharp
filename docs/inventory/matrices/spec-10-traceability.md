@@ -20,7 +20,7 @@ Also covered by Spec 10 tests and the 12 golden fixtures (owned by Spec 2): SIM-
 
 | Upstream family | Rows | Outcome | Gating seeds per test |
 |---|---|---|---|
-| y-map.tests.js testRepeatGeneratingYmapTests (10 to 1800) | 13 | ported | 200 (up to 100 ops), 40 (101 to 600), 10 (601 to 1800) |
+| y-map.tests.js testRepeatGeneratingYmapTests (10 to 1800) | 13 | ported | 50 (up to 100 ops), 12 (101 to 600), 3 (601 to 1800); calibrated in TASK-4.38, see ADR 0017 |
 | y-map.tests.js testRepeatGeneratingYmapTests (5000, 10000, 100000) | 3 | ported, nightly only | none |
 | y-array.tests.js testRepeatGeneratingYarrayTests (6 to 1800) | 13 | ported | as above |
 | y-array.tests.js testRepeatGeneratingYarrayTests (3000, 5000, 30000) | 3 | ported, nightly only | none |

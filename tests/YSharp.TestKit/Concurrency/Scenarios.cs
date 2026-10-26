@@ -4,7 +4,6 @@ using System.Linq;
 using Xunit;
 using YSharp.TestKit.Time;
 using YSharp.TestKit.Tiers;
-using YSharp.TestKit.Stubs;
 
 namespace YSharp.TestKit.Concurrency;
 
@@ -75,9 +74,6 @@ public static class Explorer
 
     public static void RunOne(Scenario scenario, IChoiceStrategy choice)
     {
-        // While the library is the stub, skip visibly.
-        ApiStub.SkipIfStub();
-
         var sched = new CooperativeScheduler(choice, scenario.Name);
         Action<ScheduleResult>? check;
         ScheduleResult result;
@@ -88,7 +84,7 @@ public static class Explorer
         }
         result.AssertClean();
         try { check?.Invoke(result); }
-        catch (Exception e) when (e is not NotImplementedException || !ApiStub.IsStub)
+        catch (Exception e)
         {
             Assert.Fail(e.Message + Environment.NewLine + result.Describe());
         }
@@ -135,13 +131,13 @@ public static class Scenarios
             });
             s.Spawn("R2", () =>
             {
-                s.WaitUntilBlocked("W");
+                s.WaitUntilBlockedAt("W", "lock.write.wait");   // W waits on the lock, not on its own test block
                 s.Note("R2-try");
                 doc.ReadTransact(_ => s.Note("R2-in"));
             });
             s.Spawn("Release", () =>
             {
-                s.WaitUntilBlocked("R2");
+                s.WaitUntilBlockedAt("R2", "lock.read.wait");
                 release = true;
             });
             return r =>
@@ -190,9 +186,14 @@ public static class Scenarios
     };
 
     /// <summary>CC-3: upgrading a read to a write on the same thread throws, in every schedule, and never waits for itself.</summary>
-    public static readonly Scenario UpgradeIsRejected = new()
+    public static readonly Scenario UpgradeIsRejected = Upgrade("upgrade-is-rejected", withReader: true);
+
+    /// <summary><see cref="UpgradeIsRejected"/> without the extra reader: two threads, small enough to enumerate every schedule.</summary>
+    public static readonly Scenario UpgradeIsRejectedPair = Upgrade("upgrade-is-rejected-pair", withReader: false);
+
+    private static Scenario Upgrade(string name, bool withReader) => new()
     {
-        Name = "upgrade-is-rejected",
+        Name = name,
         Covers = new[] { "CC-3", "CC-1" },
         Build = s =>
         {
@@ -208,7 +209,7 @@ public static class Scenarios
                 catch (YConcurrencyException) { s.Note("upgrade-threw"); }
             }));
             s.Spawn("Writer", () => doc.Transact(_ => doc.GetArray("a").Push(One)));
-            s.Spawn("Reader", () => doc.ReadTransact(_ => s.Point("r-in-read")));
+            if (withReader) s.Spawn("Reader", () => doc.ReadTransact(_ => s.Point("r-in-read")));
             return r =>
             {
                 Assert.Contains("upgrade-threw", r.Notes);
@@ -262,9 +263,14 @@ public static class Scenarios
     };
 
     /// <summary>CC-17: Destroy is a write transaction that waits its turn; a destroyed document still accepts acquires.</summary>
-    public static readonly Scenario DestroyVsWrite = new()
+    public static readonly Scenario DestroyVsWrite = Destroy("destroy-vs-write", withLate: true);
+
+    /// <summary><see cref="DestroyVsWrite"/> without the late acquirer (checked after the schedule instead): two threads, small enough to enumerate.</summary>
+    public static readonly Scenario DestroyVsWritePair = Destroy("destroy-vs-write-pair", withLate: false);
+
+    private static Scenario Destroy(string name, bool withLate) => new()
     {
-        Name = "destroy-vs-write",
+        Name = name,
         Covers = new[] { "CC-17", "CC-1" },
         Build = s =>
         {
@@ -281,15 +287,18 @@ public static class Scenarios
                 s.Point("w-inside");
                 s.Note("W-out");
             }));
-            s.Spawn("Late", () =>
-            {
-                s.Block("late-after-destroy", () => doc.IsDestroyed);
-                doc.Transact(_ => s.Note("late-acquired"));
-            });
+            if (withLate)
+                s.Spawn("Late", () =>
+                {
+                    s.Block("late-after-destroy", () => doc.IsDestroyed);
+                    doc.Transact(_ => s.Note("late-acquired"));
+                });
             return r =>
             {
                 Assert.True(doc.IsDestroyed);
-                Assert.Contains("late-acquired", r.Notes);
+                var late = false;
+                if (!withLate) doc.Transact(_ => late = true);   // after the schedule: the notes are already taken
+                Assert.True(withLate ? r.Notes.Contains("late-acquired") : late, "the destroyed document did not accept an acquire");
                 Assert.Contains("W-out", r.Notes);
             };
         },
@@ -435,6 +444,9 @@ public static class Scenarios
         SubdocHierarchy, SubdocAbba, AwarenessTimerVsSetState, UndoVsWrite,
     };
 
-    /// <summary>Small enough for depth-first enumeration of every schedule.</summary>
-    public static readonly IReadOnlyList<Scenario> Exhaustive = new[] { UpgradeIsRejected, DestroyVsWrite, NestedJoinAndExclusion };
+    /// <summary>
+    /// Small enough for depth-first enumeration of every schedule. Two threads each: with the third thread the upgrade and destroy scenarios
+    /// have tens of thousands of schedules (calibrated in TASK-4.39), so those run on seeds only.
+    /// </summary>
+    public static readonly IReadOnlyList<Scenario> Exhaustive = new[] { UpgradeIsRejectedPair, DestroyVsWritePair, NestedJoinAndExclusion };
 }
