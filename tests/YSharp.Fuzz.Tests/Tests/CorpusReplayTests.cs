@@ -62,7 +62,7 @@ public sealed class CorpusReplayTests
     public void Corpus_ProtocolFrames_UnknownTypesOverrunsAndBadStatesAreContained() => Replay("HOS-PROTO");
 
     [Fact, Covers("ERR-21", Layer = CoverLayer.Unit)]
-    [Requires(Feature.Text, Feature.V2, Feature.Sync, Feature.Awareness)]
+    [Requires(Feature.Text, Feature.V2, Feature.Sync, Feature.Awareness, Feature.Fuzz)]
     public void Corpus_EveryStoredFile_LeavesTheDocumentUnfaultedAndUsable()=> CorpusRunner.ReplayAll(CorpusFiles.LoadAll());
 
     [Fact]

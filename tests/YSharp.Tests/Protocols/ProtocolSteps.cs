@@ -141,7 +141,7 @@ internal static class ProtocolSteps
             Of(ctx).Results[s.String("name")] = new ProtocolResult
             {
                 Name = s.String("name"), Bytes = reply.WrittenSpan.ToArray(), Threw = !status.Ok && !handlerCalled,
-                Type = status.Ok ? (int)result.Type : null, HandlerCalled = handlerCalled, Consumed = input.Length - span.Length,
+                Type = status.Ok || handlerCalled ? (int)result.Type : null, HandlerCalled = handlerCalled, Consumed = input.Length - span.Length,
             };
         });
         Add("auth.permissionDenied", new[] { "name", "reason" }, none, (ctx, s) =>

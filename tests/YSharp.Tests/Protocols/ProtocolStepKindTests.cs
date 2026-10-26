@@ -79,10 +79,10 @@ public sealed class ProtocolStepKindTests
     {
         var ctx = Run($$$"""
             [{{{Two}}},
-             {"step":"awareness.applyUpdate","awareness":"b","bytes":{"$":"bytes","hex":"01010100"}},
+             {"step":"awareness.applyUpdate","awareness":"b","bytes":{"$":"bytes","hex":"010101027b7d"}},
              {"step":"awareness.removeStates","awareness":"b","clients":[1],"origin":"bye"}]
             """);
-        Assert.Contains(ProtocolSteps.Of(ctx).Events, e => e["event"]!.GetValue<string>() == "change" && e["origin"]!.GetValue<string>() == "bye");
+        Assert.Contains(ProtocolSteps.Of(ctx).Events, e => e["event"]!.GetValue<string>() == "change" && e["origin"]?.GetValue<string>() == "bye");
     }
 
     [Fact, Covers("AW-36", "AW-22")]

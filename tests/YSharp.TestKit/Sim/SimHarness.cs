@@ -120,7 +120,7 @@ public static class SimHarness
     /// </summary>
     public static void Compare(IReadOnlyList<TestYInstance> users, ISimInternals? internals = null, Action? beforeDestroy = null)
     {
-        Assert.True(users.Count >= 2, "compare needs at least two replicas");
+        Assert.True(users.Count >= 1, "compare needs a replica");   // one user is fine: it is compared with its merged rebuild, as upstream (users: 1)
         var connector = users[0].Tc;
         var format = connector.Format;
         foreach (var u in users) u.Connect();

@@ -100,7 +100,7 @@ public sealed class ProtocolFixtureTests
         {
             var got = actual[r.Name];
             var label = $"{fixture.Path} result {r.Name}";
-            var threw = r.Value.GetProperty("threw").GetBoolean();
+            var threw = r.Value.TryGetProperty("threw", out var t) && t.GetBoolean();   // writer results record no "threw": writers do not throw
             Assert.True(threw == got.Threw, $"{label}: oracle {(threw ? "threw" : "did not throw")}, y-sharp {(got.Threw ? "failed" : "succeeded")}");
             if (r.Value.TryGetProperty("bytes", out var bytes) && !threw)
                 HexAssert.Equal(TaggedValue.Read(bytes).Bytes, got.Bytes ?? Array.Empty<byte>(), label);
