@@ -256,6 +256,7 @@ public sealed class UpstreamPortTests
 
     [Fact, PortOf("updates.tests.js:testKeyEncoding", "ENC-76", "ENC-14")]
     [Requires(Feature.Text, Feature.Array, Feature.V2, Feature.Events)]
+    [Requires(Feature.Sync)]
     public void KeyEncoding_FormattedText_RoundTripsThroughEveryEncoder()
     {
         var sim = SimHarness.Init(Prng.Create(1), users: 2);

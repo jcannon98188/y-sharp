@@ -267,6 +267,7 @@ public sealed class TransactionTests
 
     [Fact, Covers("TX-14")]
     [Requires(Feature.Text)]
+    [Requires(Feature.Sync)]
     public void RemoteUpdates_RunAsNonLocalTransactions_WithTheGivenOrigin()
     {
         var net = Net.Init(2);

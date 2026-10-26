@@ -80,6 +80,7 @@ public static class SharpSide
                 var l2 = new List<byte[]>();
                 ctx.Updates[spec.Name] = l1;
                 v2[spec.Name] = l2;
+                SimSteps.Record(ctx, spec.Name, l1, l2);
                 doc.Update += (u, _, _, _) => l1.Add(u.ToArray());
                 doc.UpdateV2 += (u, _, _, _) => l2.Add(u.ToArray());
                 return doc;

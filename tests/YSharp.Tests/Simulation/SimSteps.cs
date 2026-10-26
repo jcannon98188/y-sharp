@@ -159,6 +159,14 @@ internal static class SimSteps
         }
     }
 
+    /// <summary>Hands the deliver step the update events of a replica that a doc factory of its own records.</summary>
+    public static void Record(OpsContext ctx, string replica, List<byte[]> v1, List<byte[]> v2)
+    {
+        var mail = MailOf(ctx);
+        mail.V1[replica] = v1;
+        mail.V2[replica] = v2;
+    }
+
     /// <summary>Replays a script on y-sharp with <see cref="CreateRegistry"/>, recording both update formats of every replica.</summary>
     public static Replay Run(JsonElement script)
     {
@@ -168,12 +176,10 @@ internal static class SimSteps
         interpreter.DocFactory = (ctx, spec) =>
         {
             var doc = new Doc(new DocOptions { ClientId = spec.ClientId, Gc = spec.Gc, TimeProvider = ctx.Clock });
-            var mail = MailOf(ctx);
             var l1 = new List<byte[]>();
             var l2 = new List<byte[]>();
             ctx.Updates[spec.Name] = l1;
-            mail.V1[spec.Name] = l1;
-            mail.V2[spec.Name] = l2;
+            Record(ctx, spec.Name, l1, l2);
             doc.Update += (u, _, _, _) => l1.Add(u.ToArray());
             doc.UpdateV2 += (u, _, _, _) => l2.Add(u.ToArray());
             return doc;

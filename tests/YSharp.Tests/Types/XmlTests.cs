@@ -119,6 +119,7 @@ public sealed class XmlTests
 
     [Fact, PortOf("y-xml.tests.js:testEvents", "X-E5", "Y-1")]
     [Requires(Feature.TextFormat, Feature.Text, Feature.Events)]
+    [Requires(Feature.Sync)]
     public void Xml_AttributeAndChildChanges_RaiseEventsLocallyAndRemotely()
     {
         var net = Net.Init(2);

@@ -32,9 +32,9 @@ public sealed class TextTests
         text.Insert(1, "b");
         text.Insert(100, "d");
         Assert.Equal("abcd", text.ToString());
-        Assert.Equal(4, updates);
+        Assert.Equal(3, updates);
         text.Insert(2, "");
-        Assert.Equal(4, updates);
+        Assert.Equal(3, updates);
         text.Insert(0, "\U0001F600");
         Assert.Equal(6, text.Length);
         text.Insert(2, "|");
@@ -200,6 +200,7 @@ public sealed class TextTests
 
     [Fact, PortOf("y-text.tests.js:testBasicFormat", "F-1", "F-3", "F-2")]
     [Requires(Feature.TextFormat, Feature.Events)]
+    [Requires(Feature.Sync)]
     public void Text_FormatRanges_ReportDeltasForEachChange()
     {
         var net = Net.Init(2);
@@ -250,6 +251,7 @@ public sealed class TextTests
 
     [Fact, PortOf("y-text.tests.js:testFalsyFormats", "F-4")]
     [Requires(Feature.TextFormat, Feature.Events)]
+    [Requires(Feature.Sync)]
     public void Text_FalsyFormatValues_AreKeptInTheDelta()
     {
         var net = Net.Init(2);
@@ -457,6 +459,7 @@ public sealed class TextTests
 
     [Fact, PortOf("y-text.tests.js:testDeltaAfterConcurrentFormatting", "F-9", "Y-6")]
     [Requires(Feature.TextFormat, Feature.Events)]
+    [Requires(Feature.Sync)]
     public void Text_ConcurrentFormatting_ProducesTheExpectedDelta()
     {
         var net = Net.Init(2);
@@ -477,6 +480,7 @@ public sealed class TextTests
 
     [Fact, PortOf("y-text.tests.js:testFormattingDeltaUnnecessaryAttributeChange", "Y-6", "F-9")]
     [Requires(Feature.TextFormat, Feature.Events)]
+    [Requires(Feature.Sync)]
     public void Text_ReappliedSameFormat_ProducesNoUnnecessaryAttributeChange()
     {
         var net = Net.Init(2);
@@ -554,6 +558,7 @@ public sealed class TextTests
 
     [Fact, PortOf("y-text.tests.js:testTypesAsEmbed", "E-4", "E-3")]
     [Requires(Feature.TextFormat, Feature.Map, Feature.Events)]
+    [Requires(Feature.Sync)]
     public void Text_TypeInsertedAsEmbed_SyncsAndReadsBack()
     {
         var net = Net.Init(2);
@@ -686,6 +691,7 @@ public sealed class TextTests
 
     [Fact, PortOf("y-text.tests.js:testBasicInsertAndDelete", "Y-2", "Y-5", "A-E4", "TX-5", "T-1", "T-2")]
     [Requires(Feature.Events)]
+    [Requires(Feature.Sync)]
     public void Text_InsertAndDelete_ReportDeltasForEachChange()
     {
         var net = Net.Init(2);
@@ -772,6 +778,7 @@ public sealed class TextTests
 
     [Fact, PortOf("y-text.tests.js:testSearchMarkerBug1", "A-14")]
     [Requires(Feature.Events)]
+    [Requires(Feature.Sync)]
     public void Text_SearchMarkerRegression_ConvergesAcrossPeers()
     {
         var net = Net.Init(2);

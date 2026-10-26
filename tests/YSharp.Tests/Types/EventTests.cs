@@ -29,6 +29,7 @@ public sealed class EventTests
 
     [Fact, PortOf("y-array.tests.js:testInsertAndDeleteEventsForTypes2", "A-E1", "V-8")]
     [Requires(Feature.Map)]
+    [Requires(Feature.Sync)]
     public void Events_ArrayTypeInsertAndDelete_CountsEachEvent()
     {
         var net = Net.Init(2);
@@ -44,6 +45,7 @@ public sealed class EventTests
 
     [Fact, PortOf("y-array.tests.js:testChangeEvent", "A-E2", "A-E3", "V-4", "V-6")]
     [Requires(Feature.Array)]
+    [Requires(Feature.Sync)]
     public void Events_ArrayChanges_ReportAddedAndDeletedItems()
     {
         var net = Net.Init(2);
@@ -79,6 +81,7 @@ public sealed class EventTests
     }
 
     [Fact, PortOf("y-array.tests.js:testInsertAndDeleteEvents", "A-E1")]
+    [Requires(Feature.Sync)]
     public void Events_ArrayInsertAndDelete_FireTheObserver()
     {
         var net = Net.Init(2);
@@ -98,6 +101,7 @@ public sealed class EventTests
 
     [Fact, PortOf("y-array.tests.js:testInsertAndDeleteEventsForTypes", "A-E1")]
     [Requires(Feature.Array)]
+    [Requires(Feature.Sync)]
     public void Events_ArrayInsertAndDeleteOfTypes_FireTheObserver()
     {
         var net = Net.Init(2);
@@ -140,6 +144,7 @@ public sealed class EventTests
     }
 
     [Fact, PortOf("y-array.tests.js:testEventTargetIsSetCorrectlyOnLocal", "A-E6")]
+    [Requires(Feature.Sync)]
     public void Events_LocalChange_SetsTargetAndCurrentTarget()
     {
         var net = Net.Init(3);
@@ -153,6 +158,7 @@ public sealed class EventTests
     }
 
     [Fact, PortOf("y-array.tests.js:testEventTargetIsSetCorrectlyOnRemote", "A-E6", "TX-14")]
+    [Requires(Feature.Sync)]
     public void Events_RemoteChange_SetsTargetAndIsNotLocal()
     {
         var net = Net.Init(3);
@@ -168,6 +174,7 @@ public sealed class EventTests
     }
 
     [Fact, PortOf("y-array.tests.js:testNestedObserverEvents", "A-E7", "TX-6")]
+    [Requires(Feature.Sync)]
     public void Events_ObserverThatEditsTheType_RunsNestedEventsInOrder()
     {
         var net = Net.Init(2);
@@ -195,6 +202,7 @@ public sealed class EventTests
 
     [Fact, PortOf("y-array.tests.js:testNewChildDoesNotEmitEventInTransaction", "A-E8", "V-8")]
     [Requires(Feature.Map)]
+    [Requires(Feature.Sync)]
     public void Events_ChildCreatedInATransaction_DoesNotEmitItsOwnEvent()
     {
         var net = Net.Init(2);
@@ -337,6 +345,7 @@ public sealed class EventTests
 
     [Fact, PortOf("y-array.tests.js:testObserveDeepEventOrder", "TX-10", "TX-2")]
     [Requires(Feature.Map)]
+    [Requires(Feature.Sync)]
     public void Events_DeepObserver_ReceivesEventsInTheOraclesOrder()
     {
         var net = Net.Init(2);
@@ -361,6 +370,7 @@ public sealed class EventTests
 
     [Fact, PortOf("y-map.tests.js:testThrowsAddAndUpdateAndDeleteEvents", "M-E1", "V-1")]
     [Requires(Feature.Array)]
+    [Requires(Feature.Sync)]
     public void Events_MapAddUpdateAndDelete_ReportTheChangedKeys()
     {
         var net = Net.Init(2);
@@ -382,6 +392,7 @@ public sealed class EventTests
 
     [Fact, PortOf("y-map.tests.js:testThrowsDeleteEventsOnClear", "M-E1", "M-5")]
     [Requires(Feature.Array)]
+    [Requires(Feature.Sync)]
     public void Events_MapClear_ReportsEveryDeletedKey()
     {
         var net = Net.Init(2);
@@ -406,6 +417,7 @@ public sealed class EventTests
     }
 
     [Fact, PortOf("y-map.tests.js:testChangeEvent", "M-E1", "M-E2", "V-5")]
+    [Requires(Feature.Sync)]
     public void Events_MapChanges_ReportKeysAndKeysChanged()
     {
         var net = Net.Init(2);
@@ -515,12 +527,13 @@ public sealed class EventTests
         Assert.Equal("k:add:-", computedInside);
         Assert.NotNull(stored);
         Assert.False(stored!.IsValid);
-        Assert.ThrowsAny<InvalidOperationException>(() => stored.Keys.Count);
-        Assert.ThrowsAny<InvalidOperationException>(() => stored.Keys.Count);
+        Assert.Throws<YLifetimeException>(() => stored.Keys.Count);
+        Assert.Throws<YLifetimeException>(() => stored.Keys.Count);
     }
 
     [Fact, PortOf("y-map.tests.js:testYmapEventHasCorrectValueWhenSettingAPrimitive", "M-E2")]
     [Requires(Feature.Map)]
+    [Requires(Feature.Sync)]
     public void Events_MapSetOfAPrimitive_CarriesTheNewValue()
     {
         var net = Net.Init(3);
@@ -540,6 +553,7 @@ public sealed class EventTests
 
     [Fact, PortOf("y-map.tests.js:testYmapEventHasCorrectValueWhenSettingAPrimitiveFromOtherUser", "M-E7", "M-9")]
     [Requires(Feature.Map)]
+    [Requires(Feature.Sync)]
     public void Events_MapSetOfAPrimitiveByAPeer_CarriesTheNewValue()
     {
         var net = Net.Init(3);
@@ -563,6 +577,7 @@ public sealed class EventTests
 
     [Fact, PortOf("y-map.tests.js:testObserveDeepProperties", "TX-19", "V-2")]
     [Requires(Feature.Map)]
+    [Requires(Feature.Sync)]
     public void Events_DeepObserversOnNestedMaps_SeeTheChangedProperties()
     {
         var net = Net.Init(4);
@@ -595,6 +610,7 @@ public sealed class EventTests
 
     [Fact, PortOf("y-map.tests.js:testObserversUsingObservedeep", "TX-19", "V-2")]
     [Requires(Feature.Array, Feature.Map)]
+    [Requires(Feature.Sync)]
     public void Events_DeepObserver_ReportsPathsOfNestedChanges()
     {
         var net = Net.Init(2);
@@ -616,6 +632,7 @@ public sealed class EventTests
 
     [Fact, PortOf("y-map.tests.js:testPathsOfSiblingEvents", "V-2", "TX-19")]
     [Requires(Feature.Text, Feature.Map)]
+    [Requires(Feature.Sync)]
     public void Events_SiblingChanges_ReportTheirOwnPaths()
     {
         var net = Net.Init(2);
@@ -854,24 +871,32 @@ public sealed class EventTests
 
     [Fact, Covers("Y-4")]
     [Requires(Feature.TextFormat)]
-    public void TextDelta_ReadInTheHandler_DoesNotChangeTheEncodedState()
+    public void TextDelta_ReadInTheHandler_DeletesRedundantFormatsLikeYjs()
     {
-        // JS computes event.delta lazily and the computation may delete redundant format items. The state a replica ends in must not
-        // depend on whether an observer read the delta.
-        byte[] Run(bool readDelta)
+        // JS computes event.delta lazily, in a transaction of its own that deletes the redundant format items it meets; Yjs's formatting
+        // cleanup misses them. A replica that reads the delta therefore ends in a different state, and both still render the same text
+        // (oracle: fixtures/text/concurrent-formatting.json).
+        (byte[] State, int Updates) Run(bool readDelta)
         {
-            var net = Net.Init(2);
-            var (text0, text1) = (net.Peers[0].Text, net.Peers[1].Text);
-            text0.Insert(0, "abcde");
-            net.Flush();
-            text0.Format(0, 3, Obj(("bold", true)));
-            text1.Format(2, 2, Obj(("bold", true)));
-            if (readDelta) text1.Observe((e, _) => GC.KeepAlive(((YTextEvent)e).Delta.Length));
-            net.Flush();
-            var state = text1.Doc!.EncodeStateAsUpdate();
-            Assert.Equal(text0.DeltaJson(), text1.DeltaJson());
-            return state;
+            var a = new Doc(new DocOptions { ClientId = 61 });
+            var b = new Doc(new DocOptions { ClientId = 62 });
+            var (ta, tb) = (a.GetText("t"), b.GetText("t"));
+            ta.Insert(0, "abcde");
+            b.ApplyUpdate(a.EncodeStateAsUpdate());
+            ta.Format(0, 3, Obj(("bold", true)));
+            tb.Format(2, 2, Obj(("bold", true)));
+            if (readDelta) tb.Observe((e, _) => GC.KeepAlive(((YTextEvent)e).Delta.Length));
+            var updates = 0;
+            b.Update += (_, _, _, _) => updates++;
+            b.ApplyUpdate(a.EncodeStateAsUpdate());
+            a.ApplyUpdate(b.EncodeStateAsUpdate());
+            Assert.Equal(ta.DeltaJson(), tb.DeltaJson());
+            return (b.EncodeStateAsUpdate(), updates);
         }
-        Assert.Equal(Run(false), Run(true));
+        var (plain, plainUpdates) = Run(false);
+        var (read, readUpdates) = Run(true);
+        Assert.Equal(1, plainUpdates);
+        Assert.Equal(2, readUpdates); // the remote update, then the delete of the redundant format item
+        Assert.NotEqual(plain, read);
     }
 }
