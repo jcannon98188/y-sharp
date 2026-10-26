@@ -18,6 +18,7 @@ public sealed class XmlTests
     private static YType[] Nodes(params YType[] nodes) => nodes;
 
     [Fact, Covers("X-E1")]
+    [Requires(Feature.Sync)]
     public void NodeName_DefaultsToUndefined_AndKeepsAGivenName()
     {
         Assert.Equal("UNDEFINED", new YXmlElement().NodeName);
@@ -87,6 +88,7 @@ public sealed class XmlTests
     }
 
     [Fact, PortOf("y-xml.tests.js:testSetProperty", "X-E2", "X-E5")]
+    [Requires(Feature.Sync)]
     public void Xml_SetAttribute_IsReadBackLocallyAndOnThePeer()
     {
         var net = Net.Init(2);
@@ -99,6 +101,7 @@ public sealed class XmlTests
     }
 
     [Fact, PortOf("y-xml.tests.js:testHasProperty", "X-E2")]
+    [Requires(Feature.Sync)]
     public void Xml_HasAttribute_TrueAfterSetAndFalseAfterRemove()
     {
         var net = Net.Init(2);
@@ -147,7 +150,7 @@ public sealed class XmlTests
     }
 
     [Fact, PortOf("y-xml.tests.js:testTreewalker", "X-E4")]
-    [Requires(Feature.Text)]
+    [Requires(Feature.Text, Feature.Sync)]
     public void Xml_TreeWalker_VisitsNodesInDocumentOrder()
     {
         var net = Net.Init(3);

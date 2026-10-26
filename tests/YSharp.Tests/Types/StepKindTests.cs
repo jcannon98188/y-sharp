@@ -161,7 +161,7 @@ public sealed class StepKindTests
     }
 
     [Fact, Covers("Y-1")]
-    [Requires(Feature.Xml)]
+    [Requires(Feature.Xml, Feature.Events)]
     public void Observe_AnyEvents_AreRecordedInFiringOrder()
     {
         var ctx = Run($$$"""

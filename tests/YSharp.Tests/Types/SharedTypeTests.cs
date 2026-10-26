@@ -202,7 +202,7 @@ public sealed class SharedTypeTests
     }
 
     [Fact, PortOf("y-map.tests.js:testMapHavingIterableAsConstructorParamTests", "T-0.7", "M-10")]
-    [Requires(Feature.Text, Feature.Array, Feature.Map, Feature.Xml)]
+    [Requires(Feature.Text, Feature.Array, Feature.Map, Feature.Xml, Feature.Sync)]
     public void ConstructorSugar_InitialContent_IsBuffered()
     {
         var net = Net.Init(1);
