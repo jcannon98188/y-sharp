@@ -57,7 +57,7 @@
   adr: ["0012", "0003"]
   status: active
   ref: "adr 0012 / TASK-2.13"
-  note: "Normalisers: LenientTruncationNormaliser and LenientColumnEndNormaliser (ENC-60, 62, 64, 65, 67, 68); the second is claimed only when the oracle reports readPastEnd; ZeroLengthDeleteRangeNormaliser (ENC-51) only when it reports zeroLengthDeleteRange; UnsortedPendingDeleteSetNormaliser (ENC-86) only when it reports unsortedPendingDeleteSet (TASK-4.28)."
+  note: "Normalisers: LenientTruncationNormaliser and LenientColumnEndNormaliser (ENC-60, 62, 64, 65, 67, 68); the second is claimed only when the oracle reports readPastEnd; ZeroLengthDeleteRangeNormaliser (ENC-51) only when it reports zeroLengthDeleteRange; UnsortedPendingDeleteSetNormaliser (ENC-86) only when it reports unsortedPendingDeleteSet; SelfDependentStructNormaliser (Q15) only when it reports selfDependentPending (TASK-4.28)."
 
 - id: DIFF-06
   title: "A failure prints the seed, the shrunk script, both observation sets and the first difference (byte offset or doc path), writes a fixture candidate with a repro header, and YSHARP_REPLAY re-runs one saved script"

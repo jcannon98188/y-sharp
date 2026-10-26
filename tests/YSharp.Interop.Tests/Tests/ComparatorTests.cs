@@ -184,6 +184,17 @@ public sealed class ComparatorTests
         Assert.Equal(new[] { "sv", "doc" }, UnsortedPendingDeleteSetNormaliser.StillCompared);
     }
 
+    [Fact, Covers("DIFF-05", "Q15")]
+    public void Normaliser_SelfDependentStruct_ClaimsOnlyAParkedSelfDependency()
+    {
+        var n = new SelfDependentStructNormaliser();
+        var rejects = Case(MutationKind.InsertByte, oracle: true, sharp: false, validLength: 20, mutatedLength: 21);
+        Assert.True(n.Claims(rejects with { OracleSelfDependentPending = true }));
+        Assert.False(n.Claims(rejects), "any other y-sharp rejection of an update the oracle accepts is a bug");
+        Assert.False(n.Claims(Case(MutationKind.InsertByte, oracle: true, sharp: false, unchanged: false) with { OracleSelfDependentPending = true }), "a rejection must change nothing");
+        Assert.False(n.Claims(Case(MutationKind.InsertByte, oracle: true, sharp: true) with { OracleSelfDependentPending = true }), "both accepting is not this divergence");
+    }
+
     [Fact, Covers("DIFF-05")]
     public void Normaliser_EveryOne_NamesRegisteredInventoryEntries()
     {

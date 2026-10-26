@@ -84,6 +84,18 @@ public sealed class ForeignReadPastEndTests(OracleHost host)
         Assert.Null(Result("0001770228016263", "v1")["unsortedPendingDeleteSet"]);
     }
 
+    [Fact, Covers("DIFF-05", "Q15")]
+    public void ApplyForeign_AParkedStructThatDependsOnItself_IsFlagged()
+    {
+        // client 5: "a" at clock 0 waits for client 1, then "b" at clock 1 with origin (5, 1), its own id (the shape of a Nightly find of TASK-4.28)
+        const string hex = "0102050084010001618405010162" + "00";
+        var value = Result(hex, "v1");
+        Assert.True(value["accepted"]!.GetValue<bool>());
+        Assert.True(value["selfDependentPending"]!.GetValue<bool>());
+        Assert.False(SharpSide.Run(Script(hex, "v1")).Observations!["results"]!["value"]!["r"]!["value"]!["accepted"]!.GetValue<bool>(), "y-sharp rejects it (Q15, ADR 0005)");
+        Assert.Null(Result("0102050084010001618405000162" + "00", "v1")["selfDependentPending"]);
+    }
+
     [Fact, Covers("DIFF-05")]
     public void ApplyForeign_AnUpdateDecodedInBounds_CarriesNoFlag()
     {

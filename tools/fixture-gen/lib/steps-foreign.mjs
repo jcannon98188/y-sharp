@@ -9,6 +9,8 @@
 // because it re-encoded a parked zero-length delete range (UpdateEncoderV2.writeDsLen, ENC-51), which y-sharp ignores by ADR 0003.
 // An accepted update carries `unsortedPendingDeleteSet: true` when Yjs parked delete ranges as pending state and a range of one client
 // starts before the previous one ends: the V2 re-encode then writes a negative clock difference, which lib0 turns into garbage (ENC-86).
+// An accepted update carries `selfDependentPending: true` when Yjs parked a struct that depends on its own id or a later clock of its own
+// client (origin, right origin or parent id): it can never integrate, and y-sharp rejects the update as Malformed (Q15, ADR 0005).
 // The flags are absent otherwise, so other results keep their shape.
 import { Y, lib0 } from './oracle.mjs'
 import { untag, ScriptError } from './tagged.mjs'
@@ -43,10 +45,19 @@ defineStep({
     const value = accepted && readPastEnd(structDecoder)
       ? { accepted, readPastEnd: true }
       : zeroLengthDeleteRange ? { accepted, zeroLengthDeleteRange: true }
-        : accepted && order.unsorted && doc.store.pendingDs !== null ? { accepted, unsortedPendingDeleteSet: true } : { accepted }
+        : accepted && order.unsorted && doc.store.pendingDs !== null ? { accepted, unsortedPendingDeleteSet: true }
+          : accepted && selfDependentPending(doc) ? { accepted, selfDependentPending: true } : { accepted }
     ctx.results.set(s.name, { api: enc === 'v1' ? 'Y.applyUpdate (foreign bytes)' : 'Y.applyUpdateV2 (foreign bytes)', value })
   }
 })
+
+// The parked structs are a V2 update Yjs wrote itself, so the lazy decoder reads them faithfully.
+const selfDependentPending = (doc) => {
+  const pending = doc.store.pendingStructs
+  if (pending === null) return false
+  const ahead = (dep, id) => dep instanceof Y.ID && dep.client === id.client && dep.clock >= id.clock
+  return Y.decodeUpdateV2(pending.update).structs.some(s => s instanceof Y.Item && (ahead(s.origin, s.id) || ahead(s.rightOrigin, s.id) || ahead(s.parent, s.id)))
+}
 
 // readAndApplyDeleteSet reads each client's ranges after resetDsCurVal; a range starting before the previous one ends is out of order.
 const watchDeleteSetOrder = (structDecoder, order) => {

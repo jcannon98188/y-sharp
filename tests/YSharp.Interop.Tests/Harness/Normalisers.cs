@@ -21,6 +21,9 @@ public sealed record MutationCase(UpdateFormat Format, byte[] Valid, byte[] Muta
 
     /// <summary>The oracle parked out-of-order delete ranges as pending state (the step's <c>unsortedPendingDeleteSet</c> result).</summary>
     public bool OracleUnsortedPendingDeleteSet { get; init; }
+
+    /// <summary>The oracle parked a struct that depends on its own id or a later clock of its client (the step's <c>selfDependentPending</c> result).</summary>
+    public bool OracleSelfDependentPending { get; init; }
 }
 
 /// <summary>The classes a mutated valid update falls into (ADR 0012).</summary>
@@ -129,11 +132,29 @@ public sealed class UnsortedPendingDeleteSetNormaliser : IDivergenceNormaliser
     public bool Claims(MutationCase c) => c.OracleUnsortedPendingDeleteSet && c.OracleAccepted && c.SharpAccepted;
 }
 
+/// <summary>
+/// A struct whose origin, right origin or parent id is its own id or a later clock of its own client can never integrate. Yjs parks it as
+/// pending state for good and accepts the update; y-sharp rejects the update as Malformed (TASK-4.14), the strict decoding of ADR 0005
+/// recorded as Q15. Claimed only when the oracle reports that it parked such a struct and y-sharp left the document unchanged.
+/// </summary>
+public sealed class SelfDependentStructNormaliser : IDivergenceNormaliser
+{
+    public string Key => "self-dependent-struct";
+
+    public IReadOnlyList<string> RegistryIds { get; } = new[] { "Q15" };
+
+    public string Description =>
+        "A mutated update holding a struct that depends on itself is parked as pending by the oracle and rejected by y-sharp without changing the document.";
+
+    public bool Claims(MutationCase c) => c.OracleSelfDependentPending && c.OracleAccepted && !c.SharpAccepted && c.SharpUnchanged;
+}
+
 public static class Normalisers
 {
     /// <summary>Every divergence the live differential knows. A divergence nobody registered here is reported as a bug.</summary>
     public static readonly IReadOnlyList<IDivergenceNormaliser> Registered =
-        new IDivergenceNormaliser[] { new LenientTruncationNormaliser(), new LenientColumnEndNormaliser(), new ZeroLengthDeleteRangeNormaliser(), new UnsortedPendingDeleteSetNormaliser() };
+        new IDivergenceNormaliser[] { new LenientTruncationNormaliser(), new LenientColumnEndNormaliser(), new ZeroLengthDeleteRangeNormaliser(), new UnsortedPendingDeleteSetNormaliser(),
+            new SelfDependentStructNormaliser() };
 
     public static OutcomeClass Classify(bool oracleAccepted, bool sharpAccepted) =>
         (oracleAccepted, sharpAccepted) switch
