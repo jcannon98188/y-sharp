@@ -42,6 +42,8 @@ public sealed class CanaryTests
     [InlineData(1, "", "FAIL x", CanaryVerdict.Failed)]
     [InlineData(134, "", "Stack overflow.\n   at X", CanaryVerdict.StackOverflow)]
     [InlineData(unchecked((int)0xC00000FD), "", "", CanaryVerdict.StackOverflow)]
+    [InlineData(unchecked((int)0xC0000005), "", "", CanaryVerdict.StackOverflow)]
+    [InlineData(unchecked((int)0xC0000005), "", "Unhandled exception. System.AccessViolationException", CanaryVerdict.Crashed)]
     [InlineData(139, "", "", CanaryVerdict.Crashed)]
     [LibraryIndependent]
     public void Canary_ExitCodesAndOutput_AreClassified(int exit, string stdout, string stderr, CanaryVerdict expected) =>

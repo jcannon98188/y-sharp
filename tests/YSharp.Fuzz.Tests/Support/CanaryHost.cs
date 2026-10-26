@@ -74,7 +74,10 @@ internal static class CanaryHost
     public static CanaryRun Classify(int exitCode, string stdout, string stderr)
     {
         // .NET prints "Stack overflow." to stderr and aborts: STATUS_STACK_OVERFLOW on Windows, SIGABRT (134) or SIGSEGV (139) elsewhere
-        var overflow = stderr.Contains("Stack overflow", StringComparison.OrdinalIgnoreCase) || exitCode == unchecked((int)0xC00000FD);
+        // On Windows an overflow that hits the guard page while the runtime cannot handle it dies silently with STATUS_ACCESS_VIOLATION;
+        // managed code reports any other access violation as an exception on stderr, so a silent one is the overflow (seen on CI)
+        var overflow = stderr.Contains("Stack overflow", StringComparison.OrdinalIgnoreCase) || exitCode == unchecked((int)0xC00000FD) ||
+                       (exitCode == unchecked((int)0xC0000005) && stderr.Length == 0);
         if (overflow) return new CanaryRun(CanaryVerdict.StackOverflow, exitCode, stdout, stderr);
         return exitCode switch
         {
