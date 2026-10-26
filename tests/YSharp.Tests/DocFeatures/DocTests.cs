@@ -138,8 +138,11 @@ public sealed class DocTests
         var doc = new Doc();
         Assert.Same(doc.GetText(), doc.GetText(""));
         Assert.NotSame(doc.GetText(), doc.GetText("a"));
-        Assert.Same(doc.GetArray(), doc.GetArray(""));
-        Assert.Same(doc.GetMap(), doc.GetMap(""));
+        Assert.Throws<YTypeConflictException>(() => doc.GetArray());   // "" is already a text, as in Yjs
+        var arrays = new Doc();
+        Assert.Same(arrays.GetArray(), arrays.GetArray(""));
+        var maps = new Doc();
+        Assert.Same(maps.GetMap(), maps.GetMap(""));
         Assert.Same(doc.GetXmlFragment("f"), doc.GetXmlFragment("f"));
         var element = doc.GetXmlElement("e");
         Assert.Same(element, doc.GetXmlElement("e"));
@@ -291,7 +294,7 @@ public sealed class DocTests
         var doc = Net.Mk(1);
         var log = new List<string>();
         string O(Transaction tx) => tx.Origin as string ?? "";
-        doc.BeforeAllTransactions += (tx, _) => log.Add("beforeAllTransactions:" + O(tx));
+        doc.BeforeAllTransactions += (tx, _) => log.Add("beforeAllTransactions:" + O(tx));   // Yjs passes no transaction; y-sharp passes the first one
         doc.BeforeTransaction += (tx, _) => log.Add("beforeTransaction:" + O(tx));
         doc.BeforeObserverCalls += (tx, _) => log.Add("beforeObserverCalls:" + O(tx));
         doc.AfterTransaction += (tx, _) => log.Add("afterTransaction:" + O(tx));
@@ -310,9 +313,9 @@ public sealed class DocTests
         doc.Transact(_ => t.Insert(0, "a"), "first");
         Assert.Equal(new[]
         {
-            "beforeAllTransactions:", "beforeTransaction:first", "beforeObserverCalls:first", "observe", "beforeTransaction:second", "inner-body",
-            "afterTransaction:first", "afterTransactionCleanup:first", "update:", "beforeObserverCalls:second", "observe",
-            "afterTransaction:second", "afterTransactionCleanup:second", "update:", "afterAllTransactions:first,second",
+            "beforeAllTransactions:first", "beforeTransaction:first", "beforeObserverCalls:first", "observe", "beforeTransaction:second", "inner-body",
+            "afterTransaction:first", "afterTransactionCleanup:first", "update:first", "beforeObserverCalls:second", "observe",
+            "afterTransaction:second", "afterTransactionCleanup:second", "update:second", "afterAllTransactions:first,second",
         }, log);
     }
 
