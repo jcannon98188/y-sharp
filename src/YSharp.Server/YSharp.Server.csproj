@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <RootNamespace>YSharp.Server</RootNamespace>
+    <!-- ADR 0024 SRV-3: its own package and version; the core dependency has a lower bound only -->
+    <PackageId>YSharp.Server</PackageId>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\YSharp\YSharp.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="YSharp.Server.Tests" />
+  </ItemGroup>
+</Project>
