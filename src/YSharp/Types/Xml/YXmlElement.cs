@@ -106,12 +106,14 @@ public sealed class YXmlElement : YXmlFragment
         }
     }
 
-    /// <summary>Yjs <c>getAttributes</c>: the live attributes in the order they were first stored, a snapshot (X-2). Snapshots are spec 30.</summary>
+    /// <summary>
+    /// Yjs <c>getAttributes</c>: the live attributes in the order they were first stored, a snapshot (X-2); with <paramref name="snapshot"/>, the
+    /// attributes as they were when it was taken (Yjs <c>typeMapGetAllSnapshot</c>, SNAP-05).
+    /// </summary>
     public IReadOnlyDictionary<string, YValue> GetAttributes(YSnapshot? snapshot = null)
     {
-        if (snapshot is not null) throw Sketch.NI;   // snapshots (spec 30)
         var result = new OrderedDictionary<string, YValue>(StringComparer.Ordinal);
-        foreach (var (key, entry) in AttributeEntries()) result[key] = entry.Value;
+        foreach (var (key, entry) in AttributeEntries(snapshot)) result[key] = entry.Value;
         return result;
     }
 
@@ -148,13 +150,13 @@ public sealed class YXmlElement : YXmlFragment
         foreach (var (key, value) in attrs) TypeMap.Set(tx, this, key, value);
     }
 
-    private List<KeyValuePair<string, YEntry>> AttributeEntries()
+    private List<KeyValuePair<string, YEntry>> AttributeEntries(YSnapshot? snapshot = null)
     {
         if (AttachedDoc is not { } doc) return new List<KeyValuePair<string, YEntry>>();
         var h = doc.EnterRead();
         try
         {
-            return TypeMap.Entries(this);
+            return snapshot is null ? TypeMap.Entries(this) : TypeMap.Entries(this, snapshot);
         }
         finally
         {

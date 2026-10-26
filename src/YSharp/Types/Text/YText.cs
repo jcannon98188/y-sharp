@@ -124,11 +124,31 @@ public class YText : YType
         Write((tx, doc) => ApplyDeltaCore(tx, doc, ops, sanitize));
     }
 
-    /// <summary>Yjs <c>toDelta</c>. Snapshots are spec 30.</summary>
+    /// <summary>
+    /// Yjs <c>toDelta</c>. With <paramref name="snapshot"/> it reads the text as it was then; with <paramref name="previous"/> as well, the runs
+    /// added or removed between the two carry a <c>ychange</c> attribute (<paramref name="computeYChange"/>'s value, else <c>{type}</c>). A
+    /// snapshot read splits the structs the snapshots cut, in a write transaction with the origin <c>"cleanup"</c> (or the caller's own write
+    /// transaction), which merges them again when it commits (SNAP-05 to SNAP-07). Inside a read transaction a snapshot read throws
+    /// <see cref="YConcurrencyException"/>, as any write does there (CC-3).
+    /// </summary>
     public TextDeltaOp[] ToDelta(YSnapshot? snapshot = null, YSnapshot? previous = null, Func<string, ItemId, YValue>? computeYChange = null)
     {
-        if (snapshot is not null || previous is not null) throw Sketch.NI;   // snapshots (spec 30)
         if (AttachedDoc is not { } doc) return Array.Empty<TextDeltaOp>();
+        if (snapshot is not null || previous is not null)
+        {
+            var w = doc.EnterWrite("cleanup", local: true);
+            try
+            {
+                snapshot?.SplitAffectedStructs(w.State);
+                previous?.SplitAffectedStructs(w.State);
+                return TypeText.ToDelta(doc, Branch, snapshot, previous, computeYChange);
+            }
+            finally
+            {
+                doc.Leave(w);
+            }
+        }
+
         var h = doc.EnterRead();
         try
         {

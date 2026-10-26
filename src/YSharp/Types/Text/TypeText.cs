@@ -466,6 +466,73 @@ internal static class TypeText
         return ops.ToArray();
     }
 
+    /// <summary>
+    /// Yjs <c>toDelta</c> with snapshots: walks every item visible in <paramref name="snapshot"/> (the live text when null) or in
+    /// <paramref name="previous"/>. A string visible only in <paramref name="previous"/> is marked removed and one visible only in
+    /// <paramref name="snapshot"/> added, through the <c>ychange</c> attribute; formats count only when visible in <paramref name="snapshot"/>.
+    /// Collected content (a deleted item whose content is gone) reads as nothing (SNAP-11). The caller has split the structs.
+    /// </summary>
+    public static TextDeltaOp[] ToDelta(Doc doc, Branch branch, YSnapshot? snapshot, YSnapshot? previous, Func<string, ItemId, YValue>? computeYChange)
+    {
+        var store = doc.Store;
+        var ops = new List<TextDeltaOp>();
+        var current = new OrderedDictionary<string, YValue>(StringComparer.Ordinal);
+        var sb = new StringBuilder();
+
+        void PackStr()
+        {
+            if (sb.Length == 0) return;
+            ops.Add(new TextDeltaOp(DeltaKind.Insert, sb.Length, sb.ToString(), default, AttributesOf(current)));
+            sb.Clear();
+        }
+
+        bool Visible(ItemRef n, YSnapshot? s) => s is null ? !n.IsDeleted : s.IsVisible(store.ClientOf(n), n.Clock);
+
+        void Mark(string type, ItemRef n)
+        {
+            var client = store.ClientOf(n);
+            // JS compares cur.user and cur.type, so the default {type} (which has no user) starts a new op at every item
+            if (current.TryGetValue("ychange", out var cur) && cur.TryGetObject(out var o) && o.TryGetValue("user", out var user)
+                && StrictEquals(user, YValue.Number(client)) && o.TryGetValue("type", out var t) && StrictEquals(t, type)) return;
+            PackStr();
+            current["ychange"] = computeYChange is not null
+                ? computeYChange(type, new ItemId(client, n.Clock))
+                : YValue.Object([new KeyValuePair<string, YValue>("type", type)]);
+        }
+
+        for (var n = StructStore.StartOf(branch); !n.IsNull; n = n.Right)
+        {
+            if (!Visible(n, snapshot) && !(previous is not null && Visible(n, previous))) continue;
+            switch (n.Kind)
+            {
+                case ContentKind.String:
+                    if (snapshot is not null && !Visible(n, snapshot)) Mark("removed", n);
+                    else if (previous is not null && !Visible(n, previous)) Mark("added", n);
+                    else if (current.ContainsKey("ychange"))
+                    {
+                        PackStr();
+                        current.Remove("ychange");
+                    }
+
+                    store.AppendString(sb, n);
+                    break;
+                case ContentKind.Type:
+                case ContentKind.Embed:
+                    PackStr();
+                    ops.Add(new TextDeltaOp(DeltaKind.Insert, 1, null, TypeList.ContentAt(doc, n, 0), AttributesOf(current)));
+                    break;
+                case ContentKind.Format:
+                    if (!Visible(n, snapshot)) break;
+                    PackStr();
+                    UpdateCurrent(current, Format(store, n));
+                    break;
+            }
+        }
+
+        PackStr();
+        return ops.ToArray();
+    }
+
     /// <summary>The formats in effect as a delta's <c>attributes</c> object; undefined when there are none.</summary>
     internal static YValue AttributesOf(OrderedDictionary<string, YValue> current)
     {

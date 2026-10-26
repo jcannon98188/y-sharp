@@ -110,7 +110,7 @@ public static partial class YUpdate
     }
 
     /// <summary>Decodes an update the way the update functions read it: its size checked, Skips only with an exact info byte, structs in read order.</summary>
-    private static YError DecodeForFunctions(ReadOnlySpan<byte> update, UpdateFormat format, YLimits limits, out UpdateRefs refs, out List<StructRef> structs)
+    internal static YError DecodeForFunctions(ReadOnlySpan<byte> update, UpdateFormat format, YLimits limits, out UpdateRefs refs, out List<StructRef> structs)
     {
         structs = new List<StructRef>();
         refs = null!;

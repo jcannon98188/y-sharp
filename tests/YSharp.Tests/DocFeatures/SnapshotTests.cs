@@ -215,6 +215,27 @@ public sealed class SnapshotTests
         Assert.Equal("[a{\"ychange\":{\"type\":\"removed\",\"who\":1}}][bc][def{\"bold\":true,\"ychange\":{\"type\":\"added\",\"who\":1}}]", custom);
     }
 
+    [Fact]
+    [Covers("SNAP-07")]
+    [Requires(Feature.TextFormat, Feature.Text)]
+    public void ToDelta_YChangeWithAUserField_JoinsTheSameClientsRuns_WhereTheDefaultSplitsEveryItem()
+    {
+        // from the pinned Yjs: toDelta compares cur.user and cur.type, and the default { type } has no user
+        var doc = NoGc();
+        var t = doc.GetText("t");
+        t.Insert(0, "b");
+        t.Insert(0, "a");                                              // "a" (clock 1) cannot merge with "b" (clock 0)
+        var s1 = YSnapshot.Create(doc);
+        t.Delete(0, 2);
+        var s2 = YSnapshot.Create(doc);
+        Assert.Equal("0101010002010102", Hex.Of(Encode(s2)));
+        Assert.Equal("[a{\"ychange\":{\"type\":\"removed\"}}][b{\"ychange\":{\"type\":\"removed\"}}]", Delta(t, s2, s1));
+        string WithUser(YSnapshot? s, YSnapshot? p) => string.Concat(t.ToDelta(s, p, (type, id) => Attrs(("type", type), ("user", id.Client))).Select(op =>
+            "[" + op.Text + (op.Attributes.Kind == YValueKind.Undefined ? "" : Json(op.Attributes)) + "]"));
+        Assert.Equal("[ab{\"ychange\":{\"type\":\"removed\",\"user\":1}}]", WithUser(s2, s1));
+        Assert.Equal("[ab{\"ychange\":{\"type\":\"added\",\"user\":1}}]", WithUser(s1, s2));
+    }
+
     // ------------------------------------------------------------------ SNAP-08, SNAP-09
 
     [Fact]

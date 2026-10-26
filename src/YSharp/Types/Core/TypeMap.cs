@@ -90,4 +90,28 @@ internal static class TypeMap
 
         return entries;
     }
+
+    /// <summary>
+    /// Yjs <c>typeMapGetAllSnapshot</c>: for every key, the newest value the snapshot had seen (walking left past later writes), if it was
+    /// still live then. Nothing is split: an item counts from its first clock.
+    /// </summary>
+    public static List<KeyValuePair<string, YEntry>> Entries(YType type, YSnapshot snapshot)
+    {
+        var entries = new List<KeyValuePair<string, YEntry>>();
+        if (type.AttachedDoc is not { } doc) return entries;
+        var store = doc.Store;
+        var items = new List<ItemRef>();
+        StructStore.CopyMapItems(type.Branch, items);
+        items.Sort(static (a, b) => a.Item!.ParentSub.CompareTo(b.Item!.ParentSub));
+        foreach (var latest in items)
+        {
+            var v = latest;
+            while (!v.IsNull && !snapshot.Covers(store.ClientOf(v), v.Clock)) v = v.Left;
+            if (v.IsNull || !snapshot.IsVisible(store.ClientOf(v), v.Clock)) continue;
+            // a value collected after the snapshot has no content left: JS reads getContent()[len - 1] of an empty array, undefined
+            entries.Add(new(store.ParentSubOf(latest)!, v.Kind == ContentKind.Deleted ? default : TypeList.ContentAt(doc, v, (int)v.Length - 1)));
+        }
+
+        return entries;
+    }
 }

@@ -38,6 +38,9 @@ internal sealed class TxState
     /// <summary>Set when the observers of this life start (Yjs fills <c>changedParentTypes</c> while it calls them).</summary>
     internal bool ObserversCalled;
 
+    /// <summary>The snapshots whose structs this life has split (Yjs <c>transaction.meta.get(splitSnapshotAffectedStructs)</c>).</summary>
+    internal HashSet<YSnapshot>? SplitSnapshots;
+
     internal TxState(Doc doc, bool write)
     {
         Doc = doc;
@@ -143,6 +146,7 @@ internal sealed class TxState
         _changedParentTypes = null;
         ChangedOrder.Clear();
         ObserversCalled = false;
+        SplitSnapshots = null;
     }
 
     internal long BeforeClock(ulong client)
