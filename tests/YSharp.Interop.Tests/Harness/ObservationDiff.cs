@@ -22,8 +22,11 @@ public sealed record Difference(string Observation, string Path, string Detail)
 /// </summary>
 public static class ObservationDiff
 {
-    /// <summary>The observations the y-sharp side renders; the oracle may carry more (opt-in <c>structs</c>, <c>ds</c>, <c>events</c>).</summary>
-    public static readonly string[] Compared = { "updates", "state", "sv", "doc", "results" };
+    /// <summary>
+    /// The observations both sides render, in comparison order. <c>events</c> is present when a script observes something that fired;
+    /// <c>structs</c> and <c>ds</c> when the run asked for them (ADR 0012 <c>extras</c>).
+    /// </summary>
+    public static readonly string[] Compared = { "updates", "state", "sv", "doc", "results", "events", "structs", "ds" };
 
     public static Difference? Find(JsonObject oracle, JsonObject sharp, IEnumerable<string>? only = null)
     {
@@ -89,7 +92,7 @@ public static class ObservationDiff
     private static JsonNode Strip(JsonNode value, string observation)
     {
         var clone = value.DeepClone();
-        if (observation == "doc") TypeDump.Normalize(clone);
+        if (observation is "doc" or "events") TypeDump.Normalize(clone);
         if (observation == "results" && clone is JsonObject results)
             foreach (var entry in results.Select(kv => kv.Value).OfType<JsonObject>()) entry.Remove("api");
         return clone;

@@ -49,7 +49,9 @@ public static class SharpSide
     /// <summary>Registrations for step kinds an area adds without touching the harness core.</summary>
     public static List<Action<OpsRegistry>> Extensions { get; } = new();
 
-    public static SharpReply Run(string scriptJson, TimeSpan? timeout = null) => RunGuarded(() => Replay(scriptJson), timeout ?? CaseTimeout);
+    /// <summary>Replays a script; <paramref name="extras"/> opts into the <c>structs</c> and <c>ds</c> observations, as the oracle's <c>run</c> does.</summary>
+    public static SharpReply Run(string scriptJson, TimeSpan? timeout = null, IEnumerable<string>? extras = null) =>
+        RunGuarded(() => Replay(scriptJson, extras?.ToList() ?? new List<string>()), timeout ?? CaseTimeout);
 
     /// <summary>Runs <paramref name="work"/> on a worker thread and maps its outcome; a thread that overruns is abandoned (it is a background thread).</summary>
     public static SharpReply RunGuarded(Func<JsonObject> work, TimeSpan timeout)
@@ -66,7 +68,7 @@ public static class SharpSide
         return result!;
     }
 
-    private static JsonObject Replay(string scriptJson)
+    private static JsonObject Replay(string scriptJson, IReadOnlyCollection<string> extras)
     {
         var registry = CreateRegistry();
         var script = OpsScript.Parse(scriptJson, registry);
@@ -87,7 +89,7 @@ public static class SharpSide
             },
         };
         var ctx = interpreter.Run(script);
-        return Observe(ctx, v2, RootsOf(JsonNode.Parse(scriptJson)!));
+        return Observe(ctx, v2, RootsOf(JsonNode.Parse(scriptJson)!), extras);
     }
 
     // ------------------------------------------------------------------ observations (shape of tools/fixture-gen/lib/observe.mjs)
@@ -96,7 +98,8 @@ public static class SharpSide
 
     private static JsonObject Entry(string api, JsonNode value) => new() { ["api"] = api, ["value"] = value };
 
-    public static JsonObject Observe(OpsContext ctx, IReadOnlyDictionary<string, List<byte[]>> v2Updates, IReadOnlyList<(string Name, string Kind)> roots)
+    public static JsonObject Observe(OpsContext ctx, IReadOnlyDictionary<string, List<byte[]>> v2Updates, IReadOnlyList<(string Name, string Kind)> roots,
+        IReadOnlyCollection<string>? extras = null)
     {
         var names = ctx.Docs.Keys.ToList();
         var obs = new JsonObject();
@@ -135,6 +138,10 @@ public static class SharpSide
         obs["sv"] = Entry("y-sharp Doc.EncodeStateVector", sv);
         obs["doc"] = Entry("y-sharp typed walk of every root", dumps);
 
+        var features = DocFeatureSteps.Of(ctx);
+        if (features.Events.Count > 0)
+            obs["events"] = Entry("y-sharp YType.Observe, ObserveDeep, Doc.SubdocsChanged, UndoManager events", new JsonArray(features.Events.Select(e => JsonNode.Parse(e)).ToArray()));
+
         var results = new JsonObject();
         foreach (var kv in ctx.ForeignOutcomes)
             results[kv.Key] = new JsonObject
@@ -144,7 +151,14 @@ public static class SharpSide
             };
         foreach (var kv in CodecSteps.ResultBytes(ctx))
             results[kv.Key] = new JsonObject { ["api"] = "y-sharp YUpdate", ["bytes"] = Bytes(kv.Value) };
+        foreach (var kv in features.Results)
+            results[kv.Key] = new JsonObject { ["api"] = "y-sharp doc features", ["value"] = JsonNode.Parse(kv.Value) };
         if (results.Count > 0) obs["results"] = Entry("y-sharp results", results);
+
+        if (extras?.Contains("structs") == true)
+            obs["structs"] = Entry("y-sharp struct store", new JsonObject(names.Select(n => KeyValuePair.Create(n, (JsonNode?)StoreDump.Structs(ctx.Doc(n))))));
+        if (extras?.Contains("ds") == true)
+            obs["ds"] = Entry("y-sharp delete set from the struct store", new JsonObject(names.Select(n => KeyValuePair.Create(n, (JsonNode?)StoreDump.DeleteSet(StoreDump.Structs(ctx.Doc(n)))))));
         return obs;
     }
 

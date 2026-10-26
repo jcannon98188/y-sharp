@@ -179,6 +179,60 @@ public sealed class GenerationTests
         else yield return o;
     }
 
+    [Fact, Covers("DIFF-01", "DIFF-03")]
+    public void TreePlans_AreDeterministic_ParseOnTheCSharpInterpreter_AndUseEveryEditKind()
+    {
+        var steps = new HashSet<string>(StringComparer.Ordinal);
+        for (var seed = 0; seed < 2000; seed++)
+        {
+            var plan = TreePlan.Generate(seed);
+            var json = plan.ToScript().ToJsonString();
+            Assert.Equal(json, TreePlan.Generate(seed).ToScript().ToJsonString());
+            var ex = Record.Exception(() => OpsScript.Parse(json, Registry));
+            Assert.True(ex == null, $"seed {seed} ({plan}): {ex?.Message}{Environment.NewLine}{json}");
+            void Walk(JsonNode? list)
+            {
+                foreach (var step in list?.AsArray() ?? new JsonArray())
+                {
+                    var kind = step!["step"]!.GetValue<string>();
+                    steps.Add(kind == "xml.insert" ? "xml.insert." + step["kind"]!.GetValue<string>() : kind);
+                    Walk(step["steps"]);
+                }
+            }
+            Walk(plan.ToScript()["steps"]);
+        }
+        foreach (var kind in new[]
+                 {
+                     "text.insert", "text.delete", "text.format", "array.insert", "array.insertType", "array.delete", "map.set", "map.insertType", "map.delete",
+                     "xml.insert.element", "xml.insert.text", "xml.delete", "xml.setAttribute", "xml.removeAttribute", "subdoc.add", "subdoc.load",
+                     "observe", "observeDeep", "subdoc.observe", "subdoc.inspect", "transact", "deliver", "sync",
+                 })
+            Assert.Contains(kind, steps);
+    }
+
+    [Fact, Covers("DIFF-01")]
+    public void TreePlans_AddressNestedTypesAndXmlNodes_ByPath()
+    {
+        var depths = new HashSet<int>();
+        for (var seed = 0; seed < 500; seed++)
+            foreach (var step in TreePlan.Generate(seed).ToScript()["steps"]!.AsArray())
+                if (step!["target"] is JsonArray path) depths.Add(path.Count - 1);
+        // a root, a type inside a root, and a type two levels down are all addressed
+        Assert.Contains(1, depths);
+        Assert.Contains(2, depths);
+    }
+
+    [Fact, Covers("DIFF-01")]
+    public void TreePlan_Shrink_YieldsSmallerPlans_ThatStillParse()
+    {
+        var plan = TreePlan.Generate(7);
+        foreach (var smaller in TreePlan.Shrink(plan))
+        {
+            Assert.True(smaller.Edits.Count + smaller.Base.Count <= plan.Edits.Count + plan.Base.Count);
+            OpsScript.Parse(smaller.ToScript().ToJsonString(), Registry);
+        }
+    }
+
     [Fact, Covers("DIFF-04")]
     public void Mutator_AnyInput_ProducesTheDocumentedMutations()
     {

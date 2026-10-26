@@ -46,9 +46,13 @@ public sealed class DiffRun
     public string Property { get; }
 
     /// <summary>Replaces the y-sharp side (tests of the harness itself use a second oracle run, with injected faults, as a stand-in).</summary>
-    public Func<string, SharpReply>? SharpOverride { get; set; }
+    public Func<string, IReadOnlyList<string>, SharpReply>? SharpOverride { get; set; }
 
-    private SharpReply RunSharp(string scriptJson) => (SharpOverride ?? (s => SharpSide.Run(s)))(scriptJson);
+    private SharpReply RunSharp(string scriptJson, IReadOnlyList<string> extras) =>
+        (SharpOverride ?? ((s, x) => SharpSide.Run(s, extras: x)))(scriptJson, extras);
+
+    /// <summary>The opt-in observations a generated plan asks both sides for: the struct store and its delete set (ADR 0012).</summary>
+    public static readonly IReadOnlyList<string> PlanExtras = Protocol.Extras;
 
     /// <summary>The FsCheck replay seed of the chunk being run (set by the driver), repeated in every report.</summary>
     public string? ReplaySeed { get; set; }
@@ -73,8 +77,9 @@ public sealed class DiffRun
     public (OracleReply Oracle, SharpReply Sharp)? Run(string scriptJson, Func<JsonObject, JsonObject, Difference?>? extra = null, IEnumerable<string>? extras = null)
     {
         Cases++;
-        var oracle = _host.RunAsync(scriptJson, extras).GetAwaiter().GetResult();
-        var sharp = RunSharp(scriptJson);
+        var x = extras?.ToList() ?? new List<string>();
+        var oracle = _host.RunAsync(scriptJson, x).GetAwaiter().GetResult();
+        var sharp = RunSharp(scriptJson, x);
 
         if (sharp.Status == SharpStatus.Hang) throw Fail(FailureReason.SharpFault, scriptJson, oracle.Observations, null, null, "y-sharp hung: " + sharp.Message);
         if (sharp.Status == SharpStatus.Fault) throw Fail(FailureReason.SharpFault, scriptJson, oracle.Observations, null, null, "y-sharp threw " + sharp.Message + Environment.NewLine + sharp.Exception);
@@ -114,7 +119,15 @@ public sealed class DiffRun
     {
         Label = plan.ToString();
         var script = plan.ToScript().ToJsonString();
-        return Run(script, (oracle, sharp) => Convergence(oracle, "the oracle") ?? Convergence(sharp, "y-sharp"));
+        return Run(script, (oracle, sharp) => Convergence(oracle, "the oracle") ?? Convergence(sharp, "y-sharp"), PlanExtras);
+    }
+
+    /// <summary>A plan over nested types, XML and subdocuments (Spec 40): the same check, with every observation compared, events included.</summary>
+    public (OracleReply Oracle, SharpReply Sharp)? CheckTree(Generation.TreePlan plan)
+    {
+        Label = plan.ToString();
+        var script = plan.ToScript().ToJsonString();
+        return Run(script, (oracle, sharp) => Convergence(oracle, "the oracle") ?? Convergence(sharp, "y-sharp"), PlanExtras);
     }
 
     /// <summary>All replicas of a finished plan hold the same document and the same encoded state (convergence, ADR 0012).</summary>
@@ -254,7 +267,7 @@ public sealed class DiffRun
         }.ToJsonString();
         Cases++;
         var oracle = _host.RunAsync(script).GetAwaiter().GetResult();
-        var sharp = RunSharp(script);
+        var sharp = RunSharp(script, Array.Empty<string>());
         if (sharp.Status is SharpStatus.Hang or SharpStatus.Fault or SharpStatus.ScriptError)
             throw Fail(FailureReason.SharpFault, script, oracle.Observations, null, null, $"y-sharp {sharp.Status} on a mutated update ({kind} at {offset}): {sharp.Message}");
         if (oracle.Misbehaved)
