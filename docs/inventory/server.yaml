@@ -1,0 +1,63 @@
+# Server tier (ADR 0024)
+# Behaviour registry (ADR 0010). IDs are assigned once and never reused or renumbered; a withdrawn entry stays as status: retired.
+# ADR 0019 has no server spec, so the relay entries are owned by spec 5, which owns the update functions it builds on (TASK-5.2).
+
+- id: RLY-1
+  title: "A relay folds V1 or V2 updates without a Doc, validated in full against its YLimits"
+  source: "docs/adr/0024-server-tier-layering.md:24"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:24"
+
+- id: RLY-2
+  title: "Each fold is mergeUpdates([state, update]); a Doc from the relay equals one from every input"
+  source: "docs/adr/0024-server-tier-layering.md:25"
+  kind: y-sharp-own
+  layers: [unit, differential]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:25"
+
+- id: RLY-3
+  title: "The answer for a client state vector is diffUpdate of the merged state and catches the client up"
+  source: "docs/adr/0024-server-tier-layering.md:26"
+  kind: y-sharp-own
+  layers: [unit, differential]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:26"
+
+- id: RLY-4
+  title: "An invalid or over-limit update or a malformed state vector changes nothing and writes nothing"
+  source: "docs/adr/0024-server-tier-layering.md:27"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:27"
+
+- id: RLY-5
+  title: "The relay state vector is encodeStateVectorFromUpdate of the merged state"
+  source: "docs/adr/0024-server-tier-layering.md:28"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:28"
+
+- id: RLY-6
+  title: "Every relay member is safe from any thread under its own lock"
+  source: "docs/adr/0024-server-tier-layering.md:29"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:29"
