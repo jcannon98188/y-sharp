@@ -26,7 +26,9 @@ internal static class TypeList
         if (type.AttachedDoc is not { } doc || (uint)index >= (uint)type.Branch.Length) throw new ArgumentOutOfRangeException(nameof(index));
         var branch = type.Branch;
         var n = StructStore.StartOf(branch);
-        if (branch.MarkersFor(doc.Store)?.Find(branch, index) is { } marker)
+        // a reader shares the lock with other readers, so it walks from the markers without updating them (CC-4)
+        var hit = doc.HoldsWriteLock ? branch.MarkersFor(doc.Store)?.Find(branch, index) : branch.Markers?.Peek(branch, index);
+        if (hit is { } marker)
         {
             n = new ItemRef(marker.Item);
             index -= marker.Index;

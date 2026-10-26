@@ -252,6 +252,38 @@ public sealed class LockModelTests
     }
 
     [Fact, Covers("CC-4")]
+    [Requires(Feature.Array)]
+    public void IndexLookups_InAReadTransaction_LeaveTheSearchMarkersAsTheyWere()
+    {
+        // readers share the lock, so a lookup that stamped or moved a marker would race another reader's (found by the read-purity stress run)
+        var doc = Conc.NewDoc();
+        var arr = doc.GetArray("a");
+        doc.Transact(_ =>
+        {
+            for (var i = 0; i < 300; i++) arr.Insert(i / 2, new YEntry[] { i });
+        });
+        GC.KeepAlive(arr[150]);   // outside any transaction: an implicit read
+        string Markers()
+        {
+            var flagged = new List<string>();
+            for (var p = arr.Branch.Start; p != null; p = p.Right) if (p.Marker) flagged.Add($"{p.Client}:{p.Clock}");
+            return (arr.Branch.Markers?.Count ?? -1) + " " + string.Join(",", flagged);
+        }
+
+        var before = Markers();
+        doc.ReadTransact(_ =>
+        {
+            for (var i = 0; i < arr.Length; i += 7) GC.KeepAlive(arr[i]);
+        });
+        Assert.Equal(before, Markers());
+
+        // a lookup under the write lock still keeps them, as Yjs does
+        doc.Transact(_ => GC.KeepAlive(arr[290]));
+        Assert.NotEqual(-1, arr.Branch.Markers?.Count ?? -1);
+        Assert.Equal(300, arr.Length);
+    }
+
+    [Fact, Covers("CC-4")]
     public void Reads_RunningAtTheSameTime_ReturnWhatASingleThreadedReadReturns()
     {
         var result = StressHarness.RunReadPurity(new StressOptions { Seed = YSharpEnv.Seed ?? 4242, Readers = 4, OpsPerThread = 120 });

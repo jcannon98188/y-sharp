@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace YSharp.Transactions;
@@ -66,6 +67,31 @@ internal sealed class DocLock
 
     private static void Point(string id) => ScheduleSeam.Point?.Invoke(id);
 
+    // ------------------------------------------------------------------ lock order (CC-18, Debug only)
+
+#if DEBUG
+    [ThreadStatic]
+    private static List<DocLock>? t_held;   // the document locks the calling thread holds, in the order it took them
+
+    /// <summary>
+    /// Rejects taking this lock while the calling thread holds a lock on one of this document's subdocuments: the hierarchy is parent before
+    /// child, and the opposite order is the ABBA deadlock of CC-18. Joining a lock the thread already holds is not an acquire.
+    /// </summary>
+    private void CheckOrder()
+    {
+        if (t_held is not { Count: > 0 } held || held.Contains(this)) return;
+        foreach (var other in held)
+            for (var up = other._doc.ParentDoc; up != null; up = up.ParentDoc)
+                if (ReferenceEquals(up, _doc))
+                    throw new YConcurrencyException(
+                        "A document's lock was requested while the thread holds a lock on one of its subdocuments; take the parent's first (CC-18).");
+    }
+
+    private void Held() => (t_held ??= new List<DocLock>()).Add(this);
+
+    private void Released() => t_held!.Remove(this);
+#endif
+
     // ------------------------------------------------------------------ write
 
     /// <summary>
@@ -75,6 +101,9 @@ internal sealed class DocLock
     internal LockEntry EnterWrite(int timeoutMs, CancellationToken ct)
     {
         var me = Environment.CurrentManagedThreadId;
+#if DEBUG
+        CheckOrder();
+#endif
         Point("lock.write.acquire");
         ct.ThrowIfCancellationRequested();
         var deadline = timeoutMs < 0 ? long.MaxValue : Environment.TickCount64 + timeoutMs;
@@ -106,6 +135,9 @@ internal sealed class DocLock
 
                             _writer = me;
                             _writeDepth = 1;
+#if DEBUG
+                            Held();
+#endif
                             return LockEntry.WriteFresh;
                         }
 
@@ -154,7 +186,10 @@ internal sealed class DocLock
         }
     }
 
-    /// <summary>Never waits (CC-6). Joins the calling thread's write lock, refuses an upgrade (CC-3), or reports contention.</summary>
+    /// <summary>
+    /// Never waits (CC-6). Joins the calling thread's write lock, refuses an upgrade (CC-3), or reports contention. Since it cannot wait it
+    /// cannot deadlock, so the Debug lock-order check (CC-18) does not refuse it.
+    /// </summary>
     internal TryTransactStatus TryEnterWrite(out LockEntry entry)
     {
         var me = Environment.CurrentManagedThreadId;
@@ -173,6 +208,9 @@ internal sealed class DocLock
             if (_writer != 0 || _readerCount != 0) return TryTransactStatus.Contended;
             _writer = me;
             _writeDepth = 1;
+#if DEBUG
+            Held();
+#endif
             entry = LockEntry.WriteFresh;
             return TryTransactStatus.Acquired;
         }
@@ -190,6 +228,9 @@ internal sealed class DocLock
             {
                 _writer = 0;
                 released = true;
+#if DEBUG
+                Released();
+#endif
                 Monitor.PulseAll(_sync);
             }
         }
@@ -206,6 +247,9 @@ internal sealed class DocLock
     internal LockEntry EnterRead(out TxState? tx)
     {
         var me = Environment.CurrentManagedThreadId;
+#if DEBUG
+        CheckOrder();
+#endif
         Point("lock.read.acquire");
         var seamIneffective = false;
         while (true)
@@ -231,6 +275,9 @@ internal sealed class DocLock
                     tx = RentRead();
                     if (_readerCount == _readers.Length) Array.Resize(ref _readers, _readers.Length * 2);
                     _readers[_readerCount++] = new Reader { Thread = me, Depth = 1, Tx = tx };
+#if DEBUG
+                    Held();
+#endif
                     return LockEntry.ReadFresh;
                 }
 
@@ -262,6 +309,9 @@ internal sealed class DocLock
                 state.End();
                 ReturnRead(state);
                 released = true;
+#if DEBUG
+                Released();
+#endif
                 if (_readerCount == 0) Monitor.PulseAll(_sync);
             }
         }

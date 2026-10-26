@@ -88,6 +88,42 @@ internal sealed class SearchMarkers
         return new Hit(p, pindex);
     }
 
+    /// <summary>
+    /// <see cref="Find"/> for a reader that does not hold the write lock (CC-4): the walk from the nearest marker, with no marker stamped, moved
+    /// or added, since readers share the lock and a read never mutates the document, caches included. Null when the walk should start at the front.
+    /// </summary>
+    internal Hit? Peek(Branch parent, int index)
+    {
+        if (parent.Start is null || index == 0 || _count == 0) return null;
+
+        var best = 0;
+        for (var i = 1; i < _count; i++)
+        {
+            if (Math.Abs(index - _indexes[i]) < Math.Abs(index - _indexes[best])) best = i;
+        }
+
+        var p = _items[best]!;
+        var pindex = _indexes[best];
+        while (p.Right is not null && pindex < index)
+        {
+            if (!p.Deleted && p.Countable)
+            {
+                if (index < pindex + p.Length) break;
+                pindex += (int)p.Length;
+            }
+
+            p = p.Right;
+        }
+
+        while (p.Left is not null && pindex > index)
+        {
+            p = p.Left;
+            if (!p.Deleted && p.Countable) pindex -= (int)p.Length;
+        }
+
+        return new Hit(p, pindex);
+    }
+
     /// <summary>Yjs <c>updateMarkerChanges</c>: call before a deletion (negative <paramref name="len"/>) or an insertion.</summary>
     internal void Update(int index, int len)
     {

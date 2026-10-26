@@ -136,6 +136,9 @@ public sealed partial class Doc
 
     // ------------------------------------------------------------------ the internal surface the mutators and readers use (CC-8)
 
+    /// <summary>True when the calling thread holds this document's write lock, so it may update lazily kept state such as search markers (CC-4).</summary>
+    internal bool HoldsWriteLock => _lock.IsWriteOwner;
+
     /// <summary>
     /// The calling thread's open transaction: its write transaction (the one being cleaned up while observers run), else its read
     /// transaction, else null. Another thread's transaction is never returned (CC-2).
