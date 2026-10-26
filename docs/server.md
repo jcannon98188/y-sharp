@@ -11,7 +11,7 @@
         |  structural validation -> validation hook -> relay/Doc checks -> store append -> commit -> broadcast
         |-- IUpdateStore                      append-only V2 log per document (in-memory default, or the host's)
         |-- YRelay (in YSharp)                the document as one merged update; answers sync without a Doc
-        `-- Doc (in YSharp)                   only for documents with a validation hook
+        `-- Doc (in YSharp)                   only while a hook, a host edit or read, or a subscriber needs one
   YSharp                                      the Yjs port: Doc, update functions, sync and awareness protocols
 ```
 
@@ -32,7 +32,7 @@
 
 So nothing reaches the store that the relay or the `Doc` would refuse. Between steps 3 and 4 the hot `Doc` is ahead of the log; only the next update's hook can see it, and it is rolled back if the append fails.
 
-A document with no validation hook never builds a `Doc`: it is served from the relay alone.
+A document with no validation hook builds a `Doc` only when the host edits, reads or subscribes to it (below). Otherwise it is served from the relay alone.
 
 ### Backpressure
 
@@ -137,7 +137,32 @@ The hook returns `ValidationResult.Accept` or `ValidationResult.Reject(reason)`.
 
 A rejected edit stays in the client's own document, as y-websocket has no way to retract it. So a client that does not discard it will send it again on its next sync.
 
-Documents with a hook hold a `Doc` in memory while they are open; documents without one hold only the relay's merged update.
+Documents with a hook hold a `Doc` in memory while they are in use; documents without one hold only the relay's merged update until the host edits, reads or subscribes.
+
+### Server-side edits, reads and subscribers
+
+The host never calls `Transact` on a served document itself. It posts the work to the document's mailbox, which runs it between messages (SRV-5, SRV-18). Each call loads the document from the store if no one has it open.
+
+```csharp
+await server.EditAsync("doc-1", tx => tx.Doc.GetText("text").Insert(0, "Hello from the server"));
+
+var length = await server.ReadAsync("doc-1", doc => doc.GetText("text").Length);
+
+await using var index = await server.SubscribeAsync("doc-1", doc => Index(doc.GetText("text").ToString()));
+```
+
+- **`EditAsync`** runs the edit in one write transaction. Its update goes through the relay check, the store append and the broadcast like an accepted peer update. It is the server's own edit, so the validation hook does not see it. The task completes once the update is stored and sent. If the edit throws or the append fails, nothing is stored or sent, the `Doc` is rebuilt from the relay, and the task fails.
+- **`ReadAsync`** runs in one read transaction, after every message accepted before it.
+- **`SubscribeAsync`** calls the callback once straight away, and again after every accepted update, in a read transaction on the worker. Like an observer, it must not block, keep the `Doc` or write to it. Disposing the subscription ends it.
+
+### Idle documents
+
+A document is idle while it has no connections and no subscribers (SRV-20).
+
+- After `HotDocumentIdleTimeout` (one minute by default) of idle time, it drops its `Doc`. The next hook call, edit or read rebuilds it from the relay.
+- After `DocumentIdleTimeout` (five minutes by default) of idle time, the mailbox closes and its relay state is dropped. The next connection, edit or read loads the document from the store again.
+
+The store is authoritative, so nothing accepted is lost. Set either timeout to `Timeout.InfiniteTimeSpan` to keep that state until shutdown. `YServerOptions.TimeProvider` sets the clock.
 
 ## Testing
 

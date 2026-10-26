@@ -36,7 +36,7 @@ The ADR 0006 lock makes one `Doc` safe across threads. It does not order work ac
 - **SRV-4** Each document has one mailbox. It is a single-reader channel drained by one worker loop. Apply, validate, persist and broadcast for that document run only on that loop, one message at a time, in arrival order. Different documents have different loops and run in parallel.
 - **SRV-5** Only the mailbox worker takes a write transaction on a server-held `Doc`.
   - Other threads may take read transactions, for indexing or queries (CC-1 shared reads). They see the state before or after an applied update, never a partial one (CC-4).
-  - A server-side edit is posted to the mailbox as a message; it does not call `Transact` directly.
+  - A server-side edit is posted to the mailbox as a message; it does not call `Transact` directly. Its update is persisted and broadcast like an accepted peer update; it is the server's own edit, so the validation hook does not see it. A server-side read is posted the same way and runs in a read transaction on the worker (`YServer.EditAsync`, `ReadAsync`, `SubscribeAsync`; TASK-5.8).
 - **SRV-6** No `await` happens while a transaction is open. The worker awaits I/O (persist, a slow subscriber) only between transactions. CC-15 already forbids holding a transaction across `await`; the mailbox is where this is enforced.
 - **SRV-7** Observers on a server-held `Doc` still run synchronously on the committing thread (CC-11), which is the mailbox worker. They must not block or do I/O.
   - Broadcast does not come from observers. The worker broadcasts the accepted update bytes it already holds after they are persisted, and encodes them once into one shared buffer for every subscriber (TASK-5.6).
@@ -111,9 +111,9 @@ The ADR 0006 lock makes one `Doc` safe across threads. It does not order work ac
   - The relay state alone serves sync and fan-out.
 - **SRV-19** Rehydration builds the `Doc` inside the mailbox from storage: the compacted snapshot, then the records after it, applied in sequence order. Messages that arrive meanwhile wait in the mailbox, so the `Doc` never misses an update.
 - **SRV-20** Idle eviction:
-  - A hot `Doc` is evicted after a configurable idle time with no connections and no queued messages.
+  - A hot `Doc` is evicted after a configurable idle time with no connections and no queued messages (`YServerOptions.HotDocumentIdleTimeout`, one minute by default). An indexing subscriber keeps it hot.
   - Eviction drops the `Doc` reference inside the mailbox. The relay state and the log stay authoritative, so nothing is lost.
-  - The relay state of a document with no connections may be evicted too, and is rebuilt from storage on next open.
+  - The relay state of a document with no connections may be evicted too, and is rebuilt from storage on next open (`DocumentIdleTimeout`, five minutes by default). The whole mailbox closes; a connection, edit, read or subscriber that attached meanwhile keeps it open.
 - **SRV-21** While a `Doc` is hot, its state and the relay state agree after every accepted update: both are built from the same accepted sequence. A test checks that `EncodeStateAsUpdate` of the hot `Doc` matches the relay's merged update in content.
 
 ## Considered

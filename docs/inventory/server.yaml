@@ -123,6 +123,16 @@
   status: active
   ref: "adr 0024:36"
 
+- id: SRV-5
+  title: "Server-side edits and reads run on the mailbox worker; an edit is persisted and broadcast like a peer update"
+  source: "docs/adr/0024-server-tier-layering.md:37"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:37"
+
 - id: SRV-7
   title: "An accepted update is broadcast from the mailbox, after persist, as one shared buffer for every peer"
   source: "docs/adr/0024-server-tier-layering.md:41"
@@ -204,7 +214,7 @@
   ref: "adr 0024:99"
 
 - id: SRV-18
-  title: "A Doc is materialized only when a hook needs it; the relay alone serves sync and fan-out"
+  title: "A Doc is materialized only when a hook, a server-side edit or read, or a subscriber needs it; the relay alone serves sync and fan-out"
   source: "docs/adr/0024-server-tier-layering.md:107"
   kind: y-sharp-own
   layers: [unit]
@@ -222,6 +232,16 @@
   owner: 5
   status: active
   ref: "adr 0024:112"
+
+- id: SRV-20
+  title: "An idle document drops its hot Doc, then its relay state, and reloads from storage with nothing lost"
+  source: "docs/adr/0024-server-tier-layering.md:113"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:113"
 
 - id: SRV-21
   title: "A hot Doc and the relay hold the same content after every accepted update"

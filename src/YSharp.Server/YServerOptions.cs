@@ -59,4 +59,21 @@ public sealed class YServerOptions
     /// never waits for a peer. Default 256.
     /// </summary>
     public int SubscriberQueueCapacity { get; init; } = 256;
+
+    /// <summary>
+    /// How long a document with no connections and no subscribers keeps its hot <see cref="Doc"/> after the last message or work (ADR 0024 SRV-20).
+    /// The relay and the log stay authoritative, so the Doc is rebuilt when next needed. <see cref="Timeout.InfiniteTimeSpan"/> keeps it.
+    /// Default one minute.
+    /// </summary>
+    public TimeSpan HotDocumentIdleTimeout { get; init; } = TimeSpan.FromMinutes(1);
+
+    /// <summary>
+    /// How long a document with no connections and no subscribers stays open after the last message or work (SRV-20). Then its mailbox and relay
+    /// state are dropped, and the next connection, edit or read loads it from the store. <see cref="Timeout.InfiniteTimeSpan"/> keeps every
+    /// opened document until shutdown. Default five minutes.
+    /// </summary>
+    public TimeSpan DocumentIdleTimeout { get; init; } = TimeSpan.FromMinutes(5);
+
+    /// <summary>The clock for the idle timeouts. Default <see cref="TimeProvider.System"/>.</summary>
+    public TimeProvider TimeProvider { get; init; } = TimeProvider.System;
 }
