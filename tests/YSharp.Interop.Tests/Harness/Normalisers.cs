@@ -111,7 +111,8 @@ public sealed class ZeroLengthDeleteRangeNormaliser : IDivergenceNormaliser
 /// Yjs parks delete ranges it cannot apply yet and re-encodes them as V2; a client's ranges that arrive out of order make the V2 writer
 /// write a negative clock difference, which lib0 writes as one garbage byte, so the parked ranges and every later state encode are corrupt
 /// (ENC-86, ADR 0003). y-sharp keeps the ranges as sent. Both accept; the encoded state differs while the state vector and the content
-/// match. Claimed only when the oracle reports that it parked out-of-order ranges, and the harness still compares sv, doc and results.
+/// match. Claimed only when the oracle reports that it parked out-of-order ranges, and the harness still compares sv and doc (the results
+/// differ only by the flag itself).
 /// </summary>
 public sealed class UnsortedPendingDeleteSetNormaliser : IDivergenceNormaliser
 {
@@ -123,7 +124,7 @@ public sealed class UnsortedPendingDeleteSetNormaliser : IDivergenceNormaliser
         "A mutated update whose out-of-order delete ranges are parked as pending state is accepted by both; the oracle's re-encoded pending delete set is corrupt, so only the state encodings differ.";
 
     /// <summary>The observations still compared when this normaliser claims a case.</summary>
-    public static readonly string[] StillCompared = { "sv", "doc", "results" };
+    public static readonly string[] StillCompared = { "sv", "doc" };
 
     public bool Claims(MutationCase c) => c.OracleUnsortedPendingDeleteSet && c.OracleAccepted && c.SharpAccepted;
 }

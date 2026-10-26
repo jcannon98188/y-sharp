@@ -181,7 +181,7 @@ public sealed class ComparatorTests
         Assert.True(n.Claims(both with { OracleUnsortedPendingDeleteSet = true }));
         Assert.False(n.Claims(both), "a state difference without out-of-order parked ranges is a bug");
         Assert.False(n.Claims(Case(MutationKind.FlipByte, oracle: true, sharp: false) with { OracleUnsortedPendingDeleteSet = true }), "y-sharp rejecting is another class");
-        Assert.Equal(new[] { "sv", "doc", "results" }, UnsortedPendingDeleteSetNormaliser.StillCompared);
+        Assert.Equal(new[] { "sv", "doc" }, UnsortedPendingDeleteSetNormaliser.StillCompared);
     }
 
     [Fact, Covers("DIFF-05")]

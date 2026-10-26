@@ -255,6 +255,7 @@ public sealed class DiffRun
         Cases++;
         var oracle = _host.RunAsync(script).GetAwaiter().GetResult();
         var sharp = RunSharp(script);
+        if (ReachesUnlandedSubdocs(sharp)) { Discarded++; LastDiscard = sharp.Message; return null; }
         if (sharp.Status is SharpStatus.Hang or SharpStatus.Fault or SharpStatus.ScriptError)
             throw Fail(FailureReason.SharpFault, script, oracle.Observations, null, null, $"y-sharp {sharp.Status} on a mutated update ({kind} at {offset}): {sharp.Message}");
         if (oracle.Misbehaved)
@@ -309,4 +310,12 @@ public sealed class DiffRun
             }
         }
     }
+
+    /// <summary>
+    /// A mutation can turn a content ref into 9 (ContentDoc); reading that content back is subdocuments, which spec 33 lands (ADR 0020).
+    /// Until then such a case is discarded, not failed. Only that one sketch site qualifies; spec 33 deletes this check.
+    /// </summary>
+    internal static bool ReachesUnlandedSubdocs(SharpReply sharp) =>
+        sharp.Status == SharpStatus.Fault && sharp.Exception is NotImplementedException { TargetSite.Name: "ContentAt" }
+        && !YSharp.TestKit.Gating.Features.Landed.Contains(YSharp.TestKit.Gating.Feature.Subdocs);
 }
