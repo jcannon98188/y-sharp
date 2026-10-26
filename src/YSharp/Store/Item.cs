@@ -49,6 +49,9 @@ internal enum ItemFlags : byte
     Countable = 2,
     Deleted = 4,
     Marker = 8,
+
+    /// <summary>An undo manager redid the item (Yjs <c>item.redone !== null</c>); the id of the copy is in <see cref="StructStore.RedoneOf"/>.</summary>
+    Redone = 16,
 }
 
 /// <summary>

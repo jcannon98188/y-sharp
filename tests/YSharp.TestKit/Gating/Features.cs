@@ -70,7 +70,7 @@ public static class Features
         Feature.Xml,
         Feature.Events,
         Feature.DocLifecycle,
-        Feature.Snapshots, Feature.Positions,
+        Feature.Snapshots, Feature.Positions, Feature.Undo,
     };
 }
 

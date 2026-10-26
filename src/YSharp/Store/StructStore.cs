@@ -1,5 +1,6 @@
 using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.Text;
 
 namespace YSharp.Store;
@@ -80,11 +81,78 @@ internal sealed partial class StructStore
         return new(owner.Structs[owner.FindIndex(clock)]);
     }
 
+    /// <summary>The ids that <see cref="ItemFlags.Redone"/> items were redone into (Yjs <c>item.redone</c>), off the item to keep it small.</summary>
+    private Dictionary<Item, ItemId>? _redone;
+
+    /// <summary>Yjs <c>item.redone</c>: the id of the copy an undo manager redid <paramref name="item"/> into, or null. Runtime-only state.</summary>
+    public ItemId? RedoneOf(ItemRef item) =>
+        item.Item is { } i && (i.Flags & ItemFlags.Redone) != 0 ? _redone![i] : null;
+
+    public void SetRedone(ItemRef item, ItemId redone)
+    {
+        var i = item.Item!;
+        (_redone ??= new Dictionary<Item, ItemId>(ReferenceEqualityComparer.Instance))[i] = redone;
+        i.Flags |= ItemFlags.Redone;
+    }
+
     /// <summary>
-    /// Yjs <c>item.redone</c>: the id of the copy an undo manager redid <paramref name="item"/> into, or null. Spec 32 (undo) records it;
-    /// until then nothing is ever redone.
+    /// Yjs <c>followRedone</c>: the struct holding <paramref name="id"/>, then the copy an undo manager redid it into, and so on, with the offset
+    /// of the id in the last struct. The caller checks the state first.
     /// </summary>
-    public ItemId? RedoneOf(ItemRef item) => null;
+    public (ItemRef Item, long Diff) FollowRedone(ItemId id)
+    {
+        ItemId? next = id;
+        long diff = 0;
+        ItemRef item;
+        do
+        {
+            var nextId = next!.Value;
+            if (diff > 0) nextId = nextId with { Clock = nextId.Clock + diff };
+            item = Find(nextId.Client, nextId.Clock);
+            diff = nextId.Clock - item.Clock;
+            next = item.IsGc ? null : RedoneOf(item);
+        }
+        while (next is not null);
+        return (item, diff);
+    }
+
+    /// <summary>Yjs <c>keepItem</c>: sets the keep flag of the item and of every ancestor item, stopping at the first that already has it.</summary>
+    public static void Keep(ItemRef item, bool keep)
+    {
+        for (var i = item.Item; i is not null && i.Keep != keep; i = i.Parent?.Item) i.Keep = keep;
+    }
+
+    /// <summary>
+    /// Yjs <c>item.content.copy()</c>: stores a copy of the item's content and returns what <see cref="CreateItem"/> takes. A nested type copies
+    /// as a new empty type of the same kind (<c>_copy</c>); immutable payloads are shared.
+    /// </summary>
+    public (ContentKind Kind, int Content, long Length) CopyContent(ItemRef item)
+    {
+        var i = item.Item!;
+        switch (i.Kind)
+        {
+            case ContentKind.Deleted:
+                return (ContentKind.Deleted, 0, i.Length);
+            case ContentKind.String:
+                return (ContentKind.String, AppendText(GetString(item)), i.Length);
+            case ContentKind.Any:
+            case ContentKind.Json:
+                var values = new YValue[i.Length];
+                for (var k = 0; k < values.Length; k++) values[k] = Values.Get(i.Content + k);
+                return (i.Kind, AppendValues(values), i.Length);
+            case ContentKind.Type:
+                var source = (Branch)GetPayload(item);
+                return (ContentKind.Type, AddPayload(new Branch(TypeRefs.UsesMarkers(source.TypeRef)) { TypeRef = source.TypeRef, TypeName = source.TypeName }), 1);
+            case ContentKind.Doc:
+                throw Sketch.NI;   // ContentDoc.copy: a new subdocument with the same guid and options (spec 33)
+            case ContentKind.Binary:
+            case ContentKind.Embed:
+            case ContentKind.Format:
+                return (i.Kind, AddPayload(GetPayload(item)), 1);
+            default:
+                throw new YInternalException($"A {i.Kind} struct has no content to copy.");
+        }
+    }
 
     /// <summary>Yjs <c>findIndexCleanStart</c> (STR-48): the index of the struct starting at <paramref name="clock"/>, splitting an item if needed.</summary>
     public int FindIndexCleanStart(ulong client, long clock) => FindIndexCleanStart(Owner(client), clock);
@@ -335,6 +403,7 @@ internal sealed partial class StructStore
         i.Kind = ContentKind.Gc;
         i.Content = 0;
         i.SetLength(length);
+        if ((i.Flags & ItemFlags.Redone) != 0) _redone!.Remove(i);
         i.Flags = ItemFlags.Deleted;
         i.Parent = null;
     }
@@ -401,6 +470,11 @@ internal sealed partial class StructStore
 
         right.SetLength(total - diff);
         left.SetLength(diff);
+        if ((left.Flags & ItemFlags.Redone) != 0)
+        {
+            var redone = _redone![left];
+            _redone[right] = redone with { Clock = redone.Clock + diff };
+        }
 
         left.Right = right;
         if (right.Right is not null) right.Right.Left = right;
@@ -449,6 +523,7 @@ internal sealed partial class StructStore
             (left.RightOriginClient != Item.NoClient && left.RightOriginClock != right.RightOriginClock)) return false;
         if (left.Client != right.Client || left.Clock + left.Length != right.Clock) return false;
         if (left.Deleted != right.Deleted || left.Kind != right.Kind) return false;
+        if (((left.Flags | right.Flags) & ItemFlags.Redone) != 0) return false;
         if (!MergeContent(left, right)) return false;
 
         left.Parent?.Markers?.Repoint(right, left);

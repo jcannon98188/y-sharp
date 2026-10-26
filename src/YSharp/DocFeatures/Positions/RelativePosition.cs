@@ -206,7 +206,7 @@ public readonly record struct RelativePosition(ItemId? Item, string? TypeName, I
         if (Item is { } rightId)
         {
             if (store.GetState(rightId.Client) <= rightId.Clock) return null;
-            var (right, diff) = follow ? FollowRedone(store, rightId) : FindWithOffset(store, rightId);
+            var (right, diff) = follow ? store.FollowRedone(rightId) : FindWithOffset(store, rightId);
             if (right.IsGc || right.Parent is null) return null;
             type = right.Parent;
             if (type.Item is null || !type.Item.Deleted)
@@ -228,7 +228,7 @@ public readonly record struct RelativePosition(ItemId? Item, string? TypeName, I
             {
                 var typeId = Type!.Value;
                 if (store.GetState(typeId.Client) <= typeId.Clock) return null;
-                var item = follow ? FollowRedone(store, typeId).Item : store.Find(typeId.Client, typeId.Clock);
+                var item = follow ? store.FollowRedone(typeId).Item : store.Find(typeId.Client, typeId.Clock);
                 if (item.IsGc || item.Kind != ContentKind.Type) return null;   // collected
                 type = (Branch)store.GetPayload(item);
             }
@@ -244,24 +244,6 @@ public readonly record struct RelativePosition(ItemId? Item, string? TypeName, I
     {
         var item = store.Find(id.Client, id.Clock);
         return (item, id.Clock - item.Clock);
-    }
-
-    /// <summary>Yjs <c>followRedone</c>: the struct holding <paramref name="id"/>, then the copy an undo manager redid it into, and so on.</summary>
-    private static (ItemRef Item, long Diff) FollowRedone(StructStore store, ItemId id)
-    {
-        ItemId? next = id;
-        long diff = 0;
-        ItemRef item;
-        do
-        {
-            var nextId = next!.Value;
-            if (diff > 0) nextId = nextId with { Clock = nextId.Clock + diff };
-            item = store.Find(nextId.Client, nextId.Clock);
-            diff = nextId.Clock - item.Clock;
-            next = item.IsGc ? null : store.RedoneOf(item);
-        }
-        while (next is not null);
-        return (item, diff);
     }
 }
 
