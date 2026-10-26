@@ -179,8 +179,10 @@ internal static class UpdateReader
 
         var error = ReadContent(ref decoder, limits, contentRef, ref r);
         if (error != YError.None) return error;
+        // an item owns at least one clock: one of length 0 would vanish from the state encode, releasing whatever waits behind it (ENC-88)
+        if (r.Length == 0) return YError.Malformed;
         // the item's last id must be a valid clock
-        if (r.Length > 0 && clock + r.Length - 1 > MaxClock) return YError.Malformed;
+        if (clock + r.Length - 1 > MaxClock) return YError.Malformed;
         return YError.None;
     }
 

@@ -211,6 +211,16 @@ public sealed class MalformedInputTests
     public void Enc87_AV2FormatValueThatV1JsonCannotHold_IsMalformed_WhereJsStoresItAndThenCannotEncodeV1(string value) =>
         AssertRejected(Hex.Bytes("00 02 00 02 02 41 01 02 00 02 00 05 06 00 84 00 86 07 04 74 62 78 62 41 02 01 01 00 00 01 03 00 " + value + " 7e 00"), UpdateFormat.V2);
 
+    // an item of length 0 ("" text, Deleted 0, an empty JSON or Any list): Yjs accepts and stores it, but it owns no clock, so the state encode
+    // drops it and a struct that waited behind it no longer waits (SharpFuzz, TASK-4.43). Yjs never writes one: inserting "" or [] is skipped
+    [Theory, Covers("ENC-88"), Diverges("ENC-88", adr: "0005")]
+    [InlineData("01 01 01 00 04 01 01 74 00 00")]
+    [InlineData("01 01 01 00 01 01 01 74 00 00")]
+    [InlineData("01 01 01 00 02 01 01 74 00 00")]
+    [InlineData("01 01 01 00 08 01 01 74 00 00")]
+    [InlineData("01 04 04 00 03 01 00 00 00 01 04 06 03 00 00 01 04 04 00 01 00")]   // the finding: "" waits on client 3, Deleted on a binary parent behind it
+    public void Enc88_ZeroLengthItem_IsRejected(string hex) => AssertRejected(hex);
+
     [Fact, Covers("ENC-52")]
     public void Enc52_ADeleteRangeBeyondKnownState_IsAccepted()=> AssertAccepted("00 01 05 01 00 01");
 
