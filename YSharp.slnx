@@ -1,11 +1,14 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/YSharp/YSharp.csproj" />
+    <Project Path="src/YSharp.Server/YSharp.Server.csproj" />
+    <Project Path="src/YSharp.Server.Testing/YSharp.Server.Testing.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/YSharp.TestKit/YSharp.TestKit.csproj" />
     <Project Path="tests/YSharp.Tests/YSharp.Tests.csproj" />
     <Project Path="tests/YSharp.Interop.Tests/YSharp.Interop.Tests.csproj" />
+    <Project Path="tests/YSharp.Server.Tests/YSharp.Server.Tests.csproj" />
     <Project Path="tests/YSharp.Fuzz.Tests/YSharp.Fuzz.Tests.csproj" />
     <Project Path="tests/YSharp.Fuzz.Canary/YSharp.Fuzz.Canary.csproj" />
     <Project Path="tests/YSharp.StoreHarness/YSharp.StoreHarness.csproj" />

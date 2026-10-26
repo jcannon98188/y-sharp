@@ -74,6 +74,25 @@ public static partial class YUpdate
         var error = DecodeForFunctions(update, format, limits, out _, out var structs);
         if (error != YError.None) return new YStatus(error);
 
+        var entries = StateVectorEntries(structs);
+        using var w = new Lib0Writer(16 + entries.Count * 8);
+        w.WriteVarUint((ulong)entries.Count);
+        foreach (var (client, clock) in entries)
+        {
+            w.WriteVarUint(client);
+            w.WriteVarUint((ulong)clock);
+        }
+
+        w.CopyTo(output);
+        return default;
+    }
+
+    /// <summary>
+    /// The state vector entries of decoded structs in update order (clients descending): per client, the end of the run that starts at clock 0,
+    /// up to the first Skip. Shared by <see cref="TryStateVectorFromUpdate"/> and <see cref="YRelay"/>.
+    /// </summary>
+    internal static List<(ulong Client, long Clock)> StateVectorEntries(List<StructRef> structs)
+    {
         var entries = new List<(ulong Client, long Clock)>();
         if (structs.Count > 0)
         {
@@ -97,16 +116,7 @@ public static partial class YUpdate
             if (currClock != 0) entries.Add((currClient, currClock));
         }
 
-        using var w = new Lib0Writer(16 + entries.Count * 8);
-        w.WriteVarUint((ulong)entries.Count);
-        foreach (var (client, clock) in entries)
-        {
-            w.WriteVarUint(client);
-            w.WriteVarUint((ulong)clock);
-        }
-
-        w.CopyTo(output);
-        return default;
+        return entries;
     }
 
     /// <summary>Decodes an update the way the update functions read it: its size checked, Skips only with an exact info byte, structs in read order.</summary>
@@ -121,7 +131,7 @@ public static partial class YUpdate
     }
 
     /// <summary>Merged ranges in Yjs <c>writeDeleteSet</c> order: clients descending, each client's ranges by clock.</summary>
-    private static List<DeleteRange> InWriteOrder(DeleteRanges merged)
+    internal static List<DeleteRange> InWriteOrder(DeleteRanges merged)
     {
         var read = new List<DeleteRange>(merged.Count);
         for (var i = 0; i < merged.Count; i++) read.Add(merged[i]);
@@ -148,7 +158,7 @@ public static partial class YUpdate
         return ordered;
     }
 
-    private static void Write(UpdateFormat format, List<StructRef> structs, List<DeleteRange> deletes, IBufferWriter<byte> output)
+    internal static void Write(UpdateFormat format, List<StructRef> structs, List<DeleteRange> deletes, IBufferWriter<byte> output)
     {
         if (format == UpdateFormat.V2)
         {

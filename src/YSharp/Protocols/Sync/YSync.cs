@@ -52,6 +52,23 @@ public static class YSync
         Write(writer, SyncMessageType.Step2, update.WrittenSpan);
     }
 
+    /// <summary>
+    /// <c>writeSyncStep1</c> with no document (SY-3): <c>[0, len, ...stateVector]</c>, for a server that holds a document as merged updates
+    /// (ADR 0024 SRV-2). The state vector bytes are not validated.
+    /// </summary>
+    public static void WriteStep1(IBufferWriter<byte> writer, ReadOnlySpan<byte> stateVector)
+    {
+        ArgumentNullException.ThrowIfNull(writer);
+        Write(writer, SyncMessageType.Step1, stateVector);
+    }
+
+    /// <summary><c>writeSyncStep2</c> with no document (SY-4): <c>[1, len, ...update]</c>, the update already computed; its bytes are not validated.</summary>
+    public static void WriteStep2(IBufferWriter<byte> writer, ReadOnlySpan<byte> update)
+    {
+        ArgumentNullException.ThrowIfNull(writer);
+        Write(writer, SyncMessageType.Step2, update);
+    }
+
     /// <summary>Yjs <c>writeUpdate</c> (SY-5): <c>[2, len, ...update]</c>; the update bytes are not validated.</summary>
     public static void WriteUpdate(IBufferWriter<byte> writer, ReadOnlySpan<byte> update)
     {
@@ -106,6 +123,32 @@ public static class YSync
                 default:
                     return new YStatus(YError.UnknownMessage);
             }
+        }
+        finally
+        {
+            input = input[reader.Position..];
+        }
+    }
+
+    /// <summary>
+    /// Reads one message's frame from the front of <paramref name="input"/> without acting on it: its type and its payload, a slice of
+    /// <paramref name="input"/>, for a server that answers with no document (ADR 0024 SRV-2, SRV-17). An unknown type is
+    /// <see cref="YError.UnknownMessage"/> and truncation an error result, never an exception (ADR 0005). The payload is not validated.
+    /// <paramref name="input"/> advances past what was read, also on failure.
+    /// </summary>
+    public static YStatus TryReadFrame(ref ReadOnlySpan<byte> input, out SyncMessageType type, out ReadOnlySpan<byte> payload)
+    {
+        type = default;
+        payload = default;
+        var reader = new Lib0Reader(input);
+        try
+        {
+            if (!reader.TryReadVarUint(out var t)) return new YStatus(reader.Error);
+            if (t > (ulong)SyncMessageType.Update) return new YStatus(YError.UnknownMessage);
+            if (!reader.TryReadVarBytes(out var bytes)) return new YStatus(reader.Error);
+            type = (SyncMessageType)t;
+            payload = bytes;
+            return default;
         }
         finally
         {

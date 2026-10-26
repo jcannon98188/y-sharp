@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="FsCheck.Xunit.v3" />
+    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
+    <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\YSharp.TestKit\YSharp.TestKit.csproj" />
+    <ProjectReference Include="..\..\src\YSharp\YSharp.csproj" />
+    <ProjectReference Include="..\..\src\YSharp.Server\YSharp.Server.csproj" />
+    <ProjectReference Include="..\..\src\YSharp.Server.Testing\YSharp.Server.Testing.csproj" />
+  </ItemGroup>
+</Project>

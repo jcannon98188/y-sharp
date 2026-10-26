@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <RootNamespace>YSharp.Server.Testing</RootNamespace>
+    <!-- ADR 0024 SRV-12: the storage conformance suite, shipped for hosts that implement IUpdateStore. No test framework dependency. -->
+    <PackageId>YSharp.Server.Testing</PackageId>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\YSharp.Server\YSharp.Server.csproj" />
+  </ItemGroup>
+</Project>
