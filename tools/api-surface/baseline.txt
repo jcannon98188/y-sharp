@@ -693,6 +693,7 @@ YSharp.YXmlElement|method System.Collections.Generic.IReadOnlyDictionary<System.
 YSharp.YXmlElement|method System.Void RemoveAttribute(System.String name)
 YSharp.YXmlElement|method System.Void SetAttribute(System.String name, in YSharp.YValue value)
 YSharp.YXmlElement|method override System.String ToString()
+YSharp.YXmlElement|method override YSharp.YType Clone()
 YSharp.YXmlElement|property System.String NodeName {get;}
 YSharp.YXmlElement|property YSharp.YType NextSibling {get;}
 YSharp.YXmlElement|property YSharp.YType PrevSibling {get;}
@@ -723,10 +724,12 @@ YSharp.YXmlFragment|property YSharp.YType FirstChild {get;}
 YSharp.YXmlFragment|property YSharp.YType Item {get;}
 YSharp.YXmlHook|base YSharp.YMap
 YSharp.YXmlHook|ctor(System.String hookName)
+YSharp.YXmlHook|method override YSharp.YType Clone()
 YSharp.YXmlHook|property System.String HookName {get;}
 YSharp.YXmlHook|sealed class
 YSharp.YXmlText|base YSharp.YText
 YSharp.YXmlText|ctor(System.String initial = null)
+YSharp.YXmlText|method override System.String ToString()
 YSharp.YXmlText|method override YSharp.YValue ToJson()
 YSharp.YXmlText|property YSharp.YType NextSibling {get;}
 YSharp.YXmlText|property YSharp.YType PrevSibling {get;}
