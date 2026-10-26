@@ -135,7 +135,7 @@ public sealed class RelativePositionTests
 
     [Fact]
     [PortOf("relativePositions.tests.js:testRelativePositionWithUndo", "RP-06", "RP-08")]
-    [Requires(Feature.Text)]
+    [Requires(Feature.Text, Feature.Undo)]
     public void RelativePosition_DeleteThenUndo_FollowsTheRestoredContent()
     {
         var ydoc = new Doc();
@@ -466,7 +466,7 @@ public sealed class RelativePositionTests
 
     [Fact]
     [Covers("RP-08")]
-    [Requires(Feature.Text)]
+    [Requires(Feature.Text, Feature.Undo)]
     public void FollowUndoneDeletions_MayDifferBetweenReplicas_SoComparisonsUseFalse()
     {
         var a = Net.Mk(5);
