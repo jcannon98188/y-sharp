@@ -257,7 +257,7 @@ internal static class TypeList
             case YEntryKind.Type:
                 return (ContentKind.Type, entry.Type!.Branch);
             case YEntryKind.Doc:
-                throw Sketch.NI;   // subdocuments (spec 33)
+                return (ContentKind.Doc, SubdocContent.Of(entry.Doc!));   // JS logs, and goes on, when the document is already a subdocument (SUB-05)
             default:
                 throw new YInternalException($"A {entry.Kind} entry has no payload.");
         }
@@ -295,7 +295,7 @@ internal static class TypeList
             case ContentKind.Type:
                 return YType.Of((Branch)store.GetPayload(n), doc);
             case ContentKind.Doc:
-                throw Sketch.NI;   // subdocuments (spec 33)
+                return ((SubdocContent)store.GetPayload(n)).Doc ?? throw new YInternalException("An integrated subdocument item has no document.");
             default:
                 throw new YInternalException($"A {n.Kind} item has no content to read.");
         }

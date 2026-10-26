@@ -268,7 +268,7 @@ public struct ListEnumerator
     internal static YValue Json(in YEntry e) => e.Kind switch
     {
         YEntryKind.Type => e.Type!.ToJson(),
-        YEntryKind.Doc => throw Sketch.NI,   // subdocuments (spec 33)
+        YEntryKind.Doc => e.Doc!.ToJson(),   // JS keeps the Doc, whose toJSON() JSON.stringify then calls
         _ => e.Value,
     };
 }

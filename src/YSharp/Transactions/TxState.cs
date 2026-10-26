@@ -41,6 +41,11 @@ internal sealed class TxState
     /// <summary>The snapshots whose structs this life has split (Yjs <c>transaction.meta.get(splitSnapshotAffectedStructs)</c>).</summary>
     internal HashSet<YSnapshot>? SplitSnapshots;
 
+    /// <summary>Yjs <c>subdocsAdded</c>, <c>subdocsRemoved</c> and <c>subdocsLoaded</c>; null until a subdocument is met.</summary>
+    internal SubdocChanges? SubdocChangesOrNull { get; private set; }
+
+    internal SubdocChanges SubdocChanges => SubdocChangesOrNull ??= new SubdocChanges();
+
     internal TxState(Doc doc, bool write)
     {
         Doc = doc;
@@ -147,6 +152,7 @@ internal sealed class TxState
         ChangedOrder.Clear();
         ObserversCalled = false;
         SplitSnapshots = null;
+        SubdocChangesOrNull = null;
     }
 
     internal long BeforeClock(ulong client)

@@ -95,7 +95,28 @@ public class YXmlFragment : YType
         }
     }
 
-    public void InsertSubdoc(int index, Doc subdoc) => throw Sketch.NI;      // subdocuments (spec 33); read it back through Doc.Subdocs
+    /// <summary>Yjs <c>insert(index, [subdoc])</c> on a fragment (A8): a subdocument among the nodes; read it back through <see cref="Doc.Subdocs"/>.</summary>
+    public void InsertSubdoc(int index, Doc subdoc)
+    {
+        ArgumentNullException.ThrowIfNull(subdoc);
+        var entries = new YEntry[] { subdoc };
+        if (AttachedDoc is not { } doc)
+        {
+            if (index < 0 || index > _prelim!.Count) throw new ArgumentOutOfRangeException(nameof(index), "Length exceeded!");
+            _prelim.InsertRange(index, entries);
+            return;
+        }
+
+        var h = doc.EnterWrite(null, local: true);
+        try
+        {
+            TypeList.Insert(h.Tx, this, index, entries);
+        }
+        finally
+        {
+            doc.Leave(h);
+        }
+    }
 
     /// <summary>
     /// Yjs <c>insertAfter</c>: inserts right after <paramref name="reference"/>, or at the start when it is null (X-F3). While prelim, a reference

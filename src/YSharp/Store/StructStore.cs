@@ -144,7 +144,7 @@ internal sealed partial class StructStore
                 var source = (Branch)GetPayload(item);
                 return (ContentKind.Type, AddPayload(new Branch(TypeRefs.UsesMarkers(source.TypeRef)) { TypeRef = source.TypeRef, TypeName = source.TypeName }), 1);
             case ContentKind.Doc:
-                throw Sketch.NI;   // ContentDoc.copy: a new subdocument with the same guid and options (spec 33)
+                return (ContentKind.Doc, AddPayload(((SubdocContent)GetPayload(item)).Copy()), 1);   // ContentDoc.copy (SUB-10)
             case ContentKind.Binary:
             case ContentKind.Embed:
             case ContentKind.Format:

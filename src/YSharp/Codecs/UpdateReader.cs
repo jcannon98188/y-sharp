@@ -248,7 +248,7 @@ internal static class UpdateReader
             case RefDoc:
             {
                 if (!decoder.ReadString(out var guid) || !decoder.ReadAny(out var options)) return decoder.Error;
-                SetPayload(ref r, ContentKind.Doc, new SubdocContent(guid, options));
+                SetPayload(ref r, ContentKind.Doc, SubdocContent.FromWire(guid, options));
                 return YError.None;
             }
             default:

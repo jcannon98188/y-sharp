@@ -31,7 +31,14 @@ public sealed partial class Doc
     // Spec 8: members JS exposes that the public sketch hides.
     internal bool ShouldLoad => _loadRequested || _options.ShouldLoad;
     internal bool AutoLoad => _options.AutoLoad;
-    internal string? CollectionId => _options.CollectionId;
+    /// <summary>Yjs <c>collectionid</c>: the option, or the parent's when the document joins one without its own (DOC-17).</summary>
+    internal string? CollectionId
+    {
+        get => Volatile.Read(ref _collectionId) ?? _options.CollectionId;
+        set => Volatile.Write(ref _collectionId, value);
+    }
+
+    private string? _collectionId;
     internal YValue Meta => _options.Meta;
 
     /// <summary>
@@ -85,24 +92,42 @@ public sealed partial class Doc
     }
 
     /// <summary>
-    /// Yjs <c>destroy()</c>, a write transaction that waits its turn (CC-17): marks the document destroyed, destroys its subdocuments first,
-    /// raises <see cref="Destroying"/> then <see cref="Destroyed"/> (the two Yjs emits, <c>destroyed</c> and <c>destroy</c>, in that order),
-    /// and then drops every handler of the document's events, as lib0's <c>ObservableV2.destroy</c> does. Type observers stay, and the document
-    /// keeps accepting transactions (DOC-15).
+    /// Yjs <c>destroy()</c> (CC-17): marks the document destroyed, destroys its subdocuments first, hands a subdocument's item a fresh unloaded
+    /// document (reported in the parent's <see cref="SubdocsChanged"/>), raises <see cref="Destroying"/> then <see cref="Destroyed"/> (the two
+    /// Yjs emits, <c>destroyed</c> and <c>destroy</c>, in that order), and then drops every handler of the document's events, as lib0's
+    /// <c>ObservableV2.destroy</c> does. Type observers stay, and the document keeps accepting transactions (DOC-15). Each step waits its
+    /// turn for the write lock; the subdocuments and the parent are reached with this document's lock released (CC-18).
     /// </summary>
     public void Destroy()
     {
+        Doc[] subdocs;
+        Item? item;
+        Doc? parent;
         _lock.EnterWrite(Timeout.Infinite, default);
         try
         {
             _isDestroyed = true;
-            OnDestroySubdocs();
+            subdocs = _subdocs.ToArray();
+            item = Interlocked.Exchange(ref _subdocItem, null);
+            parent = Volatile.Read(ref _parentDoc);
+        }
+        finally
+        {
+            _lock.ExitWrite();
+        }
+
+        foreach (var sub in subdocs) sub.Destroy();
+        if (item is not null && parent is not null) DetachFromParent(item, parent);
+        _lock.EnterWrite(Timeout.Infinite, default);
+        try
+        {
             RaiseDocEvent(Destroying);
             RaiseDocEvent(Destroyed);
             Loaded = Synced = Destroying = Destroyed = null;
             BeforeAllTransactions = BeforeTransaction = BeforeObserverCalls = AfterTransaction = AfterTransactionCleanup = null;
             AfterAllTransactions = null;
-            Update = UpdateV2 = null;   // spec 33 also drops SubdocsChanged, which nothing raises before it lands
+            Update = UpdateV2 = null;
+            SubdocsChanged = null;
         }
         finally
         {
@@ -112,11 +137,8 @@ public sealed partial class Doc
 
     public void Dispose() => Destroy();
 
-    /// <summary>Spec 33: a subdocument that was not loaded joins its parent's loaded subdocuments.</summary>
+    /// <summary>A subdocument that was not loaded joins its parent's loaded subdocuments (Doc.Subdocs.cs).</summary>
     partial void OnLoadSubdoc();
-
-    /// <summary>Spec 33: destroys the subdocuments and, for a subdocument, replaces it in its parent with an unloaded copy.</summary>
-    partial void OnDestroySubdocs();
 
     private void RaiseDocEvent(Action<Doc>? handlers)
     {
