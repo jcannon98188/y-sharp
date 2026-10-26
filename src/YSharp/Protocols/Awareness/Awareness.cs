@@ -109,7 +109,10 @@ public sealed class Awareness : IDisposable
         }
     }
 
-    /// <summary>Yjs <c>destroy</c> (AW-22): emits <c>destroy</c>, removes the local state and stops the timer. A second call does nothing (AW-24).</summary>
+    /// <summary>
+    /// Yjs <c>destroy</c> (AW-22): emits <c>destroy</c>, removes the local state, drops every handler and stops the timer. A second call does
+    /// nothing (AW-24).
+    /// </summary>
     public void Dispose()
     {
         lock (_gate)
@@ -130,6 +133,10 @@ public sealed class Awareness : IDisposable
                     }
                 }
             SetLocalStateCore(YValue.Null);
+            // Observable.destroy drops every listener (AW-22 step 3): an instance used after destroy changes state silently
+            Change = null;
+            Update = null;
+            Destroyed = null;
             _timer.Dispose();
         }
     }

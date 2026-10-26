@@ -199,6 +199,22 @@ public sealed class AwarenessStateTests
         Assert.Equal(before, rig.Events.Count);
     }
 
+    [Fact, Covers("AW-22")]
+    public void Dispose_DropsEveryHandler_SoLaterStateChangesRaiseNoEvents()
+    {
+        using var rig = new AwRig(4);
+        var other = new Awareness(new Doc(new DocOptions { ClientId = 5 }));
+        other.SetLocalState(Obj("x", 1));
+        var w = new System.Buffers.ArrayBufferWriter<byte>();
+        Assert.True(other.TryEncodeUpdate(w, new ulong[] { 5 }).Ok);
+        rig.Awareness.Dispose();
+        var before = rig.Events.Count;
+        Assert.True(rig.Awareness.TryApplyUpdate(w.WrittenSpan, "peer").Ok);
+        rig.Awareness.SetLocalState(Obj("back", true));
+        Assert.Equal(before, rig.Events.Count);                       // Observable.destroy dropped the listeners (step 3)
+        Assert.True(rig.Awareness.GetStates().ContainsKey(5));        // the state still changes
+    }
+
     [Fact, Covers("AW-23")]
     public void Doc_Destroyed_DestroysTheAwareness()
     {
