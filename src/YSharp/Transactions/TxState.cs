@@ -26,13 +26,17 @@ internal sealed class TxState
     private int _afterCount = -1;   // -1: not taken yet (Yjs afterState is empty until cleanup)
 
     private Dictionary<YType, HashSet<string?>>? _changed;
-    private Dictionary<YType, List<YEvent>>? _changedParentTypes;
+    private List<YType>? _changedParentTypes;
+    private readonly Stack<HashSet<string?>> _keySets = new();   // the cleared key sets of earlier lives (BUD-04, BUD-05)
 
     /// <summary>
-    /// Changed texts that no shared type object wraps yet (read from an update, not yet read). Yjs has an object for every type, so the
-    /// formatting cleanup after a remote change still has to see them (TASK-4.25).
+    /// The keys of <see cref="Changed"/> in the order they were first added (a JS Map's order, which the observers run in). A type removed
+    /// from the map stays here; the dispatch skips it.
     /// </summary>
-    internal HashSet<Branch>? UnwrappedTextsChanged;
+    internal readonly List<YType> ChangedOrder = new();
+
+    /// <summary>Set when the observers of this life start (Yjs fills <c>changedParentTypes</c> while it calls them).</summary>
+    internal bool ObserversCalled;
 
     internal TxState(Doc doc, bool write)
     {
@@ -45,12 +49,53 @@ internal sealed class TxState
 
     internal Dictionary<YType, HashSet<string?>>? ChangedOrNull => _changed;
 
-    internal Dictionary<YType, List<YEvent>>? ChangedParentTypesOrNull => _changedParentTypes;
-
     internal Dictionary<YType, HashSet<string?>> Changed => _changed ??= new Dictionary<YType, HashSet<string?>>(ReferenceEqualityComparer.Instance);
 
-    internal Dictionary<YType, List<YEvent>> ChangedParentTypes =>
-        _changedParentTypes ??= new Dictionary<YType, List<YEvent>>(ReferenceEqualityComparer.Instance);
+    /// <summary>An empty key set for <see cref="Changed"/>, reused from an earlier life: an event of that life holds its set but is stale (M-E5).</summary>
+    internal HashSet<string?> RentKeySet() => _keySets.TryPop(out var set) ? set : new HashSet<string?>();
+
+    /// <summary>
+    /// Yjs <c>transaction.changedParentTypes</c>: every changed type whose observers ran and each of its ancestors, in the order JS adds them.
+    /// Built on first use from the changed types, so a commit nobody asks this of allocates nothing; empty before the observers run.
+    /// </summary>
+    internal List<YType>? ChangedParentTypesOrNull
+    {
+        get
+        {
+            if (!ObserversCalled || _changed is not { Count: > 0 } changed) return null;
+            if (_changedParentTypes is { } built) return built;
+            var list = new List<YType>();
+            var seen = new HashSet<YType>(ReferenceEqualityComparer.Instance);
+            foreach (var type in ChangedOrder)
+            {
+                // Yjs AbstractType._callObserver of the root placeholder adds nothing; a deleted type's observers do not run
+                if (!changed.ContainsKey(type) || type is YUntyped || type.Branch.Item is { Deleted: true }) continue;
+                for (var branch = type.Branch; ; branch = branch.Item!.Parent!)
+                {
+                    var t = Doc.TypeOf(branch);
+                    if (seen.Add(t)) list.Add(t);
+                    if (branch.Item is null) break;
+                }
+            }
+
+            return _changedParentTypes = list;
+        }
+    }
+
+    /// <summary>
+    /// Yjs <c>writeUpdateMessageFromTransaction</c>'s test: something was deleted, or a client's clock moved between the start of the
+    /// transaction and the start of its cleanup.
+    /// </summary>
+    internal bool HasContent
+    {
+        get
+        {
+            if (DeleteRanges.Count > 0) return true;
+            for (var slot = 0; slot < _afterCount; slot++)
+                if (_after[slot] != (slot < _beforeCount ? _before[slot] : 0)) return true;
+            return false;
+        }
+    }
 
     /// <summary>Starts a life: takes the before state and hands out a new façade, the one allocation of an uncontended transaction (BUD-01, BUD-02).</summary>
     internal Transaction Begin(object? origin, bool local)
@@ -84,9 +129,20 @@ internal sealed class TxState
         Public = null;
         Origin = null;
         DeleteRanges.Clear();
-        _changed?.Clear();
-        _changedParentTypes?.Clear();
-        UnwrappedTextsChanged?.Clear();
+        if (_changed is { Count: > 0 } changed)
+        {
+            foreach (var set in changed.Values)
+            {
+                set.Clear();
+                _keySets.Push(set);
+            }
+
+            changed.Clear();
+        }
+
+        _changedParentTypes = null;
+        ChangedOrder.Clear();
+        ObserversCalled = false;
     }
 
     internal long BeforeClock(ulong client)

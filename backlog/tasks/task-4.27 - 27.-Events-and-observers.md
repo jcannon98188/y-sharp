@@ -1,10 +1,11 @@
 ---
 id: TASK-4.27
 title: 27. Events and observers
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-10-24 19:42'
-updated_date: '2026-10-25 23:45'
+updated_date: '2026-10-26 00:07'
 labels:
   - spec
   - 'model:opus'

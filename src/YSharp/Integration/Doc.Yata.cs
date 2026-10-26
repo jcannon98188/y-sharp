@@ -405,22 +405,27 @@ public sealed partial class Doc
 
     /// <summary>
     /// Yjs <c>addChangedTypeToTransaction</c>: records the change when the type is a root, or its item existed before the transaction and is
-    /// not deleted. Only a branch owned by a shared type object is recorded; the types attach themselves (TASK-4.21). A changed text that no
-    /// object wraps yet is noted for the formatting cleanup instead (TASK-4.25).
+    /// not deleted. Yjs has an object for every type, so a nested type read from an update that nobody has read yet gets its object here (its
+    /// observers cannot exist yet, but deep observers above it, the formatting cleanup and the changed types must see it). A root that no
+    /// object owns was only named by an update and has no observers to call: it is skipped.
     /// </summary>
     private static void AddChangedType(Transaction tx, Branch parent, string? parentSub)
     {
         var item = StructStore.ItemOf(parent);
         if (!item.IsNull && (item.IsDeleted || item.Clock >= tx.BeforeClock(tx.Doc.Store.ClientIdOf(item)))) return;
-        if (parent.Owner is not YType type)
+        YType type;
+        if (parent.Owner is YType owner) type = owner;
+        else if (!item.IsNull) type = YType.Of(parent, tx.Doc);
+        else return;
+
+        var state = tx.State;
+        var changed = state.Changed;
+        if (!changed.TryGetValue(type, out var keys))
         {
-            if (parent.TypeRef is TypeRefs.Text or TypeRefs.XmlText)
-                (tx.State.UnwrappedTextsChanged ??= new HashSet<Branch>(ReferenceEqualityComparer.Instance)).Add(parent);
-            return;
+            changed[type] = keys = state.RentKeySet();
+            state.ChangedOrder.Add(type);
         }
 
-        var changed = tx.Changed;
-        if (!changed.TryGetValue(type, out var keys)) changed[type] = keys = new HashSet<string?>();
         keys.Add(parentSub);
     }
 

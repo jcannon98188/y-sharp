@@ -222,7 +222,7 @@ public sealed partial class Doc
         _cleanups.Add(tx);
         try
         {
-            if (_cleanups.Count == 1) HookBeforeAllTransactions();
+            if (_cleanups.Count == 1) HookBeforeAllTransactions(tx);
             HookBeforeTransaction(tx);
         }
         catch
@@ -303,14 +303,33 @@ public sealed partial class Doc
 
     private void CleanupOne(Transaction tx)
     {
+        // Yjs callAll: the observers, afterTransaction and the formatting cleanup each run even when one before it threw
+        ExceptionDispatchInfo? first = null;
         try
         {
             tx.State.TakeAfterState();
             ClearStaleMarkers(tx.State);
             HookBeforeObservers(tx);
-            HookObservers(tx);
-            HookAfterTransaction(tx);
+            try
+            {
+                HookObservers(tx);
+            }
+            catch (Exception e) when (e is not OutOfMemoryException)
+            {
+                first ??= ExceptionDispatchInfo.Capture(e);
+            }
+
+            try
+            {
+                HookAfterTransaction(tx);
+            }
+            catch (Exception e) when (e is not OutOfMemoryException)
+            {
+                first ??= ExceptionDispatchInfo.Capture(e);
+            }
+
             HookFormattingCleanup(tx);
+            first?.Throw();
         }
         finally
         {

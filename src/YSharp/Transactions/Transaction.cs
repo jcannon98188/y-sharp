@@ -86,9 +86,6 @@ public sealed class Transaction
     /// <summary>The changed types and the keys changed on each, null standing for a list change (Yjs <c>transaction.changed</c>).</summary>
     internal Dictionary<YType, HashSet<string?>> Changed => State.Changed;
 
-    /// <summary>Events per parent type for deep observers (Yjs <c>transaction.changedParentTypes</c>).</summary>
-    internal Dictionary<YType, List<YEvent>> ChangedParentTypesMap => State.ChangedParentTypes;
-
     /// <summary>The clock <paramref name="client"/> had when the transaction started (Yjs <c>beforeState.get(client) || 0</c>).</summary>
     internal long BeforeClock(ulong client) => State.BeforeClock(client);
 
@@ -107,12 +104,12 @@ public sealed class Transaction
             _changedParents = changedParents;
         }
 
-        private ICollection<YType>? Keys
+        private IReadOnlyCollection<YType>? Keys
         {
             get
             {
                 var state = _tx.State;
-                return _changedParents ? state.ChangedParentTypesOrNull?.Keys : state.ChangedOrNull?.Keys;
+                return _changedParents ? state.ChangedParentTypesOrNull : state.ChangedOrNull?.Keys;
             }
         }
 

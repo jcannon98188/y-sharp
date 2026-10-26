@@ -17,7 +17,7 @@ namespace YSharp;
 // The write lock is held throughout (CC-11). A write made from a hook runs in a follow-up transaction of the same round (CC-2).
 public sealed partial class Doc
 {
-    partial void HookBeforeAllTransactions();
+    partial void HookBeforeAllTransactions(Transaction tx);
     partial void HookBeforeTransaction(Transaction tx);
     partial void HookBeforeObservers(Transaction tx);
     partial void HookObservers(Transaction tx);

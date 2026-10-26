@@ -21,9 +21,6 @@ public sealed partial class Doc
         if (state.ChangedOrNull is { } changed)
             foreach (var type in changed.Keys)
                 if (NeedsFormattingCleanup(type.Branch)) return true;
-        if (state.UnwrappedTextsChanged is { } unwrapped)
-            foreach (var branch in unwrapped)
-                if (NeedsFormattingCleanup(branch)) return true;
         return false;
     }
 

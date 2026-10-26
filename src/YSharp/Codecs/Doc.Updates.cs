@@ -63,8 +63,9 @@ public sealed partial class Doc
         if (update.Length > limits.MaxUpdateBytes) return new ApplyResult(YError.LimitExceeded, 0, 0);
         var error = Decode(update, format, limits, out var refs);
         if (error != YError.None) return new ApplyResult(error, 0, 0);
+        var faults = ObserverFaultCount;
         if (!TryIntegrateRemote(refs, origin, limits.MaxPendingBytes, out var rejected)) return new ApplyResult(YError.LimitExceeded, 0, 0);
-        return new ApplyResult(rejected > 0 ? YError.Rejected : YError.None, rejected, 0);
+        return new ApplyResult(rejected > 0 ? YError.Rejected : YError.None, rejected, ObserverFaultCount - faults);
     }
 
     /// <summary>The throwing form of <see cref="TryApplyUpdate"/>: <see cref="YDecodeException"/> with the same code, <see cref="YInternalException"/> on a faulted document.</summary>

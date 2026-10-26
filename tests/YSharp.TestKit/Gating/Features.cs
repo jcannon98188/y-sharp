@@ -68,6 +68,7 @@ public static class Features
         Feature.Text,
         Feature.TextFormat,
         Feature.Xml,
+        Feature.Events,
     };
 }
 
