@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace YSharp.Store;
 
@@ -16,6 +17,18 @@ internal readonly record struct DeleteRange(ulong Client, long Clock, long Lengt
 internal sealed class DeleteRanges
 {
     private readonly ChunkedList<DeleteRange> _ranges = new();
+    private readonly List<ulong>? _clientOrder;
+
+    internal DeleteRanges(bool trackClientOrder = false)
+    {
+        if (trackClientOrder) _clientOrder = new List<ulong>();
+    }
+
+    /// <summary>
+    /// The clients in the order each got its first range, which is the iteration order of the Yjs <c>DeleteSet.clients</c> Map (sorting
+    /// never reorders its keys); null unless the set was made to track it. A transaction's set tracks it for the formatting cleanup.
+    /// </summary>
+    internal IReadOnlyList<ulong>? ClientOrder => _clientOrder;
 
     public int Count => _ranges.Count;
 
@@ -54,6 +67,8 @@ internal sealed class DeleteRanges
             }
         }
 
+        if (_clientOrder != null && (at == 0 || _ranges[at - 1].Client != client) && (at == _ranges.Count || _ranges[at].Client != client))
+            _clientOrder.Add(client);
         _ranges.Insert(at, new DeleteRange(client, clock, length));
         AbsorbFollowing(at);
     }
@@ -75,7 +90,25 @@ internal sealed class DeleteRanges
     }
 
     /// <summary>Empties the set but keeps its blocks for the next transaction.</summary>
-    public void Clear() => _ranges.Clear();
+    public void Clear()
+    {
+        _ranges.Clear();
+        _clientOrder?.Clear();
+    }
+
+    /// <summary>The index of the first range of <paramref name="client"/>, or <see cref="Count"/> when it has none.</summary>
+    public int FirstIndexOf(ulong client)
+    {
+        int lo = 0, hi = _ranges.Count;
+        while (lo < hi)
+        {
+            var mid = (lo + hi) >>> 1;
+            if (_ranges[mid].Client < client) lo = mid + 1;
+            else hi = mid;
+        }
+
+        return lo < _ranges.Count && _ranges[lo].Client == client ? lo : _ranges.Count;
+    }
 
     private void AbsorbFollowing(int at)
     {

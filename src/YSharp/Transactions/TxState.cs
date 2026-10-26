@@ -53,7 +53,7 @@ internal sealed class TxState
     }
 
     /// <summary>What this transaction deleted (Yjs <c>transaction.deleteSet</c>).</summary>
-    internal readonly DeleteRanges DeleteRanges = new();
+    internal readonly DeleteRanges DeleteRanges = new(trackClientOrder: true);
 
     internal Dictionary<YType, HashSet<string?>>? ChangedOrNull => _changed;
 

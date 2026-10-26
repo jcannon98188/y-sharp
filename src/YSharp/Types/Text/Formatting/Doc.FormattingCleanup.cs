@@ -61,18 +61,25 @@ public sealed partial class Doc
         var h = EnterWrite(null, local: true);
         try
         {
+            // Yjs iterateDeletedStructs walks the clients in the order the transaction first deleted from each (its Map order), not sorted:
+            // a format deleted before content in that order turns the content's contextless cleanup into the full one (quill-medium)
             var ds = tx.State.DeleteRanges;
-            for (var r = 0; r < ds.Count; r++)
+            var order = ds.ClientOrder!;
+            for (var c = 0; c < order.Count; c++)
             {
-                var range = ds[r];
-                var count = store.StructCount(range.Client);
-                for (var si = store.FindIndex(range.Client, range.Clock); si < count; si++)
+                var client = order[c];
+                for (var r = ds.FirstIndexOf(client); r < ds.Count && ds[r].Client == client; r++)
                 {
-                    var item = store.StructAt(range.Client, si);
-                    if (item.Clock >= range.End) break;
-                    if (item.IsGc || item.Parent is not { } parent || !parent.HasFormatting || fullSet.Contains(parent)) continue;
-                    if (item.Kind == ContentKind.Format) AddFull(parent);
-                    else TypeText.CleanupContextlessFormattingGap(h.Tx, this, item);
+                    var range = ds[r];
+                    var count = store.StructCount(range.Client);
+                    for (var si = store.FindIndex(range.Client, range.Clock); si < count; si++)
+                    {
+                        var item = store.StructAt(range.Client, si);
+                        if (item.Clock >= range.End) break;
+                        if (item.IsGc || item.Parent is not { } parent || !parent.HasFormatting || fullSet.Contains(parent)) continue;
+                        if (item.Kind == ContentKind.Format) AddFull(parent);
+                        else TypeText.CleanupContextlessFormattingGap(h.Tx, this, item);
+                    }
                 }
             }
 

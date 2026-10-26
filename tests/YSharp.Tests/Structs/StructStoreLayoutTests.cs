@@ -215,6 +215,26 @@ public sealed class StructStoreLayoutTests
     }
 
     [Fact]
+    public void DeleteRanges_ThatTrackClientOrder_ListEachClientWhereItsFirstRangeCame_AsTheYjsDeleteSetMapIterates()
+    {
+        // Yjs DeleteSet.clients is a Map: keys iterate in first-insertion order, and sortAndMergeDeleteSet sorts only within a client
+        var tracked = new DeleteRanges(trackClientOrder: true);
+        tracked.Add(B, 5, 1);
+        tracked.Add(A, 3, 1);
+        tracked.Add(B, 1, 1);       // B again, before its first range: no new entry
+        tracked.Add(A, 4, 2);       // merges with A's range
+        Assert.Equal(new[] { B, A }, tracked.ClientOrder);
+        Assert.Equal(3, tracked.Count);   // (A 3..6), (B 1..2), (B 5..6)
+        Assert.Equal(1, tracked.FirstIndexOf(B));
+        Assert.Equal(0, tracked.FirstIndexOf(A));
+        Assert.Equal(tracked.Count, tracked.FirstIndexOf(99));
+
+        tracked.Clear();
+        Assert.Empty(tracked.ClientOrder!);
+        Assert.Null(new DeleteRanges().ClientOrder);
+    }
+
+    [Fact]
     public void GcContent_OfADeletedItem_KeepsALongLengthInTheDeletedForm()
     {
         var store = new StructStore();
