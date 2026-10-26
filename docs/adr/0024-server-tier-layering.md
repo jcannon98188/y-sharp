@@ -17,6 +17,17 @@ Decides the layout that blocks TASK-5. The server tier sits above the core and d
   - `YSharp.Server` has its own version. Its dependency on `YSharp` has a lower bound and no upper bound below the next major.
   - A breaking server change does not bump the core, and a core patch needs no server release.
 
+## The relay (TASK-5.2)
+
+`YRelay` holds a document as its merged update. Its guarantees carry `RLY-` IDs.
+
+- **RLY-1** It accepts V1 or V2 update bytes, validates each in full against its `YLimits` with the strict decoding of the update functions, and folds them in without building a `Doc`. It writes its state in either format.
+- **RLY-2** Each fold equals Yjs `mergeUpdates([state, update])`, byte for byte. A duplicate or out-of-order update is accepted, and gaps become Skips until the missing structs arrive. A `Doc` that applies the relay's state equals one that applied every input: same `EncodeStateAsUpdate` bytes in V1 and V2, same state vector.
+- **RLY-3** The answer for a client's state vector equals Yjs `diffUpdate` of the merged state, byte for byte, and a client that applies it reaches the same state as a `Doc` holding every input.
+- **RLY-4** An invalid or over-limit update returns its `YStatus` error and leaves the relay unchanged. A malformed client state vector is refused, and nothing is written.
+- **RLY-5** Its state vector is Yjs `encodeStateVectorFromUpdate` of the merged state: per client, the run from clock 0 up to the first gap. Unlike a `Doc`, it counts items whose origin or parent is still missing on another client, because it holds them and passes them on.
+- **RLY-6** Every member is safe to call from any thread, under the relay's own lock. It never takes a document lock.
+
 ## The mailbox and the ADR 0006 lock
 
 The ADR 0006 lock makes one `Doc` safe across threads. It does not order work across await points, apply backpressure or keep documents from starving each other, because it is synchronous and thread-affine (CC-15). The mailbox adds those and leaves the lock unchanged.
