@@ -1,6 +1,7 @@
 # Server tier (ADR 0024)
 # Behaviour registry (ADR 0010). IDs are assigned once and never reused or renumbered; a withdrawn entry stays as status: retired.
-# ADR 0019 has no server spec, so the relay entries are owned by spec 5, which owns the update functions it builds on (TASK-5.2).
+# ADR 0019 has no server spec, so the server-tier entries are owned by spec 5, which owns the update functions the relay and the log build on
+# (TASK-5.2 onward).
 
 - id: RLY-1
   title: "A relay folds V1 or V2 updates without a Doc, validated in full against its YLimits"
@@ -61,3 +62,23 @@
   owner: 5
   status: active
   ref: "adr 0024:29"
+
+- id: SRV-10
+  title: "The update log appends validated V2 records with strictly increasing sequences; reads return the snapshot first, then later records"
+  source: "docs/adr/0024-server-tier-layering.md:55"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:55"
+
+- id: SRV-11
+  title: "Compaction merges the log through the relay tier with no Doc; a crash at any step or a replay cannot change the state"
+  source: "docs/adr/0024-server-tier-layering.md:65"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:65"

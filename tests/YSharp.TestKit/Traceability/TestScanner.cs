@@ -118,7 +118,7 @@ public static class TestScanner
         var baseDir = AppContext.BaseDirectory;
         var selfProject = Path.Combine(repoRoot, "tests", selfName) + Path.DirectorySeparatorChar;
         var rel = baseDir.StartsWith(selfProject, StringComparison.OrdinalIgnoreCase) ? baseDir[selfProject.Length..] : null;
-        foreach (var proj in new[] { "YSharp.Fuzz.Tests", "YSharp.Interop.Tests" })
+        foreach (var proj in new[] { "YSharp.Fuzz.Tests", "YSharp.Interop.Tests", "YSharp.Server.Tests" })
         {
             if (proj == selfName) continue;
             var dll = rel == null ? null : Path.Combine(repoRoot, "tests", proj, rel, proj + ".dll");
