@@ -74,11 +74,13 @@ public sealed class DiffRun
     // ------------------------------------------------------------------ one script on both sides
 
     /// <summary>The two replies of one script; <paramref name="extra"/> adds a check on top (convergence, a source dump) and returns a difference.</summary>
-    public (OracleReply Oracle, SharpReply Sharp)? Run(string scriptJson, Func<JsonObject, JsonObject, Difference?>? extra = null, IEnumerable<string>? extras = null)
+    /// <remarks><paramref name="oracleScript"/>, when given, is what the oracle runs instead: a normaliser's rewrite (AW-51).</remarks>
+    public (OracleReply Oracle, SharpReply Sharp)? Run(string scriptJson, Func<JsonObject, JsonObject, Difference?>? extra = null, IEnumerable<string>? extras = null,
+        string? oracleScript = null)
     {
         Cases++;
         var x = extras?.ToList() ?? new List<string>();
-        var oracle = _host.RunAsync(scriptJson, x).GetAwaiter().GetResult();
+        var oracle = _host.RunAsync(oracleScript ?? scriptJson, x).GetAwaiter().GetResult();
         var sharp = RunSharp(scriptJson, x);
 
         if (sharp.Status == SharpStatus.Hang) throw Fail(FailureReason.SharpFault, scriptJson, oracle.Observations, null, null, "y-sharp hung: " + sharp.Message);
@@ -128,6 +130,45 @@ public sealed class DiffRun
         Label = plan.ToString();
         var script = plan.ToScript().ToJsonString();
         return Run(script, (oracle, sharp) => Convergence(oracle, "the oracle") ?? Convergence(sharp, "y-sharp"), PlanExtras);
+    }
+
+    /// <summary>
+    /// A protocol plan (Spec 41): sync and awareness messages flow by name on each side, so every result, the awareness dumps and the
+    /// event log are compared; a settled plan with no hostile bytes must also converge (SY-14).
+    /// </summary>
+    public (OracleReply Oracle, SharpReply Sharp)? CheckProtocol(Generation.ProtocolPlan plan)
+    {
+        Label = plan.ToString();
+        var script = plan.ToScript().ToJsonString();
+        var converge = plan.Settle && !plan.Hostile;
+        return Run(script, converge ? (oracle, sharp) => Convergence(oracle, "the oracle") ?? Convergence(sharp, "y-sharp") : null, PlanExtras);
+    }
+
+    /// <summary>
+    /// The AW-51 targeting check (recorded divergence, ADR 0005): a hand-built awareness batch that fails after good entries is applied up to
+    /// the bad entry by Node and not at all by y-sharp. The oracle runs the script once to find the rejected batches, then again with each
+    /// replaced by one that fails on its first entry; y-sharp, on the real script, must equal that run exactly, and the documents (updates,
+    /// state, state vectors, dumps) of the two oracle runs must agree, so the divergence is confined to awareness.
+    /// </summary>
+    public (OracleReply Oracle, SharpReply Sharp)? CheckPartialAwareness(Generation.ProtocolPlan plan)
+    {
+        Label = plan.ToString();
+        var script = plan.ToScript();
+        var json = script.ToJsonString();
+        var probe = _host.RunAsync(json, PlanExtras).GetAwaiter().GetResult();
+        var rejected = probe.Status == OracleStatus.Ok && probe.Observations!["results"]?["value"] is JsonObject results
+            ? results.Where(kv => kv.Value?["api"]?.GetValue<string>() == "applyAwarenessUpdate" && kv.Value["threw"]?.GetValue<bool>() == true)
+                .Select(kv => kv.Key).ToHashSet(StringComparer.Ordinal)
+            : new HashSet<string>(StringComparer.Ordinal);
+        if (rejected.Count == 0) return Run(json, null, PlanExtras);
+
+        var atomic = (JsonObject)script.DeepClone();
+        foreach (var step in atomic["steps"]!.AsArray().OfType<JsonObject>())
+            if (step["step"]?.GetValue<string>() == "awareness.applyUpdate" && step["name"]?.GetValue<string>() is { } name && rejected.Contains(name) && step["bytes"] != null)
+                step["bytes"] = new JsonObject { ["$"] = "bytes", ["hex"] = "01" };   // one entry declared, none present: fails before any is applied
+        return Run(json, (oracle, _) => ObservationDiff.Find(probe.Observations!, oracle, new[] { "updates", "state", "sv", "doc" }) is { } d
+            ? d with { Detail = "AW-51: rewriting the rejected batches changed the oracle's documents, not only its awareness: " + d.Detail }
+            : null, PlanExtras, atomic.ToJsonString());
     }
 
     /// <summary>

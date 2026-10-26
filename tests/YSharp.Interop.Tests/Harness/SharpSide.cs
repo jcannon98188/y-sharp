@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading;
 using YSharp.Tests.Codecs;
+using YSharp.Tests.Protocols;
 using YSharp.Tests.Simulation;
 using YSharp.Tests.Types;
 using YSharp.TestKit.Ops;
@@ -42,6 +43,7 @@ public static class SharpSide
     public static OpsRegistry CreateRegistry()
     {
         var registry = SimSteps.CreateRegistry();
+        ProtocolSteps.Register(registry);
         foreach (var extend in Extensions) extend(registry);
         return registry;
     }
@@ -153,7 +155,14 @@ public static class SharpSide
             results[kv.Key] = new JsonObject { ["api"] = "y-sharp YUpdate", ["bytes"] = Bytes(kv.Value) };
         foreach (var kv in features.Results)
             results[kv.Key] = new JsonObject { ["api"] = "y-sharp doc features", ["value"] = JsonNode.Parse(kv.Value) };
+        var protocol = ProtocolSteps.Of(ctx);
+        foreach (var r in protocol.Results.Values)
+            results[r.Name] = ProtocolResult(r);
         if (results.Count > 0) obs["results"] = Entry("y-sharp results", results);
+
+        if (protocol.Awarenesses.Count > 0)
+            obs["awareness"] = Entry("y-sharp Awareness.ClientId, GetStates, Meta", new JsonObject(protocol.Awarenesses.Select(kv =>
+                KeyValuePair.Create(kv.Key, (JsonNode?)AwarenessDump(kv.Value)))));
 
         if (extras?.Contains("structs") == true)
             obs["structs"] = Entry("y-sharp struct store", new JsonObject(names.Select(n => KeyValuePair.Create(n, (JsonNode?)StoreDump.Structs(ctx.Doc(n))))));
@@ -161,6 +170,36 @@ public static class SharpSide
             obs["ds"] = Entry("y-sharp delete set from the struct store", new JsonObject(names.Select(n => KeyValuePair.Create(n, (JsonNode?)StoreDump.DeleteSet(StoreDump.Structs(ctx.Doc(n)))))));
         return obs;
     }
+
+    /// <summary>A protocol result with the fields protocol-steps.mjs records for its step kind.</summary>
+    private static JsonObject ProtocolResult(ProtocolResult r)
+    {
+        var o = new JsonObject { ["api"] = r.Kind };
+        if (r.Bytes != null) o["bytes"] = Bytes(r.Bytes);
+        switch (r.Kind)
+        {
+            case "sync.read":
+                o["type"] = r.Type;
+                o["threw"] = r.Threw;
+                o["handlerCalled"] = r.HandlerCalled;
+                o["consumed"] = r.Consumed;
+                break;
+            case "awareness.applyUpdate" or "awareness.encode" or "awareness.modify":
+                o["threw"] = r.Threw;
+                break;
+        }
+        return o;
+    }
+
+    /// <summary>The <c>awareness</c> observation of one instance: client id, live states and meta, sorted by client id (observe.mjs).</summary>
+    private static JsonObject AwarenessDump(Awareness aw) => new()
+    {
+        ["clientId"] = (long)aw.ClientId,
+        ["states"] = new JsonArray(aw.GetStates().OrderBy(k => k.Key)
+            .Select(k => (JsonNode)new JsonArray(JsonValue.Create((long)k.Key), TypeDump.Value(k.Value))).ToArray()),
+        ["meta"] = new JsonArray(aw.Meta.OrderBy(k => k.Key).Select(k => (JsonNode)new JsonArray(JsonValue.Create((long)k.Key),
+            new JsonObject { ["clock"] = k.Value.Clock, ["lastUpdated"] = (long)(k.Value.LastUpdated - ProtocolSteps.Epoch).TotalMilliseconds })).ToArray()),
+    };
 
     /// <summary>Every <c>{root, kind}</c> a script addresses, so each replica's dump covers the same roots (as <c>rootsOf</c> in script.mjs).</summary>
     public static IReadOnlyList<(string Name, string Kind)> RootsOf(JsonNode script)

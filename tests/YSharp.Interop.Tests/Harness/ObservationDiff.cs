@@ -26,7 +26,7 @@ public static class ObservationDiff
     /// The observations both sides render, in comparison order. <c>events</c> is present when a script observes something that fired;
     /// <c>structs</c> and <c>ds</c> when the run asked for them (ADR 0012 <c>extras</c>).
     /// </summary>
-    public static readonly string[] Compared = { "updates", "state", "sv", "doc", "results", "events", "structs", "ds" };
+    public static readonly string[] Compared = { "updates", "state", "sv", "doc", "results", "events", "awareness", "structs", "ds" };
 
     public static Difference? Find(JsonObject oracle, JsonObject sharp, IEnumerable<string>? only = null)
     {
@@ -94,7 +94,14 @@ public static class ObservationDiff
         var clone = value.DeepClone();
         if (observation is "doc" or "events") TypeDump.Normalize(clone);
         if (observation == "results" && clone is JsonObject results)
-            foreach (var entry in results.Select(kv => kv.Value).OfType<JsonObject>()) entry.Remove("api");
+            foreach (var entry in results.Select(kv => kv.Value).OfType<JsonObject>())
+            {
+                entry.Remove("api");
+                // As the protocol fixture replay compares them: a read or encode that threw has no defined reply bytes or read position
+                // (the Node writer may have begun its reply before throwing), and one whose error went to the handler no defined position.
+                if (entry["threw"]?.GetValue<bool>() == true) { entry.Remove("bytes"); entry.Remove("consumed"); }
+                if (entry["handlerCalled"]?.GetValue<bool>() == true) entry.Remove("consumed");
+            }
         return clone;
     }
 

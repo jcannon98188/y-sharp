@@ -26,5 +26,6 @@
     <Compile Include="..\YSharp.Tests\Types\TypeDump.cs" Link="Linked\TypeDump.cs" />
     <Compile Include="..\YSharp.Tests\Types\TypeSteps.cs" Link="Linked\TypeSteps.cs" />
     <Compile Include="..\YSharp.Tests\Simulation\SimSteps.cs" Link="Linked\SimSteps.cs" />
+    <Compile Include="..\YSharp.Tests\Protocols\ProtocolSteps.cs" Link="Linked\ProtocolSteps.cs" />
   </ItemGroup>
 </Project>

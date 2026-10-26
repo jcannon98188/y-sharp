@@ -179,6 +179,48 @@ public sealed class GenerationTests
         else yield return o;
     }
 
+    [Fact, Covers("DIFF-01")]
+    public void ProtocolPlans_AreDeterministic_ParseOnTheCSharpInterpreter_AndUseEveryProtocolStep()
+    {
+        var steps = new HashSet<string>(StringComparer.Ordinal);
+        bool appended = false, withStates = false, settled = false, awarenessOnly = false, syncOnly = false;
+        for (var seed = 0; seed < 2000; seed++)
+        {
+            var plan = ProtocolPlan.Generate(seed);
+            var json = plan.ToScript().ToJsonString();
+            Assert.Equal(json, ProtocolPlan.Generate(seed).ToScript().ToJsonString());
+            var ex = Record.Exception(() => OpsScript.Parse(json, Registry));
+            Assert.True(ex == null, $"seed {seed} ({plan}): {ex?.Message}{Environment.NewLine}{json}");
+            foreach (var step in plan.ToScript()["steps"]!.AsArray())
+            {
+                steps.Add(step!["step"]!.GetValue<string>());
+                appended |= step["append"] != null;
+                withStates |= step["states"] != null;
+            }
+            settled |= plan.Settle && !plan.Hostile;
+            awarenessOnly |= plan.Awareness;
+            syncOnly |= !plan.Awareness;
+        }
+        foreach (var kind in new[]
+                 {
+                     "text.insert", "text.delete", "sync.step1", "sync.step2", "sync.update", "sync.read", "auth.permissionDenied", "awareness.new",
+                     "awareness.setLocal", "awareness.setLocalField", "awareness.applyUpdate", "awareness.removeStates", "awareness.encode",
+                     "awareness.modify", "awareness.destroy", "tick",
+                 })
+            Assert.Contains(kind, steps);
+        Assert.True(appended && withStates && settled && awarenessOnly && syncOnly);
+    }
+
+    [Fact, Covers("DIFF-01")]
+    public void ProtocolPlan_Shrink_YieldsSmallerPlans_ThatStillParse()
+    {
+        var plan = Enumerable.Range(0, 200).Select(ProtocolPlan.Generate).First(p => p.Actions.Count > 10 && p.Awareness);
+        var shrunk = ProtocolPlan.Shrink(plan).ToList();
+        Assert.NotEmpty(shrunk);
+        Assert.Contains(shrunk, p => p.Actions.Count < plan.Actions.Count);
+        foreach (var p in shrunk) OpsScript.Parse(p.ToScript().ToJsonString(), Registry);
+    }
+
     [Fact, Covers("DIFF-01", "DIFF-03")]
     public void TreePlans_AreDeterministic_ParseOnTheCSharpInterpreter_AndUseEveryEditKind()
     {
