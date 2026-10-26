@@ -64,14 +64,18 @@ public sealed class AmplificationTests
         const int count = 3000;
         const ulong missing = 7_000_000;
         var doc = Hostile.NewDoc();
-        var watch = Stopwatch.StartNew();
+        // the time spent applying, as the probe thread measures it: the wall clock around the loop also counts starting 3000 probe threads,
+        // which is slow on macOS runners and is not what this checks. Each park re-measures the whole pending state (MaxPendingBytes), so the
+        // cost still grows with the number parked; see TASK-11
+        var applying = TimeSpan.Zero;
         for (var i = 0; i < count; i++)
         {
             var update = UpdateBuilder.V1(UpdateModel.Single(10_000 + (ulong)i, 0, Struct.InRoot("t", Content.Str("x"), origin: new Id(missing, 0))));
-            var result = InputGuard.Run($"pending update {i}", () => doc.TryApplyUpdate(update)).Value;
-            Assert.True(result.Ok, $"pending update {i} gave {result.Error}");
+            var run = InputGuard.Run($"pending update {i}", () => doc.TryApplyUpdate(update));
+            Assert.True(run.Value.Ok, $"pending update {i} gave {run.Value.Error}");
+            applying += run.Elapsed;
         }
-        Assert.True(watch.Elapsed < TimeSpan.FromSeconds(30), $"{count} pending updates took {watch.Elapsed}: the retry on arrival looks quadratic");
+        Assert.True(applying < TimeSpan.FromSeconds(30), $"{count} pending updates spent {applying} applying: parking an update has got slower");
 
         var dependency = UpdateBuilder.V1(UpdateModel.Single(missing, 0, Struct.InRoot("t", Content.Str("D"))));
         var resolved = InputGuard.Run("dependency arrives", () => doc.TryApplyUpdate(dependency), Generous);

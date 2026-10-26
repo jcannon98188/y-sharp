@@ -5,7 +5,7 @@ status: Done
 assignee:
   - '@claude'
 created_date: '2026-10-26 21:28'
-updated_date: '2026-10-26 22:12'
+updated_date: '2026-10-26 23:42'
 labels:
   - server
 dependencies:
@@ -55,6 +55,8 @@ Owner flags:
 
 Suite changes:
 - tests/YSharp.Server.Tests/Mailbox/LifecycleTests.cs (new): edits, reads, failing edits, subscribers, dispose regression, idle eviction, hooked rebuild, subscriber hold, eviction racing traffic.
+
+Gate correction (CI, PR #2, macOS Release): AmplificationTests.ThousandsOfTinyPendingUpdates timed its 30 s budget with a wall clock around the loop, which also counted starting 3000 InputGuard probe threads; macOS took 37 s. It now sums the probe's own measured apply time, against the same 30 s budget. Locally the applies take 1.3 s of the loop's 1.9 s. The applies are still near-quadratic in the number parked (each re-measures the whole pending state), as in Yjs; filed TASK-11. Suite change: tests/YSharp.Fuzz.Tests/Tests/AmplificationTests.cs.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
