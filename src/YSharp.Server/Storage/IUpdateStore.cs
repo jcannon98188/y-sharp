@@ -16,11 +16,12 @@ public readonly record struct UpdateRecord(long Sequence, ReadOnlyMemory<byte> U
 /// <summary>
 /// The storage of the server tier (ADR 0024 SRV-10): an asynchronous, append-only update log per document. The server ships
 /// <see cref="InMemoryUpdateStore"/> as its default (SRV-12); a host plugs in a durable store by implementing this interface, and
-/// <c>UpdateStoreConformance</c> in the test kit checks an implementation against the contract below.
+/// <c>UpdateStoreConformance</c> in the <c>YSharp.Server.Testing</c> package checks an implementation against the contract below.
 /// </summary>
 /// <remarks>
-/// <para><b>Sequence numbers.</b> Each document's sequence starts at 1 and increases strictly with each append. A number is never reused, also after a
-/// compaction or a failed append. A deleted document that is written again starts a new log at 1, so a reader must not resume a deleted
+/// <para><b>Sequence numbers.</b> Each document's sequence starts at 1 and increases strictly with each append. A number that a completed append
+/// returned is never reused while the log exists, also after a compaction. A number handed to an append that failed or was torn may be reused,
+/// because nobody was told about it. A deleted document that is written again starts a new log at 1, so a reader must not resume a deleted
 /// document by sequence. Documents are independent: an operation on one must not wait on another.</para>
 /// <para><b>Durability.</b> <see cref="AppendAsync"/> completes only once the record survives whatever the store promises to survive (a process restart
 /// for a durable store; nothing for the in-memory default). The server persists before it applies or broadcasts (SRV-8), so a completed append is the
@@ -29,10 +30,10 @@ public readonly record struct UpdateRecord(long Sequence, ReadOnlyMemory<byte> U
 /// a prefix of the bytes. A store that cannot write atomically must detect a torn record (a length and checksum frame, for example) and treat it as
 /// absent. An absent record was never acknowledged, so dropping it loses nothing a peer was told about.</para>
 /// <para><b>Corrupted tail records.</b> A record at the end of the log that fails its own integrity check is a torn append and is dropped on read, as
-/// above, and its sequence number is not reused. A corrupted record that is followed by intact ones is not a torn append: the store must fail the read
+/// above; the next append may take its sequence number. A corrupted record that is followed by intact ones is not a torn append: the store must fail the read
 /// with an exception rather than skip it, because the records after it may depend on it and silently skipping it would lose acknowledged state.</para>
 /// <para><b>Compaction.</b> <see cref="CompactAsync"/> is atomic: a concurrent or later read sees the old records or the snapshot, never neither and
-/// never both. Records appended after <c>uptoSequence</c> survive it. A crash during compaction leaves the old records.</para>
+/// never both. Records appended after <c>uptoSequence</c> survive it. A crash during compaction leaves the old records or, once the swap is done, the snapshot.</para>
 /// <para><b>Idempotence.</b> Replaying a record twice cannot change a document's state, because merging updates is idempotent, so a reader that saw a
 /// record before a crash may see it again after.</para>
 /// <para><b>Threads.</b> Every member may be called concurrently, for the same document or different ones.</para>

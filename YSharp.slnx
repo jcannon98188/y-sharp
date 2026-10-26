@@ -2,6 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/YSharp/YSharp.csproj" />
     <Project Path="src/YSharp.Server/YSharp.Server.csproj" />
+    <Project Path="src/YSharp.Server.Testing/YSharp.Server.Testing.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/YSharp.TestKit/YSharp.TestKit.csproj" />
