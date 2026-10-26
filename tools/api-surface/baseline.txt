@@ -406,7 +406,6 @@ YSharp.UpdateHandler|method virtual System.IAsyncResult BeginInvoke(System.ReadO
 YSharp.UpdateHandler|method virtual System.Void EndInvoke(System.IAsyncResult result)
 YSharp.UpdateHandler|method virtual System.Void Invoke(System.ReadOnlySpan<System.Byte> update, System.Object origin, YSharp.Doc doc, YSharp.Transaction tx)
 YSharp.YArrayEvent|base YSharp.YEvent
-YSharp.YArrayEvent|ctor()
 YSharp.YArrayEvent|property System.ReadOnlySpan<YSharp.ListDeltaOp> Delta {get;}
 YSharp.YArrayEvent|sealed class
 YSharp.YArray|base YSharp.YType
@@ -523,7 +522,6 @@ YSharp.YLimits|property System.Int32 MaxUpdateBytes {get;set;}
 YSharp.YLimits|property static YSharp.YLimits Default {get;}
 YSharp.YLimits|sealed class
 YSharp.YMapEvent|base YSharp.YEvent
-YSharp.YMapEvent|ctor()
 YSharp.YMapEvent|property System.Collections.Generic.IReadOnlyCollection<System.String> KeysChanged {get;}
 YSharp.YMapEvent|sealed class
 YSharp.YMap|base YSharp.YType
@@ -584,7 +582,6 @@ YSharp.YSync|method static System.Void WriteUpdate(System.Buffers.IBufferWriter<
 YSharp.YSync|method static YSharp.YStatus TryReadMessage(ref System.ReadOnlySpan<System.Byte> input, System.Buffers.IBufferWriter<System.Byte> reply, YSharp.Doc doc, System.Object origin, out YSharp.SyncReadResult result, System.Action<YSharp.YError> errorHandler = null)
 YSharp.YSync|static class
 YSharp.YTextEvent|base YSharp.YEvent
-YSharp.YTextEvent|ctor()
 YSharp.YTextEvent|property System.Boolean ChildListChanged {get;}
 YSharp.YTextEvent|property System.Collections.Generic.IReadOnlyCollection<System.String> KeysChanged {get;}
 YSharp.YTextEvent|property System.ReadOnlySpan<YSharp.TextDeltaOp> Delta {get;}
@@ -699,7 +696,6 @@ YSharp.YXmlElement|property YSharp.YType NextSibling {get;}
 YSharp.YXmlElement|property YSharp.YType PrevSibling {get;}
 YSharp.YXmlElement|sealed class
 YSharp.YXmlEvent|base YSharp.YEvent
-YSharp.YXmlEvent|ctor()
 YSharp.YXmlEvent|property System.Boolean ChildListChanged {get;}
 YSharp.YXmlEvent|property System.Collections.Generic.IReadOnlyCollection<System.String> AttributesChanged {get;}
 YSharp.YXmlEvent|property System.ReadOnlySpan<YSharp.ListDeltaOp> Delta {get;}
