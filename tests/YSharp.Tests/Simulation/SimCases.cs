@@ -134,7 +134,7 @@ internal static class SimCases
                     ["nightly"] = nightly,
                     ["encoding"] = log.Format.ToString().ToLowerInvariant(),
                     ["error"] = error.Message,
-                    ["replay"] = $"YSHARP_SEED={seed} dotnet test --solution YSharp.slnx --filter-method *{c.Name}",
+                    ["replay"] = $"YSHARP_SEED={seed} dotnet test --project tests/YSharp.Tests -- --filter-trait \"PortOf={c.Key}\"",
                 },
             };
             if (c.Kind != "insertdelete") repro["script"] = log.ToScript();

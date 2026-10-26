@@ -116,3 +116,15 @@
   status: active
   ref: "adr 0017 / TASK-2.2"
   note: "Harness entry owned by spec 2 (ADR 0019); covered by SimHarnessTests."
+
+- id: SIM-15
+  title: "The text and quill tests assert that cleanupYTextFormatting finds nothing; Yjs's applyDelta can leave redundant format markers, so the port checks the cleanup changes no content and leaves nothing behind"
+  source: "yjs/tests/y-text.tests.js:2551"
+  kind: diverge
+  layers: [unit, fixture]
+  wire: false
+  owner: 10
+  adr: ["0017"]
+  status: active
+  ref: "adr 0017"
+  note: "Active (TASK-4.43, pending owner sign-off). Nightly seed 1038235662 of testRepeatGenerateQuillChanges2 leaves two redundant markers; Yjs on the same draw leaves the same two (fixtures/sim/quill-cleanup-1038235662.json pins the struct store and its generator checks Yjs's count). SimChecks.CheckCleanup asserts the delta is unchanged and a second cleanup removes nothing. [Diverges] test in SimDivergenceTests; the seed is in regression-seeds.json."

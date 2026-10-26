@@ -79,8 +79,28 @@ const deepOrder = {
   ]
 }
 
+// SIM-15: the nightly seed 1038235662 of testRepeatGenerateQuillChanges2, whose two edits leave two redundant format markers that
+// cleanupYTextFormatting removes, in Yjs as in y-sharp, so upstream's `cleanups === 0` fails in Yjs itself on this draw. The struct store
+// pins the markers; generation fails unless Yjs still finds exactly two.
+const cleanupSeed = 1038235662
+const cleanupScript = seed => {
+  const script = goldenScript('quill', 2)(seed)
+  const replay = interpret(normalize(script))
+  const cleanups = Y.cleanupYTextFormatting(replay.docs.get('a').getText('text'))
+  if (cleanups !== 2) throw new Error(`quill-cleanup-${seed}: Yjs cleans up ${cleanups} format markers, the fixture expects 2`)
+  return script
+}
+
 export default [
   ...golden,
+  {
+    area: 'sim',
+    name: `quill-cleanup-${cleanupSeed}`,
+    covers: ['SIM-15'],
+    seed: cleanupSeed,
+    observe: ['structs', 'ds'],
+    script: cleanupScript
+  },
   {
     area: 'observers',
     name: 'deep-event-order',

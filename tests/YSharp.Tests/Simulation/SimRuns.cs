@@ -128,7 +128,22 @@ internal static class SimChecks
         var keys = users.Select(u => DeltaKey(u.Doc.GetText("text"))).ToList();
         var bad = FirstDivergentReplica(keys);
         Assert.True(bad < 0, $"replica {bad} and replica 0 hold different text:{Environment.NewLine}{(bad < 0 ? "" : keys[0])}{Environment.NewLine}{(bad < 0 ? "" : keys[bad])}");
-        if (cleanup) Assert.Equal(0, users[0].Doc.GetText("text").CleanupFormatting());
+        if (cleanup) CheckCleanup(users[0].Doc.GetText("text"));
+    }
+
+    /// <summary>
+    /// SIM-15. Upstream asserts that <c>cleanupYTextFormatting</c> finds nothing, but Yjs's own <c>applyDelta</c> can leave redundant
+    /// format markers (fixture <c>sim/quill-cleanup-1038235662</c>). The port checks what holds in Yjs: the cleanup changes no content and
+    /// leaves nothing for a second one. Which markers exist is pinned against the oracle by the sim fixtures' struct stores.
+    /// Returns the number of markers removed.
+    /// </summary>
+    public static int CheckCleanup(YText text)
+    {
+        var before = DeltaKey(text);
+        var removed = text.CleanupFormatting();
+        Assert.Equal(before, DeltaKey(text));
+        Assert.Equal(0, text.CleanupFormatting());
+        return removed;
     }
 }
 /// <summary>Turns plans into the mods <see cref="SimHarness.ApplyRandomTests{T}"/> draws from (one per generator function).</summary>

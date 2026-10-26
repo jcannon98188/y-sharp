@@ -13,7 +13,7 @@ using YSharp.TestKit.Gating;
 namespace YSharp.Tests.Simulation;
 
 /// <summary>
-/// The five simulation divergences of ADR 0017 (<c>SIM-01</c> to <c>SIM-05</c>): where the port fixes a defect of the upstream test
+/// The simulation divergences of ADR 0017 (<c>SIM-01</c> to <c>SIM-05</c>, <c>SIM-15</c>): where the port fixes a defect of the upstream test
 /// machinery (<c>docs/research/js-tests.md</c> section 6.7) instead of reproducing it. Each test names the upstream behaviour.
 /// </summary>
 [Requires(Feature.Sim)]
@@ -163,6 +163,25 @@ public sealed class SimDivergenceTests
         Assert.Equal(first, Payload());
         Assert.NotSame(new TestConnector(Prng.Create(1)).Counters, new TestConnector(Prng.Create(1)).Counters);
         Assert.Equal(0, new TestConnector(Prng.Create(1)).Counters.NextChar());
+    }
+
+    // ------------------------------------------------------------------ SIM-15
+
+    /// <summary>
+    /// Upstream <c>testRepeatGenerateQuillChanges2</c> asserts <c>cleanupYTextFormatting(...) === 0</c>. On seed 1038235662 Yjs's own
+    /// <c>applyDelta</c> leaves two redundant format markers (the fixture's generator checks that count in Yjs), so the upstream test fails
+    /// in Yjs on that draw. The replay must hold the oracle's struct store, markers included; the port's check then finds the same two,
+    /// changes no content and leaves nothing for a second cleanup.
+    /// </summary>
+    [Fact]
+    [Diverges("SIM-15", adr: "0017")]
+    public void QuillCleanup_Seed1038235662_FindsTheTwoMarkersYjsLeaves_UpstreamAssertedNone()
+    {
+        var fixture = FixtureReplay.Load(GoldenSet.Path("quill-cleanup-1038235662"));
+        var replay = SimSteps.Run(fixture);
+        FixtureReplay.AssertWire(fixture, replay);
+        SimAsserts.Structs(fixture, replay);
+        Assert.Equal(2, SimChecks.CheckCleanup(replay.Context.Doc("a").GetText("text")));
     }
 
     private sealed class FixedView : ISimView

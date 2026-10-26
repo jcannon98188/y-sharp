@@ -605,6 +605,14 @@
       "bytes": 122825
     },
     {
+      "path": "sim/quill-cleanup-1038235662.json",
+      "area": "sim",
+      "name": "quill-cleanup-1038235662",
+      "covers": ["SIM-15"],
+      "sha256": "4ca4d17caf0a461223ca2393e8a1d226d784a6e0e5f5e9f618ad720e4ec9f2a2",
+      "bytes": 33952
+    },
+    {
       "path": "sim/quill-large.json",
       "area": "sim",
       "name": "quill-large",
