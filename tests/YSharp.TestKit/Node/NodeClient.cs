@@ -82,28 +82,37 @@ public sealed class NodeClient : IAsyncDisposable
         _process = process;
         var generation = Interlocked.Increment(ref _generation);
 
+        // The pipes are read on dedicated threads with blocking reads. On Windows a child's stdio pipes are synchronous handles, so
+        // ReadLineAsync blocks a pool thread; when the test run starves the pool, responses then wait behind other work until the
+        // request timeout fires (the Windows gating flakes of TASK-4.44). A dedicated thread completes the request as soon as Node answers.
         var stderrLines = new System.Collections.Generic.List<string>();
-        var stderrDone = Task.Run(async () =>
+        var stderrDone = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        StartReader("node-stderr", () =>
         {
-            string? line;
-            while ((line = await process.StandardError.ReadLineAsync()) != null)
+            try
             {
-                lock (stderrLines) stderrLines.Add(line);
-                _options.OnStderr?.Invoke(line);
+                string? line;
+                while ((line = process.StandardError.ReadLine()) != null)
+                {
+                    lock (stderrLines) stderrLines.Add(line);
+                    _options.OnStderr?.Invoke(line);
+                }
             }
+            catch (Exception) { /* the child was killed or disposed */ }
+            stderrDone.TrySetResult();
         });
 
-        using var cts = new CancellationTokenSource(_options.HandshakeTimeout);
-        string? hello;
-        try { hello = await process.StandardOutput.ReadLineAsync(cts.Token); }
-        catch (OperationCanceledException)
+        var helloRead = new TaskCompletionSource<string?>(TaskCreationOptions.RunContinuationsAsynchronously);
+        StartReader("node-stdout", () => ReadLoop(process, generation, helloRead));
+        if (await Task.WhenAny(helloRead.Task, Task.Delay(_options.HandshakeTimeout)) != helloRead.Task)
         {
             Kill(process);
             throw new NodeRequestException("Timed out waiting for the node handshake.");
         }
+        var hello = await helloRead.Task;
         if (hello == null)
         {
-            await Task.WhenAny(stderrDone, Task.Delay(2000));
+            await Task.WhenAny(stderrDone.Task, Task.Delay(2000));
             string tail;
             lock (stderrLines) tail = string.Join(" | ", stderrLines);
             throw new NodeRequestException("Node exited before the handshake." + (tail.Length == 0 ? "" : " stderr: " + tail));
@@ -116,16 +125,20 @@ public sealed class NodeClient : IAsyncDisposable
                 throw new NodeRequestException($"Bad node handshake (expected schema {ProtocolSchema}): {hello}");
             NodeVersion = root.TryGetProperty("node", out var n) ? n.GetString() : null;
         }
-
-        _ = Task.Run(() => ReadLoop(process, generation));
     }
 
-    private async Task ReadLoop(Process process, int generation)
+    private static void StartReader(string name, Action body) => new Thread(() => body()) { IsBackground = true, Name = name }.Start();
+
+    /// <summary>The first line is the handshake (handed to <paramref name="hello"/>); every later line is a response.</summary>
+    private void ReadLoop(Process process, int generation, TaskCompletionSource<string?> hello)
     {
+        Exception? failure = null;
         try
         {
-            string? line;
-            while ((line = await process.StandardOutput.ReadLineAsync()) != null)
+            var first = process.StandardOutput.ReadLine();
+            hello.TrySetResult(first);
+            string? line = first;
+            while (line != null && (line = process.StandardOutput.ReadLine()) != null)
             {
                 if (line.Length == 0) continue;
                 var doc = JsonDocument.Parse(line);
@@ -148,8 +161,23 @@ public sealed class NodeClient : IAsyncDisposable
                 }
             }
         }
-        catch (Exception) when (generation != _generation || process.HasExited) { }
-        if (generation == _generation) FailAll(new NodeRequestException("Node exited unexpectedly."));
+        catch (Exception e)
+        {
+            hello.TrySetException(e);
+            failure = e;
+        }
+
+        // a killed or disposed child belongs to an older generation; a failure in the current one fails every pending request
+        if (generation != Volatile.Read(ref _generation)) return;
+        FailAll(failure is null || HasExited(process)
+            ? new NodeRequestException("Node exited unexpectedly.")
+            : new NodeRequestException("Could not read the node response: " + failure.Message));
+    }
+
+    private static bool HasExited(Process p)
+    {
+        try { return p.HasExited; }
+        catch (InvalidOperationException) { return true; }
     }
 
     private void FailAll(Exception ex)
@@ -177,8 +205,10 @@ public sealed class NodeClient : IAsyncDisposable
         }
         finally { _writeLock.Release(); }
 
-        var finished = await Task.WhenAny(tcs.Task, Task.Delay(_options.RequestTimeout));
-        if (finished == tcs.Task) return await tcs.Task;
+        // ask whether the answer came, not which task WhenAny saw first: under a starved pool the timer's callback can run before
+        // the continuation of an answer the reader thread already delivered
+        await Task.WhenAny(tcs.Task, Task.Delay(_options.RequestTimeout));
+        if (tcs.Task.IsCompleted) return await tcs.Task;
 
         _pending.TryRemove(id, out _);
         await RestartAsync(process);
