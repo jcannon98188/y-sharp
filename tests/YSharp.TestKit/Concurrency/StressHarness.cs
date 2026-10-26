@@ -122,17 +122,24 @@ public static class StressHarness
                     log.Add($"{i}: kind={kind} at={at} key={key}");
                     void Apply()
                     {
+                        var (n, tn) = (arr.Length, text.Length);   // read once: in implicit mode a second read can see another writer's edit
                         switch (kind)
                         {
                             case 0: arr.Push(new YEntry[] { index * 1000 + i }); break;
-                            case 1: arr.Insert(at % (arr.Length + 1), new YEntry[] { index * 1000 + i }); break;
-                            case 2: if (arr.Length > 0) arr.Delete(at % arr.Length); break;
-                            case 3: text.Insert(at % (text.Length + 1), word); break;
-                            case 4: if (text.Length > 0) text.Delete(at % text.Length, 1); break;
+                            case 1: arr.Insert(at % (n + 1), new YEntry[] { index * 1000 + i }); break;
+                            case 2: if (n > 0) arr.Delete(at % n); break;
+                            case 3: text.Insert(at % (tn + 1), word); break;
+                            case 4: if (tn > 0) text.Delete(at % tn, 1); break;
                             default: map.Set(key, (double)i); break;
                         }
                     }
-                    if (o.Implicit) Apply();
+                    if (o.Implicit)
+                    {
+                        // each call is its own transaction, so the length read above can be stale by the time the edit runs; the library
+                        // re-checks the index and refuses it, which is the correct outcome of that race
+                        try { Apply(); }
+                        catch (ArgumentOutOfRangeException) { log.Add($"{i}: raced"); }
+                    }
                     else
                         doc.Transact(_ =>
                         {
@@ -156,7 +163,11 @@ public static class StressHarness
                     if (o.Implicit)
                     {
                         var n = arr.Length;
-                        if (n > 0) Sink(arr[Pick(g, 100000) % n]);   // may race a delete in implicit mode; the index is re-checked by the library
+                        try
+                        {
+                            if (n > 0) Sink(arr[Pick(g, 100000) % n]);   // may race a delete in implicit mode; the index is re-checked by the library
+                        }
+                        catch (ArgumentOutOfRangeException) { log.Add($"{i}: raced"); }
                         continue;
                     }
                     doc.ReadTransact(rtx =>

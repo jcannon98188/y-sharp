@@ -198,8 +198,8 @@ public sealed class LockModelTests
         var ran = false;
         doc.ReadTransact(_ =>
         {
-            TryTransactResult result = default;
-            Conc.AssertDoesNotWait(() => result = doc.TryTransact(_ => ran = true), "TryTransact under the caller's own read transaction");
+            // on the calling thread itself: another thread would see the read lock as contention, not as an upgrade
+            var result = doc.TryTransact(_ => ran = true);
             Assert.False(result.Acquired);
             Assert.Equal(TryTransactStatus.UpgradeRefused, result.Status);
         });
