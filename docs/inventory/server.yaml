@@ -92,3 +92,133 @@
   owner: 5
   status: active
   ref: "adr 0024:66"
+
+- id: SRV-2
+  title: "The server reaches the core through public API only: Doc-free sync framing and a decoded update view"
+  source: "docs/adr/0024-server-tier-layering.md:12"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:12"
+
+- id: SRV-4
+  title: "One mailbox per document handles its messages in arrival order; documents run apart"
+  source: "docs/adr/0024-server-tier-layering.md:35"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:35"
+
+- id: SRV-7
+  title: "An accepted update is broadcast from the mailbox, after persist, as one shared buffer for every peer"
+  source: "docs/adr/0024-server-tier-layering.md:40"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:40"
+
+- id: SRV-8
+  title: "Structural validation, hook, persist, apply, broadcast; a failed persist or a bad message changes nothing"
+  source: "docs/adr/0024-server-tier-layering.md:43"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:43"
+
+- id: SRV-9
+  title: "Per-document FIFO, durable before visible, bounded queues with a defined policy, isolation, and shutdown that drains"
+  source: "docs/adr/0024-server-tier-layering.md:46"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:46"
+
+- id: SRV-13
+  title: "Structural validation on every write without a Doc; semantic validation only with a registered hook"
+  source: "docs/adr/0024-server-tier-layering.md:78"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:78"
+
+- id: SRV-14
+  title: "The hook is synchronous, gets the Doc read-only, the update and its view, the connection and a deadline; a throw or overrun rejects"
+  source: "docs/adr/0024-server-tier-layering.md:82"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:82"
+
+- id: SRV-15
+  title: "The hook runs before persist and broadcast"
+  source: "docs/adr/0024-server-tier-layering.md:91"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:91"
+
+- id: SRV-16
+  title: "A rejected update is dropped, the sender is told and resynced, and repeated rejects close it"
+  source: "docs/adr/0024-server-tier-layering.md:92"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:92"
+
+- id: SRV-17
+  title: "A read-only connection is answered but its updates are dropped with no Doc; awareness is relayed"
+  source: "docs/adr/0024-server-tier-layering.md:98"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:98"
+
+- id: SRV-18
+  title: "A Doc is materialized only when a hook needs it; the relay alone serves sync and fan-out"
+  source: "docs/adr/0024-server-tier-layering.md:106"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:106"
+
+- id: SRV-19
+  title: "Rehydration replays the snapshot and later records in the mailbox before its first message"
+  source: "docs/adr/0024-server-tier-layering.md:111"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:111"
+
+- id: SRV-21
+  title: "A hot Doc and the relay hold the same content after every accepted update"
+  source: "docs/adr/0024-server-tier-layering.md:116"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:116"

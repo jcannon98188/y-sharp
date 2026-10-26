@@ -92,7 +92,7 @@ The ADR 0006 lock makes one `Doc` safe across threads. It does not order work ac
 - **SRV-16** When an update is rejected:
   - it is dropped: never persisted, applied or broadcast;
   - the sender receives a y-protocols auth `permission-denied` message with the reason;
-  - the sender is resynced: the server sends Step1 and Step2 from its own state.
+  - the sender is resynced: the server sends Step1 and Step2 from its own state. A rejected Step2 gets only the Step2: it answers a Step1, and a client answers every Step1 with the rejected edit again, so a Step1 would start the loop over (TASK-5.6).
   - **The edit is not undone on the client.** A resync cannot remove an edit the client has already integrated. The client keeps it, and resends it the next time it syncs, so it is rejected again.
   - **Getting the client back in line:** a client that wants to converge must discard its local `Doc`, or the server closes the connection after repeated rejects. The policy is configurable.
 - **SRV-17** Read-only connections are enforced at the protocol layer, with no `Doc`:
