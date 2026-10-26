@@ -101,8 +101,11 @@ internal static class TypeRefs
     /// <summary>Not a wire value: a root type that was only named by an update (Yjs <c>doc.get(name)</c> with no constructor).</summary>
     public const byte Untyped = 255;
 
-    /// <summary>Whether the type keeps search markers (Yjs creates them for arrays, text and the XML list types, not for maps and hooks).</summary>
-    public static bool UsesMarkers(byte typeRef) => typeRef is Array or Text or XmlElement or XmlFragment or XmlText;
+    /// <summary>
+    /// Whether the type keeps search markers: Yjs creates them only in the YArray and YText constructors, so arrays, text and XML text have them,
+    /// and maps, hooks and the XML list types (whose insertAfter would leave them stale) do not.
+    /// </summary>
+    public static bool UsesMarkers(byte typeRef) => typeRef is Array or Text or XmlText;
 
     /// <summary>The Yjs class name of a type ref, as the struct dump shows it (ADR 0016).</summary>
     public static string ClassName(byte typeRef) => typeRef switch

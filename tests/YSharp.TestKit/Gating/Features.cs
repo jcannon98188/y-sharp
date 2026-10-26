@@ -67,6 +67,7 @@ public static class Features
         Feature.Map,
         Feature.Text,
         Feature.TextFormat,
+        Feature.Xml,
     };
 }
 

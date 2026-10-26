@@ -154,6 +154,18 @@ internal static class TypeList
         InsertAfter(tx, doc, type.Branch, new ItemRef(type.Branch.End), content);
     }
 
+    /// <summary>
+    /// Yjs <c>typeListInsertGenericsAfter</c> as YXmlFragment.insertAfter calls it: inserts right after <paramref name="reference"/> (the start when
+    /// null), without updating search markers, which the XML list types do not keep.
+    /// </summary>
+    public static void InsertAfterItem(Transaction tx, YType type, ItemRef reference, ReadOnlySpan<YEntry> content)
+    {
+        var doc = type.AttachedDoc ?? throw new InvalidOperationException("The type is not integrated.");
+        Validate(content, undefinedAllowed: false);
+        if (content.IsEmpty) return;
+        InsertAfter(tx, doc, type.Branch, reference, content);
+    }
+
     /// <summary>Yjs <c>typeListSlice</c> with JS <c>Array.prototype.slice</c> bounds: negative indexes count from the end, both are clamped.</summary>
     public static List<YEntry> Slice(YType type, int start, int end)
     {
