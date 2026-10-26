@@ -27,6 +27,7 @@ Decides the layout that blocks TASK-5. The server tier sits above the core and d
 - **RLY-4** An invalid or over-limit update returns its `YStatus` error and leaves the relay unchanged. A malformed client state vector is refused, and nothing is written.
 - **RLY-5** Its state vector is Yjs `encodeStateVectorFromUpdate` of the merged state: per client, the run from clock 0 up to the first gap. Unlike a `Doc`, it counts items whose origin or parent is still missing on another client, because it holds them and passes them on.
 - **RLY-6** Every member is safe to call from any thread, under the relay's own lock. It never takes a document lock.
+- **RLY-7** What it holds but cannot yet pass on as part of the document is bounded by `YLimits.MaxPendingBytes`, as a `Doc`'s pending state is (ADR 0005): the structs past each client's first gap and the deleted ranges past each client's state, measured as their V1 encoding. An update that would take that above the limit is rejected with `LimitExceeded` and changes nothing. A server can also prepare an update, which validates and merges it without changing the relay, and commit it later (SRV-8) (TASK-5.3).
 
 ## The mailbox and the ADR 0006 lock
 
@@ -40,8 +41,8 @@ The ADR 0006 lock makes one `Doc` safe across threads. It does not order work ac
 - **SRV-7** Observers on a server-held `Doc` still run synchronously on the committing thread (CC-11), which is the mailbox worker. They must not block or do I/O.
   - Broadcast does not come from observers. The worker broadcasts the accepted update bytes it already holds after they are persisted, and encodes them once into one shared buffer for every subscriber (TASK-5.6).
   - The `update` event is not used for fan-out, so the order of broadcasts is the order of the mailbox.
-- **SRV-8** For each accepted update the order is: structural validation, then semantic validation (if a hook is registered), then persist, then apply to the hot `Doc` (if one is held), then broadcast.
-  - Persisting before applying means a failed persist leaves the hot `Doc` and the log agreeing. The update is rejected, and the `Doc` never moves ahead of what was stored.
+- **SRV-8** For each accepted update the order is: structural validation, then semantic validation (if a hook is registered), then the relay prepares the update (RLY-7) and the hot `Doc` (if one is held) applies it, then persist, then the relay commits, then broadcast (TASK-5.3).
+  - Every check that can refuse an update runs before persist, so the log never holds an update the relay or the hot `Doc` refused. A failed persist leaves the relay and the log agreeing; the hot `Doc`, which already took the update, is rebuilt from the relay. So is a hot `Doc` that took part of an update it partly rejected. Only the hook reads the hot `Doc`, on the worker, so nothing outside sees it ahead of the log.
   - Persisting before broadcast means no peer sees an update that a restart would lose.
 - **SRV-9** What the mailbox guarantees that the lock does not:
   - per-document FIFO across asynchronous steps;

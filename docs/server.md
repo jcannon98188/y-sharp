@@ -8,7 +8,7 @@
   host (ASP.NET Core, Kestrel, anything)      accepts sockets, authenticates, pumps bytes
         |  YServer.ConnectAsync / YConnection
   YSharp.Server                               one mailbox per open document
-        |  structural validation -> validation hook -> store append -> relay -> hot Doc -> broadcast
+        |  structural validation -> validation hook -> relay/Doc checks -> store append -> commit -> broadcast
         |-- IUpdateStore                      append-only V2 log per document (in-memory default, or the host's)
         |-- YRelay (in YSharp)                the document as one merged update; answers sync without a Doc
         `-- Doc (in YSharp)                   only for documents with a validation hook
@@ -25,9 +25,12 @@
 
 1. **Structural validation.** The update is decoded in full against `YServerOptions.Limits` and converted to V2. A malformed or over-limit update closes the connection with `ProtocolError`.
 2. **The validation hook**, if the document has one. It runs on a read-only view of the document with a deadline. A reject, a throw, a timeout or an attempt to write all count as a reject. The client is sent a permission-denied auth message and resynced.
-3. **The store append.** It completes only once the update is durable. If it fails, the update is neither applied nor broadcast, and the sender is closed with `StoreFailure`.
-4. **Apply** the update to the relay, and to the hot `Doc` if there is one.
-5. **Broadcast.** The update is encoded once, and that one buffer goes to every other connection on the document.
+3. **The relay and Doc checks.** The relay prepares its fold without changing anything. An update that would push the relay's pending structs and deletes (those still waiting on a missing clock) past `Limits.MaxPendingBytes` is refused (RLY-7). If there is a hot `Doc`, the update is applied to it; a `Doc` that refuses the update is rebuilt from the relay. Either refusal closes the sender with `ProtocolError`.
+4. **The store append.** It completes only once the update is durable. If it fails, the update is not committed or broadcast, the hot `Doc` is rebuilt from the relay, and the sender is closed with `StoreFailure`.
+5. **Commit** the prepared fold to the relay.
+6. **Broadcast.** The update is encoded once, and that one buffer goes to every other connection on the document.
+
+So nothing reaches the store that the relay or the `Doc` would refuse. Between steps 3 and 4 the hot `Doc` is ahead of the log; only the next update's hook can see it, and it is rolled back if the append fails.
 
 A document with no validation hook never builds a `Doc`: it is served from the relay alone.
 
@@ -106,7 +109,7 @@ static ValidationResult RejectAll(in ValidationRequest request) => ValidationRes
 Things the host owns:
 
 - **Authentication and authorization.** `ConnectionContext` carries what the host decided: `Identity`, `Claims` and `IsReadOnly`. A read-only connection can sync and receive updates, but its own updates are dropped before they reach the hook, the store or other peers.
-- **Message framing.** `ReceiveAsync` takes exactly one y-websocket message (sync, awareness, auth or query-awareness). It copies the bytes, so the host can reuse its buffer.
+- **Message framing.** `ReceiveAsync` takes exactly one y-websocket message (sync, awareness, auth or query-awareness). It copies the bytes, so the host can reuse its buffer. An awareness message whose payload is not a well-formed awareness update closes the sender with `ProtocolError` and is not relayed.
 - **Closing.** When `connection.Outgoing` completes, the server has closed the connection. `CloseReason` and `CloseDetail` say why. Disposing the connection tells the document the peer left.
 - **Limits.** Message size limits at the socket, and `YServerOptions.Limits` for update contents.
 

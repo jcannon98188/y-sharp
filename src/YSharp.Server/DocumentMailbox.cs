@@ -15,7 +15,8 @@ internal readonly record struct Envelope(EnvelopeKind Kind, YConnection Connecti
 /// <summary>
 /// One document's mailbox (ADR 0024 SRV-4..SRV-9, SRV-13..SRV-19; TASK-5.6): a bounded single-reader channel drained by one worker loop, which
 /// alone touches the document's relay, its hot <see cref="Doc"/> and its connections. Every message is handled in arrival order; an incoming
-/// update goes through structural validation, the hook (when one is registered), persist, apply and broadcast, in that order.
+/// update goes through structural validation, the hook (when one is registered), the relay and hot Doc checks, persist, apply and broadcast,
+/// in that order.
 /// </summary>
 internal sealed class DocumentMailbox
 {
@@ -150,7 +151,13 @@ internal sealed class DocumentMailbox
                 await HandleSyncAsync(connection, message).ConfigureAwait(false);
                 return;
             case MessageAwareness:
-                // relayed as is: awareness needs no document, and a read-only connection may still share its presence (SRV-17)
+                // relayed as is once it decodes: awareness needs no document, and a read-only connection may still share its presence (SRV-17)
+                if (!IsWellFormedAwareness(message))
+                {
+                    Close(connection, ConnectionCloseReason.ProtocolError, "awareness: Malformed");
+                    return;
+                }
+
                 Broadcast(message, except: connection);
                 return;
             default:
@@ -190,7 +197,12 @@ internal sealed class DocumentMailbox
         await AcceptAsync(connection, type, message.AsMemory(start, payload.Length)).ConfigureAwait(false);
     }
 
-    /// <summary>SRV-8: structural validation, the hook, persist, apply to the hot Doc, broadcast.</summary>
+    /// <summary>
+    /// SRV-8: structural validation, the hook, then the relay and the hot Doc are checked before the append, so an update that either refuses
+    /// is never persisted (RLY-7, TASK-5.3): the relay prepares the merged state without changing, and the hot Doc applies. Persist, then the
+    /// relay commits and the update is broadcast. When the hot Doc changes and the update does not go on (a partly rejected update, or a failed
+    /// append), the hot Doc is rebuilt from the relay, which still holds the state before the update.
+    /// </summary>
     private async ValueTask AcceptAsync(YConnection connection, SyncMessageType type, ReadOnlyMemory<byte> update)
     {
         if (update.Span.SequenceEqual(EmptyUpdateV1)) return;   // an up-to-date peer's Step2: nothing to store or send
@@ -213,21 +225,73 @@ internal sealed class DocumentMailbox
             }
         }
 
+        // the relay's pending bound (RLY-7) and the hot Doc's (ADR 0005) are checked here, before anything is stored
+        status = _relay.TryPrepareUpdate(v2.WrittenSpan, UpdateFormat.V2, out var prepared);
+        if (!status.Ok)
+        {
+            Close(connection, ConnectionCloseReason.ProtocolError, $"update: {status.Error}");
+            return;
+        }
+
+        if (HotDocument is { } doc)
+        {
+            var applied = doc.TryApplyUpdate(update.Span, connection);
+            if (!applied.Ok)
+            {
+                // Malformed and LimitExceeded change nothing; Rejected applied the structs that could be integrated
+                if (applied.Error == YError.Rejected) RebuildHotDocument();
+                Close(connection, ConnectionCloseReason.ProtocolError, $"update: {applied.Error}");
+                return;
+            }
+        }
+
         try
         {
             await _server.Log.Store.AppendAsync(DocumentId, v2.WrittenMemory).ConfigureAwait(false);
         }
         catch (Exception e)
         {
-            // not acknowledged: nothing was applied or sent, and the peer resends when it reconnects (SRV-8)
+            // not acknowledged: nothing is served or sent, and the peer resends when it reconnects (SRV-8)
+            if (HotDocument is not null) RebuildHotDocument();
             Close(connection, ConnectionCloseReason.StoreFailure, e.Message);
             return;
         }
 
-        status = _relay.TryApplyUpdate(v2.WrittenSpan, UpdateFormat.V2);
-        if (!status.Ok) throw new InvalidOperationException($"A validated update did not fold into the relay ({status.Error}).");
-        HotDocument?.ApplyUpdate(update.Span, connection);
+        _relay.Commit(prepared!);
         Broadcast(SyncMessage(w => YSync.WriteUpdate(w, update.Span)), except: connection);
+    }
+
+    /// <summary>A fresh hot Doc from the relay's state, for when the old one took an update that did not go on.</summary>
+    private void RebuildHotDocument()
+    {
+        var doc = new Doc(new DocOptions { Limits = _server.Log.StoredLimits });
+        doc.ApplyUpdate(_relay.EncodeStateAsUpdate(format: UpdateFormat.V2), this, UpdateFormat.V2);
+        HotDocument = doc;
+    }
+
+    /// <summary>
+    /// An awareness message's payload must be one well-formed awareness update (lib0 <c>varUint8Array</c> of it): other peers decode what is
+    /// relayed, so a malformed one closes the sender instead of reaching them (TASK-5.3). Bytes after the payload are ignored, as y-protocols
+    /// ignores them.
+    /// </summary>
+    private static bool IsWellFormedAwareness(byte[] message)
+    {
+        ReadOnlySpan<byte> input = message.AsSpan(1);
+        ulong length = 0;
+        var shift = 0;
+        var at = 0;
+        while (true)
+        {
+            if (at >= input.Length || shift > 49) return false;   // truncated, or longer than a JS safe integer
+            var b = input[at++];
+            length |= (ulong)(b & 0x7f) << shift;
+            shift += 7;
+            if ((b & 0x80) == 0) break;
+        }
+
+        if (length > (ulong)(input.Length - at)) return false;
+        var payload = input.Slice(at, (int)length);
+        return Awareness.TryModifyUpdate(payload, static v => v, new ArrayBufferWriter<byte>(payload.Length + 16)).Ok;
     }
 
     /// <summary>SRV-14: the hook in one read transaction, with a deadline; a throw or an overrun is a reject.</summary>

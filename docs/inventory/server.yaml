@@ -63,28 +63,28 @@
   status: active
   ref: "adr 0024:29"
 
+- id: RLY-7
+  title: "The relay's pending state is bounded by MaxPendingBytes; prepare validates and merges without changing the relay"
+  source: "docs/adr/0024-server-tier-layering.md:30"
+  kind: y-sharp-own
+  layers: [unit, fuzz]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:30"
+
 - id: SRV-10
   title: "The update log appends validated V2 records with strictly increasing sequences; reads return the snapshot first, then later records"
-  source: "docs/adr/0024-server-tier-layering.md:55"
+  source: "docs/adr/0024-server-tier-layering.md:56"
   kind: y-sharp-own
   layers: [unit]
   wire: false
   owner: 5
   status: active
-  ref: "adr 0024:55"
+  ref: "adr 0024:56"
 
 - id: SRV-11
   title: "Compaction merges the log through the relay tier with no Doc; a crash at any step or a replay cannot change the state"
-  source: "docs/adr/0024-server-tier-layering.md:65"
-  kind: y-sharp-own
-  layers: [unit]
-  wire: false
-  owner: 5
-  status: active
-  ref: "adr 0024:65"
-
-- id: SRV-12
-  title: "The in-memory store is the non-durable default; one registration replaces it, and the public conformance suite checks any store"
   source: "docs/adr/0024-server-tier-layering.md:66"
   kind: y-sharp-own
   layers: [unit]
@@ -92,6 +92,16 @@
   owner: 5
   status: active
   ref: "adr 0024:66"
+
+- id: SRV-12
+  title: "The in-memory store is the non-durable default; one registration replaces it, and the public conformance suite checks any store"
+  source: "docs/adr/0024-server-tier-layering.md:67"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:67"
 
 - id: SRV-2
   title: "The server reaches the core through public API only: Doc-free sync framing and a decoded update view"
@@ -105,76 +115,66 @@
 
 - id: SRV-4
   title: "One mailbox per document handles its messages in arrival order; documents run apart"
-  source: "docs/adr/0024-server-tier-layering.md:35"
+  source: "docs/adr/0024-server-tier-layering.md:36"
   kind: y-sharp-own
   layers: [unit]
   wire: false
   owner: 5
   status: active
-  ref: "adr 0024:35"
+  ref: "adr 0024:36"
 
 - id: SRV-7
   title: "An accepted update is broadcast from the mailbox, after persist, as one shared buffer for every peer"
-  source: "docs/adr/0024-server-tier-layering.md:40"
+  source: "docs/adr/0024-server-tier-layering.md:41"
   kind: y-sharp-own
   layers: [unit]
   wire: false
   owner: 5
   status: active
-  ref: "adr 0024:40"
+  ref: "adr 0024:41"
 
 - id: SRV-8
   title: "Structural validation, hook, persist, apply, broadcast; a failed persist or a bad message changes nothing"
-  source: "docs/adr/0024-server-tier-layering.md:43"
+  source: "docs/adr/0024-server-tier-layering.md:44"
   kind: y-sharp-own
   layers: [unit]
   wire: false
   owner: 5
   status: active
-  ref: "adr 0024:43"
+  ref: "adr 0024:44"
 
 - id: SRV-9
   title: "Per-document FIFO, durable before visible, bounded queues with a defined policy, isolation, and shutdown that drains"
-  source: "docs/adr/0024-server-tier-layering.md:46"
+  source: "docs/adr/0024-server-tier-layering.md:47"
   kind: y-sharp-own
   layers: [unit]
   wire: false
   owner: 5
   status: active
-  ref: "adr 0024:46"
+  ref: "adr 0024:47"
 
 - id: SRV-13
   title: "Structural validation on every write without a Doc; semantic validation only with a registered hook"
-  source: "docs/adr/0024-server-tier-layering.md:78"
+  source: "docs/adr/0024-server-tier-layering.md:79"
   kind: y-sharp-own
   layers: [unit]
   wire: false
   owner: 5
   status: active
-  ref: "adr 0024:78"
+  ref: "adr 0024:79"
 
 - id: SRV-14
   title: "The hook is synchronous, gets the Doc read-only, the update and its view, the connection and a deadline; a throw or overrun rejects"
-  source: "docs/adr/0024-server-tier-layering.md:82"
+  source: "docs/adr/0024-server-tier-layering.md:83"
   kind: y-sharp-own
   layers: [unit]
   wire: false
   owner: 5
   status: active
-  ref: "adr 0024:82"
+  ref: "adr 0024:83"
 
 - id: SRV-15
   title: "The hook runs before persist and broadcast"
-  source: "docs/adr/0024-server-tier-layering.md:91"
-  kind: y-sharp-own
-  layers: [unit]
-  wire: false
-  owner: 5
-  status: active
-  ref: "adr 0024:91"
-
-- id: SRV-16
-  title: "A rejected update is dropped, the sender is told and resynced, and repeated rejects close it"
   source: "docs/adr/0024-server-tier-layering.md:92"
   kind: y-sharp-own
   layers: [unit]
@@ -183,42 +183,52 @@
   status: active
   ref: "adr 0024:92"
 
-- id: SRV-17
-  title: "A read-only connection is answered but its updates are dropped with no Doc; awareness is relayed"
-  source: "docs/adr/0024-server-tier-layering.md:98"
+- id: SRV-16
+  title: "A rejected update is dropped, the sender is told and resynced, and repeated rejects close it"
+  source: "docs/adr/0024-server-tier-layering.md:93"
   kind: y-sharp-own
   layers: [unit]
   wire: false
   owner: 5
   status: active
-  ref: "adr 0024:98"
+  ref: "adr 0024:93"
+
+- id: SRV-17
+  title: "A read-only connection is answered but its updates are dropped with no Doc; awareness is relayed"
+  source: "docs/adr/0024-server-tier-layering.md:99"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:99"
 
 - id: SRV-18
   title: "A Doc is materialized only when a hook needs it; the relay alone serves sync and fan-out"
-  source: "docs/adr/0024-server-tier-layering.md:106"
+  source: "docs/adr/0024-server-tier-layering.md:107"
   kind: y-sharp-own
   layers: [unit]
   wire: false
   owner: 5
   status: active
-  ref: "adr 0024:106"
+  ref: "adr 0024:107"
 
 - id: SRV-19
   title: "Rehydration replays the snapshot and later records in the mailbox before its first message"
-  source: "docs/adr/0024-server-tier-layering.md:111"
+  source: "docs/adr/0024-server-tier-layering.md:112"
   kind: y-sharp-own
   layers: [unit]
   wire: false
   owner: 5
   status: active
-  ref: "adr 0024:111"
+  ref: "adr 0024:112"
 
 - id: SRV-21
   title: "A hot Doc and the relay hold the same content after every accepted update"
-  source: "docs/adr/0024-server-tier-layering.md:116"
+  source: "docs/adr/0024-server-tier-layering.md:117"
   kind: y-sharp-own
   layers: [unit]
   wire: false
   owner: 5
   status: active
-  ref: "adr 0024:116"
+  ref: "adr 0024:117"
