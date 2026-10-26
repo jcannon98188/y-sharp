@@ -85,7 +85,7 @@ public sealed class DocFeatureFixtureTests
     {
         var fixture = FixtureLoader.Load(Path.Combine(Root, "fixtures", name + ".json"), PinnedVersions.Read(Root));
         {
-            var registry = StandardSteps.CreateRegistry();
+            var registry = Codecs.CodecSteps.CreateRegistry();   // adds the nested-type insert kinds the relpos fixtures use
             var script = OpsScript.Parse(fixture.Script, registry);
             var ctx = new OpsInterpreter(registry).Run(script);
             Compare(name, fixture.Observations, ctx);
