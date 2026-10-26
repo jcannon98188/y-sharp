@@ -52,11 +52,15 @@ The ADR 0006 lock makes one `Doc` safe across threads. It does not order work ac
     - A reader sees either the old records or the snapshot, never neither and never both.
   - **`DeleteAsync(docId)`** removes the document's log.
 - **SRV-11** Compaction merges with the relay tier, with no `Doc` loaded (TASK-5.4). Because merging is idempotent and commutative in effect, replaying a record twice after a crash cannot change the state (TASK-5.4 #5).
-- **SRV-12** y-sharp ships **no concrete backend** (owner decision, 2026-10-26).
-  - Users plug in their own store by implementing the interface (a database, blob storage, files, or whatever their host uses).
-  - y-sharp ships the interface, the in-memory store used by tests (TASK-5.4), and a reusable conformance suite.
-  - The conformance suite runs every crash-at-each-step, partial-write, corrupted-tail and concurrency test against any implementation. A user's backend is correct when it passes.
-  - TASK-5.5 changes accordingly: from "first concrete backend" to that conformance suite and its contract for torn and corrupted records.
+- **SRV-12** The default backend is **in-memory**, and users can plug in their own (owner decision, 2026-10-26).
+  - `YSharp.Server` ships the interface and an in-memory store. The server uses the in-memory store unless the host registers another.
+  - The in-memory store is a supported default, not a test double:
+    - documents do not block each other;
+    - the operations are safe to call concurrently.
+  - **It is not durable.** "Durable" in SRV-10 means "recorded in the process" for this store, and a restart loses every document. The documentation says so where the default is configured.
+  - **User backends.** Users plug in a durable store (a database, blob storage, files, or whatever their host uses) by implementing the interface. y-sharp ships no file or database backend.
+  - **Conformance suite.** A reusable suite tests any implementation against the contract: crash at each step, partial writes, corrupted tail records, and concurrent documents. The in-memory store passes it, and a user's backend is correct when it passes too.
+  - TASK-5.5 changes accordingly: from "first concrete backend" to the default in-memory backend and the conformance suite.
 
 ## Validation
 
@@ -105,7 +109,7 @@ The ADR 0006 lock makes one `Doc` safe across threads. It does not order work ac
 - **Everything in `YSharp.Server`.** The relay would get only the public `YUpdate` functions, so it would re-parse the whole merged update on every fold. Rejected.
 - **Everything in `YSharp`.** Server concerns and their dependencies would ship to every client. Rejected.
 - **A synchronous storage interface.** It would hold a thread per in-flight write across many documents. Rejected.
-- **A concrete backend in the box (SQLite or files).** The owner chose a pluggable interface with a conformance suite instead. A reference backend can be added later as its own package without changing this ADR.
+- **A durable backend in the box (SQLite or files).** The owner chose an in-memory default plus a pluggable interface with a conformance suite. A durable reference backend can be added later as its own package without changing this ADR.
 - **An asynchronous hook on a snapshot.** It could await external services, but needs a `Doc` copy per update. Rejected. An external check can run before the update is posted to the mailbox.
 - **Broadcasting from `update` observers.** That would put I/O on the commit thread and fan out before persist. Rejected (SRV-7, SRV-8).
 - **Validating after apply and undoing on reject.** CRDT edits cannot be truly rolled back. Rejected (SRV-15).

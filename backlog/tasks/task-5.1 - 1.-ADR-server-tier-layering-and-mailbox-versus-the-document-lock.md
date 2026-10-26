@@ -5,7 +5,7 @@ status: Done
 assignee:
   - '@claude'
 created_date: '2026-10-25 17:38'
-updated_date: '2026-10-26 20:43'
+updated_date: '2026-10-26 20:45'
 labels:
   - server
   - hitl
@@ -61,6 +61,8 @@ Consequence for TASK-5.5: its scope ('first concrete backend') no longer matches
 SRV-16 records a limit the AC wording hides: a resync cannot remove an edit a client already integrated, so a rejected client keeps it and resends it; converging needs the client to discard its Doc or the server to close the connection.
 
 Branch impl/task-5.1 was moved onto origin/main (93ac71e) after the owner merged PR #1. The TASK-5 backlog files are committed with this task now that TASK-5 has started.
+
+Owner revised the backend decision (2026-10-26): ship an in-memory store as the default backend, plus the interface for user-provided backends. ADR 0024 SRV-12 updated. TASK-5.5 rescoped to 'default in-memory backend and conformance suite' at the owner's direction.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
