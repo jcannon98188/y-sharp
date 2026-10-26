@@ -96,6 +96,19 @@ public sealed class ForeignReadPastEndTests(OracleHost host)
         Assert.Null(Result("0102050084010001618405000162" + "00", "v1")["selfDependentPending"]);
     }
 
+    [Fact, Covers("DIFF-05", "STR-71")]
+    public void ApplyForeign_AStructWhoseParentIsNotAType_IsFlagged()
+    {
+        // client 102: "bc" in root array a at clock 0, then a deleted struct at clock 1 whose parent id is (102, 0), the Any item (the shape
+        // of the Nightly find of TASK-4.33)
+        const string hex = "0102660008010161017702626301006600" + "01" + "00";
+        var value = Result(hex, "v1");
+        Assert.True(value["accepted"]!.GetValue<bool>());
+        Assert.True(value["parentNotAType"]!.GetValue<bool>());
+        Assert.False(SharpSide.Run(Script(hex, "v1")).Observations!["results"]!["value"]!["r"]!["value"]!["accepted"]!.GetValue<bool>(), "y-sharp rejects the struct (STR-71, ADR 0005)");
+        Assert.Null(Result("02016700080101610178016500080101740000", "v1")["parentNotAType"]);
+    }
+
     [Fact, Covers("DIFF-05")]
     public void ApplyForeign_AnUpdateDecodedInBounds_CarriesNoFlag()
     {

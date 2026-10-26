@@ -24,6 +24,9 @@ public sealed record MutationCase(UpdateFormat Format, byte[] Valid, byte[] Muta
 
     /// <summary>The oracle parked a struct that depends on its own id or a later clock of its client (the step's <c>selfDependentPending</c> result).</summary>
     public bool OracleSelfDependentPending { get; init; }
+
+    /// <summary>The oracle integrated as a GC a struct whose parent id names an item that is not a type (the step's <c>parentNotAType</c> result).</summary>
+    public bool OracleParentNotAType { get; init; }
 }
 
 /// <summary>The classes a mutated valid update falls into (ADR 0012).</summary>
@@ -149,12 +152,29 @@ public sealed class SelfDependentStructNormaliser : IDivergenceNormaliser
     public bool Claims(MutationCase c) => c.OracleSelfDependentPending && c.OracleAccepted && !c.SharpAccepted && c.SharpUnchanged;
 }
 
+/// <summary>
+/// A struct whose parent id names an item holding content that is not a type: Yjs reads <c>content.type</c> as undefined and integrates
+/// the struct as a GC; y-sharp rejects that struct and whatever depends on it, applies the rest and reports the rejection (STR-71, ADR 0005).
+/// Claimed only when the oracle reports such a struct in the update. The document may have changed, because the rest of the update applies.
+/// </summary>
+public sealed class ParentNotATypeNormaliser : IDivergenceNormaliser
+{
+    public string Key => "parent-not-a-type";
+
+    public IReadOnlyList<string> RegistryIds { get; } = new[] { "STR-71" };
+
+    public string Description =>
+        "A mutated update holding a struct whose parent is not a type is accepted by the oracle (the struct becomes a GC) and reported as rejecting that struct by y-sharp.";
+
+    public bool Claims(MutationCase c) => c.OracleParentNotAType && c.OracleAccepted && !c.SharpAccepted;
+}
+
 public static class Normalisers
 {
     /// <summary>Every divergence the live differential knows. A divergence nobody registered here is reported as a bug.</summary>
     public static readonly IReadOnlyList<IDivergenceNormaliser> Registered =
         new IDivergenceNormaliser[] { new LenientTruncationNormaliser(), new LenientColumnEndNormaliser(), new ZeroLengthDeleteRangeNormaliser(), new UnsortedPendingDeleteSetNormaliser(),
-            new SelfDependentStructNormaliser() };
+            new SelfDependentStructNormaliser(), new ParentNotATypeNormaliser() };
 
     public static OutcomeClass Classify(bool oracleAccepted, bool sharpAccepted) =>
         (oracleAccepted, sharpAccepted) switch

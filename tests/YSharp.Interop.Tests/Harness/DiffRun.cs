@@ -274,6 +274,7 @@ public sealed class DiffRun
             OracleZeroLengthDeleteRange = oracleValue["zeroLengthDeleteRange"]?.GetValue<bool>() ?? false,
             OracleUnsortedPendingDeleteSet = oracleValue["unsortedPendingDeleteSet"]?.GetValue<bool>() ?? false,
             OracleSelfDependentPending = oracleValue["selfDependentPending"]?.GetValue<bool>() ?? false,
+            OracleParentNotAType = oracleValue["parentNotAType"]?.GetValue<bool>() ?? false,
         };
         Label = $"{kind} at {offset} of {valid.Length} bytes ({format})";
 

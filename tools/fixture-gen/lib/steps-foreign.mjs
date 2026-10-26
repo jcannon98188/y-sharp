@@ -11,6 +11,8 @@
 // starts before the previous one ends: the V2 re-encode then writes a negative clock difference, which lib0 turns into garbage (ENC-86).
 // An accepted update carries `selfDependentPending: true` when Yjs parked a struct that depends on its own id or a later clock of its own
 // client (origin, right origin or parent id): it can never integrate, and y-sharp rejects the update as Malformed (Q15, ADR 0005).
+// An accepted update carries `parentNotAType: true` when one of its structs names a parent id whose item holds content that is not a type:
+// Yjs reads `content.type` as undefined and integrates the struct as a GC, where y-sharp rejects that struct (STR-71, ADR 0005).
 // The flags are absent otherwise, so other results keep their shape.
 import { Y, lib0 } from './oracle.mjs'
 import { untag, ScriptError } from './tagged.mjs'
@@ -33,6 +35,7 @@ defineStep({
     let structDecoder = null
     let accepted = true
     let zeroLengthDeleteRange = false
+    const nonTypeParent = parentNotAType(doc, untag(s.bytes), enc)
     const order = { unsorted: false }
     try {
       structDecoder = enc === 'v1' ? new Y.UpdateDecoderV1(decoder) : new Y.UpdateDecoderV2(decoder)
@@ -46,7 +49,8 @@ defineStep({
       ? { accepted, readPastEnd: true }
       : zeroLengthDeleteRange ? { accepted, zeroLengthDeleteRange: true }
         : accepted && order.unsorted && doc.store.pendingDs !== null ? { accepted, unsortedPendingDeleteSet: true }
-          : accepted && selfDependentPending(doc) ? { accepted, selfDependentPending: true } : { accepted }
+          : accepted && selfDependentPending(doc) ? { accepted, selfDependentPending: true }
+            : accepted && nonTypeParent ? { accepted, parentNotAType: true } : { accepted }
     ctx.results.set(s.name, { api: enc === 'v1' ? 'Y.applyUpdate (foreign bytes)' : 'Y.applyUpdateV2 (foreign bytes)', value })
   }
 })
@@ -57,6 +61,29 @@ const selfDependentPending = (doc) => {
   if (pending === null) return false
   const ahead = (dep, id) => dep instanceof Y.ID && dep.client === id.client && dep.clock >= id.clock
   return Y.decodeUpdateV2(pending.update).structs.some(s => s instanceof Y.Item && (ahead(s.origin, s.id) || ahead(s.rightOrigin, s.id) || ahead(s.parent, s.id)))
+}
+
+// Read before the update applies: a parent is looked up among the update's own structs, then in the document. A parent that is a GC, or
+// ContentDeleted, has no type in Yjs either and y-sharp makes the same GC, so only other content counts. A malformed update decodes to nothing.
+const parentNotAType = (doc, bytes, enc) => {
+  let structs
+  try {
+    structs = (enc === 'v1' ? Y.decodeUpdate(bytes) : Y.decodeUpdateV2(bytes)).structs
+  } catch {
+    return false
+  }
+  const find = (id) => {
+    const own = structs.find(s => s.id.client === id.client && s.id.clock <= id.clock && id.clock < s.id.clock + s.length)
+    if (own !== undefined) return own
+    const list = doc.store.clients.get(id.client)
+    if (list === undefined || id.clock >= Y.getState(doc.store, id.client)) return undefined
+    return list[Y.findIndexSS(list, id.clock)]
+  }
+  return structs.some(s => {
+    if (!(s instanceof Y.Item) || !(s.parent instanceof Y.ID)) return false
+    const parent = find(s.parent)
+    return parent instanceof Y.Item && !(parent.content instanceof Y.ContentType) && !(parent.content instanceof Y.ContentDeleted)
+  })
 }
 
 // readAndApplyDeleteSet reads each client's ranges after resetDsCurVal; a range starting before the previous one ends is out of order.
