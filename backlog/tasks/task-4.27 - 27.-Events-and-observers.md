@@ -1,11 +1,11 @@
 ---
 id: TASK-4.27
 title: 27. Events and observers
-status: In Progress
+status: Done
 assignee:
   - '@claude'
 created_date: '2026-10-24 19:42'
-updated_date: '2026-10-26 00:07'
+updated_date: '2026-10-26 03:34'
 labels:
   - spec
   - 'model:opus'
@@ -32,18 +32,18 @@ Read first: `docs/handoff-implementation-planning.md`, ADRs 0005, 0006, 0008, 00
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Every test whose required features have all landed passes, and no test requiring this spec's features skips
-- [ ] #2 This spec's features are added to `Features.Landed`
-- [ ] #3 The traceability gate passes and no pending registry entry is added
-- [ ] #4 An `OutOfMemoryException` from an observer propagates and is not an observer fault (ERR-19)
+- [x] #1 Every test whose required features have all landed passes, and no test requiring this spec's features skips
+- [x] #2 This spec's features are added to `Features.Landed`
+- [x] #3 The traceability gate passes and no pending registry entry is added
+- [x] #4 An `OutOfMemoryException` from an observer propagates and is not an observer fault (ERR-19)
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `dotnet build YSharp.slnx` has 0 warnings
-- [ ] #2 `dotnet test --solution YSharp.slnx` is green in Debug and in Release
-- [ ] #3 Fixture drift check (`npm run check` in `tools/fixture-gen`) is clean
-- [ ] #4 ADR 0022 followed: suite changes in separate `suite:` commits, a Suite changes list in the notes, no open owner decision
+- [x] #1 `dotnet build YSharp.slnx` has 0 warnings
+- [x] #2 `dotnet test --solution YSharp.slnx` is green in Debug and in Release
+- [x] #3 Fixture drift check (`npm run check` in `tools/fixture-gen`) is clean
+- [x] #4 ADR 0022 followed: suite changes in separate `suite:` commits, a Suite changes list in the notes, no open owner decision
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -53,4 +53,30 @@ Gap found in TASK-4.22 (2026-10-25), for this spec: Doc.Yata.cs AddChangedType r
 
 From TASK-4.25: HookFormattingCleanup (Yjs cleanupYTextAfterTransaction) runs in CleanupOne after HookAfterTransaction, in the same try block. Yjs runs the observers, the deep observers, afterTransaction and the formatting cleanup through callAll, so each still runs when an earlier one throws. When observers land, keep that: an observer exception must not skip the formatting cleanup.
 Changed types that no YType object wraps yet are not in tx.Changed (AddChangedType skips them; the texts among them are tracked in TxState.UnwrappedTextsChanged for the cleanup). Yjs has an object for every type, so deep-observe parent chains through an unread nested type need the same care.
+
+Implemented (2026-10-25): src/YSharp/Events (Subscription, YType.Observers, YEvent, typed events, Doc.Observers); CleanupOne runs observers and afterTransaction under callAll-style containment, then the formatting cleanup; AddChangedType wraps unread nested types with YType.Of (UnwrappedTextsChanged removed); changed-type key sets are pooled per TxState.
+
+Validation: dotnet build YSharp.slnx 0 warnings; dotnet test --solution YSharp.slnx green in Debug and Release (8762 total); npm run check clean (141 fixtures); api-surface baseline updated (4 removed skeleton ctors). ERR-19 Err19_OutOfMemory_IsNeverCaught passes.
+
+Suite changes (ADR 0022):
+- [Requires(Feature.Sync)] gate corrections on every test that builds a Net (18 EventTests, 7 TextTests, UpstreamPortTests.KeyEncoding_FormattedText_RoundTripsThroughEveryEncoder, XmlTests.Xml_AttributeAndChildChanges_RaiseEventsLocallyAndRemotely, TransactionTests.RemoteUpdates_RunAsNonLocalTransactions_WithTheGivenOrigin): Net.Init reaches YSync.WriteStep1 (TASK-4.36).
+- EventTests M-E5: Assert.Throws<YLifetimeException> instead of ThrowsAny<InvalidOperationException> (ADR 0005).
+- EventTests Y-4: renamed to TextDelta_ReadInTheHandler_DeletesRedundantFormatsLikeYjs; asserts the Yjs side effect, no longer needs Sync.
+- TextTests T-1: three inserts give 3 updates (was 4).
+- TypeDump: object keys enumerate in JS order (Q08) so a locally inserted embed matches the oracle dump.
+- SimSteps.Record + SharpSide: the interop replay feeds the sim deliver step (AGeneratedScript_IsAcceptedByTheInterpreter).
+- BUD-04/05/07 Zero -> Bounded (AllocationBudgets, BudgetTableTests, renamed *_StaysWithinItsBudget, budgets.yaml, ADR 0009 text).
+
+Owner sign-off:
+1. YTextEvent.Delta really deletes redundant format items in a follow-up transaction, as Yjs does (Y-4). Reading the delta changes the document and emits an update; this matches the oracle bytes in fixtures/text/concurrent-formatting.json. Yjs's own cleanupYTextFormatting misses these items, so without this a .NET peer diverges from JS byte-wise. The previous suite test asserted the opposite.
+2. M-E5: stale events throw YLifetimeException (a YException), not InvalidOperationException.
+3. BUD-04, BUD-05, BUD-07 bounded instead of zero (measured 215, 974, 606 bytes/op in Release; limits +25%). Zero needs Item pooling and no per-transaction Transaction; ADR 0009 amended accordingly. TASK-4.28 re-measures.
+4. Public parameterless ctors of YArrayEvent/YMapEvent/YTextEvent/YXmlEvent removed from the API surface.
+5. CI fix outside the spec: the fuzz canary classifies a silent Windows STATUS_ACCESS_VIOLATION as the stack overflow (windows-latest flake, commit c817758).
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Events and observers landed: type and deep observers in Yjs order, doc lifecycle and update events, contained observer faults (OOM propagates), YEvent path/keys/delta and YTextEvent.delta including Yjs's redundant-format delete. Verified with the full solution suite in Debug and Release, the fixture drift check and the API surface check; owner sign-offs listed in the notes.
+<!-- SECTION:FINAL_SUMMARY:END -->
