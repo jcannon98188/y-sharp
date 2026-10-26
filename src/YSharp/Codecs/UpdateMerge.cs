@@ -253,7 +253,6 @@ internal static class UpdateMerge
             Length = s.Length,
             Origin = store.OriginOf(s),
             RightOrigin = store.RightOriginOf(s),
-            ParentSub = store.ParentSubOf(s),
             Content = s.Kind,
         };
         if (r.Origin is null && r.RightOrigin is null)
@@ -262,6 +261,8 @@ internal static class UpdateMerge
             var parentItem = StructStore.ItemOf(parent);
             if (parentItem.IsNull) r.ParentRoot = doc.RootNameOf(parent) ?? throw new YInternalException("A root type has no name.");
             else r.ParentId = store.IdOf(parentItem);
+            // Yjs reads parentSub only with the parent: an item with an origin reads back without it, so a merge writes info bit 6 clear
+            r.ParentSub = store.ParentSubOf(s);
         }
 
         switch (s.Kind)
