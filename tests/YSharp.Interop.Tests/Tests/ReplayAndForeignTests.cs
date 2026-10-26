@@ -148,6 +148,28 @@ public sealed class MutatedContentDocTests
     }
 }
 
+/// <summary>
+/// The Nightly find of TASK-4.44: an inserted byte gives a format item an origin inside array <c>a</c>, so it integrates into the array.
+/// Building the array's event delta threw, the observer fault dropped the event, and the oracle's insert event was missing on our side.
+/// Both sides now observe the same events (the format item inserts nothing, as <c>ContentFormat.getContent()</c> is <c>[]</c>).
+/// </summary>
+[Requires(Feature.V1, Feature.V2, Feature.UpdateFunctions, Feature.V2Functions, Feature.Array, Feature.Map, Feature.Text, Feature.TextFormat, Feature.Events)]
+[NeedsNode]
+[Tier(Tier.Smoke)]
+public sealed class MutatedFormatInArrayTests(OracleHost host)
+{
+    [Fact, Covers("DIFF-05", "V-6")]
+    public void MutatedUpdate_PuttingAFormatItemInAnArray_MatchesTheOracle()
+    {
+        host.RequireOrSkip();
+        const string hex = "02046600080101610177017a88660003787e7d20c86600660104787e7d047703e282ac486600047d3077017a787e0565000401017401628465000763c3a9f09f98800101016103466500066974616c69630474727565c66586006501066974616c6963046e756c6c0165010503";
+        var script = $$"""{"schema":1,"replicas":[{"name":"x","clientId":7000}],"steps":[{"step":"observe","doc":"x","target":{"root":"t","kind":"text"},"name":"o-x-t"},{"step":"observe","doc":"x","target":{"root":"a","kind":"array"},"name":"o-x-a"},{"step":"observe","doc":"x","target":{"root":"m","kind":"map"},"name":"o-x-m"},{"step":"applyForeign","doc":"x","bytes":{"$":"bytes","hex":"{{hex}}"},"encoding":"v1","name":"mutated"}]}""";
+        var run = new DiffRun(host, "format-in-array") { Label = "mutated update with a format item in an array" };
+        try { run.Run(script); }
+        catch (DifferentialFailure f) { Assert.Fail(f.Persist(run.Directory)); }
+    }
+}
+
 /// <summary>The <c>applyForeign</c> step (ADR 0012, 0016) on the C# interpreter and its generated fixture. No Node needed.</summary>
 [LibraryIndependent]
 public sealed class ApplyForeignTests

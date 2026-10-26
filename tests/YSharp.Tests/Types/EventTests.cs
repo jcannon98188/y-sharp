@@ -309,6 +309,30 @@ public sealed class EventTests
         })));
     }
 
+    /// <summary>
+    /// The live differential's find (nightly, TASK-4.44): a mutated foreign update puts a format item in an array, since its origin sits in
+    /// the array. Yjs's delta concatenates <c>content.getContent()</c>, which is <c>[]</c> for a format, so the insert holds only the values;
+    /// the cleanup of the next transaction deletes the format item, and its length counts in that delete. The deltas are the oracle's.
+    /// </summary>
+    [Fact, Covers("V-6", "A-E2")]
+    [Requires(Feature.Array, Feature.Text, Feature.TextFormat, Feature.V1)]
+    public void ListDelta_FormatItemInAnArray_InsertsNothingForIt_AsYjs()
+    {
+        var update = Convert.FromHexString(
+            "02046600080101610177017a88660003787e7d20c86600660104787e7d047703e282ac486600047d3077017a787e0565000401017401628465000763c3a9f09f988001" +
+            "01016103466500066974616c69630474727565c66586006501066974616c6963046e756c6c0165010503");
+        var doc = NewDoc(7000);
+        var array = doc.GetArray("a");
+        doc.GetText("t");
+        var deltas = new List<string>();
+        var faults = new List<Exception>();
+        doc.ObserverFaulted += (e, _) => faults.Add(e);
+        array.Observe((e, _) => deltas.Add(ListDelta(e)));
+        doc.ApplyUpdate(update);
+        Assert.Empty(faults);
+        Assert.Equal(new[] { "[{\"insert\":[48,\"z\",true,null,\"z\",true,null,4,\"\u20AC\",true,null,32]}]", """[{"delete":1}]""" }, deltas);
+    }
+
     [Fact, Covers("V-7")]
     [Requires(Feature.Array)]
     public void DeletedThenReinsertedValues_CountSeparately_NoUpdateForLists()
