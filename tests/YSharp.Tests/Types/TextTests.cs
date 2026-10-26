@@ -845,4 +845,21 @@ public sealed class TextTests
             """{"insert":"\n","attributes":{"block-id":"block-9d6566a1-be55-4e20-999a-b990bc15e143"}}""",
             items[41].Json());
     }
+
+    [Fact, Covers("ENC-87"), Diverges("ENC-87", adr: "0005")]
+    [Requires(Feature.TextFormat)]
+    public void FormatValues_ThatV1JsonCannotHold_AreRejected_AndChangeNothing()
+    {
+        // Yjs stores a BigInt or undefined attribute value and then cannot encode the document in V1
+        var doc = new Doc(new DocOptions { ClientId = 1 });
+        var text = doc.GetText("t");
+        text.Insert(0, "ab");
+        var before = doc.EncodeStateAsUpdate();
+        Assert.Throws<ArgumentException>(() => text.Insert(1, "x", Obj(("b", YValue.BigInt(5)))));
+        Assert.Throws<ArgumentException>(() => text.Format(0, 2, Obj(("b", YValue.Undefined))));
+        Assert.Throws<ArgumentException>(() => text.Format(0, 2, Obj(("b", Obj(("deep", YValue.Array(new[] { YValue.BigInt(1) })))))));
+        Assert.Equal(before, doc.EncodeStateAsUpdate());
+        text.Format(0, 2, Obj(("b", Obj(("ok", YValue.Null)))));   // nested null and objects are fine
+        Assert.NotEmpty(doc.EncodeStateAsUpdate());
+    }
 }

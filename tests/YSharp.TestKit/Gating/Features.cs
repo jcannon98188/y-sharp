@@ -70,7 +70,7 @@ public static class Features
         Feature.Xml,
         Feature.Events,
         Feature.DocLifecycle,
-        Feature.Snapshots, Feature.Positions, Feature.Undo, Feature.Subdocs, Feature.UserData, Feature.Awareness, Feature.Sync, Feature.Sim, Feature.Concurrency,
+        Feature.Snapshots, Feature.Positions, Feature.Undo, Feature.Subdocs, Feature.UserData, Feature.Awareness, Feature.Sync, Feature.Sim, Feature.Concurrency, Feature.Fuzz,
     };
 }
 

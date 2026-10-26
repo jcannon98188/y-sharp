@@ -21,6 +21,32 @@ internal static class JsJsonWriter
         public bool Wrote;        // an object member was already written
     }
 
+    /// <summary>
+    /// Whether <see cref="Write"/> succeeds, without writing: not Undefined at the top, no BigInt at any depth (Q30) and no deeper than
+    /// <see cref="YLimits.MaxAnyDepth"/>'s default. Scalars allocate nothing; containers keep their own stack (ADR 0007).
+    /// </summary>
+    public static bool CanWrite(in YValue root)
+    {
+        if (root.Kind is YValueKind.Undefined or YValueKind.BigInt) return false;
+        if (!root.IsContainer) return true;
+        var maxDepth = YLimits.Default.MaxAnyDepth;
+        var stack = new List<(YValue Value, int Level)> { (root, 0) };
+        while (stack.Count > 0)
+        {
+            var (value, level) = stack[^1];
+            stack.RemoveAt(stack.Count - 1);
+            if (level >= maxDepth) return false;
+            for (var i = 0; i < value.ChildCount; i++)
+            {
+                var child = value.ChildAt(i, out _);
+                if (child.Kind is YValueKind.BigInt) return false;
+                if (child.IsContainer) stack.Add((child, level + 1));
+            }
+        }
+
+        return true;
+    }
+
     public static YStatus Write(in YValue root, IBufferWriter<byte> destination)
     {
         if (root.Kind is YValueKind.Undefined) return new YStatus(YError.Rejected);   // no JSON text (Q30)

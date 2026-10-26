@@ -90,6 +90,7 @@ public class YText : YType
         if (index < 0) throw new ArgumentOutOfRangeException(nameof(index));
         if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
         if (attributes.Kind != YValueKind.Object) throw new ArgumentException("The attributes must be an object.", nameof(attributes));
+        CheckAttributes(attributes);
         if (length == 0) return;
         var attrs = attributes;
         Write((tx, doc) =>
@@ -357,11 +358,18 @@ public class YText : YType
         }
     }
 
-    /// <summary>Attributes are an object, or undefined or null for none.</summary>
+    /// <summary>
+    /// Attributes are an object, or undefined or null for none. Each value is a format, written as JSON (V1) or Any (V2), so like an embed it
+    /// must be a value JSON can hold (ADR 0005): Yjs stores an undefined or BigInt value and then cannot encode the document in V1.
+    /// </summary>
     private static void CheckAttributes(in YValue attributes)
     {
         if (attributes.Kind is not (YValueKind.Undefined or YValueKind.Null or YValueKind.Object))
             throw new ArgumentException("The attributes must be an object.", nameof(attributes));
+        if (!attributes.TryGetObject(out var members)) return;
+        for (var i = 0; i < members.Count; i++)
+            if (!JsJsonWriter.CanWrite(members[i].Value))
+                throw new ArgumentException($"The value of attribute '{members[i].Key}' must be a value JSON can represent.", nameof(attributes));
     }
 
     /// <summary>An embed is written as JSON (V1) or Any (V2), so it must be a value JSON can hold (ADR 0005).</summary>

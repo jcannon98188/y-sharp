@@ -65,7 +65,7 @@ public sealed partial class Doc
         var stack = new List<StructRef>();
         PendingStructs? rest = null;
         Dictionary<ulong, long>? rejectedFrom = null;
-        var state = new Dictionary<ulong, long>();
+        var state = new Dictionary<ulong, long>(ids.Count);   // one entry per client the walk reaches: sized once (BUD-12)
         var head = cur.Refs[cur.Next++];
 
         while (true)
@@ -156,14 +156,14 @@ public sealed partial class Doc
             {
                 // the client's last read struct is the one that could not be applied
                 refs.Next--;
-                rest.Set(client, refs.Refs.GetRange(refs.Next, refs.Refs.Count - refs.Next));
+                rest.Set(client, refs.Refs, refs.Next);
                 update.Remove(client);
                 refs.Next = 0;
                 refs.Refs = new List<StructRef>();
             }
             else
             {
-                rest.Set(client, new[] { item });
+                rest.Set(client, in item);
             }
 
             ids.Remove(client);
@@ -205,6 +205,10 @@ public sealed partial class Doc
         missingClient = 0;
         missingClock = 0;
         if (r.Kind != RefKind.Item) return Resolution.Ready;   // GC and Skip never wait (STR-16)
+
+        // an item may wait at clock 2^53-1 (ENC-36), but it may not end at 2^53: the state, and its delete range once deleted, would not
+        // decode again (Q22, ADR 0003). Yjs integrates it.
+        if (r.End > Codecs.UpdateReader.MaxClock) return Resolution.Rejected;
 
         if (SelfDependencyAhead(r.Origin, r) || SelfDependencyAhead(r.RightOrigin, r) || SelfDependencyAhead(r.ParentId, r)) return Resolution.Rejected;
         if (IsMissing(r.Origin, r.Client, dry, out missingClient, out missingClock) ||

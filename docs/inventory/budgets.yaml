@@ -130,9 +130,9 @@
   layers: [unit]
   wire: false
   owner: 14
-  status: pending
+  status: active
   ref: "adr 0009"
-  note: "pending (ADR 0018, 0019): the implementation does not exist yet; the test, the table entry and the check are in place (TASK-2.14) and activate at the milestone gate that records the measured value."
+  note: "Active at the M7 gate (TASK-4.42): k = 64 and 1 MiB fixed, the fuzz guard's bound (ADR 0013). Measured in Release over fixtures/hostile at most 56.5 bytes per input byte above the fixed MiB (HostileAllocationTests); headroom 16%, under the usual 25%, pending owner sign-off."
 
 - id: BUD-13
   title: "Managed heap per item after forced collection does not exceed the figure Yjs produced on the same workload (1M text inserts, 1M array pushes, 100k map keys)"

@@ -11,7 +11,7 @@ internal static class ChunkLimits
 }
 
 /// <summary>
-/// A growable sequence stored in blocks of at most <see cref="ChunkLimits.ChunkBytes"/> (ADR 0018, chunked storage). The first block starts at 16
+/// A growable sequence stored in blocks of at most <see cref="ChunkLimits.ChunkBytes"/> (ADR 0018, chunked storage). The first block starts at 4
 /// elements and doubles until it reaches the full block size; only then are further full blocks added. A small document therefore holds a few
 /// hundred bytes per table, not one 64 KB block per table. Adding never copies existing full blocks; insert and remove shift within blocks and
 /// carry one element across each block boundary.
@@ -21,7 +21,8 @@ internal sealed class ChunkedList<T>
     /// <summary>Elements per full block for <typeparamref name="T"/>: the largest count whose block stays within the chunk ceiling.</summary>
     public static readonly int BlockCapacity = Math.Max(1, ChunkLimits.ChunkBytes / Unsafe.SizeOf<T>());
 
-    private const int FirstCapacity = 16;
+    // small: a document holds one list per client, and an update can name thousands of one-struct clients (BUD-12)
+    private const int FirstCapacity = 4;
 
     private readonly List<T[]> _blocks = new(1);
     private int _count;

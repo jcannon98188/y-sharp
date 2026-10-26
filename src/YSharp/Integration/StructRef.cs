@@ -137,6 +137,12 @@ internal sealed class UpdateRefs
     public List<DeleteRange> Deletes { get; } = new();
 
     /// <summary>Sets <paramref name="client"/>'s structs, replacing an earlier block of the same client.</summary>
+    /// <summary>Sizes the client table for <paramref name="clients"/> clients before they are set, so it is allocated once (BUD-12).</summary>
+    public void ExpectClients(int clients)
+    {
+        if (clients > 0) (_clients ??= new(clients)).EnsureCapacity(clients);
+    }
+
     public void SetClient(ulong client, List<StructRef> refs) => (_clients ??= new())[client] = new ClientRefs(client, refs);
 
     private void SetClient(ulong client, List<StructRef> refs, int next) => (_clients ??= new())[client] = new ClientRefs(client, refs) { Next = next };

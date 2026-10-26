@@ -77,6 +77,11 @@ public static class AllocationBudgets
         ["BUD-10"] = WithHeadroom(1464),
         ["BUD-11:Encode"] = WithHeadroom(376),
         ["BUD-11:Apply"] = WithHeadroom(704),
+        // TASK-4.42, M7 gate: the fuzz guard's bound (ADR 0013: 64 bytes per input byte plus 1 MiB), so the corpus and the fuzz inputs are held
+        // to one figure. Measured in Release over fixtures/hostile: at most 56.5 bytes per input byte above the 1 MiB (hos-amp
+        // 5000-structs-waiting-on-missing-origins), 16% under k = 64 rather than the usual 25% (owner sign-off in the task notes).
+        ["BUD-12:k"] = 64,
+        ["BUD-12:fixed"] = 1024 * 1024,
     };
 
     /// <summary>The one-off large-object-heap growth BUD-14 tolerates: a single caller-supplied payload larger than a chunk (ADR 0018). The workload has none, so one chunk is slack.</summary>

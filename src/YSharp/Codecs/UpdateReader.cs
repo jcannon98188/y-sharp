@@ -38,6 +38,8 @@ internal static class UpdateReader
         update = new UpdateRefs();
         if (!decoder.ReadVarUint(out var numClients)) return decoder.Error;
         if (!decoder.CanHold(numClients, CountClaim.Clients)) return YError.Malformed;
+        // like a struct count, a client count is either delivered or the update is malformed; 16384 entries stay inside BUD-12's fixed allowance
+        if (inReadOrder is null) update.ExpectClients((int)Math.Min(numClients, 16384));
         long structs = 0;
         for (ulong c = 0; c < numClients; c++)
         {
@@ -64,7 +66,9 @@ internal static class UpdateReader
                 continue;
             }
 
-            var refs = new List<StructRef>((int)Math.Min(numStructs, 1024));
+            // sized from the claim: every claimed struct must follow or the update is malformed, so only the last client can overstate it,
+            // once, and 4096 refs (about 600 KB) stay inside BUD-12's fixed allowance
+            var refs = new List<StructRef>((int)Math.Min(numStructs, 4096));
             for (ulong s = 0; s < numStructs; s++)
             {
                 var error = ReadStruct(ref decoder, limits, client, clock, exactSkip, out var r);
@@ -80,6 +84,8 @@ internal static class UpdateReader
                     continue;
                 }
 
+                // grow towards the claimed count, never past it: plain doubling would hold 8192 refs for 5000 structs (BUD-12)
+                if (refs.Count == refs.Capacity) refs.Capacity = (int)Math.Min(numStructs, (ulong)refs.Capacity * 2);
                 refs.Add(r);
             }
 
@@ -226,12 +232,14 @@ internal static class UpdateReader
             case RefEmbed:
             {
                 if (!decoder.ReadJson(out var embed)) return decoder.Error;
+                if (!JsJsonWriter.CanWrite(embed)) return YError.Malformed;   // V2 reads Any, but the document must still encode in V1 (ADR 0005)
                 SetPayload(ref r, ContentKind.Embed, new EmbedContent(embed));
                 return YError.None;
             }
             case RefFormat:
             {
                 if (!decoder.ReadKey(out var key) || !decoder.ReadJson(out var value)) return decoder.Error;
+                if (!JsJsonWriter.CanWrite(value)) return YError.Malformed;   // as for an embed
                 SetPayload(ref r, ContentKind.Format, new FormatContent(key, value));
                 return YError.None;
             }

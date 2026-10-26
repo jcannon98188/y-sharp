@@ -28,13 +28,28 @@ internal sealed class PendingStructs
     }
 
     /// <summary>Sets <paramref name="client"/>'s waiting structs (Yjs <c>restStructs.clients.set</c>), dropping Skips.</summary>
-    public void Set(ulong client, IEnumerable<StructRef> refs)
+    public void Set(ulong client, List<StructRef> refs, int start = 0)
     {
-        var list = new List<StructRef>();
-        foreach (var r in refs)
-            if (r.Kind != RefKind.Skip) list.Add(r);
-        if (list.Count == 0) _clients.Remove(client);
-        else _clients[client] = list;
+        var count = 0;
+        for (var i = start; i < refs.Count; i++)
+            if (refs[i].Kind != RefKind.Skip) count++;
+        if (count == 0)
+        {
+            _clients.Remove(client);
+            return;
+        }
+
+        var list = new List<StructRef>(count);   // sized exactly: a hostile update can park every struct it carries here (BUD-12)
+        for (var i = start; i < refs.Count; i++)
+            if (refs[i].Kind != RefKind.Skip) list.Add(refs[i]);
+        _clients[client] = list;
+    }
+
+    /// <summary>Sets <paramref name="client"/>'s waiting structs to the single struct <paramref name="r"/>, unless it is a Skip.</summary>
+    public void Set(ulong client, in StructRef r)
+    {
+        if (r.Kind == RefKind.Skip) _clients.Remove(client);
+        else _clients[client] = new List<StructRef>(1) { r };
     }
 
     /// <summary>Merges <paramref name="other"/> into this state: missing clocks keep the lower value, structs are merged per client.</summary>
@@ -56,20 +71,27 @@ internal sealed class PendingStructs
         }
     }
 
-    /// <summary>A copy that can be changed without changing this one (the structs themselves are values).</summary>
+    /// <summary>
+    /// A copy that can be changed without changing this one. The per-client lists are shared: no list held here is ever changed in place
+    /// (merging builds a new one, and the integrator replaces a client's list rather than editing it), so a shallow copy is enough (BUD-12).
+    /// </summary>
     public PendingStructs Clone()
     {
         var copy = new PendingStructs();
         foreach (var (client, clock) in Missing) copy.Missing[client] = clock;
-        foreach (var (client, refs) in _clients) copy._clients[client] = new List<StructRef>(refs);
+        foreach (var (client, refs) in _clients) copy._clients[client] = refs;
         return copy;
     }
 
-    /// <summary>The waiting structs as an update with no deletes, for a retry (Yjs <c>applyUpdateV2(doc, pendingStructs.update)</c>).</summary>
+    /// <summary>
+    /// The waiting structs as an update with no deletes, for a retry (Yjs <c>applyUpdateV2(doc, pendingStructs.update)</c>). The lists are handed
+    /// over, not copied: the caller drops this pending state.
+    /// </summary>
     public UpdateRefs ToUpdate()
     {
         var update = new UpdateRefs();
-        foreach (var (client, refs) in _clients) update.SetClient(client, new List<StructRef>(refs));
+        update.ExpectClients(_clients.Count);
+        foreach (var (client, refs) in _clients) update.SetClient(client, refs);
         return update;
     }
 

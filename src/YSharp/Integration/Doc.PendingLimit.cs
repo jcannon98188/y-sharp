@@ -215,26 +215,30 @@ public sealed partial class Doc
     private static long V1Bytes(PendingStructs? pending, DeleteRanges? deletes)
     {
         if (pending is null && (deletes is null || deletes.Count == 0)) return 0;
-        var structs = new List<StructRef>();
+        using var w = new Lib0Writer(256);
+        var encoder = new UpdateEncoderV1(w);
+        // UpdateWriter.WriteBlocks, written per client so the structs are not copied into one list (BUD-12)
+        var clients = new List<List<StructRef>>(pending?.ClientCount ?? 0);
         if (pending is not null)
-        {
-            var clients = new List<List<StructRef>>();
             foreach (var (_, refs) in pending.Clients) clients.Add(refs);
-            for (var c = clients.Count - 1; c >= 0; c--)
+        encoder.WriteVarUint((ulong)clients.Count);
+        for (var c = clients.Count - 1; c >= 0; c--)
+        {
+            var refs = clients[c];
+            var count = refs.Count;
+            for (var i = 1; i < refs.Count; i++)
+                if (refs[i].Clock > refs[i - 1].End) count++;
+            encoder.WriteVarUint((ulong)count);
+            encoder.WriteClient(refs[0].Client);
+            encoder.WriteVarUint((ulong)refs[0].Clock);
+            for (var i = 0; i < refs.Count; i++)
             {
-                var refs = clients[c];
-                for (var i = 0; i < refs.Count; i++)
-                {
-                    if (i > 0 && refs[i].Clock > refs[i - 1].End)
-                        structs.Add(StructRef.Skip(refs[i].Client, refs[i - 1].End, refs[i].Clock - refs[i - 1].End));
-                    structs.Add(refs[i]);
-                }
+                if (i > 0 && refs[i].Clock > refs[i - 1].End)
+                    UpdateWriter.WriteRef(ref encoder, StructRef.Skip(refs[i].Client, refs[i - 1].End, refs[i].Clock - refs[i - 1].End));
+                UpdateWriter.WriteRef(ref encoder, refs[i]);
             }
         }
 
-        using var w = new Lib0Writer(256);
-        var encoder = new UpdateEncoderV1(w);
-        UpdateWriter.WriteBlocks(ref encoder, structs);
         UpdateWriter.WriteDeleteRuns(ref encoder, deletes is null ? new List<DeleteRange>() : InWriteOrder(deletes));
         return w.Length;
     }

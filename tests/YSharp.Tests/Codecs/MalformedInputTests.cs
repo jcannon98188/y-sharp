@@ -59,6 +59,20 @@ public sealed class MalformedInputTests
         Assert.Equal("", doc.GetText("t").ToString());
     }
 
+    [Fact, Covers("ENC-36", "Q22"), Diverges("Q22", adr: "0003")]
+    [Requires(Feature.Text)]
+    public void ItemAt2Pow53Minus1_ItsPredecessorKnown_IsRejectedAtIntegration_SoTheStateStillEncodes()
+    {
+        // GC [0, 2^53-1) then 'a' at 2^53-1, which would end at 2^53: Yjs integrates it; the struct is rejected, the GC applied
+        var (result, doc) = Wire.TryApply(Hex.Bytes("01 02 01 00 00 ff ff ff ff ff ff ff 0f 04 01 01 74 01 61 00"));
+        Assert.Equal(YError.Rejected, result.Error);
+        Assert.Equal(1, result.RejectedStructs);
+        Assert.Equal((1L << 53) - 1, doc.GetStateVector()[1]);
+        Assert.Equal("", doc.GetText("t").ToString());
+        var again = AssertAccepted(doc.EncodeStateAsUpdate());
+        Assert.Equal((1L << 53) - 1, again.GetStateVector()[1]);
+    }
+
     [Fact, Covers("ENC-37", "Q12"), Diverges("ENC-37", adr: "0003")]
     public void Enc37_ClientId2Pow63_IsRejected_WhereJsRoundsItToTheNearestDouble()=> AssertRejected("01 01 80 80 80 80 80 80 80 80 80 01 00 04 01 01 74 02 68 69 00");
 
@@ -189,6 +203,13 @@ public sealed class MalformedInputTests
         var doc = AssertAccepted("00 01 77 02 62 63 28 01");
         Assert.Equal("0001770228016263", Hex.Of(doc.EncodeStateAsUpdate()));
     }
+
+    [Theory, Covers("ENC-87"), Diverges("ENC-87", adr: "0005")]
+    [Requires(Feature.V2, Feature.TextFormat)]
+    [InlineData("7a 00 00 00 00 00 00 00 05")]   // the format value 5n
+    [InlineData("7f")]                           // the format value undefined
+    public void Enc87_AV2FormatValueThatV1JsonCannotHold_IsMalformed_WhereJsStoresItAndThenCannotEncodeV1(string value) =>
+        AssertRejected(Hex.Bytes("00 02 00 02 02 41 01 02 00 02 00 05 06 00 84 00 86 07 04 74 62 78 62 41 02 01 01 00 00 01 03 00 " + value + " 7e 00"), UpdateFormat.V2);
 
     [Fact, Covers("ENC-52")]
     public void Enc52_ADeleteRangeBeyondKnownState_IsAccepted()=> AssertAccepted("00 01 05 01 00 01");
