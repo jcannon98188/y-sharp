@@ -88,6 +88,19 @@ public sealed class HarnessSelfTests : IDisposable
         Assert.Equal(0, run.Misbehaved);
     }
 
+    [Fact, Covers("DIFF-01", "DIFF-10")]
+    public void GeneratedProtocolScripts_RunOnTheRealOracle_WithoutScriptErrors()
+    {
+        var run = NewRun();
+        for (var seed = 0; seed < 150; seed++)
+        {
+            run.CaseSeed = seed;
+            Assert.True(run.CheckProtocol(ProtocolPlan.Generate(seed)) != null, $"seed {seed} was discarded: {run.LastDiscard}");
+        }
+        Assert.Equal(0, run.Discarded);
+        Assert.Equal(0, run.Misbehaved);
+    }
+
     [Fact, Covers("DIFF-02", "DIFF-03")]
     public void ForeignAndPureChecks_RunOnTheRealOracle_WithItsOwnBytes()
     {

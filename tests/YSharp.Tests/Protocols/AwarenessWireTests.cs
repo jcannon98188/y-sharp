@@ -116,6 +116,21 @@ public sealed class AwarenessWireTests
         Assert.Equal(new[] { (1UL, 1L, """{"a":1,"by":"server"}"""), (16384UL, 2L, "null") }, AwBytes.Parse(w.WrittenSpan.ToArray()));
     }
 
+    [Fact, Covers("AW-36")]
+    public void Modify_WithTheSpreadStepHelper_SpreadsStringsAndArraysToIndexKeys_AsJsDoes()
+    {
+        // the ops step's setField is JS {...state, [field]: value}: strings spread per UTF-16 unit (lone surrogates escaped), arrays per element
+        var source = AwBytes.Update((1, 1, "\"a\U0001F600\""), (2, 1, """[true,"x"]"""), (3, 1, "5"));
+        var w = new ArrayBufferWriter<byte>();
+        Assert.True(Awareness.TryModifyUpdate(source, v => ProtocolSteps.WithField(v, "by", "server"), w).Ok);
+        Assert.Equal(new[]
+        {
+            (1UL, 1L, """{"0":"a","1":"\ud83d","2":"\ude00","by":"server"}"""),
+            (2UL, 1L, """{"0":true,"1":"x","by":"server"}"""),
+            (3UL, 1L, """{"by":"server"}"""),
+        }, AwBytes.Parse(w.WrittenSpan.ToArray()));
+    }
+
     [Fact, Diverges("AW-38", adr: "0007")]
     public void Modify_ReturningUndefined_IsAFailure_NotAFailureInsideTheWriter()
     {

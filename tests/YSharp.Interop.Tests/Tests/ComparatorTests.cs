@@ -75,17 +75,17 @@ public sealed class ComparatorTests
         Assert.Equal("sv", d!.Observation);
         Assert.Contains("missing in y-sharp", d.Detail);
 
-        // events, structs and ds are compared too (Spec 40): events the oracle fired and y-sharp did not are a difference
-        foreach (var name in new[] { "events", "structs", "ds" })
+        // events, structs and ds (Spec 40) and awareness (Spec 41) are compared too: events the oracle fired and y-sharp did not are a difference
+        foreach (var name in new[] { "events", "awareness", "structs", "ds" })
         {
             var withExtra = Observations();
             withExtra[name] = new JsonObject { ["api"] = "x", ["value"] = new JsonArray() };
             Assert.Equal(name, ObservationDiff.Find(withExtra, Observations())!.Observation);
         }
 
-        // an observation outside the compared list (an area's own, such as awareness) is not
+        // an observation outside the compared list (one only the oracle can make, such as an undo stack dump) is not
         var withOther = Observations();
-        withOther["awareness"] = new JsonObject { ["api"] = "x", ["value"] = new JsonObject() };
+        withOther["undoStack"] = new JsonObject { ["api"] = "x", ["value"] = new JsonObject() };
         Assert.Null(ObservationDiff.Find(withOther, Observations()));
     }
 
