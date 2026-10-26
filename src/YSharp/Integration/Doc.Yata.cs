@@ -32,6 +32,9 @@ public sealed partial class Doc
     {
         public ItemRef Left;
         public ItemRef Right;
+
+        /// <summary>Yjs <c>origin = left.lastId</c>, taken before the right-origin lookup can split <see cref="Left"/>.</summary>
+        public ItemId? Origin;
         public Branch? Parent;
         public string? ParentSub;
 
@@ -216,7 +219,11 @@ public sealed partial class Doc
             return dryResolution;
         }
 
-        if (r.Origin is { } o) resolved.Left = Store.GetItemCleanEnd(o.Client, o.Clock);
+        if (r.Origin is { } o)
+        {
+            resolved.Left = Store.GetItemCleanEnd(o.Client, o.Clock);
+            resolved.Origin = new ItemId(Store.ClientIdOf(resolved.Left), resolved.Left.LastClock);
+        }
         if (r.RightOrigin is { } ro) resolved.Right = Store.GetItemCleanStart(ro.Client, ro.Clock);
 
         if ((!resolved.Left.IsNull && resolved.Left.IsGc) || (!resolved.Right.IsNull && resolved.Right.IsGc))
@@ -284,10 +291,12 @@ public sealed partial class Doc
         }
 
         var left = resolved.Left;
+        var origin = resolved.Origin;
         if (offset > 0)
         {
             r = r.Slice(offset);
             left = Store.GetItemCleanEnd(r.Client, r.Clock - 1);
+            origin = new ItemId(r.Client, r.Clock - 1);
         }
 
         if (resolved.Parent is not { } parent)
@@ -297,7 +306,6 @@ public sealed partial class Doc
         }
 
         var right = resolved.Right;
-        ItemId? origin = left.IsNull ? null : new ItemId(Store.ClientIdOf(left), left.LastClock);
         ItemId? rightOrigin = right.IsNull ? null : Store.IdOf(right);
         var content = r.Content switch
         {
