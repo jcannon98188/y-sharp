@@ -44,7 +44,7 @@
   owner: 14
   status: active
   ref: "adr 0009"
-  note: "active (TASK-4.27), bounded pending owner sign-off: every insert allocates an Item and every transaction its Transaction (BUD-01 option A), so zero is out of reach. Measured 215 bytes per operation in Release; limit plus 25%. TASK-4.28 re-measures."
+  note: "active (TASK-4.27), bounded by owner sign-off (2026-10-26; TASK-8 tries for zero after TASK-5): every insert allocates an Item and every transaction its Transaction (BUD-01 option A), so zero is out of reach. Measured 215 bytes per operation in Release; limit plus 25%. TASK-4.28 re-measures."
 
 - id: BUD-05
   title: "A commit with no Update subscriber stays within its recorded limit"
@@ -55,7 +55,7 @@
   owner: 14
   status: active
   ref: "adr 0009"
-  note: "active (TASK-4.27), bounded pending owner sign-off: every insert allocates an Item and every transaction its Transaction (BUD-01 option A), so zero is out of reach. Measured 974 bytes per operation in Release; limit plus 25%. TASK-4.28 re-measures."
+  note: "active (TASK-4.27), bounded by owner sign-off (2026-10-26; TASK-8 tries for zero after TASK-5): every insert allocates an Item and every transaction its Transaction (BUD-01 option A), so zero is out of reach. Measured 974 bytes per operation in Release; limit plus 25%. TASK-4.28 re-measures."
 
 - id: BUD-06
   title: "EncodeStateAsUpdate into a pre-sized writer allocates zero bytes"
@@ -77,7 +77,7 @@
   owner: 14
   status: active
   ref: "adr 0009"
-  note: "active (TASK-4.27), bounded pending owner sign-off: every insert allocates an Item and every transaction its Transaction (BUD-01 option A), so zero is out of reach. Measured 606 bytes per operation in Release; limit plus 25%. TASK-4.28 re-measures."
+  note: "active (TASK-4.27), bounded by owner sign-off (2026-10-26; TASK-8 tries for zero after TASK-5): every insert allocates an Item and every transaction its Transaction (BUD-01 option A), so zero is out of reach. Measured 606 bytes per operation in Release; limit plus 25%. TASK-4.28 re-measures."
 
 - id: BUD-08
   title: "TryApplyUpdate (V1 and V2) stays within a bounded allocation budget"
@@ -132,7 +132,7 @@
   owner: 14
   status: active
   ref: "adr 0009"
-  note: "Active at the M7 gate (TASK-4.42): k = 64 and 1 MiB fixed, the fuzz guard's bound (ADR 0013). Measured in Release over fixtures/hostile at most 56.5 bytes per input byte above the fixed MiB (HostileAllocationTests); headroom 16%, under the usual 25%, pending owner sign-off."
+  note: "Active at the M7 gate (TASK-4.42): k = 64 and 1 MiB fixed, the fuzz guard's bound (ADR 0013). Measured in Release over fixtures/hostile at most 56.5 bytes per input byte above the fixed MiB (HostileAllocationTests); headroom 16%, under the usual 25%, owner sign-off 2026-10-26."
 
 - id: BUD-13
   title: "Managed heap per item after forced collection does not exceed the figure Yjs produced on the same workload (1M text inserts, 1M array pushes, 100k map keys)"

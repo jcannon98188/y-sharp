@@ -64,7 +64,7 @@ public static class AllocationBudgets
         // TASK-4.20, M3 gate: one-character inserts applied one update at a time (CodecBudgetTests), 1069 bytes per call in Release for V1 and V2.
         ["BUD-08:V1"] = WithHeadroom(1069),
         ["BUD-08:V2"] = WithHeadroom(1069),
-        // TASK-4.27, pending owner sign-off: zero is out of reach while every insert allocates an Item and every transaction its 24-byte
+        // TASK-4.27, owner sign-off 2026-10-26 (TASK-8 tries for zero after TASK-5): zero is out of reach while every insert allocates an Item and every transaction its 24-byte
         // Transaction (BUD-01 option A), so these paths are bounded. Measured in Release once Events landed: a map Set with a handler on
         // another type 215 bytes, an insert-and-delete commit 974, a one-character insert at the end 606. TASK-4.28 re-measures.
         ["BUD-04"] = WithHeadroom(215),
