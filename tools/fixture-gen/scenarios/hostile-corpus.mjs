@@ -58,6 +58,8 @@ for (const [label, seed, encoding] of [['v1', validV1, 'v1'], ['v2', validV2, 'v
 }
 mutCases.push(c('v1-splice-head-of-v1-tail-of-v2', Buffer.concat([validV1.slice(0, 6), validV2.slice(8)])))
 mutCases.push(c('v1-splice-doubled', Buffer.concat([validV1, validV1])))
+// found by the TASK-4.42 Nightly fuzz (an overwrite of sim/quill-large.json:b): a V2 format value V1 JSON cannot hold (ENC-87)
+mutCases.push(c('v2-quill-overwrite-format-value-v1-cannot-hold', '000300030502431510000000000000000000000000000000000d000000000000000000000000000dc600c400c600c400c600c400c6392d0000000000000000006f726974616c6963636f6c6f72626f6c6468626f6c646e6e636f6c6f726777636f6c6f720605060504010402050205000000010b01787704233838387f7e787e7704233838387e0105003d05', { encoding: 'v2', expect: ['Malformed'], discovered: '2026-10-26' }))
 
 // ---- HOS-LEN: oversized counts and lengths
 const struct1 = body => upd([vu(1) + vu(1) + vu(0) + body])
@@ -100,6 +102,9 @@ const clockCases = [
   c('clock-2-pow-64-minus-1', upd([blk(1, 2n ** 64n - 1n, [textS('x')])])),
   c('clock-plus-length-overflows-2-pow-53', upd([blk(1, 2n ** 53n - 1n, [textS('ab')])])),
   c('clock-plus-gc-length-overflows', upd([blk(1, 2n ** 53n - 1n, [gc(2n ** 53n)])])),
+  // found by the HOS-LEN model (TASK-4.42): an item may not end at 2^53 either, or its delete range would not decode again (Q22). It decodes
+  // (an item at 2^53-1 may wait, ENC-36); once its predecessor is known it is rejected at integration, where JS integrates it
+  c('clock-plus-deleted-length-reaches-2-pow-53', upd([blk(1, 0, [textS('a'), item('01', vu(2n ** 53n - 1n))])]), { expect: ['Rejected'], discovered: '2026-10-26' }),
   c('zero-length-string', upd([blk(1, 0, [textS('')])])),
   c('zero-length-gc', upd([blk(1, 0, [gc(0)])])),
   c('zero-length-skip', upd([blk(1, 0, [skip(0)])])),
@@ -126,12 +131,14 @@ const refCases = [
   c('origin-cycle-three-clients', upd([blk(1, 0, [textO(2, 0, 'a')]), blk(2, 0, [textO(3, 0, 'b')]), blk(3, 0, [textO(1, 0, 'c')])]), { expect: ['ok', 'Rejected'] }),
   c('right-origin-self', upd([blk(1, 0, [`44${vu(1)}${vu(0)}${T.slice(0, 0)}` + vs('x')])]), { expect: ANY }),
   c('parent-id-missing', upd([blk(1, 0, ['04' + '00' + vu(7) + vu(0) + vs('x')])]), { expect: ['ok', 'Rejected'] }),
-  c('parent-is-self', upd([blk(1, 0, ['07' + '00' + vu(1) + vu(0) + '00'])]), { expect: ['ok', 'Rejected'] }),
+  // ENC-49 (spec 14): a type item that is its own parent, and a chain of origins pointing forward in one update, are Malformed;
+  // JS throws a TypeError on both
+  c('parent-is-self', upd([blk(1, 0, ['07' + '00' + vu(1) + vu(0) + '00'])]), { expect: ['Malformed'] }),
   c('parent-cycle-two-type-items', upd([blk(1, 0, ['07' + '00' + vu(2) + vu(0) + '00']), blk(2, 0, ['07' + '00' + vu(1) + vu(0) + '00'])]), { expect: ['ok', 'Rejected'] }),
   c('parent-is-a-string-item', upd([blk(2, 0, ['04' + '00' + vu(1) + vu(0) + vs('x')])]), { before: [hiV1Hex], expect: ['Rejected'] }),
   c('parent-is-a-gc-struct', upd([blk(2, 0, ['04' + '00' + vu(1) + vu(0) + vs('x')])]), { before: [upd([blk(1, 0, [gc(1)])])], expect: ['ok', 'Rejected'] }),
   c('parent-is-a-skip-struct', upd([blk(2, 0, ['04' + '00' + vu(1) + vu(0) + vs('x')])]), { before: [upd([blk(1, 0, [skip(1)])])], expect: ['ok', 'Rejected'] }),
-  c('forward-reference-chain-200', upd([blk(1, 0, chain(200))]), { expect: ['ok', 'Rejected'] }),
+  c('forward-reference-chain-200', upd([blk(1, 0, chain(200))]), { expect: ['Malformed'] }),
   c('dependents-of-a-rejected-struct', upd([blk(2, 0, ['04' + '00' + vu(1) + vu(0) + vs('x'), textO(2, 0, 'y')]), blk(3, 0, [textS('ok')])]), { before: [hiV1Hex], expect: ['Rejected'] })
 ]
 

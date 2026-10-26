@@ -158,6 +158,19 @@
           "classification": "match"
         },
         {
+          "name": "clock-plus-deleted-length-reaches-2-pow-53",
+          "encoding": "v1",
+          "bytes": {"$":"bytes","hex":"0102010004010174016101010174ffffffffffffff0f00"},
+          "expect": ["Rejected"],
+          "discovered": "2026-10-26",
+          "outcome": "ok",
+          "pendingStructs": false,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"01018080808080808010"},
+          "doc": [["t",{"kind":"text","delta":[{"insert":"a"}]}]],
+          "classification": "match"
+        },
+        {
           "name": "zero-length-string",
           "encoding": "v1",
           "bytes": {"$":"bytes","hex":"01010100040101740000"},

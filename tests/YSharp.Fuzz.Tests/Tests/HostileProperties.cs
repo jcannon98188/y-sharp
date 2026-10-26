@@ -73,10 +73,16 @@ public sealed class HostileProperties
     public void Builder_CountClaimsBeyondTheBytes_AreRejectedWithoutAllocatingForThem() =>
         FuzzRunner.Check("HOS-LEN", HostileModels.Layer(Profile.Len), (ModelInput i) =>
         {
-            var claims = i.Model.NumClientsOverride != null || i.Model.NumDeleteClientsOverride != null
-                         || i.Model.Blocks.Any(b => b.NumStructsOverride != null || b.Structs.Any(s => s.Content is { CountOverride: true }))
-                         || i.Model.DeleteSet.Any(d => d.NumRangesOverride != null);
-            // a claim larger than the data always runs the reader off the end, before anything integrates; without a claim anything goes
+            // every counted element takes at least one byte, so a claim above the input's length runs the reader off the end once it is read,
+            // before anything integrates; a smaller over-claim can read the next client's bytes as structs (so a later claim may never be read),
+            // and then anything goes
+            var bound = (ulong)i.Bytes.Length;
+            var counts = new List<ulong?> { i.Model.NumClientsOverride, i.Model.NumDeleteClientsOverride };
+            counts.AddRange(i.Model.Blocks.Select(b => b.NumStructsOverride));
+            counts.AddRange(i.Model.Blocks.SelectMany(b => b.Structs).Where(s => s.Content is { CountOverride: true }).Select(s => (ulong?)s.Content!.Length));
+            counts.AddRange(i.Model.DeleteSet.Select(d => d.NumRangesOverride));
+            var claimed = counts.Where(c => c != null).ToList();
+            var claims = claimed.Count > 0 && claimed.All(c => c > bound);
             Hostile(i.ToString(), i.Bytes, i.Format, claims ? RejectOutcome : AnyOutcome);
         }, Candidate);
 
@@ -122,14 +128,24 @@ public sealed class HostileProperties
                 Assert.True(applied.Result.Ok, $"{plan}: a valid update was rejected with {applied.Outcome} (order {OpsLayer.Describe(order)})");
             }
             Guards.Hostile.AssertPostCondition(receiver, plan.ToString());
+            Assert.True(expected.TryApplyUpdate(Guards.Hostile.KnownGood).Ok);   // the post-condition applied it to the receiver
             foreach (var idx in late) Assert.True(receiver.TryApplyUpdate(produced[idx].Update).Ok);
 
             Assert.True(Guards.Hostile.StateVector(expected).AsSpan().SequenceEqual(Guards.Hostile.StateVector(receiver)), $"{plan}: state vectors differ after full delivery");
             Assert.True(expected.GetText(OpsLayer.TextRoot).ToString() == receiver.GetText(OpsLayer.TextRoot).ToString(), $"{plan}: text differs");
             Assert.True(expected.GetArray(OpsLayer.ArrayRoot).ToJson() == receiver.GetArray(OpsLayer.ArrayRoot).ToJson(), $"{plan}: array differs");
-            Assert.True(expected.GetMap(OpsLayer.MapRoot).ToJson() == receiver.GetMap(OpsLayer.MapRoot).ToJson(), $"{plan}: map differs");
+            Assert.True(SameMembers(expected.GetMap(OpsLayer.MapRoot).ToJson(), receiver.GetMap(OpsLayer.MapRoot).ToJson()), $"{plan}: map differs");
             _ = replicas;
         });
+
+    // map key order follows delivery order (insertion-ordered, as JS Map), so converged maps compare as key sets
+    private static bool SameMembers(YValue a, YValue b)
+    {
+        if (!a.TryGetObject(out var x) || !b.TryGetObject(out var y) || x.Count != y.Count) return false;
+        for (var i = 0; i < x.Count; i++)
+            if (!y.TryGetValue(x[i].Key, out var v) || v != x[i].Value) return false;
+        return true;
+    }
 
     // ------------------------------------------------------------------ protocol frames
 

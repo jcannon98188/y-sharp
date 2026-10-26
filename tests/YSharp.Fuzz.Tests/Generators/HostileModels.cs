@@ -223,7 +223,10 @@ internal static class HostileModels
             case 2: return Content.TypeOf((ulong)(profile == Profile.Sem ? rng.Next(0, 12) : rng.Next(0, 5)), "n");
             case 3: return Content.BinaryOf(Enumerable.Range(0, rng.Next(0, 4)).Select(i => (byte)i).ToArray());
             case 4: return Content.JsonOf(Enumerable.Range(0, rng.Next(0, 3)).Select(i => profile == Profile.Sem && rng.Next(2) == 0 ? "{{" : "1").ToArray()) with { CountOverride = profile == Profile.Len && rng.Next(3) == 0, Length = ClaimAbove(2, rng) };
-            case 5: return Content.AnyOf(profile == Profile.Len && rng.Next(3) == 0 ? ClaimAbove(1, rng) : 1, 0x7d, (byte)rng.Next(0, 100));       // integer
+            case 5:   // one integer; only a count above it is a claim (HOS-LEN expects a rejection exactly when some claim exceeds the data)
+                return profile == Profile.Len && rng.Next(3) == 0
+                    ? Content.AnyOf(ClaimAbove(1, rng), 0x7d, (byte)rng.Next(0, 100))
+                    : Content.AnyOf(1, 0x7d, (byte)rng.Next(0, 100)) with { CountOverride = false };
             case 6: return new Content(ContentKind.Embed, Text: rng.Next(2) == 0 ? "{{" : "{}", Raw: new byte[] { 0x7e });
             case 7: return new Content(ContentKind.Format, Text: rng.Next(2) == 0 ? "nope" : "1", Name: "bold", Raw: new byte[] { 0x7e });
             default: return new Content(ContentKind.Doc, Text: "guid", Raw: rng.Next(2) == 0 ? Array.Empty<byte>() : new byte[] { 0x7e });

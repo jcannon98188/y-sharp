@@ -325,8 +325,8 @@
       "area": "hostile",
       "name": "hos-clock",
       "covers": ["HOS-CLOCK","Q22","ERR-21"],
-      "sha256": "057ea8cf57fc7ad7d40f705b1fb9a5326a39ff278aaf7e18ee2fd976f32d0e04",
-      "bytes": 10203
+      "sha256": "289eecad19a489d18379f62b012f19e99aee48f81fac7cc421564fafc0012646",
+      "bytes": 10732
     },
     {
       "path": "hostile/hos-len.json",
@@ -341,8 +341,8 @@
       "area": "hostile",
       "name": "hos-mut",
       "covers": ["HOS-MUT","ERR-21"],
-      "sha256": "f8cb1abe01f96e5b91ef2c243293341e2aea691dace1320d854b9daea40bddfc",
-      "bytes": 202742
+      "sha256": "2402a9bca63c3d36a9ce17aaa9df59fdd832425aeb1f3c1ba4961a9f104d08f8",
+      "bytes": 203516
     },
     {
       "path": "hostile/hos-proto.json",
@@ -357,8 +357,8 @@
       "area": "hostile",
       "name": "hos-ref",
       "covers": ["HOS-REF","ERR-06","ERR-07","ERR-21"],
-      "sha256": "d4824fd361ebf2dacd74411a6bbe8cacc17257cb7c1a3fd18c308406277b9cbc",
-      "bytes": 9084
+      "sha256": "17ddb8cda324f84fd814fb6e630688c9d2d194c643b77610f37b2a03eaf33e39",
+      "bytes": 9076
     },
     {
       "path": "hostile/hos-sem.json",
@@ -402,10 +402,11 @@
         "ENC-22",
         "ENC-56",
         "ENC-86",
+        "ENC-87",
         "Q07"
       ],
-      "sha256": "fe1dedb48b66a35d58e50c921953ee3beffef8ca0486d47c8784831cfc750a1b",
-      "bytes": 11518
+      "sha256": "e633ffd0a50ec0cb4f8b319f16ef03bfc0368f746325b952a76fe1c994831287",
+      "bytes": 12992
     },
     {
       "path": "hostile/malformed-v1-updates.json",

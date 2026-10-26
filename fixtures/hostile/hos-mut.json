@@ -5317,6 +5317,22 @@
           "sv": {"$":"bytes","hex":"010102"},
           "doc": [["t",{"kind":"text","delta":[{"insert":"hi"}]}]],
           "classification": "match"
+        },
+        {
+          "name": "v2-quill-overwrite-format-value-v1-cannot-hold",
+          "encoding": "v2",
+          "bytes": {
+            "$": "bytes",
+            "hex": "000300030502431510000000000000000000000000000000000d000000000000000000000000000dc600c400c600c400c600c400c6392d0000000000000000006f726974616c6963636f6c6f72626f6c6468626f6c646e6e636f6c6f726777636f6c6f720605060504010402050205000000010b01787704233838387f7e787e7704233838387e0105003d05"
+          },
+          "expect": ["Malformed"],
+          "discovered": "2026-10-26",
+          "outcome": "ok",
+          "pendingStructs": true,
+          "pendingDs": false,
+          "sv": {"$":"bytes","hex":"00"},
+          "doc": [["t",{"kind":"text","delta":[]}]],
+          "classification": "match"
         }
       ]
     }
