@@ -127,4 +127,4 @@
   adr: ["0017"]
   status: active
   ref: "adr 0017"
-  note: "Active (TASK-4.43, pending owner sign-off). Nightly seed 1038235662 of testRepeatGenerateQuillChanges2 leaves two redundant markers; Yjs on the same draw leaves the same two (fixtures/sim/quill-cleanup-1038235662.json pins the struct store and its generator checks Yjs's count). SimChecks.CheckCleanup asserts the delta is unchanged and a second cleanup removes nothing. [Diverges] test in SimDivergenceTests; the seed is in regression-seeds.json."
+  note: "Active (TASK-4.43; owner sign-off 2026-10-26). Nightly seed 1038235662 of testRepeatGenerateQuillChanges2 leaves two redundant markers; Yjs on the same draw leaves the same two (fixtures/sim/quill-cleanup-1038235662.json pins the struct store and its generator checks Yjs's count). SimChecks.CheckCleanup asserts the delta is unchanged and a second cleanup removes nothing. [Diverges] test in SimDivergenceTests; the seed is in regression-seeds.json."
