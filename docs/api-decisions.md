@@ -1,6 +1,6 @@
 # Open API decisions
 
-**For the project owner. Sections A, B and C are decided (below), D1 is Keep and D2 is resolved; only D3 is open.** Each item is a question the test suite hit while compiling against the API stub (ADR 0008, 0019) and could not settle alone. Sources: the TASK-2 implementation notes (`backlog task view 2 --plain`), `// API gap` comments in `tests/`, and the registry (`docs/inventory/`). Decided items record the decision and what changed; D1 and D3 keep their original options.
+**For the project owner. Sections A, B and C are decided (below), D1 is Keep and D2 is resolved; D3 and section E are open.** Each item is a question the test suite hit while compiling against the API stub (ADR 0008, 0019) and could not settle alone. Sources: the TASK-2 implementation notes (`backlog task view 2 --plain`), `// API gap` comments in `tests/`, and the registry (`docs/inventory/`). Decided items record the decision and what changed; D1 and D3 keep their original options.
 
 IDs: `Q`, `ENC`, `AW`, `CC`, `ERR`, `AU` are registry entries (ADR 0010).
 
@@ -94,3 +94,32 @@ Decided: rename all. Every test method now follows `Subject_Condition_Outcome` (
 
 ### D3. Open, no decision needed yet
 The randomized gating budget (~60 s) and the 2-minute gating budget are unmeasured until an implementation exists; the AFL++ job is untested; Spec 13's live differential properties are unrun and will probably need normalisers; Q25 is active under Spec 10.
+
+## E. Surface added since the TASK-4 baseline (TASK-10)
+
+`tools/api-surface/check.sh` now checks two baselines: `baseline.txt` for `YSharp`, and `baseline.server.txt` for `YSharp.Server` and `YSharp.Server.Testing`. TASK-10 brought both up to date. Each change below was checked against the conventions sections A and B set: `Try` methods return a status and never throw on bad input, and throwing counterparts throw `YDecodeException`. Outputs go to an `IBufferWriter<byte>`, with a `byte[]` convenience overload. Classes are sealed, and records are used only for plain data. E1 to E3 need a decision; E4 and E5 are for the record.
+
+### E1. `YRelay.TryPrepareUpdate` parameter order
+`TryPrepareUpdate(update, format, out prepared)` takes `format` before the `out` and without a default. `YUpdate.TryDecode(update, out decoded, format = V1, limits = null)` and the rest of the core put the `out` right after the input and default the format to V1.
+- **Options.** (a) Change it now to `TryPrepareUpdate(update, out prepared, format = V1)`, while nothing is published. (b) Keep it.
+- **Recommendation.** (a). The only caller is `DocumentMailbox`.
+
+### E2. `YRelay` has no throwing `ApplyUpdate`
+`Doc` pairs `ApplyUpdate` with `TryApplyUpdate`, and `YRelay` pairs `EncodeStateAsUpdate` with `TryEncodeStateAsUpdate`. But `YRelay` has only `TryApplyUpdate`, and preparing has only `TryPrepareUpdate`.
+- **Options.** (a) Add `ApplyUpdate`, which throws `YDecodeException`, or `YLimitException` for the pending bound. (b) Leave the relay `Try`-only, as server code should not throw on a peer's bytes.
+- **Recommendation.** (b), with a sentence in the class documentation saying why.
+
+### E3. Server convenience for compaction and deletion
+A host compacts with `new UpdateLog(store).CompactAsync(docId)` and deletes through `IUpdateStore.DeleteAsync`. `YServer` exposes neither. Deleting a document that is open leaves its mailbox serving the old relay until it is evicted.
+- **Options.** (a) Add `YServer.CompactAsync(docId)` and `YServer.DeleteAsync(docId)`, which close the document's connections first. (b) Keep it as is and document the open-document caveat in `docs/server.md`.
+- **Recommendation.** (a) for deletion, which has the caveat. Compaction is already safe while a document is open.
+
+### E4. Added in TASK-5 (no decision needed)
+- **Core.** `YRelay` and `YRelay.PreparedUpdate` (TASK-5.2, 5.3). `YUpdate.TryDecode` with `DecodedUpdate`, `UpdateStruct`, `UpdateStructKind`, `UpdateContentKind` and `UpdateDeleteRange`: a read-only view of an update for validation hooks. `UpdateContentKind` is an API enum, not the wire's content reference numbers. Also `YSync.TryReadFrame`, and span overloads of `YSync.WriteStep1` and `WriteStep2`.
+- **Server.** `YServer`, `YServerOptions`, `YConnection`, `ConnectionContext`, `ConnectionCloseReason`; storage (`IUpdateStore`, `InMemoryUpdateStore`, `UpdateRecord`, `UpdateLog`, `AppendResult`, `LoadedDocument`); validation (`ValidationHook`, `ValidationRequest`, `ValidationResult`); and `YSharp.Server.Testing` (`UpdateStoreConformance`, `InMemoryUpdateStoreConformance`, `ConformanceResult`, `ConformanceOutcome`, `ConformanceException`).
+- **Type choices.** `YConnection.Outgoing` is a `ChannelReader<ReadOnlyMemory<byte>>`, so hosts depend on `System.Threading.Channels`, which ships with the framework. `YServer.EditAsync` returns false when the edit changed nothing.
+
+### E5. Baseline drift from TASK-4 (no decision needed)
+The TASK-4 baseline still had two lines the implementation had already changed:
+- `StackItem` and `YSnapshot` lost their public parameterless constructors (TASK-4.32, TASK-4.30). Only the undo manager and `YSnapshot.Create` or `Decode` make them.
+- `YSnapshot` gained `Equals` and `GetHashCode`, matching Yjs `equalSnapshots` (TASK-4.30).

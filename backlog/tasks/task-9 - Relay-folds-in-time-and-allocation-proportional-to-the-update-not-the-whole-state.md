@@ -6,6 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-10-26 22:01'
+updated_date: '2026-10-26 23:57'
 labels:
   - server
   - performance
@@ -25,3 +26,9 @@ Found in TASK-5.3: YRelay.TryApplyUpdate merges the incoming structs with the wh
 - [ ] #2 Relay output stays byte-identical to Yjs mergeUpdates on the existing RelayTests and differential runs
 - [ ] #3 RelayHostile.BytesPerStateByte is removed or reduced to the compaction case
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Audit after PR #2: once the held state is per client, UpdateMerge.Diff (answering a peer's Step1) can binary-search each client for the first struct past the target's clock instead of walking every struct, so a reconnecting peer that is nearly up to date costs O(clients x log) rather than O(state). The output must stay byte-identical to Yjs diffUpdate.
+<!-- SECTION:NOTES:END -->

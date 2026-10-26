@@ -1,0 +1,193 @@
+YSharp.Server.AppendResult|base System.ValueType
+YSharp.Server.AppendResult|ctor(YSharp.YStatus Status, System.Int64 Sequence)
+YSharp.Server.AppendResult|implements System.IEquatable<YSharp.Server.AppendResult>
+YSharp.Server.AppendResult|method System.Void Deconstruct(out YSharp.YStatus Status, out System.Int64 Sequence)
+YSharp.Server.AppendResult|method override System.Boolean Equals(System.Object obj)
+YSharp.Server.AppendResult|method override System.Int32 GetHashCode()
+YSharp.Server.AppendResult|method override System.String ToString()
+YSharp.Server.AppendResult|method sealed-override System.Boolean Equals(YSharp.Server.AppendResult other)
+YSharp.Server.AppendResult|method static System.Boolean op_Equality(YSharp.Server.AppendResult left, YSharp.Server.AppendResult right)
+YSharp.Server.AppendResult|method static System.Boolean op_Inequality(YSharp.Server.AppendResult left, YSharp.Server.AppendResult right)
+YSharp.Server.AppendResult|property System.Boolean Ok {get;}
+YSharp.Server.AppendResult|property System.Int64 Sequence {get;set;}
+YSharp.Server.AppendResult|property YSharp.YStatus Status {get;set;}
+YSharp.Server.AppendResult|struct readonly
+YSharp.Server.ConnectionCloseReason|enum
+YSharp.Server.ConnectionCloseReason|enum Disposed = 1
+YSharp.Server.ConnectionCloseReason|enum None = 0
+YSharp.Server.ConnectionCloseReason|enum ProtocolError = 3
+YSharp.Server.ConnectionCloseReason|enum ServerShutdown = 6
+YSharp.Server.ConnectionCloseReason|enum SlowSubscriber = 2
+YSharp.Server.ConnectionCloseReason|enum StoreFailure = 5
+YSharp.Server.ConnectionCloseReason|enum TooManyRejects = 4
+YSharp.Server.ConnectionCloseReason|implements System.IComparable
+YSharp.Server.ConnectionCloseReason|implements System.IConvertible
+YSharp.Server.ConnectionCloseReason|implements System.IFormattable
+YSharp.Server.ConnectionCloseReason|implements System.ISpanFormattable
+YSharp.Server.ConnectionContext|base System.Object
+YSharp.Server.ConnectionContext|ctor()
+YSharp.Server.ConnectionContext|field static readonly YSharp.Server.ConnectionContext Anonymous
+YSharp.Server.ConnectionContext|implements System.IEquatable<YSharp.Server.ConnectionContext>
+YSharp.Server.ConnectionContext|method YSharp.Server.ConnectionContext <Clone>$()
+YSharp.Server.ConnectionContext|method override System.Boolean Equals(System.Object obj)
+YSharp.Server.ConnectionContext|method override System.Int32 GetHashCode()
+YSharp.Server.ConnectionContext|method override System.String ToString()
+YSharp.Server.ConnectionContext|method sealed-override System.Boolean Equals(YSharp.Server.ConnectionContext other)
+YSharp.Server.ConnectionContext|method static System.Boolean op_Equality(YSharp.Server.ConnectionContext left, YSharp.Server.ConnectionContext right)
+YSharp.Server.ConnectionContext|method static System.Boolean op_Inequality(YSharp.Server.ConnectionContext left, YSharp.Server.ConnectionContext right)
+YSharp.Server.ConnectionContext|property System.Boolean IsReadOnly {get;set;}
+YSharp.Server.ConnectionContext|property System.Collections.Generic.IReadOnlyDictionary<System.String, System.String> Claims {get;set;}
+YSharp.Server.ConnectionContext|property System.String Identity {get;set;}
+YSharp.Server.ConnectionContext|sealed class
+YSharp.Server.IUpdateStore|interface
+YSharp.Server.IUpdateStore|method abstract System.Collections.Generic.IAsyncEnumerable<YSharp.Server.UpdateRecord> ReadSinceAsync(System.String docId, System.Int64 afterSequence, System.Threading.CancellationToken cancellationToken = default)
+YSharp.Server.IUpdateStore|method abstract System.Threading.Tasks.ValueTask CompactAsync(System.String docId, System.Int64 uptoSequence, System.ReadOnlyMemory<System.Byte> mergedV2, System.Threading.CancellationToken cancellationToken = default)
+YSharp.Server.IUpdateStore|method abstract System.Threading.Tasks.ValueTask DeleteAsync(System.String docId, System.Threading.CancellationToken cancellationToken = default)
+YSharp.Server.IUpdateStore|method abstract System.Threading.Tasks.ValueTask<System.Int64> AppendAsync(System.String docId, System.ReadOnlyMemory<System.Byte> updateV2, System.Threading.CancellationToken cancellationToken = default)
+YSharp.Server.InMemoryUpdateStore|base System.Object
+YSharp.Server.InMemoryUpdateStore|ctor()
+YSharp.Server.InMemoryUpdateStore|implements YSharp.Server.IUpdateStore
+YSharp.Server.InMemoryUpdateStore|method sealed-override System.Collections.Generic.IAsyncEnumerable<YSharp.Server.UpdateRecord> ReadSinceAsync(System.String docId, System.Int64 afterSequence, System.Threading.CancellationToken cancellationToken = default)
+YSharp.Server.InMemoryUpdateStore|method sealed-override System.Threading.Tasks.ValueTask CompactAsync(System.String docId, System.Int64 uptoSequence, System.ReadOnlyMemory<System.Byte> mergedV2, System.Threading.CancellationToken cancellationToken = default)
+YSharp.Server.InMemoryUpdateStore|method sealed-override System.Threading.Tasks.ValueTask DeleteAsync(System.String docId, System.Threading.CancellationToken cancellationToken = default)
+YSharp.Server.InMemoryUpdateStore|method sealed-override System.Threading.Tasks.ValueTask<System.Int64> AppendAsync(System.String docId, System.ReadOnlyMemory<System.Byte> updateV2, System.Threading.CancellationToken cancellationToken = default)
+YSharp.Server.InMemoryUpdateStore|sealed class
+YSharp.Server.LoadedDocument|base System.Object
+YSharp.Server.LoadedDocument|ctor(YSharp.YRelay Relay, System.Int64 LastSequence)
+YSharp.Server.LoadedDocument|implements System.IEquatable<YSharp.Server.LoadedDocument>
+YSharp.Server.LoadedDocument|method System.Void Deconstruct(out YSharp.YRelay Relay, out System.Int64 LastSequence)
+YSharp.Server.LoadedDocument|method YSharp.Server.LoadedDocument <Clone>$()
+YSharp.Server.LoadedDocument|method override System.Boolean Equals(System.Object obj)
+YSharp.Server.LoadedDocument|method override System.Int32 GetHashCode()
+YSharp.Server.LoadedDocument|method override System.String ToString()
+YSharp.Server.LoadedDocument|method sealed-override System.Boolean Equals(YSharp.Server.LoadedDocument other)
+YSharp.Server.LoadedDocument|method static System.Boolean op_Equality(YSharp.Server.LoadedDocument left, YSharp.Server.LoadedDocument right)
+YSharp.Server.LoadedDocument|method static System.Boolean op_Inequality(YSharp.Server.LoadedDocument left, YSharp.Server.LoadedDocument right)
+YSharp.Server.LoadedDocument|property System.Int64 LastSequence {get;set;}
+YSharp.Server.LoadedDocument|property YSharp.YRelay Relay {get;set;}
+YSharp.Server.LoadedDocument|sealed class
+YSharp.Server.Testing.ConformanceException|base System.Exception
+YSharp.Server.Testing.ConformanceException|ctor(System.String message)
+YSharp.Server.Testing.ConformanceException|implements System.Runtime.Serialization.ISerializable
+YSharp.Server.Testing.ConformanceException|sealed class
+YSharp.Server.Testing.ConformanceOutcome|enum
+YSharp.Server.Testing.ConformanceOutcome|enum Failed = 1
+YSharp.Server.Testing.ConformanceOutcome|enum NotSupported = 2
+YSharp.Server.Testing.ConformanceOutcome|enum Passed = 0
+YSharp.Server.Testing.ConformanceOutcome|implements System.IComparable
+YSharp.Server.Testing.ConformanceOutcome|implements System.IConvertible
+YSharp.Server.Testing.ConformanceOutcome|implements System.IFormattable
+YSharp.Server.Testing.ConformanceOutcome|implements System.ISpanFormattable
+YSharp.Server.Testing.ConformanceResult|base System.Object
+YSharp.Server.Testing.ConformanceResult|ctor(System.String Check, YSharp.Server.Testing.ConformanceOutcome Outcome, System.String Message = null)
+YSharp.Server.Testing.ConformanceResult|implements System.IEquatable<YSharp.Server.Testing.ConformanceResult>
+YSharp.Server.Testing.ConformanceResult|method System.Void Deconstruct(out System.String Check, out YSharp.Server.Testing.ConformanceOutcome Outcome, out System.String Message)
+YSharp.Server.Testing.ConformanceResult|method YSharp.Server.Testing.ConformanceResult <Clone>$()
+YSharp.Server.Testing.ConformanceResult|method override System.Boolean Equals(System.Object obj)
+YSharp.Server.Testing.ConformanceResult|method override System.Int32 GetHashCode()
+YSharp.Server.Testing.ConformanceResult|method override System.String ToString()
+YSharp.Server.Testing.ConformanceResult|method sealed-override System.Boolean Equals(YSharp.Server.Testing.ConformanceResult other)
+YSharp.Server.Testing.ConformanceResult|method static System.Boolean op_Equality(YSharp.Server.Testing.ConformanceResult left, YSharp.Server.Testing.ConformanceResult right)
+YSharp.Server.Testing.ConformanceResult|method static System.Boolean op_Inequality(YSharp.Server.Testing.ConformanceResult left, YSharp.Server.Testing.ConformanceResult right)
+YSharp.Server.Testing.ConformanceResult|property System.String Check {get;set;}
+YSharp.Server.Testing.ConformanceResult|property System.String Message {get;set;}
+YSharp.Server.Testing.ConformanceResult|property YSharp.Server.Testing.ConformanceOutcome Outcome {get;set;}
+YSharp.Server.Testing.ConformanceResult|sealed class
+YSharp.Server.Testing.InMemoryUpdateStoreConformance|base YSharp.Server.Testing.UpdateStoreConformance
+YSharp.Server.Testing.InMemoryUpdateStoreConformance|ctor()
+YSharp.Server.Testing.InMemoryUpdateStoreConformance|sealed class
+YSharp.Server.Testing.UpdateStoreConformance|abstract class
+YSharp.Server.Testing.UpdateStoreConformance|base System.Object
+YSharp.Server.Testing.UpdateStoreConformance|method System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<YSharp.Server.Testing.ConformanceResult>> RunAsync(System.Threading.CancellationToken cancellationToken = default)
+YSharp.Server.Testing.UpdateStoreConformance|method System.Threading.Tasks.Task<YSharp.Server.Testing.ConformanceResult> RunAsync(System.String check, System.Threading.CancellationToken cancellationToken = default)
+YSharp.Server.Testing.UpdateStoreConformance|property System.Collections.Generic.IReadOnlyList<System.String> CheckNames {get;}
+YSharp.Server.UpdateLog|base System.Object
+YSharp.Server.UpdateLog|ctor(YSharp.Server.IUpdateStore store, YSharp.YLimits limits = null, YSharp.YLimits storedLimits = null)
+YSharp.Server.UpdateLog|method System.Threading.Tasks.ValueTask<System.Int64> CompactAsync(System.String docId, System.Threading.CancellationToken cancellationToken = default)
+YSharp.Server.UpdateLog|method System.Threading.Tasks.ValueTask<System.Int64> FoldAsync(System.String docId, System.Int64 afterSequence, YSharp.YRelay relay, System.Threading.CancellationToken cancellationToken = default)
+YSharp.Server.UpdateLog|method System.Threading.Tasks.ValueTask<YSharp.Server.AppendResult> AppendAsync(System.String docId, System.ReadOnlyMemory<System.Byte> update, YSharp.UpdateFormat format = 0, System.Threading.CancellationToken cancellationToken = default)
+YSharp.Server.UpdateLog|method System.Threading.Tasks.ValueTask<YSharp.Server.LoadedDocument> LoadAsync(System.String docId, System.Threading.CancellationToken cancellationToken = default)
+YSharp.Server.UpdateLog|property YSharp.Server.IUpdateStore Store {get;}
+YSharp.Server.UpdateLog|property YSharp.YLimits Limits {get;}
+YSharp.Server.UpdateLog|property YSharp.YLimits StoredLimits {get;}
+YSharp.Server.UpdateLog|sealed class
+YSharp.Server.UpdateRecord|base System.ValueType
+YSharp.Server.UpdateRecord|ctor(System.Int64 Sequence, System.ReadOnlyMemory<System.Byte> UpdateV2, System.Boolean IsSnapshot)
+YSharp.Server.UpdateRecord|implements System.IEquatable<YSharp.Server.UpdateRecord>
+YSharp.Server.UpdateRecord|method System.Void Deconstruct(out System.Int64 Sequence, out System.ReadOnlyMemory<System.Byte> UpdateV2, out System.Boolean IsSnapshot)
+YSharp.Server.UpdateRecord|method override System.Boolean Equals(System.Object obj)
+YSharp.Server.UpdateRecord|method override System.Int32 GetHashCode()
+YSharp.Server.UpdateRecord|method override System.String ToString()
+YSharp.Server.UpdateRecord|method sealed-override System.Boolean Equals(YSharp.Server.UpdateRecord other)
+YSharp.Server.UpdateRecord|method static System.Boolean op_Equality(YSharp.Server.UpdateRecord left, YSharp.Server.UpdateRecord right)
+YSharp.Server.UpdateRecord|method static System.Boolean op_Inequality(YSharp.Server.UpdateRecord left, YSharp.Server.UpdateRecord right)
+YSharp.Server.UpdateRecord|property System.Boolean IsSnapshot {get;set;}
+YSharp.Server.UpdateRecord|property System.Int64 Sequence {get;set;}
+YSharp.Server.UpdateRecord|property System.ReadOnlyMemory<System.Byte> UpdateV2 {get;set;}
+YSharp.Server.UpdateRecord|struct readonly
+YSharp.Server.ValidationHook|base System.MulticastDelegate
+YSharp.Server.ValidationHook|ctor(System.Object object, System.IntPtr method)
+YSharp.Server.ValidationHook|delegate
+YSharp.Server.ValidationHook|implements System.ICloneable
+YSharp.Server.ValidationHook|implements System.Runtime.Serialization.ISerializable
+YSharp.Server.ValidationHook|method virtual System.IAsyncResult BeginInvoke(in YSharp.Server.ValidationRequest request, System.AsyncCallback callback, System.Object object)
+YSharp.Server.ValidationHook|method virtual YSharp.Server.ValidationResult EndInvoke(in YSharp.Server.ValidationRequest request, System.IAsyncResult result)
+YSharp.Server.ValidationHook|method virtual YSharp.Server.ValidationResult Invoke(in YSharp.Server.ValidationRequest request)
+YSharp.Server.ValidationRequest|base System.ValueType
+YSharp.Server.ValidationRequest|property System.ReadOnlyMemory<System.Byte> Update {get;}
+YSharp.Server.ValidationRequest|property System.String DocumentId {get;}
+YSharp.Server.ValidationRequest|property System.Threading.CancellationToken Deadline {get;}
+YSharp.Server.ValidationRequest|property YSharp.DecodedUpdate Decoded {get;}
+YSharp.Server.ValidationRequest|property YSharp.Doc Document {get;}
+YSharp.Server.ValidationRequest|property YSharp.Server.ConnectionContext Connection {get;}
+YSharp.Server.ValidationRequest|struct readonly
+YSharp.Server.ValidationResult|base System.ValueType
+YSharp.Server.ValidationResult|ctor(System.Boolean Accepted, System.String Reason)
+YSharp.Server.ValidationResult|implements System.IEquatable<YSharp.Server.ValidationResult>
+YSharp.Server.ValidationResult|method System.Void Deconstruct(out System.Boolean Accepted, out System.String Reason)
+YSharp.Server.ValidationResult|method override System.Boolean Equals(System.Object obj)
+YSharp.Server.ValidationResult|method override System.Int32 GetHashCode()
+YSharp.Server.ValidationResult|method override System.String ToString()
+YSharp.Server.ValidationResult|method sealed-override System.Boolean Equals(YSharp.Server.ValidationResult other)
+YSharp.Server.ValidationResult|method static System.Boolean op_Equality(YSharp.Server.ValidationResult left, YSharp.Server.ValidationResult right)
+YSharp.Server.ValidationResult|method static System.Boolean op_Inequality(YSharp.Server.ValidationResult left, YSharp.Server.ValidationResult right)
+YSharp.Server.ValidationResult|method static YSharp.Server.ValidationResult Reject(System.String reason)
+YSharp.Server.ValidationResult|property System.Boolean Accepted {get;set;}
+YSharp.Server.ValidationResult|property System.String Reason {get;set;}
+YSharp.Server.ValidationResult|property static YSharp.Server.ValidationResult Accept {get;}
+YSharp.Server.ValidationResult|struct readonly
+YSharp.Server.YConnection|base System.Object
+YSharp.Server.YConnection|implements System.IAsyncDisposable
+YSharp.Server.YConnection|method System.Threading.Tasks.ValueTask<System.Boolean> ReceiveAsync(System.ReadOnlyMemory<System.Byte> message, System.Threading.CancellationToken cancellationToken = default)
+YSharp.Server.YConnection|method sealed-override System.Threading.Tasks.ValueTask DisposeAsync()
+YSharp.Server.YConnection|property System.Boolean IsClosed {get;}
+YSharp.Server.YConnection|property System.String CloseDetail {get;}
+YSharp.Server.YConnection|property System.String DocumentId {get;}
+YSharp.Server.YConnection|property System.Threading.Channels.ChannelReader<System.ReadOnlyMemory<System.Byte>> Outgoing {get;}
+YSharp.Server.YConnection|property YSharp.Server.ConnectionCloseReason CloseReason {get;}
+YSharp.Server.YConnection|property YSharp.Server.ConnectionContext Context {get;}
+YSharp.Server.YConnection|sealed class
+YSharp.Server.YServerOptions|base System.Object
+YSharp.Server.YServerOptions|ctor()
+YSharp.Server.YServerOptions|property System.Boolean UsesDefaultStore {get;}
+YSharp.Server.YServerOptions|property System.Func<System.String, YSharp.Server.ValidationHook> Validation {get;set;}
+YSharp.Server.YServerOptions|property System.Int32 MailboxCapacity {get;set;}
+YSharp.Server.YServerOptions|property System.Int32 MaxRejectsBeforeClose {get;set;}
+YSharp.Server.YServerOptions|property System.Int32 SubscriberQueueCapacity {get;set;}
+YSharp.Server.YServerOptions|property System.TimeProvider TimeProvider {get;set;}
+YSharp.Server.YServerOptions|property System.TimeSpan DocumentIdleTimeout {get;set;}
+YSharp.Server.YServerOptions|property System.TimeSpan HotDocumentIdleTimeout {get;set;}
+YSharp.Server.YServerOptions|property System.TimeSpan ValidationDeadline {get;set;}
+YSharp.Server.YServerOptions|property YSharp.Server.IUpdateStore Store {get;set;}
+YSharp.Server.YServerOptions|property YSharp.YLimits Limits {get;set;}
+YSharp.Server.YServerOptions|sealed class
+YSharp.Server.YServer|base System.Object
+YSharp.Server.YServer|ctor(YSharp.Server.YServerOptions options = null)
+YSharp.Server.YServer|implements System.IAsyncDisposable
+YSharp.Server.YServer|method System.Threading.Tasks.ValueTask<System.Boolean> EditAsync(System.String documentId, System.Action<YSharp.Transaction> edit, System.Object origin = null, System.Threading.CancellationToken cancellationToken = default)
+YSharp.Server.YServer|method System.Threading.Tasks.ValueTask<System.IAsyncDisposable> SubscribeAsync(System.String documentId, System.Action<YSharp.Doc> changed, System.Threading.CancellationToken cancellationToken = default)
+YSharp.Server.YServer|method System.Threading.Tasks.ValueTask<T> ReadAsync<T>(System.String documentId, System.Func<YSharp.Doc, T> read, System.Threading.CancellationToken cancellationToken = default)
+YSharp.Server.YServer|method System.Threading.Tasks.ValueTask<YSharp.Server.YConnection> ConnectAsync(System.String documentId, YSharp.Server.ConnectionContext context = null, System.Threading.CancellationToken cancellationToken = default)
+YSharp.Server.YServer|method sealed-override System.Threading.Tasks.ValueTask DisposeAsync()
+YSharp.Server.YServer|property YSharp.Server.YServerOptions Options {get;}
+YSharp.Server.YServer|sealed class
