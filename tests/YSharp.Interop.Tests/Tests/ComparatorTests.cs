@@ -150,6 +150,18 @@ public sealed class ComparatorTests
         Assert.False(n.Claims(Case(MutationKind.Truncate, oracle: true, sharp: false, validLength: 12, mutatedLength: 12)), "a prefix must be proper");
     }
 
+    [Fact, Covers("DIFF-05", "ENC-64")]
+    public void Normaliser_LenientColumnEnd_ClaimsOnlyWhenTheOracleReadPastTheEnd()
+    {
+        var n = new LenientColumnEndNormaliser();
+        var flip = Case(MutationKind.FlipByte, oracle: true, sharp: false, validLength: 20, mutatedLength: 20);
+        Assert.True(n.Claims(flip with { OracleReadPastEnd = true }));
+        Assert.False(n.Claims(flip), "a mutation the oracle decodes in bounds is not the EOF divergence");
+        Assert.False(n.Claims(Case(MutationKind.FlipByte, oracle: true, sharp: true) with { OracleReadPastEnd = true }), "both accepting is not a divergence");
+        Assert.False(n.Claims(Case(MutationKind.FlipByte, oracle: false, sharp: false) with { OracleReadPastEnd = true }), "both rejecting is the match case");
+        Assert.False(n.Claims(Case(MutationKind.FlipByte, oracle: true, sharp: false, unchanged: false) with { OracleReadPastEnd = true }), "a rejected update must leave y-sharp unchanged");
+    }
+
     [Fact, Covers("DIFF-05")]
     public void Normaliser_EveryOne_NamesRegisteredInventoryEntries()
     {
@@ -169,6 +181,7 @@ public sealed class ComparatorTests
     {
         Assert.Equal("lenient-truncation", Normalisers.Claim(Case(MutationKind.Truncate, true, false))!.Key);
         Assert.Null(Normalisers.Claim(Case(MutationKind.DeleteByte, true, false)));
+        Assert.Equal("lenient-column-end", Normalisers.Claim(Case(MutationKind.DeleteByte, true, false) with { OracleReadPastEnd = true })!.Key);
     }
 }
 

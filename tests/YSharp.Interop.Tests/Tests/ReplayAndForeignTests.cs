@@ -33,6 +33,45 @@ public sealed class ReplayTests(OracleHost host)
     }
 }
 
+/// <summary>
+/// The oracle's <c>readPastEnd</c> flag on a named <c>applyForeign</c> result, which <see cref="LenientColumnEndNormaliser"/> relies on.
+/// The case is the first live differential's find (TASK-4.28): a flipped byte shortens the V2 info column, so the oracle reads the length
+/// of the second struct past the end of the len column (ENC-64) and accepts a zero-length ContentAny.
+/// </summary>
+[Requires(Feature.V1, Feature.V2, Feature.UpdateFunctions, Feature.V2Functions, Feature.Array, Feature.Map, Feature.Text, Feature.TextFormat, Feature.Events)]
+[NeedsNode]
+[Tier(Tier.Smoke)]
+public sealed class ForeignReadPastEndTests(OracleHost host)
+{
+    private static string Script(string hex, string encoding) =>
+        $$"""{"schema":1,"replicas":[{"name":"x","clientId":7000}],"steps":[{"step":"applyForeign","doc":"x","bytes":{"$":"bytes","hex":"{{hex}}"},"encoding":"{{encoding}}","name":"r"}]}""";
+
+    private JsonNode Result(string hex, string encoding)
+    {
+        host.RequireOrSkip();
+        var reply = host.RunAsync(Script(hex, encoding)).GetAwaiter().GetResult();
+        return reply.Observations!["results"]!["value"]!["r"]!["value"]!;
+    }
+
+    [Fact, Covers("DIFF-05", "ENC-64")]
+    public void ApplyForeign_AnUpdateReadPastTheEndOfAColumn_IsFlagged()
+    {
+        var value = Result("000004a701a5010000030802040b07617468656c6c6f410005010100010102010078010000", "v2");
+        Assert.True(value["accepted"]!.GetValue<bool>());
+        Assert.True(value["readPastEnd"]!.GetValue<bool>());
+        Assert.False(SharpSide.Run(Script("000004a701a5010000030802040b07617468656c6c6f410005010100010102010078010000", "v2"))
+            .Observations!["results"]!["value"]!["r"]!["value"]!["accepted"]!.GetValue<bool>(), "y-sharp rejects it (ADR 0005)");
+    }
+
+    [Fact, Covers("DIFF-05")]
+    public void ApplyForeign_AnUpdateDecodedInBounds_CarriesNoFlag()
+    {
+        var value = Result("02016700080101610178016500080101740000", "v1");
+        Assert.True(value["accepted"]!.GetValue<bool>());
+        Assert.Null(value["readPastEnd"]);
+    }
+}
+
 /// <summary>The <c>applyForeign</c> step (ADR 0012, 0016) on the C# interpreter and its generated fixture. No Node needed.</summary>
 [LibraryIndependent]
 public sealed class ApplyForeignTests

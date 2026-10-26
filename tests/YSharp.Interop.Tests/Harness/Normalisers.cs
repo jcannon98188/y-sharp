@@ -11,7 +11,11 @@ public enum MutationKind { Truncate, FlipByte, DeleteByte, InsertByte }
 /// One mutated-update case after both implementations ran it: the bytes, what the mutation was, and whether each side accepted them.
 /// Acceptance of a named <c>applyForeign</c> step is the observable (ADR 0012 "Compared": the outcome class of a mutated valid update).
 /// </summary>
-public sealed record MutationCase(UpdateFormat Format, byte[] Valid, byte[] Mutated, MutationKind Kind, int Offset, bool OracleAccepted, bool SharpAccepted, bool SharpUnchanged);
+public sealed record MutationCase(UpdateFormat Format, byte[] Valid, byte[] Mutated, MutationKind Kind, int Offset, bool OracleAccepted, bool SharpAccepted, bool SharpUnchanged)
+{
+    /// <summary>The oracle accepted only because a lib0 reader returned its default past the end of a buffer (the step's <c>readPastEnd</c> result).</summary>
+    public bool OracleReadPastEnd { get; init; }
+}
 
 /// <summary>The classes a mutated valid update falls into (ADR 0012).</summary>
 public enum OutcomeClass
@@ -63,10 +67,27 @@ public sealed class LenientTruncationNormaliser : IDivergenceNormaliser
         c.Kind == MutationKind.Truncate && c.Mutated.Length < c.Valid.Length && c.OracleAccepted && !c.SharpAccepted && c.SharpUnchanged;
 }
 
+/// <summary>
+/// The same EOF divergence reached by a mutation that is not a truncation: a flipped, deleted or inserted byte shortens a V2 column or the
+/// rest buffer, and the oracle reads its default past the end where y-sharp reports a decode error (ADR 0005). Claimed only when the
+/// oracle itself reports that it read past the end of a buffer, so a mutation the oracle decodes in bounds is never excused.
+/// </summary>
+public sealed class LenientColumnEndNormaliser : IDivergenceNormaliser
+{
+    public string Key => "lenient-column-end";
+
+    public IReadOnlyList<string> RegistryIds { get; } = new[] { "ENC-60", "ENC-62", "ENC-64", "ENC-65", "ENC-67", "ENC-68" };
+
+    public string Description =>
+        "A mutated valid update that the oracle accepts only by reading a default past the end of a column or of the rest buffer is rejected by y-sharp without changing the document.";
+
+    public bool Claims(MutationCase c) => c.OracleReadPastEnd && c.OracleAccepted && !c.SharpAccepted && c.SharpUnchanged;
+}
+
 public static class Normalisers
 {
     /// <summary>Every divergence the live differential knows. A divergence nobody registered here is reported as a bug.</summary>
-    public static readonly IReadOnlyList<IDivergenceNormaliser> Registered = new IDivergenceNormaliser[] { new LenientTruncationNormaliser() };
+    public static readonly IReadOnlyList<IDivergenceNormaliser> Registered = new IDivergenceNormaliser[] { new LenientTruncationNormaliser(), new LenientColumnEndNormaliser() };
 
     public static OutcomeClass Classify(bool oracleAccepted, bool sharpAccepted) =>
         (oracleAccepted, sharpAccepted) switch

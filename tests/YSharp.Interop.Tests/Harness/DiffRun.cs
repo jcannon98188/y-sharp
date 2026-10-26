@@ -267,7 +267,8 @@ public sealed class DiffRun
         var oracleAccepted = oracle.Observations!["results"]!["value"]!["mutated"]!["value"]!["accepted"]!.GetValue<bool>();
         var sharpAccepted = sharp.Observations!["results"]!["value"]!["mutated"]!["value"]!["accepted"]!.GetValue<bool>();
         var sharpUnchanged = sharp.Observations["sv"]!["value"]!["x"]!["v1"]!["hex"]!.GetValue<string>() == "00";
-        var c = new MutationCase(format, valid, mutated, kind, offset, oracleAccepted, sharpAccepted, sharpUnchanged);
+        var oracleReadPastEnd = oracle.Observations["results"]!["value"]!["mutated"]!["value"]!["readPastEnd"]?.GetValue<bool>() ?? false;
+        var c = new MutationCase(format, valid, mutated, kind, offset, oracleAccepted, sharpAccepted, sharpUnchanged) { OracleReadPastEnd = oracleReadPastEnd };
         Label = $"{kind} at {offset} of {valid.Length} bytes ({format})";
 
         switch (Normalisers.Classify(oracleAccepted, sharpAccepted))
