@@ -301,6 +301,25 @@ public sealed class SubdocTests
         Assert.Empty(parent.Subdocs);
     }
 
+    [Fact]
+    [Covers("SUB-08", "M-6")]
+    [Requires(Feature.Map)]
+    public void DeletingAMap_RemovesItsSubdocsInTheOrderTheirKeysWereFirstSet()
+    {
+        // Yjs ContentType.delete walks parent._map, a JS Map, so the removed set follows key insertion order (not key or hash order)
+        var parent = Net.Mk(1);
+        var root = parent.GetMap("m");
+        var keys = new[] { "key", "k0", "zz", "a", "q9", "b", "m", "k1", "x", "c" };
+        var holder = root.Set("h", new YMap());
+        foreach (var k in keys) holder.Set(k, Sub("g-" + k));
+        var removed = new List<string[]>();
+        parent.SubdocsChanged += (c, _, _) => removed.Add(c.Removed.Select(d => d.Guid).ToArray());
+        root.Delete("h");
+        // the deleting transaction's event, then one per removed subdocument as cleanup destroys each, in the same order (SUB-11)
+        Assert.Equal(keys.Select(k => "g-" + k).ToArray(), removed[0]);
+        Assert.Equal(keys.Select(k => new[] { "g-" + k }), removed.Skip(1));
+    }
+
     // ------------------------------------------------------------------ SUB-09
 
     [Fact]

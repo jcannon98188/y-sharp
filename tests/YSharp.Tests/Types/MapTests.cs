@@ -85,6 +85,20 @@ public sealed class MapTests
         Assert.Equal(3, map.Count);
     }
 
+    [Fact, Covers("M-6")]
+    public void Keys_FollowThisMapsInsertionOrder_EvenWhenAnotherMapSawTheKeysFirst()
+    {
+        var doc = NewDoc();
+        var other = doc.GetMap("other");
+        other.Set("b", 1);
+        other.Set("a", 2);
+        var map = doc.GetMap("m");
+        map.Set("a", 3);
+        map.Set("b", 4);
+        Assert.Equal(new[] { "a", "b" }, map.Keys);
+        Assert.Equal(new[] { "b", "a" }, other.Keys);
+    }
+
     [Fact, Covers("M-7")]
     [Requires(Feature.Text, Feature.Array)]
     public void ToJson_ConvertsNestedTypes_AndKeepsUndefinedMembers()

@@ -73,7 +73,7 @@ internal static class TypeMap
 
     /// <summary>
     /// Yjs <c>typeMapGetAll</c>: every key whose current item is not deleted, with its value, in the order the keys first appeared (a JS Map's
-    /// insertion order; a key's slot is allocated when the key is first stored).
+    /// insertion order, which the key table keeps).
     /// </summary>
     public static List<KeyValuePair<string, YEntry>> Entries(YType type)
     {
@@ -81,7 +81,6 @@ internal static class TypeMap
         if (type.AttachedDoc is not { } doc) return entries;
         var items = new List<ItemRef>();
         StructStore.CopyMapItems(type.Branch, items);
-        items.Sort(static (a, b) => a.Item!.ParentSub.CompareTo(b.Item!.ParentSub));
         foreach (var item in items)
         {
             if (item.IsDeleted) continue;
@@ -102,7 +101,6 @@ internal static class TypeMap
         var store = doc.Store;
         var items = new List<ItemRef>();
         StructStore.CopyMapItems(type.Branch, items);
-        items.Sort(static (a, b) => a.Item!.ParentSub.CompareTo(b.Item!.ParentSub));
         foreach (var latest in items)
         {
             var v = latest;
