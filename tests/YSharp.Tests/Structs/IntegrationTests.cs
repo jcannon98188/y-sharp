@@ -83,6 +83,19 @@ public sealed class IntegrationTests
     }
 
     [Fact]
+    [Covers("STR-14")]
+    [Requires(Feature.Text)]
+    public void ResolvingTheOrigin_BeforeTheRightOriginSplitsTheSameStruct_KeepsTheOriginAsReceived()
+    {
+        // "abc" by client 1, then "x" with origin (1, 2) and right origin (1, 1): Yjs takes origin = left.lastId before the right-origin
+        // lookup cuts "abc" after "a", so the origin stays (1, 2) (a Nightly differential find of TASK-4.28)
+        var d = Net.Mk(9);
+        Assert.True(d.TryApplyUpdate(Hex.Bytes("010201000401017403616263c40102010101780000")).Ok);
+        Assert.Equal("axbc", Text(d));
+        Assert.Equal("01030100040101740161840100026263c401020101017800", Hex.Of(d.EncodeStateAsUpdate()));
+    }
+
+    [Fact]
     [Covers("STR-15")]
     [Requires(Feature.Map)]
     public void AnItemWithAnOrigin_InheritsParentAndParentSub_FromItsNeighbour()
