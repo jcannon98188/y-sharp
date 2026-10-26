@@ -125,4 +125,18 @@ public sealed class StructStoreTests
         f.ApplyUpdate(ups2[0]);
         Assert.Equal("ac", f.GetText("t").ToString());
     }
+
+    [Fact]
+    [Covers("STR-52")]
+    [Requires(Feature.V2, Feature.Map)]
+    public void EncodeStateAsUpdate_WithPendingState_WritesItemsAsYjsReadsThemBack()
+    {
+        // the first live Nightly differential's find (TASK-4.28): with a pending delete set (client 101 is unknown) Yjs merges the state through
+        // mergeUpdates, which decodes the map item 102:1 (origin 102:0, parentSub "k1") without its parentSub, so info bit 6 is clear (0x88, not 0xa8)
+        var d = Net.Mk(7000);
+        d.ApplyUpdate(Hex.Bytes("000005e60100a503010000072100a8002100080c076d6b316dc3bc6101024101010100034101020202007702626302007d3c7704f09f9880026601000065010000"), null, UpdateFormat.V2);
+        Assert.Equal(
+            "0202e501002101016d02c3bc0108010161027d3c7704f09f98800266002101016d026b3101886600017702626303e5010100016601000165010001",
+            Hex.Of(d.EncodeStateAsUpdate()));
+    }
 }
