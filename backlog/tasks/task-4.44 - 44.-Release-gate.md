@@ -1,11 +1,11 @@
 ---
 id: TASK-4.44
 title: 44. Release gate
-status: In Progress
+status: Done
 assignee:
   - '@claude'
 created_date: '2026-10-24 19:42'
-updated_date: '2026-10-26 19:42'
+updated_date: '2026-10-26 20:31'
 labels:
   - spec
   - 'model:sonnet'
@@ -36,7 +36,7 @@ Read first: `docs/handoff-implementation-planning.md`, ADRs 0005, 0006, 0008, 00
 - [x] #1 Every feature is in `Features.Landed`; zero tests skip for a missing feature
 - [x] #2 Zero pending registry entries and ledger rows; `YSHARP_RELEASE_GATE=1` passes
 - [x] #3 All `BUD-*` entries active with recorded values; slow memory tier green
-- [ ] #4 Every M7 spec is Done and the M7 milestone is closed
+- [x] #4 Every M7 spec is Done and the M7 milestone is closed
 - [x] #5 The traceability gate passes and no pending registry entry is added
 <!-- AC:END -->
 
@@ -45,7 +45,7 @@ Read first: `docs/handoff-implementation-planning.md`, ADRs 0005, 0006, 0008, 00
 - [x] #1 `dotnet build YSharp.slnx` has 0 warnings
 - [x] #2 `dotnet test --solution YSharp.slnx` is green in Debug and in Release
 - [x] #3 Fixture drift check (`npm run check` in `tools/fixture-gen`) is clean
-- [ ] #4 ADR 0022 followed: suite changes in separate `suite:` commits, a Suite changes list in the notes, no open owner decision
+- [x] #4 ADR 0022 followed: suite changes in separate `suite:` commits, a Suite changes list in the notes, no open owner decision
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -89,4 +89,32 @@ Open: DoD 4 and AC 4 wait on the owner's SIM-15 sign-off (asked 2026-10-26). Aft
 
 CI flake fixed (gating windows-latest Release, run 40386696436): NodeClientTests.Request_ConcurrentRequests_AreMatchedById timed out ('Node did not answer echo within 10000 ms'), as Request_Timeout_KillsAndRestartsTheChild did twice earlier today, always on Windows. Cause: on Windows a child's stdio pipes are synchronous handles, so NodeClient's ReadLineAsync loops blocked pool threads, and a starved pool held the response; the Task.Delay timer's high-priority callback also beat the answer's continuation in WhenAny. Reproduced locally with 20 concurrent echoes under a starved pool (10 s timeout each run, 26 ms unstarved). Fix: stdout and stderr are read on dedicated background threads, the handshake comes through the stdout reader, a read error fails the pending requests, and the timeout path checks tcs.Task.IsCompleted. The probe now passes every run.
 Suite change: bd91f3a suite: NodeClient reads the child's pipes on dedicated threads and asks whether the answer came.
+
+Owner sign-off (2026-10-26):
+- SIM-15: cleanup may remove the markers Yjs leaves, as long as the content is unchanged and a second cleanup removes nothing. Registry note updated (d2adfc0).
+- BUD-04, BUD-05 and BUD-07: the bounded limits are approved for now. TASK-8 (after TASK-5 and all its subtasks) makes one more attempt at zero allocation; if zero stays out of reach, the bounded limits stand.
+- BUD-12: k = 64 with 16% headroom, approved.
+- BUD-13 array-push margin (8.08 vs Yjs 8.31): approved, recorded above.
+No open owner decision remains: no file says pending owner sign-off any more.
+Suite changes: d2adfc0 suite: SIM-15 owner sign-off recorded; 2537a89 suite: owner sign-offs for BUD-04, BUD-05, BUD-07 and BUD-12.
+CI on PR 1 at bd91f3a and 18fd107: gating (ubuntu Debug/Release, macos, windows), smoke and drift all pass.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Release gate reached. Every feature is in Features.Landed (the duplicate Values is removed, and a test holds the gate). BUD-13 and BUD-14 are active with measured values, the pending high-water mark is ratcheted to 0, and the release traceability matrix is generated (591 entries, 0 pending). The nightly bytes-per-item table now measures the Yjs script's workloads, each in its own process.
+
+Two real bugs from verification are fixed with regression tests:
+- An array event delta threw on a format item that a foreign update put in an array, which dropped the event; it now inserts nothing for that item, as Yjs's getContent does.
+- Windows CI flaked because NodeClient lost responses under a starved thread pool; it now reads the pipes on dedicated threads and checks whether the answer came.
+
+Every owner decision is signed off: SIM-15, BUD-04/05/07 (bounded; TASK-8 tries for zero after TASK-5), BUD-12 and the BUD-13 margin.
+
+Verified with:
+- Debug and Release, YSHARP_RELEASE_GATE=1: 4466 tests, 0 failed, 0 warnings, no skip for a missing feature.
+- Interop Smoke tier with Node required: green.
+- npm run check: clean.
+- Nightly 40379583357: green, with 0 benchmark regressions against the stored baseline.
+- PR CI: green on Linux, macOS and Windows.
+<!-- SECTION:FINAL_SUMMARY:END -->
