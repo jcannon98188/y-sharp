@@ -96,6 +96,19 @@ public sealed class ForeignReadPastEndTests(OracleHost host)
         Assert.Null(Result("0102050084010001618405000162" + "00", "v1")["selfDependentPending"]);
     }
 
+    [Fact, Covers("DIFF-05", "ENC-88")]
+    public void ApplyForeign_AnItemOfLengthZero_IsFlagged()
+    {
+        // client 4: binary at root "", a GC, "" waiting on client 3, then a deleted struct whose parent is the binary item (the shape of the
+        // SharpFuzz find of TASK-4.43)
+        const string hex = "010404000301000000010406030000010404000100";
+        var value = Result(hex, "v1");
+        Assert.True(value["accepted"]!.GetValue<bool>());
+        Assert.True(value["zeroLengthItem"]!.GetValue<bool>());
+        Assert.False(SharpSide.Run(Script(hex, "v1")).Observations!["results"]!["value"]!["r"]!["value"]!["accepted"]!.GetValue<bool>(), "y-sharp rejects it (ENC-88, ADR 0005)");
+        Assert.Null(Result("01010100040101740161" + "00", "v1")["zeroLengthItem"]);
+    }
+
     [Fact, Covers("DIFF-05", "STR-71")]
     public void ApplyForeign_AStructWhoseParentIsNotAType_IsFlagged()
     {

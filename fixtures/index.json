@@ -325,8 +325,8 @@
       "area": "hostile",
       "name": "hos-clock",
       "covers": ["HOS-CLOCK","Q22","ERR-21"],
-      "sha256": "289eecad19a489d18379f62b012f19e99aee48f81fac7cc421564fafc0012646",
-      "bytes": 10732
+      "sha256": "02ffb6f3bdb4b49c3b0d3dda585bceb715d67aea52b640c2689d2ba69da0a59c",
+      "bytes": 11165
     },
     {
       "path": "hostile/hos-len.json",
@@ -403,10 +403,11 @@
         "ENC-56",
         "ENC-86",
         "ENC-87",
+        "ENC-88",
         "Q07"
       ],
-      "sha256": "e633ffd0a50ec0cb4f8b319f16ef03bfc0368f746325b952a76fe1c994831287",
-      "bytes": 12992
+      "sha256": "baf3a2fdd21ac0a495176623788ef95065452b3094d2c854b232509623b016ab",
+      "bytes": 14403
     },
     {
       "path": "hostile/malformed-v1-updates.json",

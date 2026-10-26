@@ -27,6 +27,9 @@ public sealed record MutationCase(UpdateFormat Format, byte[] Valid, byte[] Muta
 
     /// <summary>The oracle integrated as a GC a struct whose parent id names an item that is not a type (the step's <c>parentNotAType</c> result).</summary>
     public bool OracleParentNotAType { get; init; }
+
+    /// <summary>The update holds an item of length 0 that the oracle stored (the step's <c>zeroLengthItem</c> result).</summary>
+    public bool OracleZeroLengthItem { get; init; }
 }
 
 /// <summary>The classes a mutated valid update falls into (ADR 0012).</summary>
@@ -169,12 +172,29 @@ public sealed class ParentNotATypeNormaliser : IDivergenceNormaliser
     public bool Claims(MutationCase c) => c.OracleParentNotAType && c.OracleAccepted && !c.SharpAccepted;
 }
 
+/// <summary>
+/// An item of length 0 ("" text, Deleted 0, an empty JSON or Any list) owns no clock. Yjs stores it, then drops it from the state encode, so
+/// a struct that waited behind it no longer waits; y-sharp rejects the update as Malformed (ENC-88, ADR 0005). Claimed only when the oracle
+/// reports such an item in the update and y-sharp left the document unchanged.
+/// </summary>
+public sealed class ZeroLengthItemNormaliser : IDivergenceNormaliser
+{
+    public string Key => "zero-length-item";
+
+    public IReadOnlyList<string> RegistryIds { get; } = new[] { "ENC-88" };
+
+    public string Description =>
+        "A mutated update holding an item of length 0 is accepted by the oracle and rejected by y-sharp without changing the document.";
+
+    public bool Claims(MutationCase c) => c.OracleZeroLengthItem && c.OracleAccepted && !c.SharpAccepted && c.SharpUnchanged;
+}
+
 public static class Normalisers
 {
     /// <summary>Every divergence the live differential knows. A divergence nobody registered here is reported as a bug.</summary>
     public static readonly IReadOnlyList<IDivergenceNormaliser> Registered =
         new IDivergenceNormaliser[] { new LenientTruncationNormaliser(), new LenientColumnEndNormaliser(), new ZeroLengthDeleteRangeNormaliser(), new UnsortedPendingDeleteSetNormaliser(),
-            new SelfDependentStructNormaliser(), new ParentNotATypeNormaliser() };
+            new SelfDependentStructNormaliser(), new ParentNotATypeNormaliser(), new ZeroLengthItemNormaliser() };
 
     public static OutcomeClass Classify(bool oracleAccepted, bool sharpAccepted) =>
         (oracleAccepted, sharpAccepted) switch

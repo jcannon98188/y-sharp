@@ -105,10 +105,13 @@ const clockCases = [
   // found by the HOS-LEN model (TASK-4.42): an item may not end at 2^53 either, or its delete range would not decode again (Q22). It decodes
   // (an item at 2^53-1 may wait, ENC-36); once its predecessor is known it is rejected at integration, where JS integrates it
   c('clock-plus-deleted-length-reaches-2-pow-53', upd([blk(1, 0, [textS('a'), item('01', vu(2n ** 53n - 1n))])]), { expect: ['Rejected'], discovered: '2026-10-26' }),
-  c('zero-length-string', upd([blk(1, 0, [textS('')])])),
+  c('zero-length-string', upd([blk(1, 0, [textS('')])]), { expect: ['Malformed'] }),
   c('zero-length-gc', upd([blk(1, 0, [gc(0)])])),
   c('zero-length-skip', upd([blk(1, 0, [skip(0)])])),
-  c('zero-length-deleted', upd([blk(1, 0, [item('01', vu(0))])])),
+  c('zero-length-deleted', upd([blk(1, 0, [item('01', vu(0))])]), { expect: ['Malformed'] }),
+  // found by SharpFuzz (TASK-4.43): "" waits on client 3 and a deleted struct on a binary parent waits behind it. The state encode drops the
+  // "" item, so the deleted struct no longer waits and the document's own state was rejected on re-apply. Items of length 0 are Malformed (ENC-88)
+  c('zero-length-item-releases-a-waiting-struct', '01 04 04 00 03 01 00 00 00 01 04 06 03 00 00 01 04 04 00 01 00', { expect: ['Malformed'], discovered: '2026-10-26' }),
   c('client-2-pow-31', upd([blk(2 ** 31, 0, [textS('x')])]), { expect: ['ok'] }),
   c('client-2-pow-32-minus-1', upd([blk(2 ** 32 - 1, 0, [textS('x')])]), { expect: ['ok'] }),
   c('client-2-pow-32', upd([blk(2 ** 32, 0, [textS('x')])]), { expect: ['ok'] }),

@@ -13,6 +13,8 @@
 // client (origin, right origin or parent id): it can never integrate, and y-sharp rejects the update as Malformed (Q15, ADR 0005).
 // An accepted update carries `parentNotAType: true` when one of its structs names a parent id whose item holds content that is not a type:
 // Yjs reads `content.type` as undefined and integrates the struct as a GC, where y-sharp rejects that struct (STR-71, ADR 0005).
+// An accepted update carries `zeroLengthItem: true` when it holds an item of length 0 ("" text, Deleted 0, an empty JSON or Any list):
+// Yjs stores it, but it owns no clock and vanishes from the state encode; y-sharp rejects the update as Malformed (ENC-88, ADR 0005).
 // The flags are absent otherwise, so other results keep their shape.
 import { Y, lib0 } from './oracle.mjs'
 import { untag, ScriptError } from './tagged.mjs'
@@ -36,6 +38,7 @@ defineStep({
     let accepted = true
     let zeroLengthDeleteRange = false
     const nonTypeParent = parentNotAType(doc, untag(s.bytes), enc)
+    const emptyItem = zeroLengthItem(untag(s.bytes), enc)
     const order = { unsorted: false }
     try {
       structDecoder = enc === 'v1' ? new Y.UpdateDecoderV1(decoder) : new Y.UpdateDecoderV2(decoder)
@@ -47,10 +50,11 @@ defineStep({
     }
     const value = accepted && readPastEnd(structDecoder)
       ? { accepted, readPastEnd: true }
-      : zeroLengthDeleteRange ? { accepted, zeroLengthDeleteRange: true }
-        : accepted && order.unsorted && doc.store.pendingDs !== null ? { accepted, unsortedPendingDeleteSet: true }
-          : accepted && selfDependentPending(doc) ? { accepted, selfDependentPending: true }
-            : accepted && nonTypeParent ? { accepted, parentNotAType: true } : { accepted }
+      : accepted && emptyItem ? { accepted, zeroLengthItem: true }
+        : zeroLengthDeleteRange ? { accepted, zeroLengthDeleteRange: true }
+          : accepted && order.unsorted && doc.store.pendingDs !== null ? { accepted, unsortedPendingDeleteSet: true }
+            : accepted && selfDependentPending(doc) ? { accepted, selfDependentPending: true }
+              : accepted && nonTypeParent ? { accepted, parentNotAType: true } : { accepted }
     ctx.results.set(s.name, { api: enc === 'v1' ? 'Y.applyUpdate (foreign bytes)' : 'Y.applyUpdateV2 (foreign bytes)', value })
   }
 })
@@ -84,6 +88,15 @@ const parentNotAType = (doc, bytes, enc) => {
     const parent = find(s.parent)
     return parent instanceof Y.Item && !(parent.content instanceof Y.ContentType) && !(parent.content instanceof Y.ContentDeleted)
   })
+}
+
+// Read before the update applies, like parentNotAType. A malformed update decodes to nothing.
+const zeroLengthItem = (bytes, enc) => {
+  try {
+    return (enc === 'v1' ? Y.decodeUpdate(bytes) : Y.decodeUpdateV2(bytes)).structs.some(s => s instanceof Y.Item && s.length === 0)
+  } catch {
+    return false
+  }
 }
 
 // readAndApplyDeleteSet reads each client's ranges after resetDsCurVal; a range starting before the previous one ends is out of order.

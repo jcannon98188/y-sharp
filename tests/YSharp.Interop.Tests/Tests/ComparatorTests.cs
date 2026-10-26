@@ -217,6 +217,17 @@ public sealed class ComparatorTests
         Assert.False(n.Claims(Case(MutationKind.InsertByte, oracle: true, sharp: true) with { OracleSelfDependentPending = true }), "both accepting is not this divergence");
     }
 
+    [Fact, Covers("DIFF-05", "ENC-88")]
+    public void Normaliser_ZeroLengthItem_ClaimsOnlyAnUnchangedRejection()
+    {
+        var n = new ZeroLengthItemNormaliser();
+        var rejects = Case(MutationKind.FlipByte, oracle: true, sharp: false, validLength: 20, mutatedLength: 20);
+        Assert.True(n.Claims(rejects with { OracleZeroLengthItem = true }));
+        Assert.False(n.Claims(rejects), "any other y-sharp rejection of an update the oracle accepts is a bug");
+        Assert.False(n.Claims(Case(MutationKind.FlipByte, oracle: true, sharp: false, unchanged: false) with { OracleZeroLengthItem = true }), "a rejection must change nothing");
+        Assert.False(n.Claims(Case(MutationKind.FlipByte, oracle: true, sharp: true) with { OracleZeroLengthItem = true }), "both accepting is not this divergence");
+    }
+
     [Fact, Covers("DIFF-05")]
     public void Normaliser_EveryOne_NamesRegisteredInventoryEntries()
     {
