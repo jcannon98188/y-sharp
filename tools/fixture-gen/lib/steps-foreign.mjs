@@ -5,7 +5,9 @@
 // The origin is the string "foreign", which observers can tell apart from local edits and from `applyUpdate` (null origin).
 // A named result also carries `readPastEnd: true` when an accepted update was only decodable because a lib0 reader returned its default
 // past the end of its buffer (a column or the rest buffer; ENC-60..68). y-sharp rejects those (ADR 0005), and the harness's
-// lenient-column-end normaliser claims exactly that case. The flag is absent otherwise, so other results keep their shape.
+// lenient-column-end normaliser claims exactly that case. A rejected update carries `zeroLengthDeleteRange: true` when Yjs threw only
+// because it re-encoded a parked zero-length delete range (UpdateEncoderV2.writeDsLen, ENC-51), which y-sharp ignores by ADR 0003.
+// Both flags are absent otherwise, so other results keep their shape.
 import { Y, lib0 } from './oracle.mjs'
 import { untag, ScriptError } from './tagged.mjs'
 import { defineStep } from './steps.mjs'
@@ -26,11 +28,17 @@ defineStep({
     const decoder = lib0.decoding.createDecoder(untag(s.bytes))
     let structDecoder = null
     let accepted = true
+    let zeroLengthDeleteRange = false
     try {
       structDecoder = enc === 'v1' ? new Y.UpdateDecoderV1(decoder) : new Y.UpdateDecoderV2(decoder)
       Y.readUpdateV2(decoder, doc, 'foreign', structDecoder)
-    } catch (e) { accepted = false }
-    const value = accepted && readPastEnd(structDecoder) ? { accepted, readPastEnd: true } : { accepted }
+    } catch (e) {
+      accepted = false
+      if (e instanceof Error && e.message === 'Unexpected case' && /\bwriteDsLen\b/.test(e.stack ?? '')) zeroLengthDeleteRange = true
+    }
+    const value = accepted && readPastEnd(structDecoder)
+      ? { accepted, readPastEnd: true }
+      : zeroLengthDeleteRange ? { accepted, zeroLengthDeleteRange: true } : { accepted }
     ctx.results.set(s.name, { api: enc === 'v1' ? 'Y.applyUpdate (foreign bytes)' : 'Y.applyUpdateV2 (foreign bytes)', value })
   }
 })

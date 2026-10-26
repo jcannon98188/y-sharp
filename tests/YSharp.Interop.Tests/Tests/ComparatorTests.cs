@@ -162,6 +162,17 @@ public sealed class ComparatorTests
         Assert.False(n.Claims(Case(MutationKind.FlipByte, oracle: true, sharp: false, unchanged: false) with { OracleReadPastEnd = true }), "a rejected update must leave y-sharp unchanged");
     }
 
+    [Fact, Covers("DIFF-05", "ENC-51")]
+    public void Normaliser_ZeroLengthDeleteRange_ClaimsOnlyTheReEncodeRejection()
+    {
+        var n = new ZeroLengthDeleteRangeNormaliser();
+        var insert = Case(MutationKind.InsertByte, oracle: false, sharp: true, validLength: 20, mutatedLength: 21);
+        Assert.True(n.Claims(insert with { OracleZeroLengthDeleteRange = true }));
+        Assert.False(n.Claims(insert), "any other oracle rejection that y-sharp accepts is a bug");
+        Assert.False(n.Claims(Case(MutationKind.InsertByte, oracle: false, sharp: false) with { OracleZeroLengthDeleteRange = true }), "both rejecting is the match case");
+        Assert.False(n.Claims(Case(MutationKind.InsertByte, oracle: true, sharp: true) with { OracleZeroLengthDeleteRange = true }), "both accepting is not a divergence");
+    }
+
     [Fact, Covers("DIFF-05")]
     public void Normaliser_EveryOne_NamesRegisteredInventoryEntries()
     {

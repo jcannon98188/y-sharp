@@ -267,8 +267,12 @@ public sealed class DiffRun
         var oracleAccepted = oracle.Observations!["results"]!["value"]!["mutated"]!["value"]!["accepted"]!.GetValue<bool>();
         var sharpAccepted = sharp.Observations!["results"]!["value"]!["mutated"]!["value"]!["accepted"]!.GetValue<bool>();
         var sharpUnchanged = sharp.Observations["sv"]!["value"]!["x"]!["v1"]!["hex"]!.GetValue<string>() == "00";
-        var oracleReadPastEnd = oracle.Observations["results"]!["value"]!["mutated"]!["value"]!["readPastEnd"]?.GetValue<bool>() ?? false;
-        var c = new MutationCase(format, valid, mutated, kind, offset, oracleAccepted, sharpAccepted, sharpUnchanged) { OracleReadPastEnd = oracleReadPastEnd };
+        var oracleValue = oracle.Observations["results"]!["value"]!["mutated"]!["value"]!;
+        var c = new MutationCase(format, valid, mutated, kind, offset, oracleAccepted, sharpAccepted, sharpUnchanged)
+        {
+            OracleReadPastEnd = oracleValue["readPastEnd"]?.GetValue<bool>() ?? false,
+            OracleZeroLengthDeleteRange = oracleValue["zeroLengthDeleteRange"]?.GetValue<bool>() ?? false,
+        };
         Label = $"{kind} at {offset} of {valid.Length} bytes ({format})";
 
         switch (Normalisers.Classify(oracleAccepted, sharpAccepted))
@@ -292,7 +296,12 @@ public sealed class DiffRun
                 return claim;
             }
             default:
-                throw Fail(FailureReason.OutcomeClass, script, oracle.Observations, sharp.Observations, null, $"y-sharp accepts a mutated update ({kind} at {offset}) that the oracle rejects.");
+            {
+                var claim = Normalisers.Claim(c);
+                if (claim == null)
+                    throw Fail(FailureReason.OutcomeClass, script, oracle.Observations, sharp.Observations, null, $"y-sharp accepts a mutated update ({kind} at {offset}) that the oracle rejects.");
+                return claim;
+            }
         }
     }
 }

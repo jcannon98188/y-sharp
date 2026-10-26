@@ -15,6 +15,9 @@ public sealed record MutationCase(UpdateFormat Format, byte[] Valid, byte[] Muta
 {
     /// <summary>The oracle accepted only because a lib0 reader returned its default past the end of a buffer (the step's <c>readPastEnd</c> result).</summary>
     public bool OracleReadPastEnd { get; init; }
+
+    /// <summary>The oracle rejected only because it re-encoded a zero-length delete range (the step's <c>zeroLengthDeleteRange</c> result).</summary>
+    public bool OracleZeroLengthDeleteRange { get; init; }
 }
 
 /// <summary>The classes a mutated valid update falls into (ADR 0012).</summary>
@@ -29,7 +32,7 @@ public enum OutcomeClass
     /// <summary>The oracle accepts, y-sharp rejects: only legal as a recorded divergence claimed by a normaliser.</summary>
     SharpRejectsOracleAccepts,
 
-    /// <summary>The oracle rejects, y-sharp accepts: always a bug.</summary>
+    /// <summary>The oracle rejects, y-sharp accepts: a bug unless a normaliser claims a recorded lenient divergence (ENC-51, ADR 0003).</summary>
     OracleRejectsSharpAccepts,
 }
 
@@ -84,10 +87,28 @@ public sealed class LenientColumnEndNormaliser : IDivergenceNormaliser
     public bool Claims(MutationCase c) => c.OracleReadPastEnd && c.OracleAccepted && !c.SharpAccepted && c.SharpUnchanged;
 }
 
+/// <summary>
+/// y-sharp ignores a zero-length delete range (ENC-51, ratified in TASK-4.14, ADR 0003); Yjs throws <c>Unexpected case</c> when the range
+/// belongs to a client the document does not know yet, because it parks the range and re-encodes it as V2. The one case where the oracle
+/// rejects and y-sharp accepts that is not a bug, claimed only when the oracle reports that its error came from that re-encode.
+/// </summary>
+public sealed class ZeroLengthDeleteRangeNormaliser : IDivergenceNormaliser
+{
+    public string Key => "zero-length-delete-range";
+
+    public IReadOnlyList<string> RegistryIds { get; } = new[] { "ENC-51" };
+
+    public string Description =>
+        "A mutated update with a zero-length delete range for a client the document does not know is rejected by the oracle (Unexpected case from writeDsLen) and accepted by y-sharp, which ignores the range.";
+
+    public bool Claims(MutationCase c) => c.OracleZeroLengthDeleteRange && !c.OracleAccepted && c.SharpAccepted;
+}
+
 public static class Normalisers
 {
     /// <summary>Every divergence the live differential knows. A divergence nobody registered here is reported as a bug.</summary>
-    public static readonly IReadOnlyList<IDivergenceNormaliser> Registered = new IDivergenceNormaliser[] { new LenientTruncationNormaliser(), new LenientColumnEndNormaliser() };
+    public static readonly IReadOnlyList<IDivergenceNormaliser> Registered =
+        new IDivergenceNormaliser[] { new LenientTruncationNormaliser(), new LenientColumnEndNormaliser(), new ZeroLengthDeleteRangeNormaliser() };
 
     public static OutcomeClass Classify(bool oracleAccepted, bool sharpAccepted) =>
         (oracleAccepted, sharpAccepted) switch

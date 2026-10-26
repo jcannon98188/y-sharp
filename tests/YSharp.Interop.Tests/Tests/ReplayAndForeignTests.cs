@@ -63,6 +63,17 @@ public sealed class ForeignReadPastEndTests(OracleHost host)
             .Observations!["results"]!["value"]!["r"]!["value"]!["accepted"]!.GetValue<bool>(), "y-sharp rejects it (ADR 0005)");
     }
 
+    [Fact, Covers("DIFF-05", "ENC-51")]
+    public void ApplyForeign_AZeroLengthDeleteRangeForAnUnknownClient_IsFlagged()
+    {
+        // no structs, then a delete set holding client 5, clock 0, length 0: the shape of the Nightly find of TASK-4.28
+        var value = Result("00010501" + "0000", "v1");
+        Assert.False(value["accepted"]!.GetValue<bool>());
+        Assert.True(value["zeroLengthDeleteRange"]!.GetValue<bool>());
+        Assert.True(SharpSide.Run(Script("00010501" + "0000", "v1"))
+            .Observations!["results"]!["value"]!["r"]!["value"]!["accepted"]!.GetValue<bool>(), "y-sharp ignores the range (ENC-51)");
+    }
+
     [Fact, Covers("DIFF-05")]
     public void ApplyForeign_AnUpdateDecodedInBounds_CarriesNoFlag()
     {

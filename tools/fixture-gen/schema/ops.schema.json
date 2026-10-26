@@ -980,7 +980,7 @@
         },
         {
           "title": "applyForeign",
-          "description": "Apply bytes another implementation produced to a replica (ADR 0012). Origin is the string \"foreign\". Without name a rejected update is a script error; with name the outcome is recorded under results as {accepted}, plus readPastEnd: true when an accepted update was only decodable because a reader returned its default past the end of a buffer.",
+          "description": "Apply bytes another implementation produced to a replica (ADR 0012). Origin is the string \"foreign\". Without name a rejected update is a script error; with name the outcome is recorded under results as {accepted}, plus readPastEnd: true when an accepted update was only decodable because a reader returned its default past the end of a buffer, or zeroLengthDeleteRange: true when a rejection came only from re-encoding a zero-length delete range (ENC-51).",
           "type": "object",
           "properties": {
             "step": {
