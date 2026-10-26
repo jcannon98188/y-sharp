@@ -273,9 +273,13 @@ internal static class TypeList
         return l;
     }
 
-    /// <summary>Yjs <c>content.getContent()</c>, appended to <paramref name="into"/>.</summary>
+    /// <summary>
+    /// Yjs <c>content.getContent()</c>, appended to <paramref name="into"/>. A format or deleted content gives <c>[]</c>: a foreign update can
+    /// put a format item in an array (its origin decides the parent), and the array's event delta then inserts nothing for it.
+    /// </summary>
     internal static void AddContent(Doc doc, ItemRef n, List<YEntry> into)
     {
+        if (n.Kind is ContentKind.Format or ContentKind.Deleted) return;
         for (var i = 0; i < n.Length; i++) into.Add(ContentAt(doc, n, i));
     }
 
