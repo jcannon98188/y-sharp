@@ -13,6 +13,10 @@ public static class RelayWorkload
 {
     private static readonly string[] Words = { "a", "bc", "def", "\u00e9", "\ud83d\ude00", "xyz12" };
 
+    // no surrogate pairs: an edit at an index inside one splits the pair into two U+FFFD, and a format that changes nothing does that
+    // locally without emitting an update, so that replica alone keeps the U+FFFD (Yjs does the same, yjs#248)
+    private static readonly string[] BmpWords = { "a", "bc", "def", "\u00e9", "\u4e2d\u6587", "xyz12" };
+
     /// <summary>Every local update the replicas emitted, in emission order, in <paramref name="format"/>.</summary>
     public static List<byte[]> Updates(int seed, int steps, UpdateFormat format)
     {
@@ -34,53 +38,68 @@ public static class RelayWorkload
         for (var s = 0; s < steps; s++)
         {
             var doc = docs[rng.Next(docs.Length)];
-            var text = doc.GetText("text");
-            var array = doc.GetArray("array");
-            var map = doc.GetMap("map");
-            switch (rng.Next(10))
-            {
-                case 0:
-                case 1:
-                case 2:
-                    text.Insert(rng.Next(text.Length + 1), Words[rng.Next(Words.Length)]);
-                    break;
-                case 3 when text.Length > 0:
-                {
-                    var at = rng.Next(text.Length);
-                    text.Delete(at, 1 + rng.Next(Math.Min(3, text.Length - at)));
-                    break;
-                }
-                case 4 when text.Length > 0:
-                {
-                    var at = rng.Next(text.Length);
-                    var bold = new[] { new KeyValuePair<string, YValue>("bold", rng.Next(2) == 0 ? YValue.Null : (YValue)true) };
-                    text.Format(at, 1 + rng.Next(text.Length - at), YValue.Object(bold));
-                    break;
-                }
-                case 5:
-                    array.Insert(rng.Next(array.Length + 1), rng.Next(4) == 0 ? new YEntry[] { new YMap() } : new YEntry[] { rng.Next(100), Words[rng.Next(Words.Length)] });
-                    break;
-                case 6 when array.Length > 0:
-                    array.Delete(rng.Next(array.Length));
-                    break;
-                case 7:
-                    map.Set("k" + rng.Next(4), rng.Next(1000));
-                    break;
-                case 8:
-                    map.Delete("k" + rng.Next(4));
-                    break;
-                default:
-                {
-                    var from = docs[rng.Next(docs.Length)];
-                    if (ReferenceEquals(from, doc)) break;
-                    var sv = new ArrayBufferWriter<byte>();
-                    doc.EncodeStateVector(sv);
-                    doc.ApplyUpdate(from.EncodeStateAsUpdate(sv.WrittenSpan), sync);
-                    break;
-                }
-            }
+            if (Edit(rng, doc, rng.Next(10), Words)) continue;
+            var from = docs[rng.Next(docs.Length)];
+            if (ReferenceEquals(from, doc)) continue;
+            var sv = new ArrayBufferWriter<byte>();
+            doc.EncodeStateVector(sv);
+            doc.ApplyUpdate(from.EncodeStateAsUpdate(sv.WrittenSpan), sync);
         }
 
         return updates;
+    }
+
+    /// <summary>
+    /// One seeded random edit to <paramref name="doc"/> (TASK-5.7 reuses it); draws the edit kind itself. Without <paramref name="astral"/> the
+    /// text holds no surrogate pairs, so replicas that make no-op formats still encode the same state.
+    /// </summary>
+    public static void Edit(Random rng, Doc doc, bool astral = true)
+    {
+        while (!Edit(rng, doc, rng.Next(9), astral ? Words : BmpWords))
+        {
+        }
+    }
+
+    /// <summary>Edit <paramref name="kind"/> (0 to 8), or false when it does not apply (a delete or format of an empty text or array).</summary>
+    private static bool Edit(Random rng, Doc doc, int kind, string[] words)
+    {
+        var text = doc.GetText("text");
+        var array = doc.GetArray("array");
+        var map = doc.GetMap("map");
+        switch (kind)
+        {
+            case 0:
+            case 1:
+            case 2:
+                text.Insert(rng.Next(text.Length + 1), words[rng.Next(words.Length)]);
+                return true;
+            case 3 when text.Length > 0:
+            {
+                var at = rng.Next(text.Length);
+                text.Delete(at, 1 + rng.Next(Math.Min(3, text.Length - at)));
+                return true;
+            }
+            case 4 when text.Length > 0:
+            {
+                var at = rng.Next(text.Length);
+                var bold = new[] { new KeyValuePair<string, YValue>("bold", rng.Next(2) == 0 ? YValue.Null : (YValue)true) };
+                text.Format(at, 1 + rng.Next(text.Length - at), YValue.Object(bold));
+                return true;
+            }
+            case 5:
+                array.Insert(rng.Next(array.Length + 1), rng.Next(4) == 0 ? new YEntry[] { new YMap() } : new YEntry[] { rng.Next(100), words[rng.Next(words.Length)] });
+                return true;
+            case 6 when array.Length > 0:
+                array.Delete(rng.Next(array.Length));
+                return true;
+            case 7:
+                map.Set("k" + rng.Next(4), rng.Next(1000));
+                return true;
+            case 8:
+                map.Delete("k" + rng.Next(4));
+                return true;
+            default:
+                return false;
+        }
     }
 }
