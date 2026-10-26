@@ -130,7 +130,12 @@ public sealed class DiffRun
         return Run(script, (oracle, sharp) => Convergence(oracle, "the oracle") ?? Convergence(sharp, "y-sharp"), PlanExtras);
     }
 
-    /// <summary>All replicas of a finished plan hold the same document and the same encoded state (convergence, ADR 0012).</summary>
+    /// <summary>
+    /// All replicas of a finished plan hold the same document and the same encoded state (convergence, ADR 0012). One byte difference is
+    /// Yjs's own: garbage collection replaces deleted items per transaction and merges the resulting GC runs only when cleanup happens to
+    /// visit them together, so a replica can keep <c>GC(1,2) GC(3,2)</c> where another holds <c>GC(1,4)</c>. When the observations carry the
+    /// store dumps, states that differ are still converged if the stores are equal with adjacent GC runs joined and the delete sets agree.
+    /// </summary>
     public static Difference? Convergence(JsonObject observations, string side)
     {
         var docs = (JsonObject)observations["doc"]!["value"]!;
@@ -141,10 +146,48 @@ public sealed class DiffRun
             var d = ObservationDiff.CompareValues(docs[first], dump, $"$.{name}", isDoc: true);
             if (d != null) return new Difference("convergence", d.Path, $"{side}: replica {name} differs from {first}: {d.Detail}");
             var f = ObservationDiff.CompareValues(states[first]!["v1"]!["full"], states[name]!["v1"]!["full"], $"$.{name}.v1.full");
-            if (f != null) return new Difference("convergence", f.Path, $"{side}: the encoded state of {name} differs from {first}: {f.Detail}");
+            if (f != null && !EqualUpToGcRuns(observations, first, name))
+                return new Difference("convergence", f.Path, $"{side}: the encoded state of {name} differs from {first}: {f.Detail}");
         }
         return null;
     }
+
+    /// <summary>Both replicas' store dumps agree once adjacent GC runs are joined, and their delete sets agree; false without the dumps.</summary>
+    private static bool EqualUpToGcRuns(JsonObject observations, string a, string b)
+    {
+        if (observations["structs"]?["value"] is not JsonObject structs || observations["ds"]?["value"] is not JsonObject ds) return false;
+        return ObservationDiff.CompareValues(JoinGcRuns(structs[a]), JoinGcRuns(structs[b]), "$") == null
+            && ObservationDiff.CompareValues(ds[a], ds[b], "$") == null;
+    }
+
+    /// <summary>A store dump (<c>[[client, [struct...]]...]</c>) sorted by client, with each run of adjacent GC structs as one.</summary>
+    private static JsonArray JoinGcRuns(JsonNode? dump)
+    {
+        var clients = new JsonArray();
+        foreach (var entry in (dump as JsonArray ?? new JsonArray()).OfType<JsonArray>().OrderBy(e => Num(e[0])))
+        {
+            var joined = new JsonArray();
+            JsonObject? gc = null;
+            foreach (var s in entry[1]!.AsArray().OfType<JsonObject>())
+            {
+                if (s["kind"]?.GetValue<string>() == "gc" && gc != null)
+                {
+                    gc["len"] = Num(gc["len"]) + Num(s["len"]);
+                    continue;
+                }
+
+                var copy = (JsonObject)s.DeepClone();
+                gc = copy["kind"]?.GetValue<string>() == "gc" ? copy : null;
+                joined.Add(copy);
+            }
+
+            clients.Add(new JsonArray(entry[0]!.DeepClone(), joined));
+        }
+
+        return clients;
+    }
+
+    private static double Num(JsonNode? n) => double.Parse(n!.ToJsonString(), System.Globalization.CultureInfo.InvariantCulture);
 
     private static JsonNode Tagged(JsonNode bytesObject) => bytesObject.DeepClone();
 

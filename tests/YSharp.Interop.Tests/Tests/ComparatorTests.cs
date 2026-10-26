@@ -131,6 +131,19 @@ public sealed class ComparatorTests
         docs["b"] = docs["a"]!.DeepClone();
         state["b"]!["v1"]!["full"] = Bytes("0101");
         Assert.Contains("encoded state of b", DiffRun.Convergence(obs, "the oracle")!.Detail);
+
+        // Yjs leaves GC runs from separate transactions unmerged on one replica: equal stores with the runs joined still converge
+        static JsonNode Gc(int clock, int len) => JsonNode.Parse($"{{\"id\":[101,{clock}],\"len\":{len},\"kind\":\"gc\"}}")!;
+        static JsonNode Store(params JsonNode[] structs) => new JsonArray(new JsonArray(101, new JsonArray(structs)));
+        var item = JsonNode.Parse("{\"id\":[101,5],\"len\":1,\"kind\":\"item\",\"parent\":\"t\",\"deleted\":false}")!;
+        obs["structs"] = new JsonObject { ["value"] = new JsonObject { ["a"] = Store(Gc(1, 2), Gc(3, 2), item.DeepClone()), ["b"] = Store(Gc(1, 4), item.DeepClone()) } };
+        obs["ds"] = new JsonObject { ["value"] = new JsonObject { ["a"] = JsonNode.Parse("[[101,[[1,4]]]]"), ["b"] = JsonNode.Parse("[[101,[[1,4]]]]") } };
+        Assert.Null(DiffRun.Convergence(obs, "the oracle"));
+        obs["ds"]!["value"]!["b"] = JsonNode.Parse("[[101,[[1,5]]]]");
+        Assert.Contains("encoded state of b", DiffRun.Convergence(obs, "the oracle")!.Detail);
+        obs["ds"]!["value"]!["b"] = JsonNode.Parse("[[101,[[1,4]]]]");
+        obs["structs"]!["value"]!["b"] = Store(Gc(1, 3), item.DeepClone());
+        Assert.Contains("encoded state of b", DiffRun.Convergence(obs, "the oracle")!.Detail);
     }
 
     // ------------------------------------------------------------------ outcome classes and normalisers
