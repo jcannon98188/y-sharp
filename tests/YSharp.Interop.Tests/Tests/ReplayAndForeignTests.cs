@@ -107,25 +107,18 @@ public sealed class ForeignReadPastEndTests(OracleHost host)
 
 /// <summary>
 /// The Nightly find of TASK-4.28: a flipped byte turns an Any array item into ContentDoc (ref 9), and rendering the array reaches the
-/// subdocuments sketch. Until spec 33 lands Subdocs the mutated-update property discards such a case instead of failing it.
+/// subdocument. With spec 33 that content decodes to a subdocument and the update applies without a fault.
 /// </summary>
-[Requires(Feature.V1, Feature.Array, Feature.Map, Feature.Text, Feature.Events)]
-public sealed class UnlandedSubdocsDiscardTests
+[Requires(Feature.V1, Feature.Array, Feature.Map, Feature.Text, Feature.Events, Feature.Subdocs)]
+public sealed class MutatedContentDocTests
 {
     [Fact, Covers("DIFF-05")]
-    public void MutatedUpdate_ReachingContentDocBeforeSubdocsLand_IsDiscardedNotFailed()
+    public void MutatedUpdate_ReachingContentDoc_AppliesWithoutAFault()
     {
         const string hex = "0202660009010161027d00770262630401017404f09f9880046500040101740f782079e697a5e69cac7a68656c6c6f08010161017d2488650b027704f09f988078c8650b650c0477026263787e7d1800";
         var script = $$"""{"schema":1,"replicas":[{"name":"x","clientId":7000}],"steps":[{"step":"observe","doc":"x","target":{"root":"a","kind":"array"},"name":"o-x-a"},{"step":"applyForeign","doc":"x","bytes":{"$":"bytes","hex":"{{hex}}"},"encoding":"v1","name":"mutated"}]}""";
         var reply = SharpSide.Run(script);
-        if (YSharp.TestKit.Gating.Features.Landed.Contains(Feature.Subdocs))
-            Assert.False(DiffRun.ReachesUnlandedSubdocs(reply), "once Subdocs land, spec 33 removes the discard");
-        else
-        {
-            Assert.Equal(SharpStatus.Fault, reply.Status);
-            Assert.True(DiffRun.ReachesUnlandedSubdocs(reply));
-        }
-        Assert.False(DiffRun.ReachesUnlandedSubdocs(new SharpReply(SharpStatus.Fault, null, "x", new NotImplementedException())), "only the ContentDoc sketch site qualifies");
+        Assert.True(reply.Status == SharpStatus.Ok, $"{reply.Status}: {reply.Message} {reply.Exception}");
     }
 }
 

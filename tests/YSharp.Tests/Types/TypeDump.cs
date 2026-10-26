@@ -57,7 +57,7 @@ internal static class TypeDump
     public static JsonNode Entry(YEntry e) => e.Kind switch
     {
         YEntryKind.Type => Type(e.Type!),
-        YEntryKind.Doc => throw new NotSupportedException("Subdocument entries are not part of the type dumps."),
+        YEntryKind.Doc => new JsonObject { ["kind"] = "subdoc", ["guid"] = e.Doc!.Guid },   // observe.mjs yvalueOut
         _ => Value(e.Value),
     };
 

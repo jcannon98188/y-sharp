@@ -281,12 +281,8 @@ public sealed class SubdocTests
             arr.Delete(0, 1);
         });
         Assert.Empty(parent.Subdocs);
-        if (w.Count > 0)                                                 // JS still reports an event, but one with no added, removed or loaded docs
-        {
-            Assert.Empty(w.Added);
-            Assert.Empty(w.Removed);
-            Assert.Empty(w.Loaded);
-        }
+        // the add and the delete cancel out, but the load stays: Yjs reports an event with only the loaded doc (fixtures/subdocs/add-and-delete-in-one-transaction)
+        AssertEvent(w, Array.Empty<string>(), Array.Empty<string>(), new[] { "gone" });
     }
 
     [Fact]
