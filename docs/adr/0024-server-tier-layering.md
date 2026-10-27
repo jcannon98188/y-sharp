@@ -115,6 +115,7 @@ The ADR 0006 lock makes one `Doc` safe across threads. It does not order work ac
   - A hot `Doc` is evicted after a configurable idle time with no connections and no queued messages (`YServerOptions.HotDocumentIdleTimeout`, one minute by default). An indexing subscriber keeps it hot.
   - Eviction drops the `Doc` reference inside the mailbox. The relay state and the log stay authoritative, so nothing is lost.
   - The relay state of a document with no connections may be evicted too, and is rebuilt from storage on next open (`DocumentIdleTimeout`, five minutes by default). The whole mailbox closes; a connection, edit, read or subscriber that attached meanwhile keeps it open.
+- **SRV-23** A host hook runs before an idle document is unloaded (TASK-17.4, owner sign-off 2026-10-27): `YServerOptions.DocumentUnloading` gets the document id and its state as a V1 update on the worker, so a host can write a snapshot when a document goes idle. It is bounded by `DocumentUnloadingDeadline` (five seconds by default), and a hook that throws or overruns does not keep the document loaded, since the store already holds every accepted update. A document opened while the hook runs stays loaded. The hook is not called on shutdown or deletion.
 - **SRV-21** While a `Doc` is hot, its state and the relay state agree after every accepted update: both are built from the same accepted sequence. A test checks that `EncodeStateAsUpdate` of the hot `Doc` matches the relay's merged update in content.
 
 ## Considered

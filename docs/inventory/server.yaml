@@ -245,13 +245,13 @@
 
 - id: SRV-21
   title: "A hot Doc and the relay hold the same content after every accepted update"
-  source: "docs/adr/0024-server-tier-layering.md:118"
+  source: "docs/adr/0024-server-tier-layering.md:119"
   kind: y-sharp-own
   layers: [unit]
   wire: false
   owner: 5
   status: active
-  ref: "adr 0024:118"
+  ref: "adr 0024:119"
 
 - id: SRV-22
   title: "Presence is kept as y-websocket keeps it: applied to the document's awareness, sent to every connection, given to a late joiner, removed when its connection closes or it goes stale"
@@ -263,3 +263,14 @@
   status: active
   ref: "adr 0024:104"
   note: "TASK-17.3. Before it the server relayed awareness as is and kept no state."
+
+- id: SRV-23
+  title: "A host hook gets an idle document's state before it is unloaded, bounded by a deadline, and a failing hook does not keep it loaded"
+  source: "docs/adr/0024-server-tier-layering.md:118"
+  kind: y-sharp-own
+  layers: [unit]
+  wire: false
+  owner: 5
+  status: active
+  ref: "adr 0024:118"
+  note: "TASK-17.4: a host may write a snapshot when a document goes idle."

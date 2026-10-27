@@ -186,7 +186,7 @@ internal sealed class DocumentMailbox
             var idle = IdleWait();
             var more = idle is null ? await reader.WaitToReadAsync().ConfigureAwait(false) : await WaitToReadAsync(reader, idle.Value).ConfigureAwait(false);
             if (more is false) break;
-            if (more is null) Evict();
+            if (more is null) await EvictAsync().ConfigureAwait(false);
         }
 
         foreach (var connection in _connections) connection.Close(CloseReason);
@@ -227,16 +227,35 @@ internal sealed class DocumentMailbox
     /// <summary>
     /// SRV-20: drops the hot Doc, then the whole document, once each has been idle long enough. The relay and the log stay authoritative, so the
     /// Doc is rebuilt from the relay when next needed, and the document from the store when next opened. The server refuses to evict a document
-    /// that something attached to meanwhile; the idle time then starts again.
+    /// that something attached to meanwhile; the idle time then starts again. The host's unloading hook runs first (SRV-23).
     /// </summary>
-    private void Evict()
+    private async ValueTask EvictAsync()
     {
         var idle = _time.GetElapsedTime(_lastActivity);
         if (HotDocument is not null && _options.HotDocumentIdleTimeout != Timeout.InfiniteTimeSpan && idle >= _options.HotDocumentIdleTimeout)
             HotDocument = null;
         if (_options.DocumentIdleTimeout == Timeout.InfiniteTimeSpan || idle < _options.DocumentIdleTimeout) return;
+        if (_options.DocumentUnloading is { } unloading) await UnloadingAsync(unloading).ConfigureAwait(false);
         if (_server.TryEvict(this)) _closed = true;
         else _lastActivity = _time.GetTimestamp();
+    }
+
+    /// <summary>
+    /// SRV-23: the host's hook gets the document's state before it is unloaded. It is awaited no longer than its deadline, and a hook that fails
+    /// or overruns does not keep the document loaded: the store holds every accepted update.
+    /// </summary>
+    private async ValueTask UnloadingAsync(Func<string, ReadOnlyMemory<byte>, CancellationToken, ValueTask> hook)
+    {
+        var limit = _options.DocumentUnloadingDeadline;
+        using var deadline = new CancellationTokenSource(limit, _time);
+        try
+        {
+            await hook(DocumentId, _relay.EncodeStateAsUpdate(), deadline.Token).AsTask().WaitAsync(limit, _time).ConfigureAwait(false);
+        }
+        catch (Exception)
+        {
+            // failed, cancelled or late: the document is unloaded all the same, and a hook still running is left to finish on its own
+        }
     }
 
     /// <summary>

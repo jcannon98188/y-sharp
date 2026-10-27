@@ -134,3 +134,8 @@ So that `DocumentMailbox` decodes a peer's update once, three members take a `De
 - **Options.** (a) Keep the three overloads. (b) Remove them and let the server decode three times; ADR 0024 keeps the server on the public API, so there is no internal route.
 - **Recommendation.** (a). There is no throwing `Doc.ApplyUpdate(DecodedUpdate)`; add one only if E2 goes the other way.
 - **Decision (owner sign-off, 2026-10-27).** (a). E2 stayed `Try`-only, so no throwing `Doc.ApplyUpdate(DecodedUpdate)` is added.
+
+### E7. Unloading hook (TASK-17.4)
+A host integration found no way for a host to act when `YServer` unloads an idle document (SRV-20), for instance to write a snapshot then. `YServerOptions` gains `DocumentUnloading`, a `Func<string, ReadOnlyMemory<byte>, CancellationToken, ValueTask>?` that gets the document id and its state as a V1 update on the worker, and `DocumentUnloadingDeadline` (five seconds), after which its token is cancelled and the document is unloaded without waiting further (SRV-23).
+- **Type choices.** A delegate, like `Validation`, rather than an interface or an event: there is one host and its call is awaited. The state is the relay's V1 update, the bytes `Y.encodeStateAsUpdate` gives a Node host; a host that wants a `Doc` applies it.
+- **Decision (owner sign-off, 2026-10-27).** The owner asked for the hook in preview.2 ("Include it now"). The shape above was chosen in implementation and recorded here.
