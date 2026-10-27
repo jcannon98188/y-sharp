@@ -276,6 +276,21 @@ public sealed class YRelay
         }
     }
 
+    /// <summary>The structs the relay holds, Skips included (the fuzz guard allows each one a fold adds the same as one it merges again).</summary>
+    internal long HeldStructs
+    {
+        get
+        {
+            lock (_gate)
+            {
+                if (_flat is not null) return _flat.Count;
+                long count = 0;
+                foreach (var held in _clients.Values) count += held.Structs.Count;
+                return count;
+            }
+        }
+    }
+
     /// <summary>True while the state is held as one flat list (tests check the per-client form is the usual one).</summary>
     internal bool IsFlat
     {
