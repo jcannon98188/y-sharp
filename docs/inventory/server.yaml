@@ -22,6 +22,7 @@
   owner: 5
   status: active
   ref: "adr 0024:25"
+  note: "An update holding other content at an id the relay already holds is folded as a Doc applies it: the relay keeps what it holds. Yjs mergeUpdates([state, update]) can keep the later struct there instead (which one depends on the other clients in the update, as mergeUpdates orders its readers), so the byte equality holds for inputs that never hold two contents at one id, which Yjs never writes (TASK-18)."
 
 - id: RLY-3
   title: "The answer for a client state vector is diffUpdate of the merged state and catches the client up"
@@ -82,6 +83,7 @@
   owner: 5
   status: active
   ref: "adr 0024:56"
+  note: "A load is the records folded one at a time in sequence order (RLY-2's fold, as the relay folded them live). Records covering disjoint clocks are merged in one step (TASK-13); a record covering a clock an earlier one in the batch covers starts a new batch, since one merge can keep the later content there and a restart then served another document (the nightly HOS-MUT finds of 2026-10-27, TASK-18)."
 
 - id: SRV-11
   title: "Compaction merges the log through the relay tier with no Doc; a crash at any step or a replay cannot change the state"
