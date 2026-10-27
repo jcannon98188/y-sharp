@@ -23,6 +23,9 @@ internal static class UpdateReader
 
     public const byte HasOrigin = 0x80, HasRightOrigin = 0x40, HasParentSub = 0x20;
 
+    /// <param name="decoder">The V1 or V2 decoder, positioned at the start of the update.</param>
+    /// <param name="limits">The bounds the update is read under; a breach returns <see cref="YError.LimitExceeded"/>.</param>
+    /// <param name="update">Receives the structs by client and the delete ranges.</param>
     /// <param name="exactSkip">
     /// The update functions' reading (Yjs <c>lazyStructReaderGenerator</c>): only an info byte of exactly 10 is a Skip, so a Skip ref with flag
     /// bits is an item with the unknown content ref 10 and is Malformed (ENC-85). Applying an update reads any info with ref 10 as a Skip.

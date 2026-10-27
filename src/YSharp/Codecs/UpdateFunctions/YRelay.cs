@@ -75,7 +75,7 @@ public sealed class YRelay
     /// <summary>
     /// Validates <paramref name="update"/> and folds it into the merged state (Yjs <c>mergeUpdates([state, update])</c>): structs the relay
     /// already holds are dropped, overlaps are sliced, gaps become Skips and the delete sets are merged. A duplicate or out-of-order update is
-    /// accepted. An invalid or over-limit update returns its error and changes nothing. The same as <see cref="TryPrepareUpdate"/> then
+    /// accepted. An invalid or over-limit update returns its error and changes nothing. The same as <see cref="TryPrepareUpdate(ReadOnlySpan{byte}, out PreparedUpdate?, UpdateFormat)"/> then
     /// <see cref="Commit"/>, in one step.
     /// </summary>
     public YStatus TryApplyUpdate(ReadOnlySpan<byte> update, UpdateFormat format = UpdateFormat.V1)
@@ -121,7 +121,7 @@ public sealed class YRelay
     }
 
     /// <summary>
-    /// Folds in an update <see cref="TryPrepareUpdate"/> prepared. Throws <see cref="InvalidOperationException"/> when it was prepared by another
+    /// Folds in an update <see cref="TryPrepareUpdate(ReadOnlySpan{byte}, out PreparedUpdate?, UpdateFormat)"/> prepared. Throws <see cref="InvalidOperationException"/> when it was prepared by another
     /// relay, was already committed, or was prepared before another update changed this relay: prepare and commit run one update at a time, as
     /// a server's per-document mailbox runs them.
     /// </summary>
@@ -139,7 +139,7 @@ public sealed class YRelay
         }
     }
 
-    /// <summary>An update <see cref="TryPrepareUpdate"/> validated and merged, waiting for <see cref="Commit"/>.</summary>
+    /// <summary>An update <see cref="TryPrepareUpdate(ReadOnlySpan{byte}, out PreparedUpdate?, UpdateFormat)"/> validated and merged, waiting for <see cref="Commit"/>.</summary>
     public sealed class PreparedUpdate
     {
         private StateVector? _stateVector;

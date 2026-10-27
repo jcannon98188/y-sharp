@@ -2,7 +2,14 @@
 
 This guide is for people who use y-sharp, either in an application or on a server. It covers the core library first: documents, shared types, transactions, updates and the sync protocol. Then it covers the server tier, and how the project shows that y-sharp interoperates with Yjs. [server.md](server.md) has the server's full hosting reference. The [architecture decision records](adr/) explain why each part is built the way it is.
 
-Nothing is on NuGet yet (TASK-15), so reference the projects from source:
+The packages are `YSharp` (the core), `YSharp.Server` and `YSharp.Server.Testing`. Once the first preview is published ([releasing.md](releasing.md)), install them with:
+
+```bash
+dotnet add package YSharp --prerelease
+dotnet add package YSharp.Server --prerelease   # only for a server
+```
+
+Until then, reference the projects from source:
 
 ```xml
 <ProjectReference Include="path/to/y-sharp/src/YSharp/YSharp.csproj" />

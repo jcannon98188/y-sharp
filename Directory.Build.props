@@ -9,6 +9,8 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <AnalysisMode>Default</AnalysisMode>
     <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
+    <!-- only the projects under src/ ship as packages (src/Directory.Build.props) -->
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
   <PropertyGroup>
     <!-- MIT, as Yjs, lib0 and y-protocols are (LICENSE, THIRD-PARTY-NOTICES.md) -->

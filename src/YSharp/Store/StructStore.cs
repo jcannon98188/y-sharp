@@ -438,7 +438,7 @@ internal sealed partial class StructStore
     // ------------------------------------------------------------------ split and merge
 
     /// <summary>
-    /// Yjs <c>splitItem</c>: the part from <paramref name="diff"/> on becomes a new item, linked right after <paramref name="item"/> and recorded in
+    /// Yjs <c>splitItem</c>: the part from <paramref name="diff"/> on becomes a new item, linked right after <paramref name="left"/> and recorded in
     /// <see cref="MergeStructs"/>. The caller places it in the client's list (the clean-start and clean-end lookups do).
     /// </summary>
     private Item Split(Item left, long diff)

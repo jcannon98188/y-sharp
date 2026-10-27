@@ -2,6 +2,7 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <RootNamespace>YSharp</RootNamespace>
+    <Description>A pure C# port of Yjs v13, the CRDT library for collaborative applications: documents, shared text, arrays, maps and XML, the V1 and V2 update formats, undo, snapshots, relative positions, and the sync, awareness and auth protocols, wire-compatible with Yjs.</Description>
     <!-- Stub only: events are declared but never raised until the implementation lands. Remove then. -->
     <NoWarn>$(NoWarn);CS0067</NoWarn>
   </PropertyGroup>

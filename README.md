@@ -3,12 +3,13 @@
 A pure C# port of [Yjs](https://github.com/yjs/yjs) v13, the CRDT library for building collaborative applications.
 
 > **Status: the core library is implemented; pre-release.**
-> All 44 implementation specs (milestones M0 to M7) have landed and passed the release gate. Every feature gate is open: documents, transactions, the V1 and V2 codecs, the shared types, events, snapshots, relative positions, the undo manager, subdocuments, permanent user data, and the awareness, sync and auth protocols. A server tier (`YSharp.Server`) sits on top of it. Nothing is published to NuGet yet (TASK-15 tracks it), so build from source. The public API may still change before a first release.
+> All 44 implementation specs (milestones M0 to M7) have landed and passed the release gate. Every feature gate is open: documents, transactions, the V1 and V2 codecs, the shared types, events, snapshots, relative positions, the undo manager, subdocuments, permanent user data, and the awareness, sync and auth protocols. A server tier (`YSharp.Server`) sits on top of it. The three packages (`YSharp`, `YSharp.Server`, `YSharp.Server.Testing`) are set up for NuGet and publish from a release tag ([docs/releasing.md](docs/releasing.md)); until the first preview is out, build from source. The public API may still change before a first release.
 
 ## Documentation
 
 - **[How y-sharp works](docs/guide.md)**: documents, shared types, transactions and threads, updates, the sync protocol, awareness, undo, limits, and the server tier.
 - **[Hosting the server](docs/server.md)**: wiring `YSharp.Server` into a host, storage backends, validation hooks, and server-side edits.
+- **[Releasing to NuGet](docs/releasing.md)**: the packages, the version scheme and how a release is cut.
 - **[API decisions](docs/api-decisions.md)** and the **[architecture decision records](docs/adr/)**: why the library is built the way it is.
 
 ## What it is
@@ -80,7 +81,7 @@ This runs the gating tier and needs no Node. The live differential tests need No
 
 ## Project management
 
-Work is tracked with [Backlog.md](https://github.com/MrLesk/Backlog.md) under `backlog/`. The implementation plan, TASK-4, is done: 44 specs across milestones M0 to M7. TASK-5 is the server tier. The follow-ups TASK-6 to TASK-13 are done: registry rows, an undo ordering detail, zero-allocation budgets, the API surface baseline, and work proportional to the update rather than the held state in the relay's folds, the document's pending state and loading a stored log. TASK-14 decodes a peer's update once on the server. The owner's API decisions on the server-tier surface (E1 to E6 in [docs/api-decisions.md](docs/api-decisions.md)) are applied, including `YServer.DeleteAsync`. TASK-15 is publishing the packages to NuGet.
+Work is tracked with [Backlog.md](https://github.com/MrLesk/Backlog.md) under `backlog/`. The implementation plan, TASK-4, is done: 44 specs across milestones M0 to M7. TASK-5 is the server tier. The follow-ups TASK-6 to TASK-13 are done: registry rows, an undo ordering detail, zero-allocation budgets, the API surface baseline, and work proportional to the update rather than the held state in the relay's folds, the document's pending state and loading a stored log. TASK-14 decodes a peer's update once on the server. The owner's API decisions on the server-tier surface (E1 to E6 in [docs/api-decisions.md](docs/api-decisions.md)) are applied, including `YServer.DeleteAsync`. TASK-15 packages the libraries for NuGet: package metadata, symbols and Source Link, and a release workflow that publishes from a version tag.
 
 ## License
 

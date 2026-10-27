@@ -5,3 +5,6 @@ TestResults/
 BenchmarkDotNet.Artifacts/
 node_modules/
 coverage/
+
+# packed NuGet packages (dotnet pack -o artifacts)
+artifacts/
