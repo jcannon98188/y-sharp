@@ -59,7 +59,7 @@ internal sealed partial class StructStore
     public string? ParentSubOf(ItemRef item)
     {
         var key = item.Item!.ParentSub;
-        return key < 0 ? null : Keys.Get(key).ToString();
+        return key < 0 ? null : Keys.GetString(key);
     }
 
     /// <summary>Number of structs held for <paramref name="client"/>.</summary>

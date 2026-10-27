@@ -29,6 +29,7 @@ internal sealed class KeyTable
 
     private readonly ChunkedList<char[]> _chunks = new();
     private readonly ChunkedList<KeySlice> _keys = new();
+    private readonly ChunkedList<string?> _strings = new();   // each key as a string, made the first time one is asked for
     private int _current = -1;
     private int _used;
 
@@ -79,6 +80,7 @@ internal sealed class KeyTable
         }
 
         _keys.Add(new KeySlice(chunk, start, key.Length));
+        _strings.Add(null);
         return _keys.Count - 1;
     }
 
@@ -87,6 +89,12 @@ internal sealed class KeyTable
         var k = _keys[index];
         return _chunks[k.Chunk].AsSpan(k.Start, k.Length);
     }
+
+    /// <summary>
+    /// The key as a string, made once per key: a transaction names each changed key as a string (Yjs <c>parentSub</c>), and a map Set that
+    /// made a new string for the item it adds and another for the one it replaces would allocate on every write (BUD-04).
+    /// </summary>
+    public string GetString(int index) => _strings[index] ??= Get(index).ToString();
 
     public int LengthOf(int index) => _keys[index].Length;
 }

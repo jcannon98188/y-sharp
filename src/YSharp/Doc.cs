@@ -24,6 +24,9 @@ public sealed partial class Doc : IDisposable
     /// <summary>The document's structs (spec 11). Read and written only under the document lock.</summary>
     internal StructStore Store { get; } = new();
 
+    /// <summary>The text position a plain insert or delete reuses (<see cref="TypeText.Position.Rent"/>); only the lock holder touches it.</summary>
+    internal TypeText.Position? SpareTextPosition;
+
     internal DocOptions Options => _options;
 
     public ulong ClientId

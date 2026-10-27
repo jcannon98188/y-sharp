@@ -51,8 +51,22 @@ public class YText : YType
         if (index < 0) throw new ArgumentOutOfRangeException(nameof(index));
         CheckAttributes(attributes);
         if (text.Length == 0) return;
-        var attrs = attributes;
-        Write((tx, doc) => InsertCore(tx, doc, index, text, attrs));
+        if (AttachedDoc is not { } doc)
+        {
+            AddPendingInsert(index, text, attributes);
+            return;
+        }
+
+        // no closure: a plain insert allocates its item and the transaction, nothing more (BUD-07)
+        var h = doc.EnterWrite(null, local: true);
+        try
+        {
+            InsertCore(h.Tx, doc, index, text, attributes);
+        }
+        finally
+        {
+            doc.Leave(h);
+        }
     }
 
     /// <summary>Yjs <c>insertEmbed</c> of a JSON value: one unit long, skipped by <see cref="ToString"/> (E-1).</summary>
@@ -81,7 +95,21 @@ public class YText : YType
         if (index < 0) throw new ArgumentOutOfRangeException(nameof(index));
         if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
         if (length == 0) return;
-        Write((tx, doc) => TypeText.DeleteText(tx, doc, TypeText.FindPosition(doc, Branch, index, useSearchMarker: true), length));
+        if (AttachedDoc is not { } doc)
+        {
+            AddPendingDelete(index, length);
+            return;
+        }
+
+        var h = doc.EnterWrite(null, local: true);
+        try
+        {
+            DeleteCore(h.Tx, doc, index, length);
+        }
+        finally
+        {
+            doc.Leave(h);
+        }
     }
 
     /// <summary>Yjs <c>format</c>: zero, or an index at or past the end, changes nothing (F-6).</summary>
@@ -313,8 +341,22 @@ public class YText : YType
     {
         var inherit = attributes.Kind is YValueKind.Undefined or YValueKind.Null;
         var pos = TypeText.FindPosition(doc, Branch, index, useSearchMarker: inherit);
-        var attrs = inherit ? TypeText.Attributes.From(pos.Current) : TypeText.Attributes.From(attributes);
+        var attrs = inherit ? TypeText.Attributes.From(pos.Current, pos.SpareAttributes ??= new TypeText.Attributes()) : TypeText.Attributes.From(attributes);
         TypeText.InsertText(tx, doc, Branch, pos, text, attrs);
+        pos.Return(doc);
+    }
+
+    // the lambdas of a text not yet in a document live here: a closure over a method's parameters is allocated on entry to that method,
+    // so Insert and Delete would pay for it on every call
+    private void AddPendingInsert(int index, string text, YValue attributes) => _pending!.Add((tx, d) => InsertCore(tx, d, index, text, attributes));
+
+    private void AddPendingDelete(int index, int length) => _pending!.Add((tx, d) => DeleteCore(tx, d, index, length));
+
+    private void DeleteCore(Transaction tx, Doc doc, int index, int length)
+    {
+        var pos = TypeText.FindPosition(doc, Branch, index, useSearchMarker: true);
+        TypeText.DeleteText(tx, doc, pos, length);
+        pos.Return(doc);
     }
 
     private void InsertEmbedCore(int index, YEntry content, YValue attributes)
