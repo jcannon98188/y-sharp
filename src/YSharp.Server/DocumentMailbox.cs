@@ -233,13 +233,7 @@ internal sealed class DocumentMailbox
         var log = _server.Log;
         _relay = new YRelay(log.StoredLimits);
         var doc = _hook is null ? null : new Doc(new DocOptions { Limits = log.StoredLimits });
-        await foreach (var record in log.Store.ReadSinceAsync(DocumentId, 0).ConfigureAwait(false))
-        {
-            var status = _relay.TryApplyUpdate(record.UpdateV2.Span, UpdateFormat.V2);
-            if (!status.Ok) throw new InvalidDataException($"Document '{DocumentId}': record {record.Sequence} is not a valid update ({status.Error}).");
-            doc?.ApplyUpdate(record.UpdateV2.Span, this, UpdateFormat.V2);
-        }
-
+        await log.FoldAsync(DocumentId, 0, _relay, doc, this, CancellationToken.None).ConfigureAwait(false);
         HotDocument = doc;
     }
 

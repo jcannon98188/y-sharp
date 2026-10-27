@@ -1,5 +1,6 @@
 using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -84,17 +85,49 @@ public sealed class UpdateLog
     /// Folds the records after <paramref name="afterSequence"/> into <paramref name="relay"/> and returns the last sequence folded
     /// (<paramref name="afterSequence"/> when there were none). A relay kept in memory catches up this way after another writer appended.
     /// </summary>
-    public async ValueTask<long> FoldAsync(string docId, long afterSequence, YRelay relay, CancellationToken cancellationToken = default)
+    public ValueTask<long> FoldAsync(string docId, long afterSequence, YRelay relay, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(docId);
         ArgumentNullException.ThrowIfNull(relay);
+        return FoldAsync(docId, afterSequence, relay, null, null, cancellationToken);
+    }
+
+    /// <summary>
+    /// <see cref="FoldAsync(string, long, YRelay, CancellationToken)"/>, also applying the records to <paramref name="doc"/> when one is given. The
+    /// records are merged once (Yjs <c>mergeUpdates</c> over all of them, as Yjs storage backends load a log) and the merged update is folded in
+    /// one step, so a log of n records costs its size times log n rather than n folds (TASK-13); the merge of all records is the bytes folding
+    /// them one at a time gives. When the merge or the merged fold is refused (a record that does not decode, or a limit the merged update breaks
+    /// that no record did) the records are folded one at a time as before, which names the record that fails.
+    /// </summary>
+    internal async ValueTask<long> FoldAsync(string docId, long afterSequence, YRelay relay, Doc? doc, object? origin, CancellationToken cancellationToken)
+    {
         var last = afterSequence;
+        var records = new List<UpdateRecord>();
+        // the store's contract keeps a record's bytes valid after the read moves past it (IUpdateStore), so they are held, not copied
         await foreach (var record in Store.ReadSinceAsync(docId, afterSequence, cancellationToken).ConfigureAwait(false))
+        {
+            records.Add(record);
+            if (record.Sequence > last) last = record.Sequence;
+        }
+
+        if (records.Count == 0) return last;
+        var updates = new ReadOnlyMemory<byte>[records.Count];
+        for (var i = 0; i < updates.Length; i++) updates[i] = records[i].UpdateV2;
+        var merged = new ArrayBufferWriter<byte>();
+        if (YUpdate.TryMerge(updates, merged, UpdateFormat.V2, StoredLimits).Ok && relay.TryApplyUpdate(merged.WrittenSpan, UpdateFormat.V2).Ok)
+        {
+            if (doc is not null && !doc.TryApplyUpdate(merged.WrittenSpan, origin, UpdateFormat.V2).Ok)
+                foreach (var record in records) doc.ApplyUpdate(record.UpdateV2.Span, origin, UpdateFormat.V2);
+            return last;
+        }
+
+        // the relay is unchanged: a refused update changes nothing
+        foreach (var record in records)
         {
             var status = relay.TryApplyUpdate(record.UpdateV2.Span, UpdateFormat.V2);
             if (!status.Ok)
                 throw new InvalidDataException($"Document '{docId}': record {record.Sequence}{(record.IsSnapshot ? " (snapshot)" : "")} is not a valid update ({status.Error}).");
-            if (record.Sequence > last) last = record.Sequence;
+            doc?.ApplyUpdate(record.UpdateV2.Span, origin, UpdateFormat.V2);
         }
 
         return last;

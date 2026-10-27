@@ -46,7 +46,8 @@ public interface IUpdateStore
     /// <summary>
     /// The records after <paramref name="afterSequence"/>, in sequence order. When the compacted snapshot covers sequences after
     /// <paramref name="afterSequence"/>, it comes first, with <see cref="UpdateRecord.IsSnapshot"/> set and the last sequence it covers. Pass 0 to read
-    /// the whole log. An unknown document reads as empty.
+    /// the whole log. An unknown document reads as empty. A record's bytes stay valid after the read moves past it: a reader may hold every
+    /// record and merge them once at the end.
     /// </summary>
     IAsyncEnumerable<UpdateRecord> ReadSinceAsync(string docId, long afterSequence, CancellationToken cancellationToken = default);
 
