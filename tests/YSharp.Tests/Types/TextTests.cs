@@ -94,6 +94,22 @@ public sealed class TextTests
         Assert.Equal("xyz", text.ToString());
     }
 
+    // TASK-17.1: Yjs inserts nothing for an empty initial string (YText.insert returns on length 0), so the update holds the type alone;
+    // the bytes are pinned Yjs v13.6.33 output for client 7001
+    [Theory, Covers("T-4")]
+    [Requires(Feature.Array, Feature.Xml)]
+    [InlineData(true, "0101d93600070101660600")]
+    [InlineData(false, "0101d93600070101610200")]
+    public void NewText_WithAnEmptyString_IntegratesWithNoContentItem(bool xml, string expected)
+    {
+        var doc = new Doc(new DocOptions { ClientId = 7001 });
+        if (xml) doc.GetXmlFragment("f").Push([new YXmlText("")]);
+        else doc.GetArray("a").Push([new YText("")]);
+        var update = doc.EncodeStateAsUpdate();
+        Assert.Equal(expected, Convert.ToHexString(update).ToLowerInvariant());
+        Assert.True(YUpdate.TryValidate(update).Ok);
+    }
+
     [Fact, PortOf("y-text.tests.js:testSplitSurrogateCharacter", "T-5")]
     [Requires(Feature.TextFormat, Feature.Sync)]
     public void Text_SplitSurrogatePair_SurvivesDisconnectAndSync()
