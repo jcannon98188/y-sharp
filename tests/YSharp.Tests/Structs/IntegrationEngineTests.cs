@@ -340,6 +340,72 @@ public sealed class IntegrationEngineTests
     }
 
     [Fact]
+    [Covers("STR-63", "STR-64", "ERR-10")]
+    public void ThePredictedPendingSize_IsExactlyWhatTheUpdateLeaves_ForRandomWaitingShapes()
+    {
+        // the size is kept as the pending state changes (TASK-11): gaps, Skips, overlaps, out-of-order clocks, pending deletes and retries
+        for (var seed = 0; seed < 300; seed++)
+        {
+            var rng = new Random(seed);
+            var limited = Mk();
+            var reference = Mk();
+            for (var step = 0; step < 30; step++)
+            {
+                var (refs, deletes) = RandomWaitingUpdate(rng);
+                UpdateRefs Make()
+                {
+                    var u = Update(refs);
+                    foreach (var (client, clock, length) in deletes) u.AddDelete(client, clock, length);
+                    return u;
+                }
+
+                reference.IntegrateRemote(Make());
+                var expected = Doc.V1Bytes(reference.Pending, reference.PendingDeletes);
+                Assert.False(limited.TryIntegrateRemote(Make(), null, expected - 1, out _), $"seed {seed} step {step}: accepted one byte under {expected}");
+                Assert.True(limited.TryIntegrateRemote(Make(), null, expected, out _), $"seed {seed} step {step}: rejected at {expected}");
+                Assert.Equal(expected, Doc.V1Bytes(limited.Pending, limited.PendingDeletes));
+            }
+
+            Assert.Equal(Text(reference), Text(limited));
+        }
+    }
+
+    /// <summary>One or two clients' runs of strings and GCs from a random clock, Skips between, origins in other clients, sometimes deletes.</summary>
+    private static (StructRef[] Refs, (ulong, long, long)[] Deletes) RandomWaitingUpdate(Random rng)
+    {
+        var refs = new List<StructRef>();
+        var first = (ulong)rng.Next(1, 5);
+        foreach (var client in rng.Next(2) == 0 ? new[] { first } : new[] { first, first % 4 + 1 })
+        {
+            var clock = (long)rng.Next(0, 10);
+            var count = rng.Next(1, 4);
+            for (var i = 0; i < count; i++)
+            {
+                var length = rng.Next(1, 3);
+                switch (i > 0 && i < count - 1 ? rng.Next(3) : rng.Next(2))
+                {
+                    case 0:
+                        var other = (client + (ulong)rng.Next(1, 4) - 1) % 4 + 1;
+                        refs.Add(Str(client, clock, length == 1 ? "a" : "ab", origin: rng.Next(2) == 0 ? (other, rng.Next(0, 10)) : null));
+                        break;
+                    case 1:
+                        refs.Add(StructRef.Gc(client, clock, length));
+                        break;
+                    default:
+                        refs.Add(StructRef.Skip(client, clock, length));
+                        break;
+                }
+
+                clock += length;
+            }
+        }
+
+        var deletes = new List<(ulong, long, long)>();
+        if (rng.Next(3) == 0) deletes.Add(((ulong)rng.Next(1, 5), rng.Next(0, 12), rng.Next(1, 4)));
+        return (refs.ToArray(), deletes.ToArray());
+    }
+
+    [Fact]
     [Covers("STR-64")]
     public void IndependentPendingUpdates_MergeIntoOnePendingState_AndEachIntegratesWhenItsDependencyArrives()
     {
