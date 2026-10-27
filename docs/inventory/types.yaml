@@ -1080,6 +1080,170 @@
   status: active
   ref: "types.md:363"
 
+- id: X-F1
+  title: "YXmlFragment API: length, firstChild, insert, insertAfter, delete, push, unshift, get, slice, toArray, forEach, tree walker, querySelector(All), toString, toJSON, clone (YXF:134-440)"
+  source: "yjs/src/types/YXmlFragment.js:134"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: active
+  ref: "types.md:334"
+  note: "toDOM is browser-only and out of scope (ADR 0008); the rest is the public YXmlFragment API."
+
+- id: X-F2
+  title: "insert/delete/push/get/slice/toArray/forEach share the list machinery of YArray; push is insert(length), so it lands after the last live child"
+  source: "yjs/src/types/YXmlFragment.js:367"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: active
+  ref: "types.md:336"
+
+- id: X-F3
+  title: "insertAfter(ref, content): null inserts at the start, a type or item inserts after it (typeListInsertGenericsAfter); before attach an unknown ref throws (YXF:338-349)"
+  source: "yjs/src/types/YXmlFragment.js:338"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: active
+  ref: "types.md:337"
+
+- id: X-F4
+  title: "firstChild is the first non-deleted child or null (YXF:146-149)"
+  source: "yjs/src/types/YXmlFragment.js:146"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: active
+  ref: "types.md:340"
+
+- id: X-F5
+  title: "toString() concatenates the children's toString(); toJSON() is toString(), an XML string, not a JSON structure (YXF:270-279)"
+  source: "yjs/src/types/YXmlFragment.js:270"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: active
+  ref: "types.md:341"
+
+- id: X-F6
+  title: "length before attach is the prelim content's length (T-0.4)"
+  source: "yjs/src/types/YXmlFragment.js:157"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: active
+  ref: "types.md:342"
+
+- id: X-F7
+  title: "Tree walker: depth-first pre-order over element and fragment descendants, skipping deleted nodes; querySelector(All) matches nodeName case-insensitively (YXF:57-123)"
+  source: "yjs/src/types/YXmlFragment.js:57"
+  kind: match
+  layers: [unit, port, differential]
+  wire: false
+  owner: 7
+  status: active
+  ref: "types.md:343"
+
+- id: X-F8
+  title: "Events are YXmlEvent with childListChanged and attributesChanged; delta as for arrays"
+  source: "yjs/src/types/YXmlEvent.js:10"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: active
+  ref: "types.md:347"
+
+- id: X-T1
+  title: "YXmlText has all YText behaviour plus attributes and siblings"
+  source: "yjs/src/types/YXmlText.js:15"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: active
+  ref: "types.md:368"
+
+- id: X-T2
+  title: "toString() renders each format as a nested tag, sorted by name, whose attributes are the format value's for...in keys; no escaping (YXT:68-103)"
+  source: "yjs/src/types/YXmlText.js:68"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: active
+  ref: "types.md:369"
+
+- id: X-T3
+  title: "YXmlText toJSON() is toString(), tags included, unlike YText (YXT:105-107)"
+  source: "yjs/src/types/YXmlText.js:105"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: active
+  ref: "types.md:372"
+
+- id: X-T4
+  title: "YXmlText events are YTextEvent"
+  source: "yjs/src/types/YXmlText.js:15"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: active
+  ref: "types.md:373"
+
+- id: X-H1
+  title: "YXmlHook is a YMap with a hookName; all map semantics and YMapEvent apply"
+  source: "yjs/src/types/YXmlHook.js:12"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: active
+  ref: "types.md:378"
+  note: "toDOM is out of scope (ADR 0008)."
+
+- id: X-H2
+  title: "clone() shallow-copies the values and keeps the hookName (T-0.9)"
+  source: "yjs/src/types/YXmlHook.js:30"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: active
+  ref: "types.md:379"
+
+- id: X-H3
+  title: "The hookName round-trips through encode and decode (written as a key)"
+  source: "yjs/src/types/YXmlHook.js:84"
+  kind: match
+  layers: [unit, differential]
+  wire: false
+  owner: 7
+  status: active
+  ref: "types.md:380"
+
+- id: X-T5
+  title: "YXmlText toDOM (browser DOM)"
+  source: "yjs/src/types/YXmlText.js:46"
+  kind: match
+  layers: [unit]
+  wire: false
+  owner: 7
+  status: excluded
+  ref: "types.md:374"
+  exclusion: not-applicable
+  note: "toDOM is browser-only; y-sharp has no DOM (ADR 0008)."
+
 - id: V-1
   title: "Fields: target, currentTarget (initially == target), transaction, lazily path, keys, delta, changes (YE:16-53)"
   source: "yjs/src/utils/YEvent.js:16"
