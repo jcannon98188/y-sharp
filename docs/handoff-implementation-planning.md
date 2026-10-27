@@ -97,7 +97,7 @@ CI on GitHub Actions:
 
 ## 6. Known issues and open items
 
-- **Nightly fails on four relay hostile-input properties** (`RelayHostileProperties`, the nightly tier only). Three are one bug: `YRelay.TryApplyUpdate` accepts a struct whose clock plus length runs past 2^53-1, and the relay's V2 state then fails `YUpdate.TryValidate`. It reproduces with `01010105888080808008ffffffffffffff0f017d5600`. The fourth is `Builder_ManyTinyStructsClientsAndRanges_AreContained`: 1.33 MB allocated for a 2,667-byte input, against a 1.22 MB bound. Both need a fix in the relay.
+- **Nightly differential mismatches.** Some nightly runs fail on a live differential mismatch in the mutated-updates property; the failure depends on the seed. The four relay hostile-input failures of 2026-10-25 are fixed (TASK-16).
 - **XML documentation.** About 630 public members have no doc comment. The packages ship the comments that exist, and CS1591 is suppressed under `src/`.
 - **Parent tasks** TASK-1 to TASK-5 still show To Do in the backlog, although their work is done. Closing them is the owner's call.
 - **Divergences and normalisers.** The live differential compares updates, state, state vectors, documents and results. Where y-sharp is deliberately stricter than JS, normalisers in `tests/YSharp.Interop.Tests/Harness/Normalisers.cs` account for it.
