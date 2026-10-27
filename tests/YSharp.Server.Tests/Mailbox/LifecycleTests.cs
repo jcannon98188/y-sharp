@@ -14,7 +14,7 @@ namespace YSharp.Server.Tests.Mailbox;
 /// <summary>
 /// The hot-Doc lifecycle (ADR 0024 SRV-5, SRV-18, SRV-20; TASK-5.8): a host's edits, reads and subscribers run on the document's mailbox and
 /// materialize a <see cref="Doc"/> only when they ask, an edit is persisted and broadcast like a peer's update, and an idle document drops its
-/// hot Doc and then itself, to be loaded from the store again with nothing lost.
+/// hot Doc and then itself, to be loaded from the store again with nothing lost. A deleted document closes its peers and is gone from the store.
 /// </summary>
 [Requires(Feature.UpdateFunctions, Feature.V2, Feature.V2Functions, Feature.Sync, Feature.Awareness, Feature.Text, Feature.Map, Feature.Events)]
 public sealed class LifecycleTests
@@ -220,6 +220,82 @@ public sealed class LifecycleTests
         await b.FlushAsync();
         Assert.Equal("last words", b.Text);
         Assert.Single(await Records(store, "doc"));
+    }
+
+    // ------------------------------------------------------------------ deletion (docs/api-decisions.md E3)
+
+    [Fact, Covers("SRV-10"), Covers("SRV-9")]
+    public async Task DeletingAnOpenDocument_ClosesItsPeers_EmptiesTheStore_AndTheNextPeerFindsNothing()
+    {
+        var store = new InMemoryUpdateStore();
+        await using var server = new YServer(Options(store));
+        var a = await Peer.JoinAsync(server, "doc", 1);
+        var other = await Peer.JoinAsync(server, "other", 2);
+        await a.InsertAsync("gone");
+        await other.InsertAsync("kept");
+        await a.FlushAsync();
+        await other.FlushAsync();
+
+        await server.DeleteAsync("doc", Ct);
+
+        Assert.True(a.Connection.IsClosed);
+        Assert.Equal(ConnectionCloseReason.DocumentDeleted, a.Connection.CloseReason);
+        Assert.Null(server.Mailbox("doc"));
+        Assert.Empty(await Records(store, "doc"));
+        Assert.False(other.Connection.IsClosed);
+        Assert.NotEmpty(await Records(store, "other"));
+
+        var b = await Peer.JoinAsync(server, "doc", 3);
+        await b.FlushAsync();
+        Assert.Equal("", b.Text);
+        Assert.Equal("", await TextAsync(server, "doc"));
+    }
+
+    [Fact, Covers("SRV-10")]
+    public async Task WhileADocumentIsBeingDeleted_ANewPeerAndAHostReadWait_ThenFindItEmpty()
+    {
+        var store = new GatedStore();
+        await using var server = new YServer(Options(store));
+        Assert.True(await server.EditAsync("doc", tx => Append(tx, "old"), cancellationToken: Ct));
+        store.DeleteGate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        var deleting = server.DeleteAsync("doc", Ct).AsTask();
+        Assert.True(await store.Deleting.WaitAsync(TimeSpan.FromSeconds(30), Ct));
+        var joining = Peer.JoinAsync(server, "doc", 1);
+        var reading = TextAsync(server, "doc");
+        await Task.Delay(50, Ct);
+        Assert.False(joining.IsCompleted);
+        Assert.False(reading.IsCompleted);
+
+        store.DeleteGate.SetResult();
+        await deleting;
+        Assert.Equal("", await reading);
+        var peer = await joining;
+        await peer.FlushAsync();
+        Assert.Equal("", peer.Text);
+        Assert.Empty(await Records(store.Inner, "doc"));
+    }
+
+    [Fact, Covers("SRV-10")]
+    public async Task DeletingADocumentNoOneHasOpen_RemovesItFromTheStore()
+    {
+        var store = new InMemoryUpdateStore();
+        await using (var first = new YServer(Options(store)))
+            Assert.True(await first.EditAsync("doc", tx => Append(tx, "stored"), cancellationToken: Ct));
+        Assert.Single(await Records(store, "doc"));
+
+        await using var server = new YServer(Options(store));
+        await server.DeleteAsync("doc", Ct);
+        Assert.Empty(await Records(store, "doc"));
+        Assert.Equal("", await TextAsync(server, "doc"));
+    }
+
+    [Fact]
+    public async Task DeleteAsync_OnAShutDownServer_Throws()
+    {
+        var server = new YServer(Options(new InMemoryUpdateStore()));
+        await server.DisposeAsync();
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => server.DeleteAsync("doc", Ct).AsTask());
     }
 
     // ------------------------------------------------------------------ SRV-20: idle eviction

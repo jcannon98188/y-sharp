@@ -158,7 +158,7 @@ public sealed class DecodedUpdateTests
         var update = Hex.Bytes(hex);
         var bytes = new YRelay();
         var decoded = new YRelay();
-        var a = bytes.TryPrepareUpdate(update, UpdateFormat.V1, out var pa);
+        var a = bytes.TryPrepareUpdate(update, out var pa);
         var b = decoded.TryPrepareUpdate(Decode(update), out var pb);
         Assert.Equal(a.Error, b.Error);
         if (!a.Ok) return;
@@ -187,7 +187,7 @@ public sealed class DecodedUpdateTests
         HexAssert.Equal(new byte[] { 0, 0 }, target.EncodeStateAsUpdate(), "refused");
 
         // decoded under limits as tight as theirs, or under their own, it is checked the same way the bytes are
-        Assert.Equal(YError.LimitExceeded, relay.TryPrepareUpdate(update, UpdateFormat.V1, out _).Error);
+        Assert.Equal(YError.LimitExceeded, relay.TryPrepareUpdate(update, out _).Error);
         Assert.False(YUpdate.TryDecode(update, out _, UpdateFormat.V1, tight).Ok);
         var small = YLimits.Default with { MaxStructsPerUpdate = 0 };
         Assert.Equal(YError.LimitExceeded, new YRelay(small).TryPrepareUpdate(Decode(update, UpdateFormat.V1, small with { MaxStructsPerUpdate = 100 }), out _).Error);

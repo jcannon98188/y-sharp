@@ -156,7 +156,7 @@ public sealed class ServerTierBoundsTests
             var relay = new YRelay();
             var before = BufferPool.Outstanding;
             relay.TryApplyUpdate(i.Bytes, i.Format);
-            relay.TryPrepareUpdate(i.Bytes, i.Format, out _);
+            relay.TryPrepareUpdate(i.Bytes, out _, i.Format);
             relay.EncodeStateAsUpdate(format: UpdateFormat.V2);
             Assert.Equal(before, BufferPool.Outstanding);
         }, i => (i.Bytes, i.Format), cases: 300);

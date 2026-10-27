@@ -335,7 +335,7 @@ public sealed class RelayTests
     public void Prepare_ChangesNothing_UntilCommit_AndACommitIsSpentOnce()
     {
         var relay = new YRelay();
-        Assert.True(relay.TryPrepareUpdate(U0, UpdateFormat.V1, out var prepared).Ok);
+        Assert.True(relay.TryPrepareUpdate(U0, out var prepared).Ok);
         Assert.True(relay.IsEmpty);
         Assert.Equal(1, prepared!.StateVector[1]);
         relay.Commit(prepared);
@@ -344,12 +344,12 @@ public sealed class RelayTests
         HexAssert.Equal(Encode(direct, UpdateFormat.V1), Encode(relay, UpdateFormat.V1), "prepare then commit is a fold");
 
         Assert.Throws<InvalidOperationException>(() => relay.Commit(prepared));                 // already committed
-        Assert.True(relay.TryPrepareUpdate(U1, UpdateFormat.V1, out var stale).Ok);
+        Assert.True(relay.TryPrepareUpdate(U1, out var stale).Ok);
         Assert.True(relay.TryApplyUpdate(U2).Ok);
         Assert.Throws<InvalidOperationException>(() => relay.Commit(stale!));                   // the relay changed after it was prepared
         Assert.Throws<InvalidOperationException>(() => new YRelay().Commit(prepared));          // prepared by another relay
 
-        Assert.Equal(YError.Malformed, relay.TryPrepareUpdate(U1[..^2], UpdateFormat.V1, out var none).Error);
+        Assert.Equal(YError.Malformed, relay.TryPrepareUpdate(U1[..^2], out var none).Error);
         Assert.Null(none);
     }
 
