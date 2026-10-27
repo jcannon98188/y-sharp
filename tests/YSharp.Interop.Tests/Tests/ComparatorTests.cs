@@ -185,14 +185,15 @@ public sealed class ComparatorTests
     }
 
     [Fact, Covers("DIFF-05", "ENC-51")]
-    public void Normaliser_ZeroLengthDeleteRange_ClaimsOnlyTheReEncodeRejection()
+    public void Normaliser_ZeroLengthDeleteRange_ClaimsOnlyAnUnchangedRejection()
     {
         var n = new ZeroLengthDeleteRangeNormaliser();
-        var insert = Case(MutationKind.InsertByte, oracle: false, sharp: true, validLength: 20, mutatedLength: 21);
-        Assert.True(n.Claims(insert with { OracleZeroLengthDeleteRange = true }));
-        Assert.False(n.Claims(insert), "any other oracle rejection that y-sharp accepts is a bug");
+        var rejects = Case(MutationKind.InsertByte, oracle: true, sharp: false, validLength: 20, mutatedLength: 21);
+        Assert.True(n.Claims(rejects with { OracleZeroLengthDeleteRange = true }));
+        Assert.False(n.Claims(rejects), "any other y-sharp rejection of an update the oracle accepts is a bug");
+        Assert.False(n.Claims(Case(MutationKind.InsertByte, oracle: true, sharp: false, unchanged: false) with { OracleZeroLengthDeleteRange = true }), "a rejection must change nothing");
         Assert.False(n.Claims(Case(MutationKind.InsertByte, oracle: false, sharp: false) with { OracleZeroLengthDeleteRange = true }), "both rejecting is the match case");
-        Assert.False(n.Claims(Case(MutationKind.InsertByte, oracle: true, sharp: true) with { OracleZeroLengthDeleteRange = true }), "both accepting is not a divergence");
+        Assert.False(n.Claims(Case(MutationKind.InsertByte, oracle: false, sharp: true) with { OracleZeroLengthDeleteRange = true }), "y-sharp accepting what the oracle rejects is a bug");
     }
 
     [Fact, Covers("DIFF-05", "ENC-86")]

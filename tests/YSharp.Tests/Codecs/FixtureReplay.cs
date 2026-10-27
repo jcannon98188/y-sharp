@@ -204,7 +204,7 @@ internal static class FixtureReplay
     }
 
     /// <summary>Recorded divergences where y-sharp accepts what the oracle rejects (ADR 0003): a <c>diverge</c> case naming one is accepted.</summary>
-    private static readonly HashSet<string> LenientDivergences = new(StringComparer.Ordinal) { "ENC-51", "ENC-86" };
+    private static readonly HashSet<string> LenientDivergences = new(StringComparer.Ordinal) { "ENC-86" };
 
     /// <summary>
     /// The malformed-input contract: where the oracle accepts a <c>match</c> case y-sharp accepts it; where the oracle rejects, y-sharp

@@ -204,14 +204,27 @@ public sealed class MalformedInputTests
     [Fact, Covers("ENC-50")]
     public void Enc50_ADeleteSetClientWithNoRanges_IsAccepted()=> AssertAccepted("00 01 05 00");
 
-    [Fact, Covers("ENC-51"), Diverges("ENC-51", adr: "0003")]
+    // Yjs never writes a delete range of length 0; it accepts one for a known client and throws Unexpected case (writeDsLen) for an unknown
+    // one. y-sharp rejects it everywhere (TASK-17.2). V2 cannot carry one: its delete-set length column holds the length minus 1
+    [Theory, Covers("ENC-51"), Diverges("ENC-51", adr: "0005")]
     [Requires(Feature.V2, Feature.UpdateFunctions, Feature.V2Functions)]
-    public void Enc51_ADeleteRangeOfLengthZero_IsIgnored_AndConvertsWhereJsThrowsUnexpectedCase()
+    [InlineData("00 01 05 01 00 00")]
+    [InlineData("00 01 00 01 00 00")]         // client 0, clock 0, length 0
+    [InlineData("00 01 05 02 00 01 03 00")]   // after a valid range
+    public void Enc51_ADeleteRangeOfLengthZero_IsMalformed(string hex)
     {
-        var update = Hex.Bytes("00 01 05 01 00 00");
-        AssertAccepted(update);
-        var w = new ArrayBufferWriter<byte>();
-        Assert.True(YUpdate.TryConvert(update, UpdateFormat.V1, UpdateFormat.V2, w).Ok);
+        var update = Hex.Bytes(hex);
+        AssertRejected(update);
+        Assert.Equal(YError.Malformed, YUpdate.TryConvert(update, UpdateFormat.V1, UpdateFormat.V2, new ArrayBufferWriter<byte>()).Error);
+    }
+
+    [Fact, Covers("ENC-51"), Diverges("ENC-51", adr: "0005")]
+    [Requires(Feature.V1)]
+    public void Enc51_ADeleteRangeOfLengthZero_ForAKnownClient_IsMalformed_WhereJsAcceptsIt()
+    {
+        var doc = AssertAccepted(HiV1);
+        Assert.Equal(YError.Malformed, doc.TryApplyUpdate(Hex.Bytes("00 01 01 01 00 00"), null, UpdateFormat.V1).Error);
+        Assert.Equal("hi", doc.GetText("t").ToString());
     }
 
     [Fact, Covers("ENC-86"), Diverges("ENC-86", adr: "0003")]

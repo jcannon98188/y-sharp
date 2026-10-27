@@ -276,7 +276,11 @@ const hostileExtra = [
   c('parent-info-2', textStruct('04', '02 01 00 01 61')),
   c('parent-info-5', textStruct('04', '05 01 00 01 61')),
   c('delete-set-zero-deletes-for-client', '00 01 05 00'),
-  c('delete-set-len-0', '00 01 05 01 00 00', { classification: 'diverge', divergence: 'ENC-51', expect: ['ok'] }),
+  // ENC-51: a delete range of length 0, which Yjs never writes. JS throws Unexpected case re-encoding it for an unknown client (and accepts
+  // it for a known one); y-sharp rejects it everywhere (TASK-17.2)
+  c('delete-set-len-0', '00 01 05 01 00 00', { classification: 'diverge', divergence: 'ENC-51', expect: ['Malformed'] }),
+  c('delete-set-len-0-client-0', '00 01 00 01 00 00', { classification: 'diverge', divergence: 'ENC-51', expect: ['Malformed'] }),
+  c('delete-set-len-0-after-a-range', '00 01 05 02 00 01 03 00', { classification: 'diverge', divergence: 'ENC-51', expect: ['Malformed'] }),
   c('delete-set-two-clients-one-truncated', '00 02 05 01 00 01 06'),
   // both accept; JS re-encodes the parked ranges with a negative V2 clock difference and re-exports (98, 99), (296, 1)
   c('delete-set-pending-out-of-order', '00 01 77 02 62 63 28 01', { classification: 'diverge', divergence: 'ENC-86', expect: ['ok'] }),

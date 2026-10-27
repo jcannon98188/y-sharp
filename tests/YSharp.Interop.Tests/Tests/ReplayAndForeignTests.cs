@@ -64,14 +64,26 @@ public sealed class ForeignReadPastEndTests(OracleHost host)
     }
 
     [Fact, Covers("DIFF-05", "ENC-51")]
-    public void ApplyForeign_AZeroLengthDeleteRangeForAnUnknownClient_IsFlagged()
+    public void ApplyForeign_AZeroLengthDeleteRangeForAnUnknownClient_IsRejectedByBoth()
     {
         // no structs, then a delete set holding client 5, clock 0, length 0: the shape of the Nightly find of TASK-4.28
         var value = Result("00010501" + "0000", "v1");
         Assert.False(value["accepted"]!.GetValue<bool>());
+        Assert.Null(value["zeroLengthDeleteRange"]);
+        Assert.False(SharpSide.Run(Script("00010501" + "0000", "v1"))
+            .Observations!["results"]!["value"]!["r"]!["value"]!["accepted"]!.GetValue<bool>(), "y-sharp rejects the range (ENC-51, TASK-17.2)");
+    }
+
+    [Fact, Covers("DIFF-05", "ENC-51")]
+    public void ApplyForeign_AZeroLengthDeleteRangeForAKnownClient_IsFlagged()
+    {
+        // "hi" from client 1, then a delete set holding client 1, clock 0, length 0: the oracle applies the range
+        const string hex = "0101010004010174026869" + "0101010000";
+        var value = Result(hex, "v1");
+        Assert.True(value["accepted"]!.GetValue<bool>());
         Assert.True(value["zeroLengthDeleteRange"]!.GetValue<bool>());
-        Assert.True(SharpSide.Run(Script("00010501" + "0000", "v1"))
-            .Observations!["results"]!["value"]!["r"]!["value"]!["accepted"]!.GetValue<bool>(), "y-sharp ignores the range (ENC-51)");
+        Assert.False(SharpSide.Run(Script(hex, "v1"))
+            .Observations!["results"]!["value"]!["r"]!["value"]!["accepted"]!.GetValue<bool>(), "y-sharp rejects the range (ENC-51, TASK-17.2)");
     }
 
     [Fact, Covers("DIFF-05", "ENC-86")]
