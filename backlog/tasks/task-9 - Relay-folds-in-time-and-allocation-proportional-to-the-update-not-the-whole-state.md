@@ -7,7 +7,7 @@ status: Done
 assignee:
   - '@claude'
 created_date: '2026-10-26 22:01'
-updated_date: '2026-10-27 00:25'
+updated_date: '2026-10-27 03:25'
 labels:
   - server
   - performance
@@ -40,6 +40,8 @@ API behaviour: PreparedUpdate.StateVector is now built on first read and throws 
 Suite changes (69d2183): RelayTests +3 (pending size per client equals the whole-state measure; in-order folds keep the per-client form and merge no held struct; fold allocation at 1700 updates under 2x that at 300). RelayHostile: BytesPerStateByte (128 per state byte) replaced with BytesPerMergedStruct (768 per held struct the fold merged or copied again, YRelay.MergedHeldStructs): 0 for appends, a client's tail from the gap it fills, or the whole state on the flat path and its conversion back.
 
 Verified: full Debug suite (YSHARP_RELEASE_GATE=1) 0 failed; interop Smoke tier incl. RelayDifferentialTests 118/118.
+
+Follow-up (de25d1c, PR #3 macOS Release gate): the per-client form cost about 1 KB per one-struct client (a 4-StructRef first block, a List per ChunkedList, an empty Skip index), so HOS-REF's 3000 cross-client structs retained 3.4 MB locally and 6.5 MB on macOS against a 3.6 MB budget (main: 0.7 MB). ChunkedList now takes a first capacity and holds its blocks in an exact-length array; the relay's lists start at one struct and the Skip index is made on the first Skip. Now 1.5 MB. Gated suite 5051/0 in Debug and Release, API surface unchanged.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
