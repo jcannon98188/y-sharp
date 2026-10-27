@@ -167,6 +167,20 @@ internal sealed class TxState
         return slot >= 0 && slot < _afterCount ? _after[slot] : 0;
     }
 
+    /// <summary>
+    /// Adds each client's new clocks to <paramref name="into"/> in store order, the order of the Yjs <c>afterState</c> Map the undo manager
+    /// builds a stack item's insertions from.
+    /// </summary>
+    internal void AddInsertions(DeleteRanges into)
+    {
+        var clients = Doc.Store.Clients;
+        for (var slot = 0; slot < _afterCount; slot++)
+        {
+            var start = slot < _beforeCount ? _before[slot] : 0;
+            if (_after[slot] > start) into.Add(clients[slot].Id, start, _after[slot] - start);
+        }
+    }
+
     internal StateVector BeforeState => ToStateVector(_before, _beforeCount);
 
     internal StateVector AfterState => ToStateVector(_after, Math.Max(0, _afterCount));

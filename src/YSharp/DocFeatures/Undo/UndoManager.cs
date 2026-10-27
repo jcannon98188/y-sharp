@@ -158,14 +158,8 @@ public sealed class UndoManager : IDisposable
         if (undoing) Volatile.Write(ref _lastChange, 0);   // the next undo is not appended to the last stack item
         else if (!redoing) ClearRedoStackInHook();
 
-        var insertions = new DeleteRanges();
-        var before = tx.BeforeState;
-        foreach (var (client, end) in tx.AfterState.Clients)
-        {
-            var start = before[client];
-            if (end > start) insertions.Add(client, start, end - start);
-        }
-
+        var insertions = new DeleteRanges(trackClientOrder: true);
+        tx.State.AddInsertions(insertions);
         var deletions = Copy(tx.State.DeleteRanges);
         var now = _time.GetUtcNow().ToUnixTimeMilliseconds();
         var lastChange = Volatile.Read(ref _lastChange);
@@ -505,22 +499,18 @@ public sealed class UndoManager : IDisposable
 
     /// <summary>
     /// Yjs <c>iterateDeletedStructs</c>: every struct in the ranges, split so each lies wholly inside one, skipping ranges past the client's
-    /// state. Clients run in ascending order (the JS map runs in insertion order).
+    /// state. Clients run in the set's client order, as the JS Map does: the order which decides the redone items' clocks.
     /// </summary>
     private static void IterateDeletedStructs(StructStore store, DeleteRanges ds, Action<ItemRef> f)
     {
-        var i = 0;
-        while (i < ds.Count)
+        var order = ds.ClientOrder!;
+        for (var c = 0; c < order.Count; c++)
         {
-            var client = ds[i].Client;
-            if (store.StructCount(client) > 0)
-            {
-                var state = store.GetState(client);
-                for (; i < ds.Count && ds[i].Client == client && ds[i].Clock < state; i++)
-                    IterateStructs(store, client, ds[i].Clock, ds[i].Length, f);
-            }
-
-            while (i < ds.Count && ds[i].Client == client) i++;
+            var client = order[c];
+            if (store.StructCount(client) == 0) continue;
+            var state = store.GetState(client);
+            for (var i = ds.FirstIndexOf(client); i < ds.Count && ds[i].Client == client && ds[i].Clock < state; i++)
+                IterateStructs(store, client, ds[i].Clock, ds[i].Length, f);
         }
     }
 
@@ -539,19 +529,28 @@ public sealed class UndoManager : IDisposable
         while (index < store.StructCount(client) && store.StructAt(client, index).Clock < end);
     }
 
+    /// <summary>A copy that keeps the client order of <paramref name="ranges"/>, which must track it.</summary>
     private static DeleteRanges Copy(DeleteRanges ranges)
     {
-        var copy = new DeleteRanges();
-        for (var i = 0; i < ranges.Count; i++) copy.Add(ranges[i].Client, ranges[i].Clock, ranges[i].Length);
+        var copy = new DeleteRanges(trackClientOrder: true);
+        AddInOrder(copy, ranges);
         return copy;
     }
 
-    /// <summary>Yjs <c>mergeDeleteSets</c>, into a new set.</summary>
+    /// <summary>Yjs <c>mergeDeleteSets</c>, into a new set: the clients of <paramref name="a"/>, then those new in <paramref name="b"/>.</summary>
     private static DeleteRanges Merge(DeleteRanges a, DeleteRanges b)
     {
         var merged = Copy(a);
-        for (var i = 0; i < b.Count; i++) merged.Add(b[i].Client, b[i].Clock, b[i].Length);
+        AddInOrder(merged, b);
         return merged;
+    }
+
+    private static void AddInOrder(DeleteRanges into, DeleteRanges from)
+    {
+        var order = from.ClientOrder!;
+        for (var c = 0; c < order.Count; c++)
+            for (var i = from.FirstIndexOf(order[c]); i < from.Count && from[i].Client == order[c]; i++)
+                into.Add(from[i].Client, from[i].Clock, from[i].Length);
     }
 
     private void AddScope(object scope)
