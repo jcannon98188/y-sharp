@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@claude'
 created_date: '2026-10-27 14:49'
-updated_date: '2026-10-27 15:00'
+updated_date: '2026-10-27 16:48'
 labels:
   - bug
   - server
@@ -51,4 +51,6 @@ Cost (Release, allocation and time per record on load, old merge -> new): in ord
 Validation: YSHARP_RELEASE_GATE=1 full Debug suite 5,083 total, 0 failed; server tests 149/149 in Release; ServerTierBoundsTests at YSHARP_TIER=Nightly in Release 14/14; Smoke interop 120/120; traceability 42/42; api-surface check unchanged.
 Suite changes (abcbb76): UpdateLogTests.ALoad_OfARecordReusingAnId_GivesTheBytesOfFoldingTheRecordsOneAtATime (4 cases; the two nightly ones fail on the old code), ALoad_CostsTheLogsSize_NotItsRecordsTimesTheState now a theory with an in-order-with-resends case; ServerTierBoundsTests.NightlyFinds_ThroughTheMailbox_AreContained (4 cases, failed on the old code).
 Docs: server.yaml notes on RLY-2 (the relay keeps what it holds at an id, where mergeUpdates can keep the later struct) and SRV-10.
+
+Nightly run 40536463370 on main (d3651b5, preview.3): the two original finds pass; one new HOS-MUT find (mutation of sim/map-large.json:e) still made the store and the relay disagree after a restart. Cause: not merge order. The V1 update lists client 0 in more than one block and ends with a zero-length GC at clock 0, behind the client's end (3). The update writer groups a client's structs and writes the first clock and the lengths, so the stored V2 record holds Gc(0,3)x0; the relay, prepared from the V1 decode, skipped the GC at clock 0. A reload integrated Gc(0,3)x0, so the restart served other bytes (same content). Fix: DocumentMailbox.SurvivesV2 also returns false when a struct does not start where its client's previous struct ends, so the relay and the hot Doc take the stored form, as they already did for out-of-order delete ranges. Regression: NightlyFinds_ThroughTheMailbox_AreContained gains the find, hooked and not (red before, green after).
 <!-- SECTION:NOTES:END -->
