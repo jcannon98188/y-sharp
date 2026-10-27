@@ -252,12 +252,53 @@ public sealed class UpdateLogTests
         HexAssert.Equal(folded.EncodeStateAsUpdate(default, UpdateFormat.V2), caughtUp.EncodeStateAsUpdate(default, UpdateFormat.V2), "caught up");
     }
 
-    [Fact, Covers("SRV-10")]
-    public async Task ALoad_CostsTheLogsSize_NotItsRecordsTimesTheState()
+    // a record holding other content at an id the log already holds: live, the relay folds each update in turn and skips a struct it holds, so the
+    // first content wins; one merge of the whole log can let the later one win (which one depends on the other clients in the record, as Yjs
+    // orders mergeUpdates' readers), and a restart then serves another document (TASK-18)
+    [Theory, Covers("SRV-10", "SRV-11")]
+    [InlineData("01 01 01 00 00 01 00")]                                                                    // a GC over the first character
+    [InlineData("01 01 01 00 04 01 01 74 01 6A 00")]                                                        // a string "j" at its id
+    [InlineData("02 01 02 00 C4 00 00 00 00 01 00 01 01 00 00 01 00 00 00 00 00 00")]                       // the nightly finds of
+    [InlineData("03 01 03 00 84 00 00 01 00 01 02 00 84 00 00 01 00 01 01 00 00 01 00 00 00 00 00")]        // 2026-10-27: a GC at it after
+    public async Task ALoad_OfARecordReusingAnId_GivesTheBytesOfFoldingTheRecordsOneAtATime(string hex)
     {
-        // one character per record, stored newest first: folding these one at a time held every record as a gap and re-merged the whole state
-        // each time, n times the state; one merge costs the log's size times log n (TASK-13)
-        static async Task<double> BytesPerRecord(int n)
+        var doc = new Doc(new DocOptions { ClientId = 1 });
+        var updates = new List<byte[]>();
+        doc.UpdateV2 += (u, _, _, _) => updates.Add(u.ToArray());
+        var text = doc.GetText("t");
+        text.Insert(0, "hello");
+        text.Insert(5, " world");
+        var store = new InMemoryUpdateStore();
+        var log = new UpdateLog(store);
+        Assert.True((await log.AppendAsync(DocId, updates[0], UpdateFormat.V2, cancellationToken: Ct)).Ok);
+        Assert.True((await log.AppendAsync(DocId, Hex.Bytes(hex), UpdateFormat.V1, cancellationToken: Ct)).Ok);
+        Assert.True((await log.AppendAsync(DocId, updates[1], UpdateFormat.V2, cancellationToken: Ct)).Ok);
+
+        var folded = new YRelay(log.StoredLimits);
+        foreach (var r in await ReadAll(store)) folded.TryApplyUpdate(r.UpdateV2.Span, UpdateFormat.V2);
+        var expected = folded.EncodeStateAsUpdate(default, UpdateFormat.V2);
+        var loaded = (await log.LoadAsync(DocId, cancellationToken: Ct)).Relay.EncodeStateAsUpdate(default, UpdateFormat.V2);
+        HexAssert.Equal(expected, loaded, "load");
+
+        // catching up a relay that holds the first record, and compacting, fold the same way
+        var caughtUp = new YRelay(log.StoredLimits);
+        Assert.True(caughtUp.TryApplyUpdate(updates[0], UpdateFormat.V2).Ok);
+        await log.FoldAsync(DocId, 1, caughtUp, cancellationToken: Ct);
+        HexAssert.Equal(expected, caughtUp.EncodeStateAsUpdate(default, UpdateFormat.V2), "caught up");
+        await log.CompactAsync(DocId, cancellationToken: Ct);
+        var compacted = (await log.LoadAsync(DocId, cancellationToken: Ct)).Relay.EncodeStateAsUpdate(default, UpdateFormat.V2);
+        HexAssert.Equal(expected, compacted, "compacted");
+    }
+
+    // one character per record, stored newest first: folding these one at a time held every record as a gap and re-merged the whole state each
+    // time, n times the state; one merge costs the log's size times log n (TASK-13). A resent record ends a merged batch (TASK-18), which in
+    // order costs no more than the batch
+    [Theory, Covers("SRV-10")]
+    [InlineData(true, 0)]
+    [InlineData(false, 50)]
+    public async Task ALoad_CostsTheLogsSize_NotItsRecordsTimesTheState(bool newestFirst, int resendEvery)
+    {
+        async Task<double> BytesPerRecord(int n)
         {
             var doc = new Doc(new DocOptions { ClientId = 1 });
             var updates = new List<byte[]>();
@@ -265,7 +306,12 @@ public sealed class UpdateLogTests
             var text = doc.GetText("t");
             for (var i = 0; i < n; i++) text.Insert(i, "x");
             var log = new UpdateLog(new InMemoryUpdateStore());
-            for (var i = updates.Count - 1; i >= 0; i--) Assert.True((await log.AppendAsync(DocId, updates[i], UpdateFormat.V2, cancellationToken: Ct)).Ok);
+            for (var k = 0; k < updates.Count; k++)
+            {
+                var u = updates[newestFirst ? updates.Count - 1 - k : k];
+                Assert.True((await log.AppendAsync(DocId, u, UpdateFormat.V2, cancellationToken: Ct)).Ok);
+                if (resendEvery > 0 && k % resendEvery == resendEvery - 1) Assert.True((await log.AppendAsync(DocId, u, UpdateFormat.V2, cancellationToken: Ct)).Ok);
+            }
             await log.LoadAsync(DocId, cancellationToken: Ct);   // warm
             var before = GC.GetAllocatedBytesForCurrentThread();
             var loaded = log.LoadAsync(DocId, cancellationToken: Ct).AsTask().GetAwaiter().GetResult();   // the in-memory store reads synchronously

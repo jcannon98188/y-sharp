@@ -169,6 +169,16 @@ public sealed class ServerTierBoundsTests
     public void ByteMutator_ThroughTheMailbox_ARejectedMessageReachesNoOne_AndAGoodPeerStillSyncs(bool hooked) =>
         FuzzRunner.Check("HOS-MUT", ByteMutator.Layer(), (RawInput i) => MailboxCase(i, hooked).GetAwaiter().GetResult(), i => (i.Bytes, i.Format), cases: 250);
 
+    // nightly finds (run 40501680613, 2026-10-27): a record reusing an id with other content, folded live one update at a time but merged on
+    // reload, so the store and the relay disagreed after a restart (TASK-18)
+    [Theory, Covers("HOS-MUT", "SRV-8", "SRV-9")]
+    [InlineData("02010200c40000000001000101000001000000000000", "mutation of structs/pending-two-missing-clients.json:e (Duplicate)", false)]
+    [InlineData("030103008400000100010200840000010001010000010000000000", "mutation of structs/pending-chain-permutations.json:d (Overwrite)", false)]
+    [InlineData("02010200c40000000001000101000001000000000000", "mutation of structs/pending-two-missing-clients.json:e (Duplicate)", true)]
+    [InlineData("030103008400000100010200840000010001010000010000000000", "mutation of structs/pending-chain-permutations.json:d (Overwrite)", true)]
+    public Task NightlyFinds_ThroughTheMailbox_AreContained(string hex, string origin, bool hooked) =>
+        MailboxCase(new RawInput(UpdateFormat.V1, Convert.FromHexString(hex), origin), hooked);
+
     private static async Task MailboxCase(RawInput input, bool hooked)
     {
         var rented = BufferPool.Outstanding;

@@ -94,10 +94,14 @@ public sealed class UpdateLog
 
     /// <summary>
     /// <see cref="FoldAsync(string, long, YRelay, CancellationToken)"/>, also applying the records to <paramref name="doc"/> when one is given. The
-    /// records are merged once (Yjs <c>mergeUpdates</c> over all of them, as Yjs storage backends load a log) and the merged update is folded in
-    /// one step, so a log of n records costs its size times log n rather than n folds (TASK-13); the merge of all records is the bytes folding
-    /// them one at a time gives. When the merge or the merged fold is refused (a record that does not decode, or a limit the merged update breaks
-    /// that no record did) the records are folded one at a time as before, which names the record that fails.
+    /// result is folding the records one at a time in sequence order, as the relay folded them live: a struct at an id the relay holds is skipped,
+    /// so the first content at an id wins. Records whose structs cover disjoint clocks are merged once (Yjs <c>mergeUpdates</c>, as Yjs storage
+    /// backends load a log) and the merged update is folded in one step, so a log of n records costs its size times log n rather than n folds
+    /// (TASK-13); with no two records at one id, the merge is the bytes folding them one at a time gives. A record covering a clock an earlier
+    /// record of the batch covers ends the batch, which is folded before it: the merge orders such structs by its own rules and can keep the later
+    /// one, which made a restart serve another document than the one peers saw live (TASK-18). Honest logs hold such records only where a client
+    /// resent an update, and compaction removes them. When the merge or the merged fold is refused (a record that does not decode, or a limit the
+    /// merged update breaks that no record did) the records are folded one at a time, which names the record that fails.
     /// </summary>
     internal async ValueTask<long> FoldAsync(string docId, long afterSequence, YRelay relay, Doc? doc, object? origin, CancellationToken cancellationToken)
     {
@@ -111,26 +115,58 @@ public sealed class UpdateLog
         }
 
         if (records.Count == 0) return last;
-        var updates = new ReadOnlyMemory<byte>[records.Count];
-        for (var i = 0; i < updates.Length; i++) updates[i] = records[i].UpdateV2;
+        var covered = new ClockRanges();
+        var start = 0;
+        for (var i = 0; i < records.Count; i++)
+        {
+            if (!YUpdate.TryDecode(records[i].UpdateV2.Span, out var decoded, UpdateFormat.V2, StoredLimits).Ok)
+            {
+                // folding one at a time names it
+                FoldOneAtATime(docId, records, start, records.Count, relay, doc, origin);
+                return last;
+            }
+
+            if (covered.Overlaps(decoded))
+            {
+                FoldMerged(docId, records, start, i, relay, doc, origin);
+                start = i;
+                covered.Clear();
+            }
+
+            covered.Add(decoded);
+        }
+
+        FoldMerged(docId, records, start, records.Count, relay, doc, origin);
+        return last;
+    }
+
+    /// <summary>Folds <paramref name="records"/> from <paramref name="start"/> up to <paramref name="end"/>, whose structs cover disjoint clocks, with one merge.</summary>
+    private void FoldMerged(string docId, List<UpdateRecord> records, int start, int end, YRelay relay, Doc? doc, object? origin)
+    {
+        var updates = new ReadOnlyMemory<byte>[end - start];
+        for (var i = 0; i < updates.Length; i++) updates[i] = records[start + i].UpdateV2;
         var merged = new ArrayBufferWriter<byte>();
         if (YUpdate.TryMerge(updates, merged, UpdateFormat.V2, StoredLimits).Ok && relay.TryApplyUpdate(merged.WrittenSpan, UpdateFormat.V2).Ok)
         {
             if (doc is not null && !doc.TryApplyUpdate(merged.WrittenSpan, origin, UpdateFormat.V2).Ok)
-                foreach (var record in records) doc.ApplyUpdate(record.UpdateV2.Span, origin, UpdateFormat.V2);
-            return last;
+                for (var i = start; i < end; i++) doc.ApplyUpdate(records[i].UpdateV2.Span, origin, UpdateFormat.V2);
+            return;
         }
 
         // the relay is unchanged: a refused update changes nothing
-        foreach (var record in records)
+        FoldOneAtATime(docId, records, start, end, relay, doc, origin);
+    }
+
+    private static void FoldOneAtATime(string docId, List<UpdateRecord> records, int start, int end, YRelay relay, Doc? doc, object? origin)
+    {
+        for (var i = start; i < end; i++)
         {
+            var record = records[i];
             var status = relay.TryApplyUpdate(record.UpdateV2.Span, UpdateFormat.V2);
             if (!status.Ok)
                 throw new InvalidDataException($"Document '{docId}': record {record.Sequence}{(record.IsSnapshot ? " (snapshot)" : "")} is not a valid update ({status.Error}).");
             doc?.ApplyUpdate(record.UpdateV2.Span, origin, UpdateFormat.V2);
         }
-
-        return last;
     }
 
     /// <summary>
