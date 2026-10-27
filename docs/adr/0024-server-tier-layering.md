@@ -101,6 +101,7 @@ The ADR 0006 lock makes one `Doc` safe across threads. It does not order work ac
   - `Step1` is still answered, so the connection can read;
   - awareness is unaffected.
   - Finer rules, such as writing only within a subtree or keeping to a schema, need the semantic tier and so a hot `Doc`.
+- **SRV-22** Presence is kept as y-websocket's `bin/utils.js` keeps it (TASK-17.3, owner sign-off 2026-10-27): each document's mailbox holds an `Awareness` with no state of its own, applies every awareness message to it (a malformed one closes the sender), and sends its own encoding of the changed clients to every connection, the sender included. A connection that joins gets every known state after the server's Step1. The clients a connection set are its own; when it closes, for any reason, their states are removed and the removal is sent to the rest, so a crashed tab does not linger. A state not renewed within the y-protocols outdated timeout (30 s) is removed and the removal sent as well. Unlike y-websocket, a client that removed its state and set it again stays its connection's.
 
 ## Hot-Doc lifecycle
 

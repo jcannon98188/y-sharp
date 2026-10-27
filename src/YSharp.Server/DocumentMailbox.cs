@@ -67,7 +67,8 @@ internal sealed class DocumentSubscription(DocumentMailbox mailbox, Action<Doc> 
 /// alone touches the document's relay, its hot <see cref="Doc"/> and its connections. Every message is handled in arrival order; an incoming
 /// update goes through structural validation, the hook (when one is registered), the relay and hot Doc checks, persist, apply and broadcast,
 /// in that order. A host's edits, reads and subscriptions run on the same worker (SRV-5, SRV-18), and an idle document drops its hot Doc and
-/// then itself (SRV-20; TASK-5.8).
+/// then itself (SRV-20; TASK-5.8). The document's presence lives in an <see cref="Awareness"/> of its own, kept as y-websocket keeps it
+/// (TASK-17.3).
 /// </summary>
 internal sealed class DocumentMailbox
 {
@@ -84,6 +85,9 @@ internal sealed class DocumentMailbox
     private readonly List<YConnection> _connections = new();
     private readonly List<DocumentSubscription> _subscribers = new();
     private readonly TimeProvider _time;
+    private readonly Awareness _awareness;
+    private readonly Dictionary<YConnection, HashSet<ulong>> _controlled = new();   // the awareness clients each connection set
+    private readonly List<ulong> _departed = new();                                  // clients of closed connections, removed after the message
     private YRelay _relay = null!;
     private YLimits? _peerLimits;
     private Exception? _loadFailure;
@@ -102,6 +106,10 @@ internal sealed class DocumentMailbox
             SingleReader = true,
             FullMode = BoundedChannelFullMode.Wait,
         });
+        // the server holds no presence of its own (y-websocket: setLocalState(null)), so the awareness only keeps the peers' states
+        _awareness = new Awareness(new Doc(new DocOptions { Limits = options.Limits }), _time);
+        _awareness.SetLocalState(YValue.Null);
+        _awareness.Update += OnAwarenessUpdate;
         Worker = Task.Run(RunAsync);
     }
 
@@ -171,6 +179,7 @@ internal sealed class DocumentMailbox
                     if (envelope.Connection is { } sender) Close(sender, ConnectionCloseReason.ProtocolError, e.Message);
                 }
 
+                RemoveDepartedAwareness();
                 _lastActivity = _time.GetTimestamp();
             }
 
@@ -182,6 +191,8 @@ internal sealed class DocumentMailbox
 
         foreach (var connection in _connections) connection.Close(CloseReason);
         _connections.Clear();
+        _awareness.Update -= OnAwarenessUpdate;
+        _awareness.Dispose();
     }
 
     /// <summary>True when there is something to read, false when the mailbox is complete and drained, null when <paramref name="timeout"/> passed.</summary>
@@ -271,7 +282,11 @@ internal sealed class DocumentMailbox
                 }
 
                 _connections.Add(connection);
-                Send(connection, Step1());
+                _controlled[connection] = new HashSet<ulong>();
+                if (!Send(connection, Step1())) return;
+                // y-websocket: every known state after the sync step 1, so a peer that joins late sees who is there
+                var states = _awareness.GetStates();
+                if (states.Count > 0) Send(connection, AwarenessMessage([.. states.Keys]));
                 return;
             case EnvelopeKind.Disconnect:
                 Remove(connection);
@@ -286,15 +301,15 @@ internal sealed class DocumentMailbox
                 await HandleSyncAsync(connection, message).ConfigureAwait(false);
                 return;
             case MessageAwareness:
-                // relayed as is once it decodes: awareness needs no document, and a read-only connection may still share its presence (SRV-17)
-                if (!IsWellFormedAwareness(message))
-                {
-                    Close(connection, ConnectionCloseReason.ProtocolError, "awareness: Malformed");
-                    return;
-                }
-
-                Broadcast(message, except: connection);
+            {
+                // applied to the document's awareness, whose update handler sends what changed to every connection (TASK-17.3). Awareness needs
+                // no document, and a read-only connection may still share its presence (SRV-17)
+                var error = TryReadAwareness(message, out var start, out var length)
+                    ? _awareness.TryApplyUpdate(message.AsSpan(start, length), connection).Error
+                    : YError.Malformed;
+                if (error != YError.None) Close(connection, ConnectionCloseReason.ProtocolError, $"awareness: {error}");
                 return;
+            }
             default:
                 return;   // auth and query-awareness from a peer, and unknown types, are ignored
         }
@@ -538,28 +553,89 @@ internal sealed class DocumentMailbox
     }
 
     /// <summary>
-    /// An awareness message's payload must be one well-formed awareness update (lib0 <c>varUint8Array</c> of it): other peers decode what is
-    /// relayed, so a malformed one closes the sender instead of reaching them (TASK-5.3). Bytes after the payload are ignored, as y-protocols
-    /// ignores them.
+    /// An awareness message's payload: one lib0 <c>varUint8Array</c>, which the awareness then decodes as a whole before it applies anything, so
+    /// a malformed one closes the sender and reaches no one (TASK-5.3). Bytes after the payload are ignored, as y-protocols ignores them.
     /// </summary>
-    private static bool IsWellFormedAwareness(byte[] message)
+    private static bool TryReadAwareness(byte[] message, out int start, out int length)
     {
-        ReadOnlySpan<byte> input = message.AsSpan(1);
-        ulong length = 0;
+        start = length = 0;
+        ulong value = 0;
         var shift = 0;
-        var at = 0;
+        var at = 1;
         while (true)
         {
-            if (at >= input.Length || shift > 49) return false;   // truncated, or longer than a JS safe integer
-            var b = input[at++];
-            length |= (ulong)(b & 0x7f) << shift;
+            if (at >= message.Length || shift > 49) return false;   // truncated, or longer than a JS safe integer
+            var b = message[at++];
+            value |= (ulong)(b & 0x7f) << shift;
             shift += 7;
             if ((b & 0x80) == 0) break;
         }
 
-        if (length > (ulong)(input.Length - at)) return false;
-        var payload = input.Slice(at, (int)length);
-        return Awareness.TryModifyUpdate(payload, static v => v, new ArrayBufferWriter<byte>(payload.Length + 16)).Ok;
+        if (value > (ulong)(message.Length - at)) return false;
+        start = at;
+        length = (int)value;
+        return true;
+    }
+
+    /// <summary>
+    /// y-websocket's awareness update handler: a connection's update marks the clients it added as its own and forgets the ones it removed, and
+    /// the server's own encoding of every changed client goes to every connection, the sender included. It runs on the worker, except for the
+    /// removals of the awareness's outdated check, which come from its timer and are posted to the worker.
+    /// </summary>
+    private void OnAwarenessUpdate(AwarenessChange change, object? origin)
+    {
+        if (origin is YConnection connection && _controlled.TryGetValue(connection, out var ids))
+        {
+            foreach (var id in change.Added) ids.Add(id);
+            foreach (var id in change.Updated) ids.Add(id);   // a client that removed its state and set it again is updated, not added
+            foreach (var id in change.Removed) ids.Remove(id);
+        }
+
+        var message = AwarenessMessage([.. change.Added, .. change.Updated, .. change.Removed]);
+        if (message.IsEmpty) return;
+        if (origin is not "timeout")
+        {
+            Broadcast(message, except: null);
+            return;
+        }
+
+        var send = new MailboxWork<bool>(m =>
+        {
+            m.Broadcast(message, except: null);
+            return ValueTask.FromResult(true);
+        }) { Attached = false };
+        _ = PostAsync(new Envelope(EnvelopeKind.Work, null, null, send), CancellationToken.None);
+    }
+
+    /// <summary>The states of connections that closed during the last message, removed and the removal sent to the rest (y-websocket closeConn).</summary>
+    private void RemoveDepartedAwareness()
+    {
+        while (_departed.Count > 0)
+        {
+            ulong[] clients = [.. _departed];
+            _departed.Clear();
+            _awareness.RemoveStates(clients, null);   // closing a slow peer while sending the removal departs it in turn
+        }
+    }
+
+    /// <summary>An awareness message of the given clients' states, or empty when they cannot be encoded.</summary>
+    private ReadOnlyMemory<byte> AwarenessMessage(ReadOnlySpan<ulong> clients)
+    {
+        var update = new ArrayBufferWriter<byte>();
+        if (!_awareness.TryEncodeUpdate(update, clients).Ok) return ReadOnlyMemory<byte>.Empty;
+        var w = new ArrayBufferWriter<byte>(update.WrittenCount + 6);
+        Span<byte> header = stackalloc byte[11];
+        header[0] = MessageAwareness;
+        var n = 1;
+        for (var v = (ulong)update.WrittenCount; ; v >>= 7)
+        {
+            header[n++] = (byte)(v < 0x80 ? v : (v & 0x7f) | 0x80);
+            if (v < 0x80) break;
+        }
+
+        w.Write(header[..n]);
+        w.Write(update.WrittenSpan);
+        return w.WrittenMemory;
     }
 
     /// <summary>SRV-14: the hook in one read transaction, with a deadline; a throw or an overrun is a reject.</summary>
@@ -666,9 +742,13 @@ internal sealed class DocumentMailbox
         Remove(connection);
     }
 
-    /// <summary>A connection leaves the document: it no longer holds it open (SRV-20).</summary>
+    /// <summary>
+    /// A connection leaves the document: it no longer holds it open (SRV-20), and the awareness states it set are removed once the message in
+    /// hand is done, so the removal is not sent from inside another send.
+    /// </summary>
     private void Remove(YConnection connection)
     {
+        if (_controlled.Remove(connection, out var ids)) _departed.AddRange(ids);
         if (_connections.Remove(connection)) _server.Detach(this);
     }
 }
