@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using YSharp.Server.Tests.Mailbox;
@@ -31,8 +32,12 @@ public sealed class ServerSimulationTests
         var rng = new Random(seed);
         var store = new InMemoryUpdateStore();
         ValidationHook accept = (in ValidationRequest _) => ValidationResult.Accept;
-        // slow subscribers are MailboxTests' concern: here a peer may leave its queue unread for the whole run
-        YServer Start() => new(new YServerOptions { Store = store, Validation = hooked ? _ => accept : null, SubscriberQueueCapacity = 1 << 16 });
+        // slow subscribers are MailboxTests' concern: here a peer may leave its queue unread for the whole run. So is the hook's deadline: under
+        // a loaded test run a stall past it rejected an edit, which the server then never had
+        YServer Start() => new(new YServerOptions
+        {
+            Store = store, Validation = hooked ? _ => accept : null, SubscriberQueueCapacity = 1 << 16, ValidationDeadline = Timeout.InfiniteTimeSpan,
+        });
 
         // the Doc-only path: every local edit of every peer, applied directly
         var reference = new Doc();
@@ -104,6 +109,7 @@ public sealed class ServerSimulationTests
             foreach (var p in peers) await p.FlushAsync();
         foreach (var p in peers) await p.DrainAsync();
 
+        Assert.All(peers, p => Assert.Empty(p.Denied));
         var expected = reference.EncodeStateAsUpdate();
         foreach (var p in peers) Assert.Equal(expected, p.Doc.EncodeStateAsUpdate());
 
