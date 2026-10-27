@@ -95,6 +95,7 @@ CI on GitHub Actions:
 | TASK-6 to TASK-14 | Done: registry rows, an undo ordering detail, zero-allocation budgets, the API baselines, folds and loading that scale with the update rather than the held state, the server's API decisions, and decoding a peer's update once. |
 | TASK-16 | Done: the nightly relay hostile-input failures (a V2 clock range and the guard allowance). |
 | TASK-15 (NuGet) | Done. Packaging, symbols, Source Link, the release workflow and the docs. Publishing uses nuget.org trusted publishing, so no API key is stored. 0.1.0-preview.1 is published. |
+| TASK-17 (host integration defects, for preview.2) | Done: an empty prelim text encodes no item (17.1); a zero-length delete range is Malformed everywhere, as Yjs rejects it (17.2, ENC-51); the server keeps presence as y-websocket does (17.3, SRV-22); `YServerOptions.DocumentUnloading` runs before an idle document is unloaded (17.4, SRV-23). 0.1.0-preview.2 is not yet tagged. |
 
 ## 6. Known issues and open items
 

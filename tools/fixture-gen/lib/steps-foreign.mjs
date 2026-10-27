@@ -5,8 +5,9 @@
 // The origin is the string "foreign", which observers can tell apart from local edits and from `applyUpdate` (null origin).
 // A named result also carries `readPastEnd: true` when an accepted update was only decodable because a lib0 reader returned its default
 // past the end of its buffer (a column or the rest buffer; ENC-60..68). y-sharp rejects those (ADR 0005), and the harness's
-// lenient-column-end normaliser claims exactly that case. A rejected update carries `zeroLengthDeleteRange: true` when Yjs threw only
-// because it re-encoded a parked zero-length delete range (UpdateEncoderV2.writeDsLen, ENC-51), which y-sharp ignores by ADR 0003.
+// lenient-column-end normaliser claims exactly that case. An accepted update carries `zeroLengthDeleteRange: true` when its delete set
+// holds a range of length 0: Yjs applies it for a known client below its state (and throws `Unexpected case` from writeDsLen when it has to
+// park it), where y-sharp rejects the update as Malformed (ENC-51, ADR 0005, TASK-17.2).
 // An accepted update carries `unsortedPendingDeleteSet: true` when Yjs parked delete ranges as pending state and a range of one client
 // starts before the previous one ends: the V2 re-encode then writes a negative clock difference, which lib0 turns into garbage (ENC-86).
 // An accepted update carries `selfDependentPending: true` when Yjs parked a struct that depends on its own id or a later clock of its own
@@ -36,22 +37,21 @@ defineStep({
     const decoder = lib0.decoding.createDecoder(untag(s.bytes))
     let structDecoder = null
     let accepted = true
-    let zeroLengthDeleteRange = false
     const nonTypeParent = parentNotAType(doc, untag(s.bytes), enc)
     const emptyItem = zeroLengthItem(untag(s.bytes), enc)
+    const emptyRange = zeroLengthDeleteRange(untag(s.bytes), enc)
     const order = { unsorted: false }
     try {
       structDecoder = enc === 'v1' ? new Y.UpdateDecoderV1(decoder) : new Y.UpdateDecoderV2(decoder)
       watchDeleteSetOrder(structDecoder, order)
       Y.readUpdateV2(decoder, doc, 'foreign', structDecoder)
-    } catch (e) {
+    } catch {
       accepted = false
-      if (e instanceof Error && e.message === 'Unexpected case' && /\bwriteDsLen\b/.test(e.stack ?? '')) zeroLengthDeleteRange = true
     }
     const value = accepted && readPastEnd(structDecoder)
       ? { accepted, readPastEnd: true }
       : accepted && emptyItem ? { accepted, zeroLengthItem: true }
-        : zeroLengthDeleteRange ? { accepted, zeroLengthDeleteRange: true }
+        : accepted && emptyRange ? { accepted, zeroLengthDeleteRange: true }
           : accepted && order.unsorted && doc.store.pendingDs !== null ? { accepted, unsortedPendingDeleteSet: true }
             : accepted && selfDependentPending(doc) ? { accepted, selfDependentPending: true }
               : accepted && nonTypeParent ? { accepted, parentNotAType: true } : { accepted }
@@ -94,6 +94,15 @@ const parentNotAType = (doc, bytes, enc) => {
 const zeroLengthItem = (bytes, enc) => {
   try {
     return (enc === 'v1' ? Y.decodeUpdate(bytes) : Y.decodeUpdateV2(bytes)).structs.some(s => s instanceof Y.Item && s.length === 0)
+  } catch {
+    return false
+  }
+}
+
+// Read before the update applies, like zeroLengthItem. Yjs readDeleteSet keeps a range of length 0 as it is.
+const zeroLengthDeleteRange = (bytes, enc) => {
+  try {
+    return [...(enc === 'v1' ? Y.decodeUpdate(bytes) : Y.decodeUpdateV2(bytes)).ds.clients.values()].some(ranges => ranges.some(r => r.len === 0))
   } catch {
     return false
   }

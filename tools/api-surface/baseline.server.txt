@@ -171,12 +171,14 @@ YSharp.Server.YConnection|sealed class
 YSharp.Server.YServerOptions|base System.Object
 YSharp.Server.YServerOptions|ctor()
 YSharp.Server.YServerOptions|property System.Boolean UsesDefaultStore {get;}
+YSharp.Server.YServerOptions|property System.Func<System.String, System.ReadOnlyMemory<System.Byte>, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> DocumentUnloading {get;set;}
 YSharp.Server.YServerOptions|property System.Func<System.String, YSharp.Server.ValidationHook> Validation {get;set;}
 YSharp.Server.YServerOptions|property System.Int32 MailboxCapacity {get;set;}
 YSharp.Server.YServerOptions|property System.Int32 MaxRejectsBeforeClose {get;set;}
 YSharp.Server.YServerOptions|property System.Int32 SubscriberQueueCapacity {get;set;}
 YSharp.Server.YServerOptions|property System.TimeProvider TimeProvider {get;set;}
 YSharp.Server.YServerOptions|property System.TimeSpan DocumentIdleTimeout {get;set;}
+YSharp.Server.YServerOptions|property System.TimeSpan DocumentUnloadingDeadline {get;set;}
 YSharp.Server.YServerOptions|property System.TimeSpan HotDocumentIdleTimeout {get;set;}
 YSharp.Server.YServerOptions|property System.TimeSpan ValidationDeadline {get;set;}
 YSharp.Server.YServerOptions|property YSharp.Server.IUpdateStore Store {get;set;}

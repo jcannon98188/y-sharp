@@ -42,14 +42,17 @@ public sealed class VirtualTimeProvider : TimeProvider
         while (true)
         {
             VirtualTimer? next;
+            long due;
+            // the timer is picked and rescheduled under the gate: another thread may change or dispose it meanwhile (a mailbox's Awareness timer)
             lock (_gate)
             {
                 next = _timers.Where(t => t.Due is not null && t.Due <= target).OrderBy(t => t.Due).ThenBy(t => t.Sequence).FirstOrDefault();
+                if (next is null) break;
+                due = next.Due!.Value;
+                next.Reschedule();
             }
-            if (next is null) break;
-            var due = next.Due!.Value;
             SetTime(due);
-            next.Fire();
+            next.Invoke();
         }
         SetTime(target);
     }
@@ -99,15 +102,14 @@ public sealed class VirtualTimeProvider : TimeProvider
             return true;
         }
 
-        public void Fire()
+        // called under the owner's gate
+        public void Reschedule()
         {
-            lock (_owner._gate)
-            {
-                if (_period > 0) { Due += _period; Sequence = ++_owner._sequence; }
-                else { Due = null; _owner._timers.Remove(this); }
-            }
-            _callback(_state);
+            if (_period > 0) { Due += _period; Sequence = ++_owner._sequence; }
+            else { Due = null; _owner._timers.Remove(this); }
         }
+
+        public void Invoke() => _callback(_state);
 
         public void Dispose()
         {

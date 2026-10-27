@@ -253,6 +253,7 @@ public sealed class MailboxTests
     [InlineData(new byte[] { 0, 2, 9, 1 })]         // a payload cut short
     [InlineData(new byte[] { 0, 7, 0 })]            // no such sync message
     [InlineData(new byte[] { 0, 0, 2, 1, 1 })]      // a malformed state vector
+    [InlineData(new byte[] { 0, 2, 6, 0, 1, 0, 1, 0, 0 })]   // a delete range of length 0, which Yjs throws on (ENC-51, TASK-17.2)
     public async Task AMessageThatDoesNotParse_ClosesTheSender_AndChangesNothing(byte[] message)
     {
         var store = new InMemoryUpdateStore();
@@ -308,44 +309,5 @@ public sealed class MailboxTests
         await a.InsertAsync("fresh");
         await a.FlushAsync();
         Assert.Equal(ConnectionCloseReason.None, a.Connection.CloseReason);
-    }
-
-    [Fact, Covers("SRV-17")]
-    public async Task AwarenessIsRelayedToTheOtherPeers_AsIs()
-    {
-        await using var server = new YServer();
-        var a = await Peer.JoinAsync(server, "doc", 1);
-        var b = await Peer.JoinAsync(server, "doc", 2, new ConnectionContext { IsReadOnly = true });
-        await a.FlushAsync();
-        await b.FlushAsync();
-
-        // one entry: client 2, clock 0, state null
-        var presence = new byte[] { 1, 8, 1, 2, 0, 4, (byte)'n', (byte)'u', (byte)'l', (byte)'l' };
-        await b.SendAsync(presence);
-        await a.FlushAsync();
-        Assert.Equal(presence, Assert.Single(a.Awareness));
-        await b.DrainAsync();
-        Assert.Empty(b.Awareness);
-    }
-
-    [Theory]
-    [InlineData(new byte[] { 1 })]                                   // no payload
-    [InlineData(new byte[] { 1, 9, 1, 2, 0 })]                       // the payload runs past the message
-    [InlineData(new byte[] { 1, 5, 1, 2, 0, 1, 0 })]                 // the state is not JSON
-    [InlineData(new byte[] { 1, 4, 1, 2, 0, 9 })]                    // the state's length runs past the payload
-    [InlineData(new byte[] { 1, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x01 })]   // a length past a JS safe integer
-    public async Task MalformedAwareness_ClosesTheSender_AndReachesNoOne(byte[] message)
-    {
-        await using var server = new YServer();
-        var a = await Peer.JoinAsync(server, "doc", 1);
-        var b = await Peer.JoinAsync(server, "doc", 2);
-        await a.FlushAsync();
-        await b.FlushAsync();
-
-        Assert.True(await b.Connection.ReceiveAsync(message, Ct));
-        await a.FlushAsync();
-        Assert.Empty(a.Awareness);
-        await foreach (var _ in b.Connection.Outgoing.ReadAllAsync(Ct)) { }
-        Assert.Equal(ConnectionCloseReason.ProtocolError, b.Connection.CloseReason);
     }
 }

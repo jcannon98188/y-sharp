@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace YSharp.Server;
 
@@ -73,6 +74,19 @@ public sealed class YServerOptions
     /// opened document until shutdown. Default five minutes.
     /// </summary>
     public TimeSpan DocumentIdleTimeout { get; init; } = TimeSpan.FromMinutes(5);
+
+    /// <summary>
+    /// Called on the document's worker just before an idle document is unloaded (<see cref="DocumentIdleTimeout"/>; ADR 0024 SRV-23), with the
+    /// document id and its whole state as a V1 update, so a host can write a snapshot of it. Messages for the document wait meanwhile. The token is
+    /// cancelled after <see cref="DocumentUnloadingDeadline"/>, and the document is unloaded once the hook returns, throws or runs past it: the
+    /// store already holds every accepted update, so a failed hook loses nothing. If something opens the document while the hook runs, the
+    /// document stays loaded and the hook is called again when it next goes idle. It is not called on shutdown or for a deleted document.
+    /// Null, the default, unloads with no call.
+    /// </summary>
+    public Func<string, ReadOnlyMemory<byte>, CancellationToken, ValueTask>? DocumentUnloading { get; init; }
+
+    /// <summary>How long <see cref="DocumentUnloading"/> may run before the document is unloaded without it. Default five seconds.</summary>
+    public TimeSpan DocumentUnloadingDeadline { get; init; } = TimeSpan.FromSeconds(5);
 
     /// <summary>The clock for the idle timeouts. Default <see cref="TimeProvider.System"/>.</summary>
     public TimeProvider TimeProvider { get; init; } = TimeProvider.System;

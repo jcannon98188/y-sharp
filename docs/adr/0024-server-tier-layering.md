@@ -101,6 +101,7 @@ The ADR 0006 lock makes one `Doc` safe across threads. It does not order work ac
   - `Step1` is still answered, so the connection can read;
   - awareness is unaffected.
   - Finer rules, such as writing only within a subtree or keeping to a schema, need the semantic tier and so a hot `Doc`.
+- **SRV-22** Presence is kept as y-websocket's `bin/utils.js` keeps it (TASK-17.3, owner sign-off 2026-10-27): each document's mailbox holds an `Awareness` with no state of its own, applies every awareness message to it (a malformed one closes the sender), and sends its own encoding of the changed clients to every connection, the sender included. A connection that joins gets every known state after the server's Step1. The clients a connection set are its own; when it closes, for any reason, their states are removed and the removal is sent to the rest, so a crashed tab does not linger. A state not renewed within the y-protocols outdated timeout (30 s) is removed and the removal sent as well. Unlike y-websocket, a client that removed its state and set it again stays its connection's.
 
 ## Hot-Doc lifecycle
 
@@ -114,6 +115,7 @@ The ADR 0006 lock makes one `Doc` safe across threads. It does not order work ac
   - A hot `Doc` is evicted after a configurable idle time with no connections and no queued messages (`YServerOptions.HotDocumentIdleTimeout`, one minute by default). An indexing subscriber keeps it hot.
   - Eviction drops the `Doc` reference inside the mailbox. The relay state and the log stay authoritative, so nothing is lost.
   - The relay state of a document with no connections may be evicted too, and is rebuilt from storage on next open (`DocumentIdleTimeout`, five minutes by default). The whole mailbox closes; a connection, edit, read or subscriber that attached meanwhile keeps it open.
+- **SRV-23** A host hook runs before an idle document is unloaded (TASK-17.4, owner sign-off 2026-10-27): `YServerOptions.DocumentUnloading` gets the document id and its state as a V1 update on the worker, so a host can write a snapshot when a document goes idle. It is bounded by `DocumentUnloadingDeadline` (five seconds by default), and a hook that throws or overruns does not keep the document loaded, since the store already holds every accepted update. A document opened while the hook runs stays loaded. The hook is not called on shutdown or deletion.
 - **SRV-21** While a `Doc` is hot, its state and the relay state agree after every accepted update: both are built from the same accepted sequence. A test checks that `EncodeStateAsUpdate` of the hot `Doc` matches the relay's merged update in content.
 
 ## Considered

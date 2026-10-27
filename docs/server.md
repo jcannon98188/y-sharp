@@ -165,6 +165,20 @@ A document is idle while it has no connections and no subscribers (SRV-20).
 
 The store is authoritative, so nothing accepted is lost. Set either timeout to `Timeout.InfiniteTimeSpan` to keep that state until shutdown. `YServerOptions.TimeProvider` sets the clock.
 
+`YServerOptions.DocumentUnloading` is called on the document's worker just before an idle document is unloaded, with the document id and its whole state as a V1 update, for a host that writes a snapshot then (SRV-23):
+
+```csharp
+var options = new YServerOptions
+{
+    Store = store,
+    DocumentUnloading = (docId, state, ct) => snapshots.WriteAsync(docId, state, ct),
+};
+```
+
+- Messages for the document wait while it runs. If something opens the document meanwhile, the document stays loaded, and the hook is called again when it next goes idle.
+- Its token is cancelled after `DocumentUnloadingDeadline` (five seconds by default). The document is unloaded once the hook returns, throws or overruns, since the store already holds every accepted update.
+- It is not called on shutdown or for a document deleted with `YServer.DeleteAsync`.
+
 ## Testing
 
 - `tests/YSharp.Server.Tests` covers the update log, compaction and recovery, storage conformance, the mailbox and validation.

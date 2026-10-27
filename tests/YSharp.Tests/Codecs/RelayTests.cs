@@ -244,6 +244,7 @@ public sealed class RelayTests
 
         Assert.Equal(YError.Malformed, relay.TryApplyUpdate(U1.AsSpan(0, 6)).Error);
         Assert.Equal(YError.Malformed, relay.TryApplyUpdate(Hex.Bytes("01 01 01 00 8a 02 00")).Error);   // a Skip with flag bits (ENC-85)
+        Assert.Equal(YError.Malformed, relay.TryApplyUpdate(Hex.Bytes("00 01 00 01 00 00")).Error);      // a delete range of length 0 (ENC-51)
         Assert.Equal(YError.LimitExceeded, relay.TryApplyUpdate(new byte[17]).Error);
         Assert.False(relay.TryApplyUpdate(U1, UpdateFormat.V2).Ok);   // V1 bytes read as V2
 
