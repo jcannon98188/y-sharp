@@ -100,7 +100,10 @@ internal static class UpdateReader
         return ReadDeleteSet(ref decoder, update.Deletes);
     }
 
-    /// <summary>Yjs <c>readDeleteSet</c>: ranges in update order; a client with no ranges and a range of length 0 add nothing (ENC-50, ENC-51).</summary>
+    /// <summary>
+    /// Yjs <c>readDeleteSet</c>: ranges in update order; a client with no ranges adds nothing (ENC-50). A range of length 0 is Malformed (ENC-51,
+    /// ADR 0005, TASK-17.2): Yjs never writes one, and throws <c>Unexpected case</c> re-encoding it when its client is unknown.
+    /// </summary>
     public static YError ReadDeleteSet<TDecoder>(ref TDecoder decoder, List<DeleteRange> ranges)
         where TDecoder : IUpdateDecoder, allows ref struct
     {
@@ -115,7 +118,8 @@ internal static class UpdateReader
             {
                 if (!decoder.ReadDsClock(out var clock) || !decoder.ReadDsLen(out var length)) return decoder.Error;
                 if (clock + length > (ulong)MaxClock) return YError.Malformed;
-                if (length > 0) ranges.Add(new DeleteRange(client, (long)clock, (long)length));
+                if (length == 0) return YError.Malformed;
+                ranges.Add(new DeleteRange(client, (long)clock, (long)length));
             }
         }
 
