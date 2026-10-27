@@ -84,9 +84,9 @@ internal ref struct Lib0Reader
 
     /// <summary>
     /// lib0's sign-magnitude varint. The sign is returned apart from the magnitude because -0 (<c>40</c>) is meaningful (Q03, Q13).
-    /// The magnitude has the same limits as <see cref="TryReadVarUint"/>.
+    /// The magnitude has the same limits as <see cref="TryReadVarUint"/>, unless the caller allows a larger <paramref name="maxMagnitude"/>.
     /// </summary>
-    public bool TryReadVarInt(out ulong magnitude, out bool negative)
+    public bool TryReadVarInt(out ulong magnitude, out bool negative, ulong maxMagnitude = MaxVarint)
     {
         magnitude = 0;
         negative = false;
@@ -100,20 +100,20 @@ internal ref struct Lib0Reader
         {
             if (pos >= data.Length) return Fail();
             var b = data[pos++];
-            if (!Accumulate(ref magnitude, (ulong)(b & 0x7f), shift)) return Fail();
+            if (!Accumulate(ref magnitude, (ulong)(b & 0x7f), shift, maxMagnitude)) return Fail();
             if (b < 0x80) return true;
             shift += 7;
         }
         return Fail();
     }
 
-    /// <summary>Adds <c>group &lt;&lt; shift</c> unless the total would pass 2^53-1.</summary>
-    private static bool Accumulate(ref ulong value, ulong group, int shift)
+    /// <summary>Adds <c>group &lt;&lt; shift</c> unless the total would pass <paramref name="max"/> (2^53-1 unless the caller says otherwise).</summary>
+    private static bool Accumulate(ref ulong value, ulong group, int shift, ulong max = MaxVarint)
     {
         if (group == 0) return true;
-        if (shift >= 53) return false;
+        if (shift >= 63 || group > max >> shift) return false;
         var total = value + (group << shift);
-        if (total > MaxVarint) return false;
+        if (total > max) return false;
         value = total;
         return true;
     }

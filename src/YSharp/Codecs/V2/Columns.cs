@@ -88,6 +88,12 @@ internal ref struct UintOptRleColumnReader
 /// </summary>
 internal ref struct IntDiffOptRleColumnReader
 {
+    /// <summary>
+    /// The largest encoded magnitude: a diff between two clocks of 0 to 2^53-1, doubled, plus the run flag. A writer emits up to this for an origin
+    /// clock near 2^53 (JS too, and its reader takes the bytes back), so the column allows past 2^53-1; the decoded clock keeps its own bound.
+    /// </summary>
+    private const ulong MaxEncoded = (1UL << 54) - 1;
+
     private Lib0Reader reader;
     private long value;
     private long diff;
@@ -106,7 +112,7 @@ internal ref struct IntDiffOptRleColumnReader
         v = 0;
         if (count == 0)
         {
-            if (!reader.TryReadVarInt(out var magnitude, out var negative)) return false;
+            if (!reader.TryReadVarInt(out var magnitude, out var negative, MaxEncoded)) return false;
             var encoded = negative ? -(long)magnitude : (long)magnitude;
             diff = encoded >> 1;   // Math.floor(encoded / 2)
             count = 1;
