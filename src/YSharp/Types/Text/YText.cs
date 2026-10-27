@@ -18,9 +18,10 @@ public class YText : YType
 
     private List<Action<Transaction, Doc>>? _pending = new();
 
+    /// <summary>Yjs <c>new YText(string)</c>: <paramref name="initial"/> is inserted on integration; an empty string inserts nothing (TASK-17.1).</summary>
     public YText(string? initial = null)
     {
-        if (initial is not null) _pending!.Add((tx, doc) => InsertCore(tx, doc, 0, initial, default));
+        if (!string.IsNullOrEmpty(initial)) _pending!.Add((tx, doc) => InsertCore(tx, doc, 0, initial, default));
     }
 
     /// <summary>Yjs <c>length</c>: UTF-16 units plus one per embed (Q17).</summary>
