@@ -433,6 +433,29 @@ const undos = [
     }
   },
   {
+    // one stack item deletes items of two clients, the higher id first: the delete set's client order (a Map) decides which redone item
+    // gets the lower clock (TASK-7)
+    area: 'undo',
+    name: 'redo-order-follows-delete-order',
+    covers: ['UM-06', 'UM-10', 'UM-11'],
+    observe: ['structs', 'ds'],
+    script: {
+      replicas: [replica('a', 2), replica('b', 9)],
+      steps: [
+        ins('a', 0, 'A'),
+        ...both('a', 'b'),
+        ins('b', 1, 'B'),
+        ...both('b', 'a'),
+        um('a', 'um', [t], { captureTimeout: 0 }),
+        { step: 'transact', doc: 'a', steps: [del('a', 1, 1), del('a', 0, 1)] },
+        undo('um', 'u1'),
+        redo('um', 'r1'),
+        undo('um', 'u2'),
+        ...both('a', 'b')
+      ]
+    }
+  },
+  {
     area: 'undo',
     name: 'nested-types-and-formatting',
     covers: ['UM-10', 'UM-11', 'UM-18'],

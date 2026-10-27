@@ -1133,6 +1133,14 @@
       "bytes": 27280
     },
     {
+      "path": "undo/redo-order-follows-delete-order.json",
+      "area": "undo",
+      "name": "redo-order-follows-delete-order",
+      "covers": ["UM-06","UM-10","UM-11"],
+      "sha256": "330a8bdfa5af00efa6e37212e87490a58afc4a471e3fac4fdf9eddafcecd4710",
+      "bytes": 10444
+    },
+    {
       "path": "undo/redo-stack-invalidation.json",
       "area": "undo",
       "name": "redo-stack-invalidation",
