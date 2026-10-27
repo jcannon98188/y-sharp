@@ -182,7 +182,17 @@ internal sealed partial class StructStore
         if (owner.Structs.Count > 0 && owner.NextClock != i.Clock)
             throw new YInternalException($"A struct at clock {i.Clock} does not follow the client's state {owner.NextClock}.");
         owner.Structs.Add(i);
+        if (Awaited is { } awaited && awaited.TryGetValue(owner.Id, out var clock) && clock < i.Clock + i.Length) AwaitedPassed = true;
     }
+
+    /// <summary>
+    /// The clocks the document's pending structs wait for (Yjs <c>pendingStructs.missing</c>), or null; set by the document. A state only grows,
+    /// so once a struct is added past one of them, retrying the pending structs can help until the document drops them (TASK-11).
+    /// </summary>
+    internal Dictionary<ulong, long>? Awaited;
+
+    /// <summary>Whether a struct was added past one of the <see cref="Awaited"/> clocks since the document set them.</summary>
+    internal bool AwaitedPassed;
 
     private int FindIndexCleanStart(ClientStructs owner, long clock)
     {

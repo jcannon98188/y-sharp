@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using YSharp.Integration;
 using YSharp.Store;
@@ -177,21 +178,18 @@ public sealed partial class Doc
         var pending = _pending;
         if (pending is not null)
         {
-            // something became applicable when a missing clock is now below the client's state
-            foreach (var (client, clock) in pending.Missing)
+            // something became applicable when a missing clock is now below the client's state: the store flags it as it happens
+            retry = Store.AwaitedPassed;
+            Debug.Assert(retry == AnyAwaitedPassed(pending.Missing, null), "The store's flag disagrees with the missing clocks.");
+            if (rest is not null)
             {
-                if (clock < Store.GetState(client))
-                {
-                    retry = true;
-                    break;
-                }
+                pending.MergeFrom(rest);
+                if (AnyAwaitedPassed(rest.Missing, null)) Store.AwaitedPassed = true;
             }
-
-            if (rest is not null) pending.MergeFrom(rest);
         }
         else
         {
-            _pending = rest;
+            SetPending(rest);
         }
 
         var dsRest = ApplyDeleteSet(tx, update.Deletes);
@@ -221,9 +219,25 @@ public sealed partial class Doc
         if (retry)
         {
             var again = _pending!.ToUpdate();
-            _pending = null;
+            SetPending(null);
             ReadUpdate(tx, again, ref rejected);
         }
+    }
+
+    /// <summary>Replaces the pending structs, and has the store watch their missing clocks for a retry (Yjs checks them on every update).</summary>
+    private void SetPending(PendingStructs? pending)
+    {
+        _pending = pending;
+        Store.Awaited = pending?.Missing;
+        Store.AwaitedPassed = pending is not null && AnyAwaitedPassed(pending.Missing, null);
+    }
+
+    /// <summary>Whether a missing clock is below its client's state, in the store or, for a dry run, in its virtual state.</summary>
+    private bool AnyAwaitedPassed(Dictionary<ulong, long> missing, PendingDryRun? dry)
+    {
+        foreach (var (client, clock) in missing)
+            if (clock < StateOf(client, dry)) return true;
+        return false;
     }
 
     /// <summary>The ranges of a delete set in the order Yjs <c>writeDeleteSet</c> writes them: clients descending, clocks ascending.</summary>
