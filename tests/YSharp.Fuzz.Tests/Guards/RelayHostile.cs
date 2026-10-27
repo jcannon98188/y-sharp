@@ -13,10 +13,12 @@ namespace YSharp.Fuzz.Guards;
 internal static class RelayHostile
 {
     /// <summary>
-    /// Allocation a fold may make per byte of the state it merges into: the smallest struct takes two V1 bytes and the merge copies each held
-    /// struct into the new list (and its growth) as a struct of about 100 bytes. Measured at about 75 for a state of one-clock GCs.
+    /// Allocation a fold may make per held struct it merges or copies again (<see cref="YRelay.MergedHeldStructs"/>): the merge copies each
+    /// into its output as a struct of about 180 bytes, and the per-client lists copy it again as they grow, with its V1 offset. A fold that only appends to its clients' histories merges none (TASK-9), so
+    /// its bound is the input's alone; a fold that fills a gap merges that client's structs from the gap on, and one in the flat form, the
+    /// whole state.
     /// </summary>
-    public const long BytesPerStateByte = 128;
+    public const long BytesPerMergedStruct = 768;
 
     public static byte[] StateVector(YRelay relay)
     {
@@ -26,9 +28,8 @@ internal static class RelayHostile
     }
 
     /// <summary>
-    /// Folds <paramref name="bytes"/> into <paramref name="relay"/> on the probe thread. A fold merges into the whole state and builds the merged
-    /// list anew, so it allocates for the input and for every struct held: the bound is k*N+C over the input plus
-    /// <see cref="BytesPerStateByte"/> per byte of the state's V1 encoding. A relay never rejects part of an update: the result is ok,
+    /// Folds <paramref name="bytes"/> into <paramref name="relay"/> on the probe thread. The bound is k*N+C over the input plus
+    /// <see cref="BytesPerMergedStruct"/> per held struct the fold merged again. A relay never rejects part of an update: the result is ok,
     /// Malformed or LimitExceeded, and the last two change nothing.
     /// </summary>
     public static YStatus ApplyTo(YRelay relay, string label, byte[] bytes, UpdateFormat format)
@@ -36,7 +37,7 @@ internal static class RelayHostile
         var svBefore = StateVector(relay);
         var stateBefore = relay.EncodeStateAsUpdate();
         var run = InputGuard.Run(label, () => relay.TryApplyUpdate(bytes, format));
-        InputGuard.AssertAllocationWithinBound(label, run.AllocatedBytes - BytesPerStateByte * stateBefore.Length, bytes.Length);
+        InputGuard.AssertAllocationWithinBound(label, run.AllocatedBytes - BytesPerMergedStruct * relay.MergedHeldStructs, bytes.Length);
         var status = run.Value;
         Assert.True(status.Ok || status.Error is YError.Malformed or YError.LimitExceeded, $"{label}: the relay returned {status.Error}. Input {Hex.Short(bytes)}");
         if (!status.Ok)
