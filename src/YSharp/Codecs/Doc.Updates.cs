@@ -87,7 +87,7 @@ public sealed partial class Doc
         return new ApplyResult(rejected > 0 ? YError.Rejected : YError.None, rejected, ObserverFaultCount - faults);
     }
 
-    /// <summary>The throwing form of <see cref="TryApplyUpdate"/>: <see cref="YDecodeException"/> with the same code, <see cref="YInternalException"/> on a faulted document.</summary>
+    /// <summary>The throwing form of <see cref="TryApplyUpdate(ReadOnlySpan{byte}, object?, UpdateFormat)"/>: <see cref="YDecodeException"/> with the same code, <see cref="YInternalException"/> on a faulted document.</summary>
     public void ApplyUpdate(ReadOnlySpan<byte> update, object? origin = null, UpdateFormat format = UpdateFormat.V1)
     {
         ThrowIfFaulted();

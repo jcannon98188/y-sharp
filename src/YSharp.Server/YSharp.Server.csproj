@@ -2,9 +2,9 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <RootNamespace>YSharp.Server</RootNamespace>
+    <Description>A transport-neutral server for y-websocket-compatible Yjs clients, built on YSharp: one mailbox per document, relay-first sync, check-persist-broadcast, pluggable append-only storage and validation hooks.</Description>
     <!-- ADR 0024 SRV-3: its own package and version; the core dependency has a lower bound only -->
     <PackageId>YSharp.Server</PackageId>
-    <Version>0.1.0</Version>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\YSharp\YSharp.csproj" />

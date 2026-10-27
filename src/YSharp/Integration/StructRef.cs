@@ -136,7 +136,6 @@ internal sealed class UpdateRefs
     /// <summary>The delete ranges in update order.</summary>
     public List<DeleteRange> Deletes { get; } = new();
 
-    /// <summary>Sets <paramref name="client"/>'s structs, replacing an earlier block of the same client.</summary>
     /// <summary>Sizes the client table for <paramref name="clients"/> clients before they are set, so it is allocated once (BUD-12).</summary>
     public void ExpectClients(int clients)
     {

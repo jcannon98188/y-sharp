@@ -2,9 +2,9 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <RootNamespace>YSharp.Server.Testing</RootNamespace>
+    <Description>The storage conformance suite for YSharp.Server: checks that an IUpdateStore backend keeps the log contract (ordering, compaction, deletion, crash and torn-write behaviour, concurrency). No test framework dependency.</Description>
     <!-- ADR 0024 SRV-12: the storage conformance suite, shipped for hosts that implement IUpdateStore. No test framework dependency. -->
     <PackageId>YSharp.Server.Testing</PackageId>
-    <Version>0.1.0</Version>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\YSharp.Server\YSharp.Server.csproj" />

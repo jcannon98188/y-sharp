@@ -3,6 +3,8 @@ on:
   push:
     branches: [main]
   pull_request:
+  # release.yml runs the gating suite before it publishes a tagged release
+  workflow_call:
 jobs:
   gating:
     name: gating (${{ matrix.os }}, ${{ matrix.config }})

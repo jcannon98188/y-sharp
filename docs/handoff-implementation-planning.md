@@ -1,102 +1,115 @@
-# Handoff: from the verification suite to the y-sharp implementation plan
+# Handoff: the state of y-sharp
 
-Written when the verification suite (backlog TASK-2, specs 1 to 14) was complete and merged into `main`. The next job is to **plan** the y-sharp implementation (not build it yet). This note says what exists, what is unproven, and what the planning agent must know.
+Updated 2026-10-27. This note is for whoever picks the project up next, whether a person or an agent. It says what exists, how to work on it, and what is still open. It used to be the handoff from the verification suite to implementation planning. That stage is long finished, and the history is in git and in backlog TASK-1 to TASK-4.
 
-## 1. What y-sharp is, and what is already built
+For what the library does and how to use it, read [guide.md](guide.md). For hosting the server, read [server.md](server.md).
 
-y-sharp is a pure C# port of Yjs v13 (ADR 0004). The oracle is pinned: Yjs v13.6.33, lib0 v0.2.99, y-protocols v1.0.7, as git submodules (`yjs/`, `lib0/`, `y-protocols/`). Yjs v14 is out of scope.
+## 1. What exists
 
-The **implementation does not exist**. What exists is the verification suite that lets it be built with confidence:
+y-sharp is a pure C# port of Yjs v13 (ADR 0004). The oracle is pinned as git submodules (`yjs/`, `lib0/`, `y-protocols/`): Yjs v13.6.33, lib0 v0.2.99 and y-protocols v1.0.7. Yjs v14 is out of scope.
+
+**The core library is implemented.** All 44 implementation specs (TASK-4, milestones M0 to M7) have landed. Every feature gate is open, and no test is skipped for a missing feature. The **server tier** (TASK-5) sits above the core without changing it (ADR 0024).
 
 | Piece | Where |
 |---|---|
-| API stub (every member throws `NotImplementedException`) | `src/YSharp/` (five files from the old API sketch) |
-| Solution, build props, SDK pin | `YSharp.slnx`, `Directory.Build.props`, `Directory.Packages.props`, `global.json` (SDK 10.0.x, Microsoft.Testing.Platform runner, net10.0) |
-| Unit and port tests | `tests/YSharp.Tests` (about 1,200 test methods, mostly skipped against the stub) |
-| Test helpers: PRNG with lib0 goldens, ops-script interpreter, fixture loader, diffs, allocation helper, virtual `TimeProvider`, Node client, sim harness port, concurrency scheduler, traceability attributes and checker | `tests/YSharp.TestKit` |
-| Hostile input, fuzz, canary | `tests/YSharp.Fuzz.Tests`, `tests/YSharp.Fuzz.Canary`, `tools/sharpfuzz` |
+| Core library: documents, transactions, V1 and V2 codecs, shared types, events, snapshots, relative positions, undo, subdocs, permanent user data, the awareness, sync and auth protocols, `YRelay`, the update functions | `src/YSharp` (module layout in ADR 0021) |
+| Server tier: mailbox, connections, storage interface, in-memory store, validation hooks | `src/YSharp.Server` |
+| Storage conformance suite for `IUpdateStore` backends | `src/YSharp.Server.Testing` |
+| Unit, port, fixture, allocation and simulation tests | `tests/YSharp.Tests` |
+| Server-tier tests: mailbox, validation, lifecycle, storage conformance, crash recovery, end-to-end simulation | `tests/YSharp.Server.Tests` |
+| Hostile input, fuzz and the deep-recursion canary | `tests/YSharp.Fuzz.Tests`, `tests/YSharp.Fuzz.Canary`, `tools/sharpfuzz` |
 | Live Node-versus-y-sharp differential harness | `tests/YSharp.Interop.Tests` |
-| Benchmarks and Yjs memory baseline | `bench/YSharp.Benchmarks`, `bench/yjs-memory` |
-| Fixture generator (replays ops scripts on the pinned Yjs) and about 141 committed fixtures (about 20 MB, `fixtures/sim` is 18 MB) | `tools/fixture-gen`, `fixtures/` |
-| Behaviour registry (one YAML per area), JS-test ledger (210 rows), ID lock, pending high-water mark, per-spec traceability matrices | `docs/inventory/` |
-| CI workflows (gating, fixture drift, smoke, nightly, sharpfuzz) | `.github/workflows/` |
+| Test helpers: PRNG with lib0 goldens, ops-script interpreter, fixture loader, sim harness, scheduler, traceability | `tests/YSharp.TestKit` |
+| Storage-model spike harness (ADR 0023) | `tests/YSharp.StoreHarness`, `spike/` |
+| Benchmarks and the Yjs memory baseline | `bench/YSharp.Benchmarks`, `bench/yjs-memory` |
+| Fixture generator and about 140 committed fixtures | `tools/fixture-gen`, `fixtures/` |
+| Public API baselines, for the core and for the server | `tools/api-surface/` (`check.sh`, `baseline.txt`, `baseline.server.txt`) |
+| NuGet packaging and the install smoke test | `src/Directory.Build.props`, `tools/package-smoke`, [releasing.md](releasing.md) |
+| Behaviour registry, JS-test ledger, ID lock, pending high-water mark, per-spec matrices | `docs/inventory/` |
+| CI workflows | `.github/workflows/` (section 4) |
+
+The API sketch in `docs/prototype/api-sketch` and the research notes in `docs/research/` are historical. They record what was known before the implementation existed.
 
 ## 2. Read these first
 
-1. `CLAUDE.md` (Backlog.md workflow is mandatory) and `GLOSSARY.md` (ubiquitous language: Oracle, Fixture, Divergence, Registry entry, Pending entry, Ops script, and so on).
-2. ADRs in `docs/adr/`: 0003 (match JS by default; divergences are recorded), 0004 (pure C#), 0005 (error model, limits, faulted documents), 0006 (concurrency contract), 0007 and 0008 (value and public API shape), 0009 (allocation budgets), 0010 (traceability registry), 0011 and 0016 (fixtures and ops scripts), 0015 (layout, tooling, CI, naming, tiers), 0018 (memory layout and the M0 spike gate), 0019 (how the suite was cut into 14 specs, plus "Deviations during execution").
-3. `docs/api-decisions.md` (every API decision, all marked Decided).
-4. `docs/research/*.md` (structs, encoding, types, quirks, JSON, y-protocols, schedule exploration, Yrs concurrency).
-5. Backlog: `backlog task view 1 --plain` (the wayfinder map) and `backlog task view 2 --plain` (the specs, with long implementation notes).
+1. `CLAUDE.md`: the Backlog.md workflow is mandatory. Then `GLOSSARY.md`, for the project's vocabulary: Oracle, Fixture, Divergence, Registry entry, Ops script.
+2. [guide.md](guide.md) and [server.md](server.md), for how the library and the server work.
+3. The ADRs in `docs/adr/`. The most important are:
+   - 0003: match JS by default, and record every divergence;
+   - 0005: the error model, limits and faulted documents;
+   - 0006: the concurrency contract;
+   - 0008: the public API shape;
+   - 0009 and 0018: allocation budgets and memory layout;
+   - 0010: traceability;
+   - 0020: feature gates;
+   - 0022: the rules for changing the suite;
+   - 0023: the storage model;
+   - 0024: the server-tier layering.
+4. [api-decisions.md](api-decisions.md): every public API decision, with the owner's sign-offs.
+5. The backlog: `backlog task list --plain`, then `backlog task view <id> --plain`. The implementation notes on TASK-4.x, TASK-5.x and TASK-6 to TASK-15 record why things are the way they are.
 
-## 3. The implementation order is already decided (ADR 0018)
+## 3. Process rules
 
-- **M0, spike gate.** Before decode and integrate are built on a store, a spike of the chosen storage model must run the three slow-tier workloads (1M text inserts, 1M array pushes, 100k map keys) plus a steady-state check (zero gen2 collections, no LOH growth over 100k edits). Bytes per item must be at or below the Yjs figure. The Yjs numbers are in `bench/yjs-memory/yjs-bytes-per-item.json` (text 194.77, array 8.31, map 312.26 bytes per item). The choice between object-per-item and indexed arenas is recorded in a **follow-up ADR with the measurements**. Nothing builds on a store that fails.
-- **Milestones:** store and integrate, V1 codec, V2 codec, shared types, transactions and events, awareness and sync. A milestone is done only when its hot paths from ADR 0009 are in `AllocationBudgets` with measured values (plus 25%), zero-byte paths read 0, and the slow memory tier is green. Budgets only move down afterwards.
-- Layout invariants: chunked storage, no per-item machinery, document-owned memory, pooled bounded transients (ADR 0018).
+- **Backlog.** Use the `backlog` CLI for every task change. Never edit the backlog markdown by hand. Read `backlog instructions task-creation`, `task-execution` or `task-finalization` before the matching action.
+- **Owner sign-off.** Public API changes, library behaviour changes the suite did not ask for, and suite changes outside ADR 0022's rules all need the owner's approval. Record it in the task notes as "Owner sign-off".
+- **Suite changes** follow ADR 0022. They go in their own `suite:` commits, and each task's notes carry a "Suite changes" list.
+- **Interop is the requirement.** Bytes must stay identical to Yjs. A deliberate difference is a recorded divergence (`[Diverges]`) with a test that shows the JS behaviour.
+- **API surface.** `bash tools/api-surface/check.sh` fails on any unreviewed change to the public API. `--update` rewrites the baselines; review the diff first.
+- **Source files** are ASCII with LF line endings and no BOM. Git on this machine warns that LF will become CRLF; that is the local `autocrlf` setting, and the repository stores LF.
 
-## 4. Decisions made (do not reopen without a reason)
-
-All in `docs/api-decisions.md` and the ADRs. Headlines:
-
-- Client ids are `ulong`; wire ids up to 2^53-1 are accepted and round-trip. At or above 2^53 they are Malformed (a recorded divergence: JS rounds silently). ENC-37 and Q12 stay `diverge`; ENC-26 and ENC-57..59 stay excluded (no `obfuscateUpdate`, `parseUpdateMeta` or `logUpdate` equivalents).
-- Added to the stub: `Doc.GetXmlText`, `YArray.Slice`, `Transact<TResult>`, `TransactWithTimeout` (renamed to avoid the null-origin overload trap), the transaction list on `AfterAllTransactions`, `UndoManagerOptions.Doc`, `Doc.GetSubdocGuids`, `YXmlFragment.InsertSubdoc`.
-- Kept hidden: items and structs. Kept pooled: events (valid only during dispatch; `GetPath()` is relative to `CurrentTarget`).
-- Limits (ADR 0005): exceeded when value > limit; checked before allocation; on every decode path including merge, diff, convert and V2 columns; document unchanged on failure. `TryMerge/TryDiff/TryConvert/TryStateVectorFromUpdate` take an optional `YLimits`.
-- Stale views throw the new `YLifetimeException : YException`. `TryTransact` under a held read lock returns `UpgradeRefused`; the throwing forms throw `YConcurrencyException`.
-- `Awareness.GetStates` returns a snapshot (AW-13 is a divergence). A null auth handler throws `ArgumentNullException`.
-- Clocks and lengths that are negative, non-integer or above 2^53-1 are Malformed (Q22, ADR 0003).
-- A faulted document (ERR-20): reads work, mutators and `ApplyUpdate` throw `YInternalException`, `TryApplyUpdate` returns `Rejected`. **A subagent chose this; the ADR had left it open.** Confirm it.
-- An `OutOfMemoryException` thrown by an observer propagates and is not an observer fault (ERR-19).
-
-## 5. Internal seams the implementation must provide
-
-Declared in the stub as `internal` members (they throw `NotImplementedException`); tests in `YSharp.Tests`, `Fuzz.Tests` and `Benchmarks` reach them through `InternalsVisibleTo`. TestKit and Interop cannot see internals, so they still use reflection (`DocSeams`, `UndoSeams`, a `ScheduleSeam` adapter). Documented in ADR 0015.
-
-- `Doc.DumpStructs()` (ADR 0016 `structs` dump as JSON), `Doc.HasPending`, `Doc.InjectInvariantViolation()` (fault hook for ERR-20).
-- `YText.CleanupFormatting()`.
-- `ScheduleSeam`: internal static class with `Action<string>? Point` and `Action<string, Func<bool>>? Block`, plain null fields, null-checked on the hot path. The lock reports its transitions through it.
-- `Doc.ShouldLoad`, `AutoLoad`, `CollectionId`, `Meta`, `CollectGarbage`, `SignalLoaded`, `SignalSynced`; `UndoManager.Undoing`, `Redoing`, `CurrStackItem`.
-- The CC-18 lock-order checker is a Debug-only feature.
-
-## 6. How the suite behaves today, and how to run it
+## 4. Building, testing and CI
 
 ```bash
-dotnet build YSharp.slnx                       # expect 0 warnings
-dotnet test --solution YSharp.slnx             # Debug
-dotnet test --solution YSharp.slnx -c Release  # Release (allocation tests run only here)
-cd tools/fixture-gen && npm ci && npm run check   # fixtures and plan goldens must show no drift
+git clone --recurse-submodules https://github.com/jcannon98188/y-sharp.git
+dotnet build YSharp.slnx                                     # 0 warnings expected
+dotnet test --solution YSharp.slnx                           # gating tier, Debug
+YSHARP_RELEASE_GATE=1 dotnet test --solution YSharp.slnx     # also requires zero pending registry entries
+dotnet test --solution YSharp.slnx -c Release                # Release: the allocation tests run only here
+cd tools/fixture-gen && npm ci && npm run check              # fixtures and plan goldens show no drift
 ```
 
-- Last result: about 8,140 tests, 0 failed, about 360 passing. The rest **skip because the library is still the stub**. Skips go through the shared probe `ApiStub.IsStub` (TestKit). **Once the implementation exists, a stray `NotImplementedException` fails the test instead of skipping**, so every skip is a to-do.
-- The progress measure for the implementation is the skip count falling to zero, together with the traceability gate and the budgets.
-- Tiers: trait `Tier` = `Gating` (default), `Smoke`, `Nightly`, set by `YSHARP_TIER`. `Needs=Node` tests are never Gating (a test enforces this). Allocation tests run only in Release in a serial collection; TieredCompilation is off for the test projects.
-- The traceability gate (`TraceabilityGateTests`) enforces: every active registry entry has tests with `[Covers]`/`[PortOf]`/`[Diverges]` on its declared layers; pending entries have a reason and an owner; the ID lock and `pending-high-water.json` exist and are not exceeded; ledger rows have evidence. It writes a matrix to `TestResults/traceability/`.
-- Test names follow `Subject_Condition_Outcome` (ADR 0015). Upstream JS test names live only in `[PortOf]`.
+- **Suite size.** The gating suite is about 5,050 tests and all pass. The skipped tests are the nightly tier, or the allocation tests that run only in Release.
+- **Tiers** are set with `YSHARP_TIER`: `Gating` (the default), `Smoke` or `Nightly`. Tests that need Node are never in the gating tier. `YSHARP_REPLAY=<path>` re-runs one saved differential failure.
+- **Filters.** Run one class or method with `--filter-class` or `--filter-method`.
+- **Traceability.** The traceability gate (ADR 0010) runs inside the gating tests and writes a matrix to `TestResults/traceability/`. The registry has 0 pending entries, and pending may only shrink.
+- **Allocation tests** run in a serial collection, because the allocation listener is process-wide.
 
-## 7. Pending and unproven
+CI on GitHub Actions:
 
-**Registry:** 14 pending entries, all `BUD-01..14` (allocation budgets, owner spec 14). They activate at the milestone gate that records a measured value. Pending is only allowed to shrink (high-water mark: registry 14, ledger 0). Release gate: `YSHARP_RELEASE_GATE=1` requires zero pending.
+| Workflow | When | What |
+|---|---|---|
+| `gating` | push to `main`, PRs, and called by `release` | Build and gating tests: Linux Debug (with coverage) and Release, Windows Release, macOS Release |
+| `fixture-drift` | PRs | Regenerates every fixture on the pinned Yjs and fails on any byte of drift |
+| `smoke-differential` | PRs | Live Node-versus-y-sharp differential runs at Smoke size |
+| `nightly` | 03:00 UTC daily, or manual | Slow differential, fuzz, soak, slow memory and benchmark comparison |
+| `sharpfuzz` | 03:30 UTC daily, or manual | AFL++ through SharpFuzz |
+| `release` | every push, and `v*` tags | Packs the three NuGet packages and smoke-installs them; on a tag, runs `gating` and then publishes ([releasing.md](releasing.md)) |
 
-**Never run against a real implementation (all of it):**
-- The ~7,700 skipped tests; their expectations come from the oracle and the research notes.
-- Spec 2's last criterion: the end-to-end sim harness (`Init`, `Compare`, `ApplyRandomTests`), which needs `ISimInternals`. TASK-2.2 is still **In Progress** for this reason; the parent TASK-2 is still To Do.
-- The gating time budgets (2 minutes) and the randomized budget (about 60 s). The calibration knob is `SimCase.GatingSeeds` in `tests/YSharp.Tests/Simulation/SimCases.cs`.
-- The bounded allocation limits and the BUD-12 constants (the tests measure, print the value to record, then skip).
-- The first live Node-versus-y-sharp runs. Expect unrecorded divergences that need normalisers (`LenientTruncationNormaliser` and, since the first runs in TASK-4.28, `LenientColumnEndNormaliser`). The differential generators cover text, array and map edits only; XML, nested types, subdocs, `sync.*` and awareness generators are not built (only the `SharpSide.Extensions` hook). The y-sharp side compares `updates`, `state`, `sv`, `doc` and `results`, not yet `events`, `structs` or `ds`.
-- The CI workflows have never run on a real runner (actionlint passes). The coverage summary step, the AFL++/SharpFuzz job and the nightly benchmark comparison are untested.
-- Two inputs likely to need a fix once there is code: the hand-built V2 negative-clock bytes in `Q22_ANegativeClockFromAV2DiffColumn_IsMalformed`, and the pending-bytes boundary in `LimitsTests`.
-- ENC-26/57-59 are excluded and the JS-only `testObfuscateUpdates` ledger row is `skipped` with a reason.
+## 5. Where the work stands
 
-## 8. Practical notes for whoever picks this up
+| Tasks | State |
+|---|---|
+| TASK-1 to TASK-3 | Done: research, the verification suite, implementation planning. The parent tasks' statuses were not closed in the backlog. |
+| TASK-4 (M0 to M7, 44 specs) | Done; all subtasks are Done. The parent is still To Do in the backlog. |
+| TASK-5 (server tier) | All eight subtasks are Done and merged. The parent's acceptance criteria are left for the owner to check. |
+| TASK-6 to TASK-14 | Done: registry rows, an undo ordering detail, zero-allocation budgets, the API baselines, folds and loading that scale with the update rather than the held state, the server's API decisions, and decoding a peer's update once. |
+| TASK-15 (NuGet) | Packaging, symbols, Source Link, the release workflow and the docs are done. Publishing uses nuget.org trusted publishing, so no API key is stored. Waiting on the owner to add the nuget.org policy and the `NUGET_USER` secret, then push the first `v0.1.0-preview.1` tag. |
 
-- **Process rules (CLAUDE.md):** use the `backlog` CLI for every task, doc and decision change. Never edit Backlog markdown by hand. Read `backlog instructions task-creation`, `task-execution` and `task-finalization` before the matching action.
-- **Git:** `main` is the only branch, all work is local, **nothing is pushed**. Commit trailers end with the `Co-Authored-By` line in use. Keep `.claude/worktrees/` out of commits (it is in `.git/info/exclude` locally); never `git add -A` blindly.
-- **Fixtures are generated.** Change the generator, then run `npm run gen` in `tools/fixture-gen` and commit the output; the drift job fails on any diff. The generator needs the submodules checked out.
-- **Environment:** Windows, SDK pinned by `global.json` (the machine also has an 11 RC SDK; the pin avoids it). Node major is pinned in `.nvmrc` (24). Git warns that LF becomes CRLF on commit; that is the local autocrlf setting.
-- **Useful gotchas learned:** the allocation-tick listener is process-wide, so the allocation tests run in a non-parallel collection; the Yjs `Date.now` capture in lib0 is shimmed in the generator so the virtual clock reaches `UndoManager`; the fixture client reads one JSON line per request, so scripts are compacted before sending.
-- Per-spec traceability matrices are in `docs/inventory/matrices/` and show which IDs each spec owns.
+## 6. Known issues and open items
 
-## 9. Suggested brief for the planning agent
+- **Nightly fails on four relay hostile-input properties** (`RelayHostileProperties`, the nightly tier only). Three are one bug: `YRelay.TryApplyUpdate` accepts a struct whose clock plus length runs past 2^53-1, and the relay's V2 state then fails `YUpdate.TryValidate`. It reproduces with `01010105888080808008ffffffffffffff0f017d5600`. The fourth is `Builder_ManyTinyStructsClientsAndRanges_AreContained`: 1.33 MB allocated for a 2,667-byte input, against a 1.22 MB bound. Both need a fix in the relay.
+- **XML documentation.** About 630 public members have no doc comment. The packages ship the comments that exist, and CS1591 is suppressed under `src/`.
+- **Parent tasks** TASK-1 to TASK-5 still show To Do in the backlog, although their work is done. Closing them is the owner's call.
+- **Divergences and normalisers.** The live differential compares updates, state, state vectors, documents and results. Where y-sharp is deliberately stricter than JS, normalisers in `tests/YSharp.Interop.Tests/Harness/Normalisers.cs` account for it.
 
-> Produce an implementation plan for y-sharp as Backlog tasks under a new parent, using the `backlog` CLI. Inputs: ADR 0004, 0005, 0006, 0008, 0009, 0018, 0019; `docs/api-decisions.md`; `docs/inventory/` (registry, ledger); the stub in `src/YSharp`; the research notes. Order by ADR 0018: M0 spike first (with the follow-up storage ADR as its output), then the six milestones. For each milestone list the registry IDs and test files that turn from skipped to passing, the budgets that must be recorded to close it, and the seams it must provide. Schedule the unproven items in section 7 of this handoff at the milestone where they first become measurable. Do not write implementation code. Ask the owner about the faulted-document behaviour and anything the ADRs leave open.
+## 7. Practical notes
+
+- **Git.** `main` is protected by review: work goes on a branch (`impl/...`) and lands through a pull request to `main`. Commit trailers end with the `Co-Authored-By` line in use. Keep `.claude/worktrees/` out of commits; it is in `.git/info/exclude` locally. Never `git add -A` blindly.
+- **Fixtures are generated.** Change the generator, run `npm run gen` in `tools/fixture-gen`, and commit the output. The drift job fails on any diff. The generator needs the submodules checked out.
+- **Environment.** The SDK is pinned by `global.json` (10.0.x, Microsoft.Testing.Platform runner). The Node major version is pinned in `.nvmrc` (24).
+- **Stray test processes.** A test host left running in the background locks the build output, and the next build fails with MSB3021. End the process and rebuild.
+- **Learned gotchas:**
+  - the Yjs `Date.now` capture in lib0 is shimmed in the generator, so the virtual clock reaches `UndoManager`;
+  - the fixture client reads one JSON line per request, so scripts are compacted before sending;
+  - `YValue` object equality is order-sensitive;
+  - applying a remote format change makes a Yjs peer delete redundant format items as its own local update. A test that compares peers must let them settle.
