@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@claude'
 created_date: '2026-10-27 01:02'
-updated_date: '2026-10-27 04:58'
+updated_date: '2026-10-27 05:06'
 labels:
   - release
   - packaging
@@ -49,4 +49,6 @@ Decisions:
 Validation: packed locally, nuspec and contents inspected; smoke passed (18 conformance checks) at 0.1.0-dev and 0.1.0-local.1; full gated suite 5055, 0 failed; API surface unchanged.
 
 AC5 waits on the owner: add the NUGET_API_KEY secret and push a v0.1.0-preview.1 tag on main; then verify the published packages install. Left In Progress until then.
+
+Owner sign-off (2026-10-27): publish through nuget.org trusted publishing, not a stored NUGET_API_KEY (NuGet's recommendation). AC3 is met that way: release.yml's publish job has id-token: write, logs in with NuGet/login@v1 (user from the NUGET_USER secret, the nuget.org profile name) and pushes with the one-hour key it returns. AC5 now waits on the owner adding the trusted publishing policy (owner jcannon98188, repo y-sharp, workflow release.yml, no environment) and the NUGET_USER secret, then tagging v0.1.0-preview.1. docs/releasing.md and the handoff note describe the setup.
 <!-- SECTION:NOTES:END -->

@@ -1,6 +1,6 @@
 name: release
 # Packs YSharp, YSharp.Server and YSharp.Server.Testing on every push. A tag v<version> also runs the gating suite and, if it passes,
-# publishes the packages and their symbols to nuget.org (TASK-15, docs/releasing.md).
+# publishes the packages and their symbols to nuget.org through trusted publishing: no stored API key (TASK-15, docs/releasing.md).
 on:
   push:
     branches: ['**']
@@ -54,6 +54,8 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: [pack, gating]
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write   # the OIDC token nuget.org exchanges for a one-hour API key
     steps:
       - uses: actions/setup-dotnet@v4
         with:
@@ -62,10 +64,19 @@ jobs:
         with:
           name: packages-${{ needs.pack.outputs.version }}
           path: artifacts
+      - name: Check the nuget.org user is set
+        env:
+          NUGET_USER: ${{ secrets.NUGET_USER }}
+        run: if [ -z "$NUGET_USER" ]; then echo "::error::the NUGET_USER secret (the nuget.org profile name) is not set"; exit 1; fi
+      # trusted publishing: nuget.org checks this repository and workflow against its policy and returns a short-lived key
+      - name: NuGet login
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
       - name: Push to nuget.org
         env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
         run: |
-          if [ -z "$NUGET_API_KEY" ]; then echo "::error::the NUGET_API_KEY secret is not set"; exit 1; fi
           # pushing a .nupkg also pushes the .snupkg next to it to the symbol server
           dotnet nuget push "artifacts/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate

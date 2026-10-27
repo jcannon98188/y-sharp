@@ -93,7 +93,7 @@ CI on GitHub Actions:
 | TASK-4 (M0 to M7, 44 specs) | Done; all subtasks are Done. The parent is still To Do in the backlog. |
 | TASK-5 (server tier) | All eight subtasks are Done and merged. The parent's acceptance criteria are left for the owner to check. |
 | TASK-6 to TASK-14 | Done: registry rows, an undo ordering detail, zero-allocation budgets, the API baselines, folds and loading that scale with the update rather than the held state, the server's API decisions, and decoding a peer's update once. |
-| TASK-15 (NuGet) | Packaging, symbols, Source Link, the release workflow and the docs are done. Waiting on the owner to add the `NUGET_API_KEY` secret and push the first `v0.1.0-preview.1` tag. |
+| TASK-15 (NuGet) | Packaging, symbols, Source Link, the release workflow and the docs are done. Publishing uses nuget.org trusted publishing, so no API key is stored. Waiting on the owner to add the nuget.org policy and the `NUGET_USER` secret, then push the first `v0.1.0-preview.1` tag. |
 
 ## 6. Known issues and open items
 

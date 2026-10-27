@@ -30,7 +30,16 @@ Releases stay below 1.0, with `-preview.N` prereleases, until the public API is 
 
 ## Cutting a release
 
-You need the `NUGET_API_KEY` repository secret once. Create the key on nuget.org with the push scope, limited to the `YSharp*` package IDs. Store it under the repository's Settings, Secrets and variables, Actions.
+Publishing uses nuget.org [trusted publishing](https://learn.microsoft.com/en-us/nuget/nuget-org/trusted-publishing), so no API key is stored anywhere. The workflow asks GitHub for an OIDC token, and nuget.org exchanges it for an API key that lasts one hour. Set this up once:
+
+1. On nuget.org, under your account's Trusted Publishing page, add a GitHub Actions policy:
+   - Repository Owner `jcannon98188`;
+   - Repository `y-sharp`;
+   - Workflow File `release.yml` (the file name only, no path);
+   - Environment left empty.
+2. In the repository's Settings, Secrets and variables, Actions, add the secret `NUGET_USER`. Its value is your nuget.org profile name, not your email address.
+
+The first push creates the three package IDs under the account that owns the policy.
 
 1. Merge everything for the release into `main`, and make sure the gating workflow is green there.
 2. If the release moves to a new version, change `VersionPrefix` in `src/Directory.Build.props` in a normal PR.
