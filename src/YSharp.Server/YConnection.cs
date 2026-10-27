@@ -27,6 +27,9 @@ public enum ConnectionCloseReason
 
     /// <summary>The server shut down after draining the document's mailbox.</summary>
     ServerShutdown,
+
+    /// <summary>The host deleted the document with <see cref="YServer.DeleteAsync"/>, after its mailbox handled what it had accepted.</summary>
+    DocumentDeleted,
 }
 
 /// <summary>

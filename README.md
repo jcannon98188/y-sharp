@@ -74,7 +74,7 @@ This runs the gating tier and needs no Node. The live differential tests need No
 
 ## Project management
 
-Work is tracked with [Backlog.md](https://github.com/MrLesk/Backlog.md) under `backlog/`. The implementation plan, TASK-4, is done: 44 specs across milestones M0 to M7. TASK-5 is the server tier. The follow-ups TASK-6 to TASK-13 are done: registry rows, an undo ordering detail, zero-allocation budgets, the API surface baseline, and work proportional to the update rather than the held state in the relay's folds, the document's pending state and loading a stored log. TASK-14 (decoding a peer's update once on the server) is implemented and waits on an API decision, E6 in [docs/api-decisions.md](docs/api-decisions.md). TASK-15 is publishing the packages to NuGet.
+Work is tracked with [Backlog.md](https://github.com/MrLesk/Backlog.md) under `backlog/`. The implementation plan, TASK-4, is done: 44 specs across milestones M0 to M7. TASK-5 is the server tier. The follow-ups TASK-6 to TASK-13 are done: registry rows, an undo ordering detail, zero-allocation budgets, the API surface baseline, and work proportional to the update rather than the held state in the relay's folds, the document's pending state and loading a stored log. TASK-14 decodes a peer's update once on the server. The owner's API decisions on the server-tier surface (E1 to E6 in [docs/api-decisions.md](docs/api-decisions.md)) are applied, including `YServer.DeleteAsync`. TASK-15 is publishing the packages to NuGet.
 
 ## License
 

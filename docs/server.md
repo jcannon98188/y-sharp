@@ -56,6 +56,7 @@ The interface's documentation in `src/YSharp.Server/Storage/IUpdateStore.cs` giv
 - **The default** is `InMemoryUpdateStore`. **It is not durable: a restart loses every document.** `YServerOptions.UsesDefaultStore` tells a host whether it is still on the default.
 - **A durable backend** is an `IUpdateStore` the host writes, for example over a database table or files, and sets as `YServerOptions.Store`. To check it, subclass `UpdateStoreConformance` from `YSharp.Server.Testing` and run its checks in your test project. The suite covers sequences, ordering, compaction, deletion, crashes during an append or a compaction, torn tails, mid-log corruption and concurrency.
 - **Compaction** is the host's call. `new UpdateLog(store).CompactAsync(docId)` merges a document's log into one snapshot and is safe to run while the document is open.
+- **Deletion** goes through `YServer.DeleteAsync(docId)`. It lets the document's mailbox finish what it had accepted, closes its connections with `ConnectionCloseReason.DocumentDeleted`, and then deletes the log from the store. A peer or server read that arrives meanwhile waits and then finds the document empty. Calling `IUpdateStore.DeleteAsync` directly on an open document leaves its mailbox serving the old state until it is evicted, and its next append starts a new log.
 
 ## Hosting
 

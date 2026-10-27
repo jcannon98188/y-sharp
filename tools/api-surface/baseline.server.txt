@@ -14,6 +14,7 @@ YSharp.Server.AppendResult|property YSharp.YStatus Status {get;set;}
 YSharp.Server.AppendResult|struct readonly
 YSharp.Server.ConnectionCloseReason|enum
 YSharp.Server.ConnectionCloseReason|enum Disposed = 1
+YSharp.Server.ConnectionCloseReason|enum DocumentDeleted = 7
 YSharp.Server.ConnectionCloseReason|enum None = 0
 YSharp.Server.ConnectionCloseReason|enum ProtocolError = 3
 YSharp.Server.ConnectionCloseReason|enum ServerShutdown = 6
@@ -184,6 +185,7 @@ YSharp.Server.YServerOptions|sealed class
 YSharp.Server.YServer|base System.Object
 YSharp.Server.YServer|ctor(YSharp.Server.YServerOptions options = null)
 YSharp.Server.YServer|implements System.IAsyncDisposable
+YSharp.Server.YServer|method System.Threading.Tasks.ValueTask DeleteAsync(System.String documentId, System.Threading.CancellationToken cancellationToken = default)
 YSharp.Server.YServer|method System.Threading.Tasks.ValueTask<System.Boolean> EditAsync(System.String documentId, System.Action<YSharp.Transaction> edit, System.Object origin = null, System.Threading.CancellationToken cancellationToken = default)
 YSharp.Server.YServer|method System.Threading.Tasks.ValueTask<System.IAsyncDisposable> SubscribeAsync(System.String documentId, System.Action<YSharp.Doc> changed, System.Threading.CancellationToken cancellationToken = default)
 YSharp.Server.YServer|method System.Threading.Tasks.ValueTask<T> ReadAsync<T>(System.String documentId, System.Func<YSharp.Doc, T> read, System.Threading.CancellationToken cancellationToken = default)

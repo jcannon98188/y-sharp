@@ -97,22 +97,25 @@ The randomized gating budget (~60 s) and the 2-minute gating budget are unmeasur
 
 ## E. Surface added since the TASK-4 baseline (TASK-10)
 
-`tools/api-surface/check.sh` now checks two baselines: `baseline.txt` for `YSharp`, and `baseline.server.txt` for `YSharp.Server` and `YSharp.Server.Testing`. TASK-10 brought both up to date. Each change below was checked against the conventions sections A and B set: `Try` methods return a status and never throw on bad input, and throwing counterparts throw `YDecodeException`. Outputs go to an `IBufferWriter<byte>`, with a `byte[]` convenience overload. Classes are sealed, and records are used only for plain data. E1 to E3 and E6 need a decision; E4 and E5 are for the record.
+`tools/api-surface/check.sh` now checks two baselines: `baseline.txt` for `YSharp`, and `baseline.server.txt` for `YSharp.Server` and `YSharp.Server.Testing`. TASK-10 brought both up to date. Each change below was checked against the conventions sections A and B set: `Try` methods return a status and never throw on bad input, and throwing counterparts throw `YDecodeException`. Outputs go to an `IBufferWriter<byte>`, with a `byte[]` convenience overload. Classes are sealed, and records are used only for plain data. E1 to E3 and E6 were decided by the owner on 2026-10-27; E4 and E5 are for the record.
 
 ### E1. `YRelay.TryPrepareUpdate` parameter order
 `TryPrepareUpdate(update, format, out prepared)` takes `format` before the `out` and without a default. `YUpdate.TryDecode(update, out decoded, format = V1, limits = null)` and the rest of the core put the `out` right after the input and default the format to V1.
 - **Options.** (a) Change it now to `TryPrepareUpdate(update, out prepared, format = V1)`, while nothing is published. (b) Keep it.
 - **Recommendation.** (a). The only caller is `DocumentMailbox`.
+- **Decision (owner sign-off, 2026-10-27).** (a). The signature is now `TryPrepareUpdate(update, out prepared, format = V1)`.
 
 ### E2. `YRelay` has no throwing `ApplyUpdate`
 `Doc` pairs `ApplyUpdate` with `TryApplyUpdate`, and `YRelay` pairs `EncodeStateAsUpdate` with `TryEncodeStateAsUpdate`. But `YRelay` has only `TryApplyUpdate`, and preparing has only `TryPrepareUpdate`.
 - **Options.** (a) Add `ApplyUpdate`, which throws `YDecodeException`, or `YLimitException` for the pending bound. (b) Leave the relay `Try`-only, as server code should not throw on a peer's bytes.
 - **Recommendation.** (b), with a sentence in the class documentation saying why.
+- **Decision (owner sign-off, 2026-10-27).** (b). The `YRelay` class documentation says why.
 
 ### E3. Server convenience for compaction and deletion
 A host compacts with `new UpdateLog(store).CompactAsync(docId)` and deletes through `IUpdateStore.DeleteAsync`. `YServer` exposes neither. Deleting a document that is open leaves its mailbox serving the old relay until it is evicted.
 - **Options.** (a) Add `YServer.CompactAsync(docId)` and `YServer.DeleteAsync(docId)`, which close the document's connections first. (b) Keep it as is and document the open-document caveat in `docs/server.md`.
 - **Recommendation.** (a) for deletion, which has the caveat. Compaction is already safe while a document is open.
+- **Decision (owner sign-off, 2026-10-27).** (a) for deletion only. `YServer.DeleteAsync(docId)` lets the mailbox finish what it accepted, closes its connections with the new `ConnectionCloseReason.DocumentDeleted`, then deletes from the store; opens of that document wait meanwhile. `docs/server.md` documents it and the direct-store caveat. No `YServer.CompactAsync`.
 
 ### E4. Added in TASK-5 (no decision needed)
 - **Core.** `YRelay` and `YRelay.PreparedUpdate` (TASK-5.2, 5.3). `YUpdate.TryDecode` with `DecodedUpdate`, `UpdateStruct`, `UpdateStructKind`, `UpdateContentKind` and `UpdateDeleteRange`: a read-only view of an update for validation hooks. `UpdateContentKind` is an API enum, not the wire's content reference numbers. Also `YSync.TryReadFrame`, and span overloads of `YSync.WriteStep1` and `WriteStep2`.
@@ -128,3 +131,4 @@ The TASK-4 baseline still had two lines the implementation had already changed:
 So that `DocumentMailbox` decodes a peer's update once, three members take a `DecodedUpdate` from `YUpdate.TryDecode`: `YRelay.TryPrepareUpdate(DecodedUpdate, out prepared)`, `Doc.TryApplyUpdate(DecodedUpdate, origin)`, and `DecodedUpdate.Encode(output, format = V1)`, which writes the bytes `YUpdate.TryConvert` would. Each gives what its bytes overload gives. A decoded update carries the limits it was decoded under, and a relay or document refuses it with `LimitExceeded` when they were looser than its own string or nesting bound, since those are checked only while decoding.
 - **Options.** (a) Keep the three overloads. (b) Remove them and let the server decode three times; ADR 0024 keeps the server on the public API, so there is no internal route.
 - **Recommendation.** (a). There is no throwing `Doc.ApplyUpdate(DecodedUpdate)`; add one only if E2 goes the other way.
+- **Decision (owner sign-off, 2026-10-27).** (a). E2 stayed `Try`-only, so no throwing `Doc.ApplyUpdate(DecodedUpdate)` is added.

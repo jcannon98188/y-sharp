@@ -27,6 +27,10 @@ namespace YSharp;
 /// measured as their V1 encoding. An update that would take that above the limit is rejected with LimitExceeded and changes nothing (ADR 0024
 /// RLY-7).
 /// </para>
+/// <para>
+/// Applying and preparing come only as <c>Try</c> methods, unlike <see cref="Doc.ApplyUpdate(ReadOnlySpan{byte}, object?, UpdateFormat)"/>: a relay's input is a
+/// peer's bytes, which a server should refuse with a status rather than an exception (docs/api-decisions.md E2).
+/// </para>
 /// <para>Every member is safe to call from any thread. The relay has its own lock and never takes a document lock.</para>
 /// </summary>
 /// <remarks>
@@ -93,7 +97,7 @@ public sealed class YRelay
     /// changing the relay, so a server can persist the update before the relay serves it (ADR 0024 SRV-8). The update's bytes are not kept.
     /// An invalid or over-limit update returns its error and a null <paramref name="prepared"/>.
     /// </summary>
-    public YStatus TryPrepareUpdate(ReadOnlySpan<byte> update, UpdateFormat format, out PreparedUpdate? prepared)
+    public YStatus TryPrepareUpdate(ReadOnlySpan<byte> update, out PreparedUpdate? prepared, UpdateFormat format = UpdateFormat.V1)
     {
         prepared = null;
         var error = YUpdate.DecodeForFunctions(update, format, Limits, out var refs, out var structs);
@@ -103,7 +107,7 @@ public sealed class YRelay
     }
 
     /// <summary>
-    /// <see cref="TryPrepareUpdate(ReadOnlySpan{byte}, UpdateFormat, out PreparedUpdate?)"/> for an update already decoded with
+    /// <see cref="TryPrepareUpdate(ReadOnlySpan{byte}, out PreparedUpdate?, UpdateFormat)"/> for an update already decoded with
     /// <see cref="YUpdate.TryDecode"/>, so a server that decodes a peer's update once can validate, store and prepare it from that (TASK-14).
     /// LimitExceeded when the update breaks this relay's limits or was decoded under a looser string or nesting bound than this relay's.
     /// </summary>

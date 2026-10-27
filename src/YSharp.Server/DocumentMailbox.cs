@@ -118,6 +118,9 @@ internal sealed class DocumentMailbox
     /// <summary>Connections, posted work and subscriptions that hold the document open; guarded by the server's lock (SRV-20).</summary>
     internal int Attached;
 
+    /// <summary>Why the remaining connections close once the mailbox is complete and drained: set before <see cref="Complete"/>.</summary>
+    internal ConnectionCloseReason CloseReason = ConnectionCloseReason.ServerShutdown;
+
     /// <summary>The relay state. Read on the worker, or after it stops.</summary>
     internal YRelay Relay => _relay;
 
@@ -177,7 +180,7 @@ internal sealed class DocumentMailbox
             if (more is null) Evict();
         }
 
-        foreach (var connection in _connections) connection.Close(ConnectionCloseReason.ServerShutdown);
+        foreach (var connection in _connections) connection.Close(CloseReason);
         _connections.Clear();
     }
 
