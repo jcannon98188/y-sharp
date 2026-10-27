@@ -263,7 +263,8 @@ internal static class UpdateWriter
 
     /// <summary>
     /// Yjs <c>createDeleteSetFromStructStore</c> then <c>writeDeleteSet</c>: per client, in descending order, each run of consecutive deleted structs
-    /// (GC structs included) as one range.
+    /// (GC structs included) as one range. A run of length 0, which only a zero-length GC accepted from a peer makes, is left out: a delete range
+    /// of length 0 is Malformed (ENC-51), and Yjs writing one makes its own state unreadable (TASK-17.2).
     /// </summary>
     public static void WriteStoreDeleteSet<TEncoder>(ref TEncoder encoder, StructStore store)
         where TEncoder : IUpdateEncoder, allows ref struct
@@ -287,6 +288,7 @@ internal static class UpdateWriter
                 var clock = s.Clock;
                 var length = s.Length;
                 while (i + 1 < count && store.StructAtRank(rank, i + 1).IsDeleted) length += store.StructAtRank(rank, ++i).Length;
+                if (length == 0) continue;
                 encoder.WriteDsClock(clock);
                 encoder.WriteDsLen(length);
             }
@@ -299,9 +301,11 @@ internal static class UpdateWriter
         var count = store.StructCountAtRank(rank);
         for (var i = 0; i < count; i++)
         {
-            if (!store.StructAtRank(rank, i).IsDeleted) continue;
-            runs++;
-            while (i + 1 < count && store.StructAtRank(rank, i + 1).IsDeleted) i++;
+            var s = store.StructAtRank(rank, i);
+            if (!s.IsDeleted) continue;
+            var length = s.Length;
+            while (i + 1 < count && store.StructAtRank(rank, i + 1).IsDeleted) length += store.StructAtRank(rank, ++i).Length;
+            if (length > 0) runs++;
         }
 
         return runs;

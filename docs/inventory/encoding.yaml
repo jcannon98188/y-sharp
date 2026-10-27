@@ -518,7 +518,7 @@
   owner: 5
   status: active
   ref: "encoding.md 8.2 row"
-  note: "An update holding a zero-length delete range is Malformed in every decode path (TASK-17.2, reversing the TASK-4.14 'ignored' ruling). Yjs never writes one; it applies one for a known client and throws 'Unexpected case' when it re-encodes a parked one."
+  note: "An update holding a zero-length delete range is Malformed in every decode path (TASK-17.2, reversing the TASK-4.14 'ignored' ruling). Yjs never writes one; it applies one for a known client and throws 'Unexpected case' when it re-encodes a parked one. A document holding a zero-length GC (which both accept) leaves its run of length 0 out of its own state's delete set, where Yjs writes one."
 
 - id: ENC-52
   title: "Malformed input: ds range beyond known state -> accepted, parked in pendingDs"
