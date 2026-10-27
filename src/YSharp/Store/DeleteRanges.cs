@@ -89,6 +89,21 @@ internal sealed class DeleteRanges
         return false;
     }
 
+    /// <summary>Removes <paramref name="count"/> ranges from <paramref name="index"/>. Only for a set that does not track its client order.</summary>
+    public void RemoveRange(int index, int count)
+    {
+        System.Diagnostics.Debug.Assert(_clientOrder is null, "Removing ranges would leave the client order stale.");
+        _ranges.RemoveRange(index, count);
+    }
+
+    /// <summary>A copy of the ranges, not tracking the client order.</summary>
+    public DeleteRanges Clone()
+    {
+        var copy = new DeleteRanges();
+        for (var i = 0; i < _ranges.Count; i++) copy._ranges.Add(_ranges[i]);
+        return copy;
+    }
+
     /// <summary>Empties the set but keeps its blocks for the next transaction.</summary>
     public void Clear()
     {

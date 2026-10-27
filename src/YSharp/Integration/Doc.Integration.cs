@@ -173,6 +173,7 @@ public sealed partial class Doc
 
     private void ReadUpdate(Transaction tx, UpdateRefs update, ref int rejected)
     {
+        var reach = ReachableDeleteClients(update, _pendingDeletes);
         var rest = IntegrateStructs(tx, update, ref rejected);
         var retry = false;
         var pending = _pending;
@@ -193,28 +194,8 @@ public sealed partial class Doc
         }
 
         var dsRest = ApplyDeleteSet(tx, update.Deletes);
-        if (_pendingDeletes is { } pendingDs)
-        {
-            var dsRest2 = ApplyDeleteSet(tx, InWriteOrder(pendingDs));
-            if (dsRest is not null && dsRest2 is not null)
-            {
-                for (var i = 0; i < dsRest2.Count; i++)
-                {
-                    var r = dsRest2[i];
-                    dsRest.Add(r.Client, r.Clock, r.Length);
-                }
-
-                _pendingDeletes = dsRest;
-            }
-            else
-            {
-                _pendingDeletes = dsRest ?? dsRest2;
-            }
-        }
-        else
-        {
-            _pendingDeletes = dsRest;
-        }
+        SettlePendingDeletes(tx, null, reach, dsRest, ref _pendingDeletes, ref _pendingDeleteSize, change: true);
+        _retiredClientIds = null;
 
         if (retry)
         {
