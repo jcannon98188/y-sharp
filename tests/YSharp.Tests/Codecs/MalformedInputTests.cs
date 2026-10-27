@@ -120,6 +120,25 @@ public sealed class MalformedInputTests
         AssertRejected(V2("01 01 00 00", origin.info, origin.str, client: origin.client, leftClock: "42"), UpdateFormat.V2);
     }
 
+    [Fact, Covers("Q22", "Q14")]
+    [Requires(Feature.V2, Feature.V2Functions)]
+    public void Q22_AnOriginClockOf2Pow53Minus1_RoundTripsThroughV2()
+    {
+        // A diff column holds diff * 2 + flag, so an origin clock of 2^53-1 is written as 2^54-2 (be ff ff ff ff ff ff 3f). Yjs v13.6.33 writes
+        // these V2 bytes for the V1 update and reads them back to it (TASK-16); a clock of 2^53 (diff 2^54) stays Malformed.
+        var origin = (info: "84", client: "01 02", str: "02 68 69 02");
+        AssertAccepted(V2("01 01 00 00", origin.info, origin.str, client: origin.client, leftClock: "be ff ff ff ff ff ff 3f"), UpdateFormat.V2);
+        AssertRejected(V2("01 01 00 00", origin.info, origin.str, client: origin.client, leftClock: "80 80 80 80 80 80 80 40"), UpdateFormat.V2);
+
+        var v1 = Hex.Bytes("01 01 01 00 88 02 ff ff ff ff ff ff ff 0f 01 7d 36 00");   // client 1 clock 0, origin (2, 2^53-1), Any [54]
+        var v2 = new ArrayBufferWriter<byte>();
+        Assert.True(YUpdate.TryConvert(v1, UpdateFormat.V1, UpdateFormat.V2, v2).Ok);
+        Assert.Equal("000002010208beffffffffffff3f0001880100000001010101007d3600", Hex.Of(v2.WrittenSpan.ToArray()));
+        var back = new ArrayBufferWriter<byte>();
+        Assert.True(YUpdate.TryConvert(v2.WrittenSpan, UpdateFormat.V2, UpdateFormat.V1, back).Ok);
+        Assert.Equal(Hex.Of(v1), Hex.Of(back.WrittenSpan.ToArray()));
+    }
+
     [Fact, Covers("ENC-38")]
     public void Enc38_ContentRef11_IsRejected()=> AssertRejected(Struct("0b", ""));
 
