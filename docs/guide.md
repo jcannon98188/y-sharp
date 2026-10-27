@@ -267,7 +267,7 @@ The README's [How correctness is tested](../README.md#how-correctness-is-tested)
 | Topic | Where |
 | --- | --- |
 | Hosting the server, storage, validation hooks | [server.md](server.md) |
-| Why the API looks the way it does, and open decisions | [api-decisions.md](api-decisions.md), [ADR 0008](adr/0008-public-api-shape.md) |
+| Why the API looks the way it does, and the decision history | [api-decisions.md](api-decisions.md), [ADR 0008](adr/0008-public-api-shape.md) |
 | Error model and crash safety | [ADR 0005](adr/0005-error-model-and-crash-safety.md) |
 | Thread safety | [ADR 0006](adr/0006-concurrency-contract.md) |
 | Value mapping to JavaScript | [ADR 0002](adr/0002-yvalue-pinned-any-mapping.md), [ADR 0007](adr/0007-yvalue-contract.md) |

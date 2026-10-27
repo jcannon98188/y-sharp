@@ -1,6 +1,6 @@
-# Open API decisions
+# API decisions
 
-**For the project owner. Sections A, B and C are decided (below), D1 is Keep and D2 is resolved; D3 and section E are open.** Each item is a question the test suite hit while compiling against the API stub (ADR 0008, 0019) and could not settle alone. Sources: the TASK-2 implementation notes (`backlog task view 2 --plain`), `// API gap` comments in `tests/`, and the registry (`docs/inventory/`). Decided items record the decision and what changed; D1 and D3 keep their original options.
+**Every section is decided: A, B and C (below), D1 is Keep, D2 and D3 are resolved, and section E was signed off by the owner on 2026-10-27.** Each item is a question the test suite hit while compiling against the API stub (ADR 0008, 0019) and could not settle alone. Sources: the TASK-2 implementation notes (`backlog task view 2 --plain`), `// API gap` comments in `tests/`, and the registry (`docs/inventory/`). Decided items record the decision and what changed; D1 and D3 keep their original options.
 
 IDs: `Q`, `ENC`, `AW`, `CC`, `ERR`, `AU` are registry entries (ADR 0010).
 
@@ -92,8 +92,10 @@ Section B is decided; the decisions are recorded in ADR 0003, 0005, 0006, 0008 a
 ### D2. Test method naming rule (resolved)
 Decided: rename all. Every test method now follows `Subject_Condition_Outcome` (ADR 0015); upstream names live only in `[PortOf]`. The ported oracle tests are named for the behaviour they check, for example `Undo_Map_UndoesAndRedoesKeyChanges`.
 
-### D3. Open, no decision needed yet
-The randomized gating budget (~60 s) and the 2-minute gating budget are unmeasured until an implementation exists; the AFL++ job is untested; Spec 13's live differential properties are unrun and will probably need normalisers; Q25 is active under Spec 10.
+### D3. Resolved by measurement
+At the time this was open, the randomized gating budget (~60 s) and the 2-minute gating budget were unmeasured, the AFL++ job was untested, Spec 13's live differential properties were unrun, and Q25 was active under Spec 10.
+
+**Resolved.** TASK-4.38 calibrated the randomized gating tier to about 58 s. TASK-4.43 ran coverage, SharpFuzz/AFL++ and the nightly benchmark green on a real runner. Spec 13's live differential runs on every PR (`smoke-differential`), with its normalisers in `tests/YSharp.Interop.Tests/Harness/Normalisers.cs`.
 
 ## E. Surface added since the TASK-4 baseline (TASK-10)
 
