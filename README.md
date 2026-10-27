@@ -5,6 +5,12 @@ A pure C# port of [Yjs](https://github.com/yjs/yjs) v13, the CRDT library for bu
 > **Status: the core library is implemented; pre-release.**
 > All 44 implementation specs (milestones M0 to M7) have landed and passed the release gate. Every feature gate is open: documents, transactions, the V1 and V2 codecs, the shared types, events, snapshots, relative positions, the undo manager, subdocuments, permanent user data, and the awareness, sync and auth protocols. A server tier (`YSharp.Server`) sits on top of it. Nothing is published to NuGet yet (TASK-15 tracks it), so build from source. The public API may still change before a first release.
 
+## Documentation
+
+- **[How y-sharp works](docs/guide.md)**: documents, shared types, transactions and threads, updates, the sync protocol, awareness, undo, limits, and the server tier.
+- **[Hosting the server](docs/server.md)**: wiring `YSharp.Server` into a host, storage backends, validation hooks, and server-side edits.
+- **[API decisions](docs/api-decisions.md)** and the **[architecture decision records](docs/adr/)**: why the library is built the way it is.
+
 ## What it is
 
 y-sharp aims to be a drop-in .NET peer for Yjs. A y-sharp document and a Yjs document should exchange updates, state vectors and sync messages and converge on the same state.
