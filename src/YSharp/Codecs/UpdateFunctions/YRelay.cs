@@ -454,7 +454,7 @@ public sealed class YRelay
             held.Offsets.RemoveRange(c.P + 1, held.Offsets.Count - c.P - 1);
             foreach (var o in c.TailOffsets) held.Offsets.Add(o);
             while (held.Skips.Count > 0 && held.Skips.Last >= c.P) held.Skips.RemoveAt(held.Skips.Count - 1);
-            foreach (var k in c.TailSkips) held.Skips.Add(k);
+            foreach (var k in c.TailSkips) held.AddSkip(k);
             held.State = c.State;
             held.PendingBytes = c.PendingBytes;
         }
@@ -510,7 +510,7 @@ public sealed class YRelay
             var held = new ClientStructs();
             foreach (var t in change.Tail) held.Structs.Add(t);
             foreach (var o in change.TailOffsets) held.Offsets.Add(o);
-            foreach (var k in change.TailSkips) held.Skips.Add(k);
+            foreach (var k in change.TailSkips) held.AddSkip(k);
             held.State = change.State;
             held.PendingBytes = change.PendingBytes;
             _clients.Add(client, held);
@@ -809,19 +809,27 @@ public sealed class YRelay
     /// <summary>One client's merged structs, with what the relay keeps about them.</summary>
     internal sealed class ClientStructs
     {
-        // chunked (ADR 0018), so a long history grows by blocks and a fold never copies it to grow it
-        public readonly ChunkedList<StructRef> Structs = new();
+        private static readonly ChunkedList<int> NoSkips = new();
+
+        // chunked (ADR 0018), so a long history grows by blocks and a fold never copies it to grow it. The first blocks fit one struct: a
+        // StructRef is large, and a relay can hold thousands of clients with one struct each (HOS-REF)
+        public readonly ChunkedList<StructRef> Structs = new(firstCapacity: 1);
         public readonly ChunkedList<long> Offsets = NewOffsets();   // Offsets[i]: the V1 bytes of Structs[0..i)
-        public readonly ChunkedList<int> Skips = new();             // the indices of the Skips, ascending
+        public long State;                                          // the state vector's clock, 0 when the client is not listed
+        public long PendingBytes;                                   // the V1 bytes of the client's pending block, 0 when it has none
+        private ChunkedList<int>? _skips;                           // made on the first Skip: most clients have none
+
+        /// <summary>The indices of the Skips, ascending. Read only; <see cref="AddSkip"/> adds one.</summary>
+        public ChunkedList<int> Skips => _skips ?? NoSkips;
+
+        public void AddSkip(int index) => (_skips ??= new ChunkedList<int>(firstCapacity: 1)).Add(index);
 
         private static ChunkedList<long> NewOffsets()
         {
-            var offsets = new ChunkedList<long>();
+            var offsets = new ChunkedList<long>(firstCapacity: 2);
             offsets.Add(0);
             return offsets;
         }
-        public long State;                                  // the state vector's clock, 0 when the client is not listed
-        public long PendingBytes;                           // the V1 bytes of the client's pending block, 0 when it has none
     }
 
     /// <summary>A fold's splice of one client: its held structs from <see cref="P"/> on are replaced with <see cref="Tail"/>.</summary>

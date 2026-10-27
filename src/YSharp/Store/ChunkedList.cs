@@ -23,10 +23,15 @@ internal sealed class ChunkedList<T> : IReadOnlyList<T>
     public static readonly int BlockCapacity = Math.Max(1, ChunkLimits.ChunkBytes / Unsafe.SizeOf<T>());
 
     // small: a document holds one list per client, and an update can name thousands of one-struct clients (BUD-12)
-    private const int FirstCapacity = 4;
+    private const int DefaultFirstCapacity = 4;
 
-    private readonly List<T[]> _blocks = new(1);
+    // exactly one entry per block: a block is added only every ChunkBytes, so growing the array is rare, and an empty list holds no array
+    private T[][] _blocks = Array.Empty<T[]>();
+    private readonly int _firstCapacity;
     private int _count;
+
+    /// <param name="firstCapacity">The first block's size: below the default for a list that most often holds one or two large elements.</param>
+    public ChunkedList(int firstCapacity = DefaultFirstCapacity) => _firstCapacity = Math.Max(1, firstCapacity);
 
     public int Count => _count;
 
@@ -166,14 +171,14 @@ internal sealed class ChunkedList<T> : IReadOnlyList<T>
 
     private void EnsureRoomFor(int count)
     {
-        if (_blocks.Count == 0)
+        if (_blocks.Length == 0)
         {
-            _blocks.Add(new T[Math.Min(FirstCapacity, BlockCapacity)]);
+            _blocks = new[] { new T[Math.Min(_firstCapacity, BlockCapacity)] };
             return;
         }
 
         var first = _blocks[0];
-        if (_blocks.Count == 1 && first.Length < BlockCapacity)
+        if (_blocks.Length == 1 && first.Length < BlockCapacity)
         {
             if (count <= first.Length) return;
             var grown = new T[Math.Min(first.Length * 2, BlockCapacity)];
@@ -182,6 +187,10 @@ internal sealed class ChunkedList<T> : IReadOnlyList<T>
             return;
         }
 
-        if (count > _blocks.Count * BlockCapacity) _blocks.Add(new T[BlockCapacity]);
+        if (count > _blocks.Length * BlockCapacity)
+        {
+            Array.Resize(ref _blocks, _blocks.Length + 1);
+            _blocks[^1] = new T[BlockCapacity];
+        }
     }
 }
