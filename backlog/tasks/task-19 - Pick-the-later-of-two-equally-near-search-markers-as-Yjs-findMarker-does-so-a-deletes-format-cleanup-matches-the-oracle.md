@@ -3,11 +3,11 @@ id: TASK-19
 title: >-
   Pick the later of two equally near search markers, as Yjs findMarker does, so
   a delete's format cleanup matches the oracle
-status: In Progress
+status: Done
 assignee:
   - '@claude'
 created_date: '2026-10-27 17:51'
-updated_date: '2026-10-27 17:55'
+updated_date: '2026-10-27 19:42'
 labels:
   - bug
   - text
@@ -28,7 +28,7 @@ Nightly run 40547040408 on main (tree-scripts differential, FsCheck replay 80444
 - [x] #1 SearchMarkers.Find and Peek choose the later of two equally near markers
 - [x] #2 A unit test pins the oracle's bytes for the delete (no Node)
 - [x] #3 A Smoke live differential replays the shrunk nightly script and matches the oracle
-- [ ] #4 The Nightly tier passes on main
+- [x] #4 The Nightly tier passes on main
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -41,4 +41,12 @@ Nightly run 40547040408 on main (tree-scripts differential, FsCheck replay 80444
 
 <!-- SECTION:NOTES:BEGIN -->
 Red before the fix: the unit test's update was 00026701000165010A01 (also deleting 101:10); the live test differed at a.v1[2]. Green after. YSHARP_RELEASE_GATE=1 full suite 5,087 total, 0 failed; Smoke tier 0 failed; API surface unchanged. The replay of the saved nightly script matches the oracle.
+
+Nightly run 40564569431 on main 32ac03f passed (all tiers, HOS-MUT included).
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+SearchMarkers.Find and Peek now take the later of two equally near markers, as Yjs findMarker's reduce does, so a delete's format cleanup deletes only what Yjs deletes (PR #10). Verified by a unit test pinning the oracle's bytes, a Smoke live differential of the shrunk nightly script, and the passing nightly run 40564569431.
+<!-- SECTION:FINAL_SUMMARY:END -->
