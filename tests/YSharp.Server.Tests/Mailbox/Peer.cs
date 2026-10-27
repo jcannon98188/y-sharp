@@ -89,6 +89,13 @@ internal sealed class Peer : IAsyncDisposable
         }
     }
 
+    /// <summary>Whether the document made updates of its own that were not sent: the format items a remote change left redundant, which Yjs
+    /// deletes as the change is applied (cleanupYTextAfterTransaction).</summary>
+    public bool HasUnsent => _localUpdates.Count > 0;
+
+    /// <summary>Sends the updates the document made of its own since the last send, as a provider sends every update it did not receive.</summary>
+    public Task SendUnsentAsync() => EditAsync(_ => { });
+
     public Task InsertAsync(string text) => EditAsync(d => d.GetText("text").Insert(d.GetText("text").Length, text));
 
     public async Task SendAsync(byte[] message) => Assert.True(await Connection.ReceiveAsync(message, Ct), "the message was not accepted");

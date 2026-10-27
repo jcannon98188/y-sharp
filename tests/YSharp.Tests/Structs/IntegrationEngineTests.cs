@@ -370,6 +370,133 @@ public sealed class IntegrationEngineTests
         }
     }
 
+    [Fact]
+    [Covers("STR-65", "ERR-10")]
+    public void ThePendingDeletes_AreEveryRangeReceivedFromItsClientsState_AsYjsReReadingThemAllLeavesThem()
+    {
+        // only the clients an update reaches are re-applied (TASK-12); Yjs re-reads every pending range, which leaves each one from its client's
+        // state on, so the set is always the ranges received so far, cut at their clients' states. The local client's own edits move its state too
+        for (var seed = 0; seed < 300; seed++)
+        {
+            var rng = new Random(seed);
+            var d = Mk(4);
+            var reference = Mk(4);
+            var received = new List<(ulong Client, long Clock, long Length)>();
+            for (var step = 0; step < 40; step++)
+            {
+                if (rng.Next(6) == 0)
+                {
+                    foreach (var doc in new[] { d, reference }) doc.GetText("t").Insert(0, "xy");
+                    continue;
+                }
+
+                var (refs, deletes) = RandomWaitingUpdate(rng);
+                var more = Enumerable.Range(0, rng.Next(3)).Select(_ => ((ulong)rng.Next(1, 5), (long)rng.Next(0, 16), (long)rng.Next(1, 4)));
+                deletes = deletes.Concat(more).ToArray();
+                received.AddRange(deletes);
+                UpdateRefs Make()
+                {
+                    var u = Update(refs);
+                    foreach (var (client, clock, length) in deletes) u.AddDelete(client, clock, length);
+                    return u;
+                }
+
+                reference.IntegrateRemote(Make());
+                var expected = Doc.V1Bytes(reference.Pending, reference.PendingDeletes);
+                Assert.False(d.TryIntegrateRemote(Make(), null, expected - 1, out _), $"seed {seed} step {step}: accepted one byte under {expected}");
+                Assert.True(d.TryIntegrateRemote(Make(), null, expected, out _), $"seed {seed} step {step}: rejected at {expected}");
+
+                var model = new DeleteRanges();
+                foreach (var (client, clock, length) in received)
+                {
+                    var state = d.Store.GetState(client);
+                    if (clock + length > state) model.Add(client, Math.Max(clock, state), clock + length - Math.Max(clock, state));
+                }
+
+                Assert.Equal(Ranges(model), d.PendingDeletes is null ? new List<DeleteRange>() : Ranges(d.PendingDeletes));
+                Assert.Equal(expected, Doc.V1Bytes(d.Pending, d.PendingDeletes));
+            }
+
+            Assert.Equal(Text(reference), Text(d));
+        }
+    }
+
+    [Fact]
+    [Covers("STR-65")]
+    public void ARangeOfTheLocalClient_ReachedByItsOwnEdits_IsAppliedByTheNextUpdate_AsYjsDoes()
+    {
+        // Yjs re-reads the pending deletes on every update, whichever clients it brings: here one of a client the range does not belong to
+        var d = Mk(1);
+        var deletes = new UpdateRefs();
+        deletes.AddDelete(1, 2, 2);
+        d.IntegrateRemote(deletes);
+        d.GetText("t").Insert(0, "abcdef");
+        Assert.Equal("abcdef", Text(d));
+        Assert.NotNull(d.PendingDeletes);
+
+        d.IntegrateRemote(Update(Str(2, 0, "x")));
+        Assert.Equal("abef", Text(d).Replace("x", ""));
+        Assert.Null(d.PendingDeletes);
+    }
+
+    [Fact]
+    [Covers("STR-65")]
+    public void ARangeOfAClientIdTheDocumentGaveUp_ReachedByItsLastEdits_IsAppliedByTheNextUpdate()
+    {
+        // a remote update writes as the local client, so the document picks a new id when the transaction ends; edits made as the old id in that
+        // transaction moved its state past the pending range, which the next update applies, as Yjs's full re-read does
+        var d = Mk(1);
+        var deletes = new UpdateRefs();
+        deletes.AddDelete(1, 3, 2);
+        d.IntegrateRemote(deletes);
+        d.Transact(tx =>
+        {
+            d.IntegrateRemote(Update(Str(1, 0, "ab")));
+            d.GetText("t").Insert(2, "cdef");
+        });
+        Assert.NotEqual(1UL, d.ClientId);
+        Assert.Equal("abcdef", Text(d));
+
+        d.IntegrateRemote(Update(Str(2, 0, "x")));
+        Assert.Equal("abcf", Text(d).Replace("x", ""));
+        Assert.Null(d.PendingDeletes);
+    }
+
+    [Fact]
+    [Covers("STR-65", "ERR-10")]
+    public void AnUpdate_AllocatesInProportionToItself_NotToThePendingDeletesItDoesNotReach()
+    {
+        // client 7's ranges wait for structs that never come; client 2 types, deleting ahead of itself (TASK-12)
+        long Cost(int pending)
+        {
+            var d = Mk();
+            var held = new UpdateRefs();
+            for (var i = 0; i < pending; i++) held.AddDelete(7, 2L * i, 1);
+            d.IntegrateRemote(held);
+            UpdateRefs Next(int k)
+            {
+                var u = Update(Str(2, k, "a", origin: k == 0 ? null : (2, k - 1)));
+                u.AddDelete(2, k + 5, 1);
+                return u;
+            }
+
+            for (var k = 0; k < 10; k++) d.IntegrateRemote(Next(k));   // warm up
+            var before = GC.GetAllocatedBytesForCurrentThread();
+            for (var k = 10; k < 60; k++)
+            {
+                Assert.True(d.PredictPendingBytes(Next(k)) > 0);
+                d.IntegrateRemote(Next(k));
+            }
+
+            Assert.Equal(pending + 1, d.PendingDeletes!.Count);
+            return (GC.GetAllocatedBytesForCurrentThread() - before) / 50;
+        }
+
+        var small = Cost(500);
+        var large = Cost(20_000);
+        Assert.True(large < small * 2, $"an update allocated {large} bytes with 20000 ranges pending and {small} with 500");
+    }
+
     /// <summary>One or two clients' runs of strings and GCs from a random clock, Skips between, origins in other clients, sometimes deletes.</summary>
     private static (StructRef[] Refs, (ulong, long, long)[] Deletes) RandomWaitingUpdate(Random rng)
     {
