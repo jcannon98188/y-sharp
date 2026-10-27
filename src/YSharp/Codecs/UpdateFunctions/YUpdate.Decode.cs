@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using YSharp.Integration;
 using YSharp.Store;
@@ -130,18 +131,108 @@ public readonly record struct UpdateDeleteRange(ulong Client, long Clock, long L
 /// <summary>A decoded update, read-only (Yjs <c>decodeUpdate</c>): the structs in the order the update lists them, then its delete set.</summary>
 public sealed class DecodedUpdate
 {
-    internal DecodedUpdate(UpdateStruct[] structs, UpdateDeleteRange[] deletes)
+    private readonly List<(ulong Client, int Start)> _blocks;
+    private UpdateStruct[]? _structViews;
+    private UpdateDeleteRange[]? _deleteViews;
+
+    internal DecodedUpdate(List<StructRef> structs, List<(ulong Client, int Start)> blocks, UpdateRefs refs, YLimits limits, int length)
     {
-        Structs = structs;
-        Deletes = deletes;
+        InReadOrder = structs;
+        _blocks = blocks;
+        Refs = refs;
+        DecodeLimits = limits;
+        Length = length;
     }
 
-    public IReadOnlyList<UpdateStruct> Structs { get; }
+    /// <summary>The structs as the update functions read them; nothing changes them, so a relay and a document can share them.</summary>
+    internal List<StructRef> InReadOrder { get; }
 
-    public IReadOnlyList<UpdateDeleteRange> Deletes { get; }
+    /// <summary>The delete ranges, in update order.</summary>
+    internal UpdateRefs Refs { get; }
+
+    /// <summary>The limits the update was decoded under.</summary>
+    internal YLimits DecodeLimits { get; }
+
+    /// <summary>The length of the bytes it was decoded from.</summary>
+    internal int Length { get; }
+
+    public IReadOnlyList<UpdateStruct> Structs => _structViews ??= StructViews();
+
+    public IReadOnlyList<UpdateDeleteRange> Deletes => _deleteViews ??= DeleteViews();
 
     /// <summary>True when the update carries no struct and no deletion (what an up-to-date peer's Step2 holds).</summary>
-    public bool IsEmpty => Structs.Count == 0 && Deletes.Count == 0;
+    public bool IsEmpty => InReadOrder.Count == 0 && Refs.Deletes.Count == 0;
+
+    /// <summary>
+    /// Writes the update in <paramref name="format"/>: the bytes <see cref="YUpdate.TryConvert"/> writes for the update this was decoded from, so
+    /// a server that decodes once can store and apply the same update (TASK-14).
+    /// </summary>
+    public void Encode(IBufferWriter<byte> output, UpdateFormat format = UpdateFormat.V1)
+    {
+        ArgumentNullException.ThrowIfNull(output);
+        YUpdate.Write(format, InReadOrder, YUpdate.InWriteOrder(Refs.Deletes), output);
+    }
+
+    /// <summary>
+    /// Whether the update may be taken as checked against <paramref name="limits"/>: its size and struct count within them, and decoded under a
+    /// string and nesting bound no looser than theirs (those are checked only while decoding).
+    /// </summary>
+    internal bool Within(YLimits limits) =>
+        DecodeLimits.MaxStringBytes <= limits.MaxStringBytes && DecodeLimits.MaxAnyDepth <= limits.MaxAnyDepth
+        && Length <= limits.MaxUpdateBytes && InReadOrder.Count <= limits.MaxStructsPerUpdate;
+
+    /// <summary>
+    /// The update as a document's decode reads the same bytes: a list per client block (a repeated client's later block replaces the earlier
+    /// one), adjacent GC or Skip structs joined, and the delete ranges. New lists, as integration consumes them.
+    /// </summary>
+    internal UpdateRefs ForApply()
+    {
+        var refs = new UpdateRefs();
+        refs.ExpectClients(Math.Min(_blocks.Count, 16384));
+        for (var b = 0; b < _blocks.Count; b++)
+        {
+            var (client, start) = _blocks[b];
+            var end = b + 1 < _blocks.Count ? _blocks[b + 1].Start : InReadOrder.Count;
+            var list = new List<StructRef>(end - start);
+            for (var i = start; i < end; i++)
+            {
+                var r = InReadOrder[i];
+                if (r.Kind != RefKind.Item && list.Count > 0 && list[^1].Kind == r.Kind)
+                {
+                    var last = list[^1];
+                    last.Length += r.Length;
+                    list[^1] = last;
+                    continue;
+                }
+
+                list.Add(r);
+            }
+
+            refs.SetClient(client, list);
+        }
+
+        refs.Deletes.AddRange(Refs.Deletes);
+        return refs;
+    }
+
+    private UpdateStruct[] StructViews()
+    {
+        var views = new UpdateStruct[InReadOrder.Count];
+        for (var i = 0; i < views.Length; i++) views[i] = new UpdateStruct(InReadOrder[i]);
+        return views;
+    }
+
+    private UpdateDeleteRange[] DeleteViews()
+    {
+        var deletes = new UpdateDeleteRange[Refs.Deletes.Count];
+        for (var i = 0; i < deletes.Length; i++)
+        {
+            var d = Refs.Deletes[i];
+            deletes[i] = new UpdateDeleteRange(d.Client, d.Clock, d.Length);
+        }
+
+        return deletes;
+    }
 }
 
 public static partial class YUpdate
@@ -154,18 +245,10 @@ public static partial class YUpdate
     {
         decoded = null!;
         limits ??= YLimits.Default;
-        var error = DecodeForFunctions(update, format, limits, out var refs, out var structs);
+        var blocks = new List<(ulong Client, int Start)>();
+        var error = DecodeForFunctions(update, format, limits, out var refs, out var structs, blocks);
         if (error != YError.None) return new YStatus(error);
-        var views = new UpdateStruct[structs.Count];
-        for (var i = 0; i < views.Length; i++) views[i] = new UpdateStruct(structs[i]);
-        var deletes = new UpdateDeleteRange[refs.Deletes.Count];
-        for (var i = 0; i < deletes.Length; i++)
-        {
-            var d = refs.Deletes[i];
-            deletes[i] = new UpdateDeleteRange(d.Client, d.Clock, d.Length);
-        }
-
-        decoded = new DecodedUpdate(views, deletes);
+        decoded = new DecodedUpdate(structs, blocks, refs, limits, update.Length);
         return default;
     }
 }

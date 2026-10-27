@@ -31,8 +31,9 @@ internal static class UpdateReader
     /// When given, receives every struct in the order the update lists them, repeated clients included, and <paramref name="update"/> holds only
     /// the delete ranges.
     /// </param>
+    /// <param name="blocks">With <paramref name="inReadOrder"/>, receives each client block's client and the index of its first struct.</param>
     public static YError Read<TDecoder>(ref TDecoder decoder, YLimits limits, out UpdateRefs update, bool exactSkip = false,
-        List<StructRef>? inReadOrder = null)
+        List<StructRef>? inReadOrder = null, List<(ulong Client, int Start)>? blocks = null)
         where TDecoder : IUpdateDecoder, allows ref struct
     {
         update = new UpdateRefs();
@@ -51,6 +52,7 @@ internal static class UpdateReader
             var clock = (long)startClock;
             if (inReadOrder != null)
             {
+                blocks?.Add((client, inReadOrder.Count));
                 // the update functions work on the structs in read order only, so no per-client blocks are built, and the first block sizes the
                 // list exactly, where EnsureCapacity would round a one-struct update up to four (HOS-AMP)
                 var needed = inReadOrder.Count + (int)Math.Min(numStructs, 1024);

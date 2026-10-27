@@ -54,12 +54,13 @@ internal static class UpdateCodecV2
     }
 
     /// <summary>Decodes a whole V2 update the way the update functions read it (exact Skips, structs in read order).</summary>
-    public static YError DecodeForFunctions(ReadOnlySpan<byte> update, YLimits limits, out UpdateRefs refs, List<StructRef> inReadOrder)
+    public static YError DecodeForFunctions(ReadOnlySpan<byte> update, YLimits limits, out UpdateRefs refs, List<StructRef> inReadOrder,
+        List<(ulong Client, int Start)>? blocks = null)
     {
         refs = null!;
         var decoder = new UpdateDecoderV2(update, limits);
         if (decoder.Error != YError.None) return decoder.Error;
-        return UpdateReader.Read(ref decoder, limits, out refs, exactSkip: true, inReadOrder: inReadOrder);
+        return UpdateReader.Read(ref decoder, limits, out refs, exactSkip: true, inReadOrder: inReadOrder, blocks: blocks);
     }
 
     /// <summary>Writes an update function's result as V2: the structs in client blocks, then the delete ranges (already in write order).</summary>

@@ -63,6 +63,25 @@ public sealed partial class Doc
         if (update.Length > limits.MaxUpdateBytes) return new ApplyResult(YError.LimitExceeded, 0, 0);
         var error = Decode(update, format, limits, out var refs);
         if (error != YError.None) return new ApplyResult(error, 0, 0);
+        return Integrate(refs, origin, limits);
+    }
+
+    /// <summary>
+    /// <see cref="TryApplyUpdate(ReadOnlySpan{byte}, object?, UpdateFormat)"/> for an update already decoded with <see cref="YUpdate.TryDecode"/>,
+    /// so a server that decodes a peer's update once can also apply it to a document from that (TASK-14); the result is the same as applying
+    /// the bytes. LimitExceeded when the update breaks this document's limits or was decoded under a looser string or nesting bound than its.
+    /// </summary>
+    public ApplyResult TryApplyUpdate(DecodedUpdate update, object? origin = null)
+    {
+        ArgumentNullException.ThrowIfNull(update);
+        if (IsFaulted) return new ApplyResult(YError.Rejected, 0, 0);
+        var limits = Limits;
+        if (!update.Within(limits)) return new ApplyResult(YError.LimitExceeded, 0, 0);
+        return Integrate(update.ForApply(), origin, limits);
+    }
+
+    private ApplyResult Integrate(UpdateRefs refs, object? origin, YLimits limits)
+    {
         var faults = ObserverFaultCount;
         if (!TryIntegrateRemote(refs, origin, limits.MaxPendingBytes, out var rejected)) return new ApplyResult(YError.LimitExceeded, 0, 0);
         return new ApplyResult(rejected > 0 ? YError.Rejected : YError.None, rejected, ObserverFaultCount - faults);

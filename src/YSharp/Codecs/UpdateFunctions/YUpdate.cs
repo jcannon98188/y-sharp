@@ -120,14 +120,15 @@ public static partial class YUpdate
     }
 
     /// <summary>Decodes an update the way the update functions read it: its size checked, Skips only with an exact info byte, structs in read order.</summary>
-    internal static YError DecodeForFunctions(ReadOnlySpan<byte> update, UpdateFormat format, YLimits limits, out UpdateRefs refs, out List<StructRef> structs)
+    internal static YError DecodeForFunctions(ReadOnlySpan<byte> update, UpdateFormat format, YLimits limits, out UpdateRefs refs, out List<StructRef> structs,
+        List<(ulong Client, int Start)>? blocks = null)
     {
         structs = new List<StructRef>();
         refs = null!;
         if (update.Length > limits.MaxUpdateBytes) return YError.LimitExceeded;
-        if (format == UpdateFormat.V2) return UpdateCodecV2.DecodeForFunctions(update, limits, out refs, structs);
+        if (format == UpdateFormat.V2) return UpdateCodecV2.DecodeForFunctions(update, limits, out refs, structs, blocks);
         var decoder = new UpdateDecoderV1(update, limits);
-        return UpdateReader.Read(ref decoder, limits, out refs, exactSkip: true, inReadOrder: structs);
+        return UpdateReader.Read(ref decoder, limits, out refs, exactSkip: true, inReadOrder: structs, blocks: blocks);
     }
 
     /// <summary>Merged ranges in Yjs <c>writeDeleteSet</c> order: clients descending, each client's ranges by clock.</summary>
@@ -142,7 +143,7 @@ public static partial class YUpdate
     /// Ranges as Yjs <c>readDeleteSet</c> then <c>writeDeleteSet</c> pass them through: grouped by client (a repeated client's ranges joined, in
     /// read order, not merged), clients descending.
     /// </summary>
-    private static List<DeleteRange> InWriteOrder(List<DeleteRange> read)
+    internal static List<DeleteRange> InWriteOrder(List<DeleteRange> read)
     {
         var byClient = new Dictionary<ulong, List<DeleteRange>>();
         foreach (var r in read)

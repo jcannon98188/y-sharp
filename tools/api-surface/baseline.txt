@@ -73,6 +73,7 @@ YSharp.Awareness|property System.UInt64 ClientId {get;}
 YSharp.Awareness|property YSharp.YValue LocalState {get;}
 YSharp.Awareness|sealed class
 YSharp.DecodedUpdate|base System.Object
+YSharp.DecodedUpdate|method System.Void Encode(System.Buffers.IBufferWriter<System.Byte> output, YSharp.UpdateFormat format = 0)
 YSharp.DecodedUpdate|property System.Boolean IsEmpty {get;}
 YSharp.DecodedUpdate|property System.Collections.Generic.IReadOnlyList<YSharp.UpdateDeleteRange> Deletes {get;}
 YSharp.DecodedUpdate|property System.Collections.Generic.IReadOnlyList<YSharp.UpdateStruct> Structs {get;}
@@ -143,6 +144,7 @@ YSharp.Doc|method System.Void TransactWithTimeout(System.Action<YSharp.Transacti
 YSharp.Doc|method TResult Transact<TResult>(System.Func<YSharp.Transaction, TResult> body, System.Object origin = null)
 YSharp.Doc|method TResult Transact<TState, TResult>(TState state, System.Func<TState, YSharp.Transaction, TResult> body, System.Object origin = null)
 YSharp.Doc|method YSharp.ApplyResult TryApplyUpdate(System.ReadOnlySpan<System.Byte> update, System.Object origin = null, YSharp.UpdateFormat format = 0)
+YSharp.Doc|method YSharp.ApplyResult TryApplyUpdate(YSharp.DecodedUpdate update, System.Object origin = null)
 YSharp.Doc|method YSharp.StateVector GetStateVector()
 YSharp.Doc|method YSharp.TransactionScope BeginReadTransaction()
 YSharp.Doc|method YSharp.TransactionScope BeginTransaction(System.Object origin = null)
@@ -627,6 +629,7 @@ YSharp.YRelay|method YSharp.StateVector GetStateVector()
 YSharp.YRelay|method YSharp.YStatus TryApplyUpdate(System.ReadOnlySpan<System.Byte> update, YSharp.UpdateFormat format = 0)
 YSharp.YRelay|method YSharp.YStatus TryEncodeStateAsUpdate(System.Buffers.IBufferWriter<System.Byte> writer, System.ReadOnlySpan<System.Byte> targetStateVector = default, YSharp.UpdateFormat format = 0)
 YSharp.YRelay|method YSharp.YStatus TryPrepareUpdate(System.ReadOnlySpan<System.Byte> update, YSharp.UpdateFormat format, out YSharp.YRelay.PreparedUpdate prepared)
+YSharp.YRelay|method YSharp.YStatus TryPrepareUpdate(YSharp.DecodedUpdate update, out YSharp.YRelay.PreparedUpdate prepared)
 YSharp.YRelay|property System.Boolean IsEmpty {get;}
 YSharp.YRelay|property YSharp.YLimits Limits {get;}
 YSharp.YRelay|sealed class

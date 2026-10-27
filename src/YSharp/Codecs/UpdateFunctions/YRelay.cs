@@ -103,6 +103,20 @@ public sealed class YRelay
     }
 
     /// <summary>
+    /// <see cref="TryPrepareUpdate(ReadOnlySpan{byte}, UpdateFormat, out PreparedUpdate?)"/> for an update already decoded with
+    /// <see cref="YUpdate.TryDecode"/>, so a server that decodes a peer's update once can validate, store and prepare it from that (TASK-14).
+    /// LimitExceeded when the update breaks this relay's limits or was decoded under a looser string or nesting bound than this relay's.
+    /// </summary>
+    public YStatus TryPrepareUpdate(DecodedUpdate update, out PreparedUpdate? prepared)
+    {
+        ArgumentNullException.ThrowIfNull(update);
+        prepared = null;
+        if (!update.Within(Limits)) return new YStatus(YError.LimitExceeded);
+        lock (_gate) prepared = Prepare(update.Refs, update.InReadOrder);
+        return prepared is null ? new YStatus(YError.LimitExceeded) : default;
+    }
+
+    /// <summary>
     /// Folds in an update <see cref="TryPrepareUpdate"/> prepared. Throws <see cref="InvalidOperationException"/> when it was prepared by another
     /// relay, was already committed, or was prepared before another update changed this relay: prepare and commit run one update at a time, as
     /// a server's per-document mailbox runs them.

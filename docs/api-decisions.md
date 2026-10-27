@@ -97,7 +97,7 @@ The randomized gating budget (~60 s) and the 2-minute gating budget are unmeasur
 
 ## E. Surface added since the TASK-4 baseline (TASK-10)
 
-`tools/api-surface/check.sh` now checks two baselines: `baseline.txt` for `YSharp`, and `baseline.server.txt` for `YSharp.Server` and `YSharp.Server.Testing`. TASK-10 brought both up to date. Each change below was checked against the conventions sections A and B set: `Try` methods return a status and never throw on bad input, and throwing counterparts throw `YDecodeException`. Outputs go to an `IBufferWriter<byte>`, with a `byte[]` convenience overload. Classes are sealed, and records are used only for plain data. E1 to E3 need a decision; E4 and E5 are for the record.
+`tools/api-surface/check.sh` now checks two baselines: `baseline.txt` for `YSharp`, and `baseline.server.txt` for `YSharp.Server` and `YSharp.Server.Testing`. TASK-10 brought both up to date. Each change below was checked against the conventions sections A and B set: `Try` methods return a status and never throw on bad input, and throwing counterparts throw `YDecodeException`. Outputs go to an `IBufferWriter<byte>`, with a `byte[]` convenience overload. Classes are sealed, and records are used only for plain data. E1 to E3 and E6 need a decision; E4 and E5 are for the record.
 
 ### E1. `YRelay.TryPrepareUpdate` parameter order
 `TryPrepareUpdate(update, format, out prepared)` takes `format` before the `out` and without a default. `YUpdate.TryDecode(update, out decoded, format = V1, limits = null)` and the rest of the core put the `out` right after the input and default the format to V1.
@@ -123,3 +123,8 @@ A host compacts with `new UpdateLog(store).CompactAsync(docId)` and deletes thro
 The TASK-4 baseline still had two lines the implementation had already changed:
 - `StackItem` and `YSnapshot` lost their public parameterless constructors (TASK-4.32, TASK-4.30). Only the undo manager and `YSnapshot.Create` or `Decode` make them.
 - `YSnapshot` gained `Equals` and `GetHashCode`, matching Yjs `equalSnapshots` (TASK-4.30).
+
+### E6. Decoded-update overloads (TASK-14)
+So that `DocumentMailbox` decodes a peer's update once, three members take a `DecodedUpdate` from `YUpdate.TryDecode`: `YRelay.TryPrepareUpdate(DecodedUpdate, out prepared)`, `Doc.TryApplyUpdate(DecodedUpdate, origin)`, and `DecodedUpdate.Encode(output, format = V1)`, which writes the bytes `YUpdate.TryConvert` would. Each gives what its bytes overload gives. A decoded update carries the limits it was decoded under, and a relay or document refuses it with `LimitExceeded` when they were looser than its own string or nesting bound, since those are checked only while decoding.
+- **Options.** (a) Keep the three overloads. (b) Remove them and let the server decode three times; ADR 0024 keeps the server on the public API, so there is no internal route.
+- **Recommendation.** (a). There is no throwing `Doc.ApplyUpdate(DecodedUpdate)`; add one only if E2 goes the other way.
