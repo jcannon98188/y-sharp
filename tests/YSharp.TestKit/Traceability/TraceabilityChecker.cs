@@ -105,7 +105,7 @@ public static class TraceabilityChecker
     public static readonly string[] Exclusions = { "js-undefined", "js-crash", "upstream-defect", "not-applicable" };
     public static readonly string[] Outcomes = { "pending", "ported", "merged-into", "replaced-by-fixture", "skipped" };
 
-    private static readonly Regex IdFormat = new(@"^(?:Q\d{2}|[A-Z]{1,5}-(?:E?\d+(?:\.\d+)?|[A-Z]+))$", RegexOptions.Compiled);
+    private static readonly Regex IdFormat = new(@"^(?:Q\d{2}|[A-Z]{1,5}-(?:[EFTH]?\d+(?:\.\d+)?|[A-Z]+))$", RegexOptions.Compiled);
     private static readonly Regex SourceFormat = new(@"^(?<path>.+):(?<line>\d+)$", RegexOptions.Compiled);
 
     public static bool IsRandomizedTestName(string name) =>

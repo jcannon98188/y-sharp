@@ -14,7 +14,7 @@ namespace YSharp.Tests.Types;
 [Requires(Feature.TypesCore)]
 public sealed class SharedTypeTests
 {
-    [Fact, Covers("T-0.1")]
+    [Fact, Covers("T-0.1", "X-F8", "X-T4", "X-H1")]
     [Requires(Feature.Text, Feature.Array, Feature.Map, Feature.Xml, Feature.Events)]
     public void Events_EachType_RaisesItsOwnEventClassAndXmlTextEventsAreTextEvents()
     {
