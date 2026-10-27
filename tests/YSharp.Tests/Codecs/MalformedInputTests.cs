@@ -229,6 +229,24 @@ public sealed class MalformedInputTests
         Assert.Equal("hi", doc.GetText("t").ToString());
     }
 
+    // a GC of length 0 is accepted, as Yjs accepts it, and is deleted: Yjs then writes a range of length 0 in the document's own state, which
+    // y-sharp now rejects, so the state encode leaves that range out (the hostile corpus's zero-length-gc and a HOS-PROTO find, TASK-17.2)
+    [Theory, Covers("ENC-51")]
+    [Requires(Feature.V2)]
+    [InlineData("01 01 01 00 00 00 00", UpdateFormat.V1)]                    // client 1: a GC of length 0
+    [InlineData("02 01 00 00 00 00 01 00 00 00 00 00", UpdateFormat.V1)]     // HOS-PROTO, 2026-10-27, as a sync update message carries it
+    public void Enc51_ADocumentHoldingAZeroLengthGc_EncodesAStateThatApplies(string hex, UpdateFormat format)
+    {
+        var doc = new Doc();
+        Assert.True(doc.TryApplyUpdate(Hex.Bytes(hex), null, format).Ok);
+        foreach (var f in new[] { UpdateFormat.V1, UpdateFormat.V2 })
+        {
+            var state = doc.EncodeStateAsUpdate(format: f);
+            Assert.True(new Doc().TryApplyUpdate(state, null, f).Ok);
+            Assert.True(YUpdate.TryValidate(state, f).Ok);
+        }
+    }
+
     [Fact, Covers("ENC-86"), Diverges("ENC-86", adr: "0003")]
     [Requires(Feature.V1)]
     public void Enc86_OutOfOrderPendingDeleteRanges_AreKeptWhereJsCorruptsThem()
