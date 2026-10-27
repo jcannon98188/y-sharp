@@ -48,13 +48,14 @@ defineStep({
     } catch {
       accepted = false
     }
-    const value = accepted && readPastEnd(structDecoder)
-      ? { accepted, readPastEnd: true }
-      : accepted && emptyItem ? { accepted, zeroLengthItem: true }
-        : accepted && emptyRange ? { accepted, zeroLengthDeleteRange: true }
-          : accepted && order.unsorted && doc.store.pendingDs !== null ? { accepted, unsortedPendingDeleteSet: true }
-            : accepted && selfDependentPending(doc) ? { accepted, selfDependentPending: true }
-              : accepted && nonTypeParent ? { accepted, parentNotAType: true } : { accepted }
+    // Every flag that holds is set: one update can carry two divergences, and each normaliser checks y-sharp's side for its own.
+    const value = { accepted }
+    if (accepted && readPastEnd(structDecoder)) value.readPastEnd = true
+    if (accepted && emptyItem) value.zeroLengthItem = true
+    if (accepted && emptyRange) value.zeroLengthDeleteRange = true
+    if (accepted && order.unsorted && doc.store.pendingDs !== null) value.unsortedPendingDeleteSet = true
+    if (accepted && selfDependentPending(doc)) value.selfDependentPending = true
+    if (accepted && nonTypeParent) value.parentNotAType = true
     ctx.results.set(s.name, { api: enc === 'v1' ? 'Y.applyUpdate (foreign bytes)' : 'Y.applyUpdateV2 (foreign bytes)', value })
   }
 })

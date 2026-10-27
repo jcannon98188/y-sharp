@@ -134,6 +134,27 @@ public sealed class ForeignReadPastEndTests(OracleHost host)
         Assert.Null(Result("02016700080101610178016500080101740000", "v1")["parentNotAType"]);
     }
 
+    [Fact, Covers("DIFF-05", "STR-71", "ENC-86")]
+    public void ApplyForeign_AnUpdateCarryingTwoDivergences_IsFlaggedForBoth()
+    {
+        // The Nightly find of 2026-10-27 (InsertByte at 23, V1): (101, 102) names the Any item (101, 0) as its parent, and client 109's
+        // delete ranges arrive out of order for a client the document does not know, so Yjs parks them. Flagging only the first divergence
+        // left y-sharp's rejection of the struct unclaimed.
+        const string hex = "020166000801016102787e04650008010161017e8165006503486500037d3077017a782801016d02c3bc01760201787d0401797e0165010103";
+        var value = Result(hex, "v1");
+        Assert.True(value["accepted"]!.GetValue<bool>());
+        Assert.True(value["unsortedPendingDeleteSet"]!.GetValue<bool>());
+        Assert.True(value["parentNotAType"]!.GetValue<bool>());
+        var sharpAccepted = SharpSide.Run(Script(hex, "v1")).Observations!["results"]!["value"]!["r"]!["value"]!["accepted"]!.GetValue<bool>();
+        Assert.False(sharpAccepted, "y-sharp rejects the struct (STR-71, ADR 0005)");
+        var c = new MutationCase(UpdateFormat.V1, Array.Empty<byte>(), Convert.FromHexString(hex), MutationKind.InsertByte, 23, true, sharpAccepted, false)
+        {
+            OracleUnsortedPendingDeleteSet = true,
+            OracleParentNotAType = true,
+        };
+        Assert.IsType<ParentNotATypeNormaliser>(Normalisers.Claim(c));
+    }
+
     [Fact, Covers("DIFF-05")]
     public void ApplyForeign_AnUpdateDecodedInBounds_CarriesNoFlag()
     {
