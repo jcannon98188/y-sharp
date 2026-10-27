@@ -792,6 +792,37 @@ public sealed class TextTests
         Assert.Equal(n, text0.Length);
     }
 
+    /// <summary>
+    /// The Nightly differential find of 2026-10-27 (A-14): of two search markers equally near an index, Yjs <c>findMarker</c>'s reduce keeps
+    /// the later one. The walk from the earlier one stopped on the bold end with no attributes, so the delete's <c>cleanupFormattingGap</c>
+    /// deleted that format item too, a delete Yjs never makes. Peer c asks for the text only after the formatted text arrived, so its text
+    /// keeps search markers, as in JS.
+    /// </summary>
+    [Fact, Covers("A-14")]
+    [Requires(Feature.Sync)]
+    public void Delete_BetweenTwoEquallyNearMarkers_WalksFromTheLaterOne_AsYjs()
+    {
+        var a = NewDoc(101);
+        var c = NewDoc(103);
+        var ta = a.GetText("t");
+        ta.Insert(0, "naïvebc");
+        a.Transact(_ =>
+        {
+            ta.Format(1, 1, Obj(("italic", true)));
+            ta.Format(1, 3, Bold);
+        });
+        c.ApplyUpdate(a.EncodeStateAsUpdate());
+        var tc = c.GetText("t");
+        tc.Insert(4, "日本");
+        tc.Insert(7, "€");
+        var updates = new List<byte[]>();
+        c.Update += (update, _, _, _) => updates.Add(update.ToArray());
+        tc.Delete(4, 1);
+        // the oracle's update deletes 103:0 only
+        Assert.Equal("000167010001", Convert.ToHexString(Assert.Single(updates)));
+        Assert.Equal("naïv本e€bc", tc.ToString());
+    }
+
     [Fact, PortOf("y-text.tests.js:testSearchMarkerBug1", "A-14")]
     [Requires(Feature.Events)]
     [Requires(Feature.Sync)]
