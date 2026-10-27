@@ -176,6 +176,8 @@ public sealed class ServerTierBoundsTests
     [InlineData("030103008400000100010200840000010001010000010000000000", "mutation of structs/pending-chain-permutations.json:d (Overwrite)", false)]
     [InlineData("02010200c40000000001000101000001000000000000", "mutation of structs/pending-two-missing-clients.json:e (Duplicate)", true)]
     [InlineData("030103008400000100010200840000010001010000010000000000", "mutation of structs/pending-chain-permutations.json:d (Overwrite)", true)]
+    [InlineData("040100000000030000a10300020000a10000010100000000000000000000000000000000000000000000000000000000000000000000000000000000", "mutation of sim/map-large.json:e (Overwrite+BitFlip)", false)]
+    [InlineData("040100000000030000a10300020000a10000010100000000000000000000000000000000000000000000000000000000000000000000000000000000", "mutation of sim/map-large.json:e (Overwrite+BitFlip)", true)]
     public Task NightlyFinds_ThroughTheMailbox_AreContained(string hex, string origin, bool hooked) =>
         MailboxCase(new RawInput(UpdateFormat.V1, Convert.FromHexString(hex), origin), hooked);
 
@@ -225,7 +227,7 @@ public sealed class ServerTierBoundsTests
         server = Start();
         var late = await server.ConnectAsync("doc", cancellationToken: Ct);
         var (_, reloaded) = await BarrierAsync(late);
-        Assert.True(state.AsSpan().SequenceEqual(reloaded), $"{label}: the store and the relay disagree after a restart");
+        Assert.True(state.AsSpan().SequenceEqual(reloaded), $"{label}: the store and the relay disagree after a restart ({Convert.ToHexString(state)} before, {Convert.ToHexString(reloaded)} after)");
         await late.DisposeAsync();
         await server.DisposeAsync();
         Assert.True(rented == BufferPool.Outstanding, $"{label}: {BufferPool.Outstanding - rented} buffers still rented");
