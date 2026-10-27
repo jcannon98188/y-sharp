@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
@@ -16,7 +17,7 @@ internal static class ChunkLimits
 /// hundred bytes per table, not one 64 KB block per table. Adding never copies existing full blocks; insert and remove shift within blocks and
 /// carry one element across each block boundary.
 /// </summary>
-internal sealed class ChunkedList<T>
+internal sealed class ChunkedList<T> : IReadOnlyList<T>
 {
     /// <summary>Elements per full block for <typeparamref name="T"/>: the largest count whose block stays within the chunk ceiling.</summary>
     public static readonly int BlockCapacity = Math.Max(1, ChunkLimits.ChunkBytes / Unsafe.SizeOf<T>());
@@ -153,6 +154,13 @@ internal sealed class ChunkedList<T>
 
         _count = 0;
     }
+
+    public IEnumerator<T> GetEnumerator()
+    {
+        for (var i = 0; i < _count; i++) yield return this[i];
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     private int UsedIn(int block) => Math.Clamp(_count - block * BlockCapacity, 0, BlockCapacity);
 

@@ -63,16 +63,19 @@ internal static class UpdateMerge
 
     private sealed class Source
     {
-        private readonly List<StructRef> _structs;
-        private int _index = -1;
+        private readonly IReadOnlyList<StructRef> _structs;
+        private readonly int _end;
+        private int _index;
 
-        public Source(List<StructRef> structs)
+        public Source(IReadOnlyList<StructRef> structs, int start, int end)
         {
             _structs = structs;
+            _index = start - 1;
+            _end = end;
             Next();
         }
 
-        public bool HasCurr => _index < _structs.Count;
+        public bool HasCurr => _index < _end;
 
         public StructRef Curr => _structs[_index];
 
@@ -80,25 +83,36 @@ internal static class UpdateMerge
         public void Next()
         {
             do _index++;
-            while (_index < _structs.Count && _structs[_index].Kind == RefKind.Skip);
+            while (_index < _end && _structs[_index].Kind == RefKind.Skip);
         }
     }
 
     /// <summary>Yjs <c>mergeUpdatesV2</c> on structs: one merged list, clients in descending order, structs of a client in clock order.</summary>
     public static List<StructRef> Merge(IReadOnlyList<List<StructRef>> updates)
     {
+        var ranges = new (IReadOnlyList<StructRef>, int, int)[updates.Count];
+        for (var i = 0; i < ranges.Length; i++) ranges[i] = (updates[i], 0, updates[i].Count);
+        return Merge(ranges, null);
+    }
+
+    /// <summary>
+    /// <see cref="Merge(IReadOnlyList{List{StructRef}})"/> over a range of each list. With <paramref name="write"/>, the merge resumes where Yjs
+    /// would be at the top of its loop holding that struct as <c>currWrite</c>: the output starts with it, as it is extended or sliced.
+    /// </summary>
+    public static List<StructRef> Merge(IReadOnlyList<(IReadOnlyList<StructRef> Structs, int Start, int End)> updates, StructRef? write)
+    {
         var sources = new List<Source>(updates.Count);
-        var total = 0;
-        foreach (var u in updates)
+        var total = write.HasValue ? 1 : 0;
+        foreach (var (structs, start, end) in updates)
         {
-            sources.Add(new Source(u));
-            total += u.Count;
+            sources.Add(new Source(structs, start, end));
+            total += end - start;
         }
 
         // the merge writes at most one struct per input struct, plus a Skip per gap (HOS-AMP: no doubling on large merges)
         var output = new List<StructRef>(total);
-        var hasWrite = false;
-        StructRef write = default;
+        var hasWrite = write.HasValue;
+        var curWrite = write.GetValueOrDefault();
         while (true)
         {
             sources.RemoveAll(s => !s.HasCurr);
@@ -110,66 +124,66 @@ internal static class UpdateMerge
             {
                 var iterated = false;
                 // skip what was already written
-                while (source.HasCurr && source.Curr.End <= write.End && source.Curr.Client >= write.Client)
+                while (source.HasCurr && source.Curr.End <= curWrite.End && source.Curr.Client >= curWrite.Client)
                 {
                     source.Next();
                     iterated = true;
                 }
 
-                if (!source.HasCurr || source.Curr.Client != firstClient || (iterated && source.Curr.Clock > write.End)) continue;
+                if (!source.HasCurr || source.Curr.Client != firstClient || (iterated && source.Curr.Clock > curWrite.End)) continue;
                 var curr = source.Curr;
-                if (firstClient != write.Client)
+                if (firstClient != curWrite.Client)
                 {
-                    output.Add(write);
-                    write = curr;
+                    output.Add(curWrite);
+                    curWrite = curr;
                     source.Next();
                 }
-                else if (write.End < curr.Clock)
+                else if (curWrite.End < curr.Clock)
                 {
-                    if (write.Kind == RefKind.Skip)
+                    if (curWrite.Kind == RefKind.Skip)
                     {
-                        write.Length = curr.End - write.Clock;
+                        curWrite.Length = curr.End - curWrite.Clock;
                     }
                     else
                     {
-                        output.Add(write);
-                        write = StructRef.Skip(firstClient, write.End, curr.Clock - write.End);
+                        output.Add(curWrite);
+                        curWrite = StructRef.Skip(firstClient, curWrite.End, curr.Clock - curWrite.End);
                     }
                 }
                 else
                 {
-                    var diff = write.End - curr.Clock;
+                    var diff = curWrite.End - curr.Clock;
                     if (diff > 0)
                     {
                         // prefer to slice a Skip, the other struct may carry more information
-                        if (write.Kind == RefKind.Skip) write.Length -= diff;
+                        if (curWrite.Kind == RefKind.Skip) curWrite.Length -= diff;
                         else curr = curr.Slice(diff);
                     }
 
-                    if (!TryMergeWith(ref write, curr))
+                    if (!TryMergeWith(ref curWrite, curr))
                     {
-                        output.Add(write);
-                        write = curr;
+                        output.Add(curWrite);
+                        curWrite = curr;
                         source.Next();
                     }
                 }
             }
             else
             {
-                write = source.Curr;
+                curWrite = source.Curr;
                 hasWrite = true;
                 source.Next();
             }
 
-            while (source.HasCurr && source.Curr.Client == firstClient && source.Curr.Clock == write.End && source.Curr.Kind != RefKind.Skip)
+            while (source.HasCurr && source.Curr.Client == firstClient && source.Curr.Clock == curWrite.End && source.Curr.Kind != RefKind.Skip)
             {
-                output.Add(write);
-                write = source.Curr;
+                output.Add(curWrite);
+                curWrite = source.Curr;
                 source.Next();
             }
         }
 
-        if (hasWrite) output.Add(write);
+        if (hasWrite) output.Add(curWrite);
         return output;
     }
 

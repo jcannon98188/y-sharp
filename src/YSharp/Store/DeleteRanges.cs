@@ -110,6 +110,20 @@ internal sealed class DeleteRanges
         return lo < _ranges.Count && _ranges[lo].Client == client ? lo : _ranges.Count;
     }
 
+    /// <summary>The index past the last range of <paramref name="client"/>: the first range of a higher client, or <see cref="Count"/>.</summary>
+    public int EndIndexOf(ulong client)
+    {
+        int lo = 0, hi = _ranges.Count;
+        while (lo < hi)
+        {
+            var mid = (lo + hi) >>> 1;
+            if (_ranges[mid].Client <= client) lo = mid + 1;
+            else hi = mid;
+        }
+
+        return lo;
+    }
+
     private void AbsorbFollowing(int at)
     {
         var current = _ranges[at];
