@@ -1,11 +1,11 @@
 ---
 id: TASK-14
 title: Decode an incoming update once on the server's update path
-status: In Progress
+status: Done
 assignee:
   - '@claude'
 created_date: '2026-10-26 23:57'
-updated_date: '2026-10-27 01:05'
+updated_date: '2026-10-27 04:34'
 labels:
   - server
   - performance
@@ -24,7 +24,7 @@ Found in the performance audit after PR #2: DocumentMailbox.AcceptAsync decodes 
 <!-- AC:BEGIN -->
 - [x] #1 An accepted peer update is decoded once on the server's path, a server edit at most once after it is captured
 - [x] #2 Stored records and broadcast bytes are unchanged on the existing server and simulation tests
-- [ ] #3 Any new public members are recorded in the API baseline and approved by the owner
+- [x] #3 Any new public members are recorded in the API baseline and approved by the owner
 <!-- AC:END -->
 
 ## Implementation Notes
@@ -43,4 +43,12 @@ Suite changes (ADR 0022): new DecodedUpdateTests (encode = TryConvert, apply = b
 Validation: full suite 5046 total, 0 failed (twice); Smoke interop 118 passed, 1 skipped; Release allocation 710, 0 failed; API baseline updated (three new core members).
 
 Owner sign-off: AC3 waits on docs/api-decisions.md E6 (keep the three overloads, recommended). Left In Progress until then.
+
+Owner sign-off (2026-10-27): E6 keep the three decoded-update overloads. AC3 checked.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+An accepted peer update is now decoded once on the server's path (a server edit once after capture) through three public decoded-update overloads: YRelay.TryPrepareUpdate(DecodedUpdate), Doc.TryApplyUpdate(DecodedUpdate) and DecodedUpdate.Encode. Stored and broadcast bytes are unchanged; a delete shape that does not survive V2 falls back to a decode of the stored bytes. The owner approved the overloads (docs/api-decisions.md E6); they are in the API baseline. Suite: DecodedUpdateTests, a mailbox V2-survival test, and simulation hardening; full gated suite passes.
+<!-- SECTION:FINAL_SUMMARY:END -->
