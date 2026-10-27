@@ -1,5 +1,5 @@
-// Dumps the public API surface of one assembly as sorted, diffable text (TASK-4.2, ADR 0021).
-// Usage: dotnet run --project tools/api-surface -- <path to YSharp.dll>
+// Dumps the public API surface of one or more assemblies as sorted, diffable text (TASK-4.2, ADR 0021; TASK-10 added the server tier).
+// Usage: dotnet run --project tools/api-surface -- <path to YSharp.dll> [more assemblies]
 // Every line starts with the owning type's full name, so ordinal sorting keeps each type's members together.
 using System;
 using System.Collections.Generic;
@@ -16,17 +16,20 @@ internal static class Program
 
     private static int Main(string[] args)
     {
-        if (args.Length != 1)
+        if (args.Length == 0)
         {
-            Console.Error.WriteLine("usage: api-surface <path to assembly>");
+            Console.Error.WriteLine("usage: api-surface <path to assembly> [more assemblies]");
             return 2;
         }
 
-        var assembly = Assembly.LoadFrom(Path.GetFullPath(args[0]));
         var lines = new List<string>();
-        foreach (var type in assembly.GetExportedTypes())
+        foreach (var path in args)
         {
-            DumpType(type, lines);
+            var assembly = Assembly.LoadFrom(Path.GetFullPath(path));
+            foreach (var type in assembly.GetExportedTypes())
+            {
+                DumpType(type, lines);
+            }
         }
 
         lines.Sort(StringComparer.Ordinal);

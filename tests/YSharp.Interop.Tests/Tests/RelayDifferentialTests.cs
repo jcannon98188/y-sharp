@@ -18,7 +18,7 @@ namespace YSharp.Interop.Tests;
 /// <summary>
 /// The relay tier against the oracle (TASK-5.2): every fold of a <see cref="YRelay"/> must be the bytes Yjs <c>mergeUpdates</c> gives for the
 /// relay's previous state and the incoming update, and every answer for a client's state vector the bytes Yjs <c>diffUpdate</c> gives for the
-/// merged state, in V1 and V2. Smoke: fixed seeds. Nightly: random seeds within the differential time box.
+/// merged state, in V1 and V2; and one <c>mergeUpdates</c> over every arrival must be the last fold. Smoke: fixed seeds. Nightly: random seeds within the differential time box.
 /// </summary>
 [Requires(Feature.V1, Feature.V2, Feature.UpdateFunctions, Feature.V2Functions, Feature.Array, Feature.Map, Feature.Text, Feature.TextFormat, Feature.Events)]
 [NeedsNode]
@@ -54,6 +54,17 @@ public sealed class RelayDifferentialTests(OracleHost host)
             state = relay.EncodeStateAsUpdate(default, format);
             expected[$"fold{i}"] = state;
         }
+
+        // one merge of every arrival is the bytes of folding them one at a time, as a stored log is loaded (TASK-13)
+        steps.Add(new JsonObject
+        {
+            ["step"] = "mergeUpdates", ["name"] = "mergeAll", ["encoding"] = encoding,
+            ["updates"] = new JsonArray(arrivals.Select(a => (JsonNode)BytesNode(a)).ToArray()),
+        });
+        expected["mergeAll"] = state;
+        var all = new System.Buffers.ArrayBufferWriter<byte>();
+        Assert.True(YUpdate.TryMerge(arrivals.Select(a => (ReadOnlyMemory<byte>)a).ToList(), all, format).Ok, $"seed {seed}: merge refused");
+        HexAssert.Equal(state, all.WrittenSpan.ToArray(), $"seed {seed} ({encoding}) one merge against the folds");
 
         for (var r = 0; r < 3; r++)
         {

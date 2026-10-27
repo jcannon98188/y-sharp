@@ -225,6 +225,60 @@ public sealed class UpdateLogTests
         Assert.Contains("record 2", e.Message, StringComparison.Ordinal);
     }
 
+    [Theory, Covers("SRV-10", "SRV-11")]
+    [MemberData(nameof(Formats))]
+    public async Task ALoad_GivesTheBytesOfFoldingTheRecordsOneAtATime(UpdateFormat format)
+    {
+        // a snapshot, then records in order, out of order and repeated: the load merges them once (TASK-13)
+        var updates = Workload(11, 60, format);
+        var store = new InMemoryUpdateStore();
+        var log = new UpdateLog(store);
+        foreach (var u in updates.Take(20)) Assert.True((await log.AppendAsync(DocId, u, format, cancellationToken: Ct)).Ok);
+        await log.CompactAsync(DocId, cancellationToken: Ct);
+        var rng = new Random(11);
+        var rest = updates.Skip(20).Concat(updates.Where(_ => rng.Next(4) == 0)).OrderBy(_ => rng.Next()).ToList();
+        foreach (var u in rest) Assert.True((await log.AppendAsync(DocId, u, format, cancellationToken: Ct)).Ok);
+
+        var folded = new YRelay(log.StoredLimits);
+        foreach (var r in await ReadAll(store)) Assert.True(folded.TryApplyUpdate(r.UpdateV2.Span, UpdateFormat.V2).Ok);
+        var loaded = await log.LoadAsync(DocId, cancellationToken: Ct);
+        foreach (var f in new[] { UpdateFormat.V1, UpdateFormat.V2 })
+            HexAssert.Equal(folded.EncodeStateAsUpdate(default, f), loaded.Relay.EncodeStateAsUpdate(default, f), $"{f}");
+
+        // catching up a relay that holds the first records folds the rest the same way
+        var caughtUp = new YRelay(log.StoredLimits);
+        foreach (var u in updates.Take(20)) Assert.True(caughtUp.TryApplyUpdate(u, format).Ok);
+        Assert.Equal(loaded.LastSequence, await log.FoldAsync(DocId, 20, caughtUp, cancellationToken: Ct));
+        HexAssert.Equal(folded.EncodeStateAsUpdate(default, UpdateFormat.V2), caughtUp.EncodeStateAsUpdate(default, UpdateFormat.V2), "caught up");
+    }
+
+    [Fact, Covers("SRV-10")]
+    public async Task ALoad_CostsTheLogsSize_NotItsRecordsTimesTheState()
+    {
+        // one character per record, stored newest first: folding these one at a time held every record as a gap and re-merged the whole state
+        // each time, n times the state; one merge costs the log's size times log n (TASK-13)
+        static async Task<double> BytesPerRecord(int n)
+        {
+            var doc = new Doc(new DocOptions { ClientId = 1 });
+            var updates = new List<byte[]>();
+            doc.UpdateV2 += (u, _, _, _) => updates.Add(u.ToArray());
+            var text = doc.GetText("t");
+            for (var i = 0; i < n; i++) text.Insert(i, "x");
+            var log = new UpdateLog(new InMemoryUpdateStore());
+            for (var i = updates.Count - 1; i >= 0; i--) Assert.True((await log.AppendAsync(DocId, updates[i], UpdateFormat.V2, cancellationToken: Ct)).Ok);
+            await log.LoadAsync(DocId, cancellationToken: Ct);   // warm
+            var before = GC.GetAllocatedBytesForCurrentThread();
+            var loaded = log.LoadAsync(DocId, cancellationToken: Ct).AsTask().GetAwaiter().GetResult();   // the in-memory store reads synchronously
+            var bytes = GC.GetAllocatedBytesForCurrentThread() - before;
+            HexAssert.Equal(StateOf(updates, UpdateFormat.V2), StateOf(loaded.Relay), $"n = {n}");
+            return (double)bytes / n;
+        }
+
+        var small = await BytesPerRecord(300);
+        var large = await BytesPerRecord(2400);
+        Assert.True(large < small * 2, $"a load allocated {small:F0} bytes per record over 300 records and {large:F0} over 2400");
+    }
+
     [Fact, Covers("SRV-10")]
     public async Task AnEmptyLog_LoadsAnEmptyRelay_AndCompactsToNothing()
     {

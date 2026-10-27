@@ -28,6 +28,37 @@ internal static class TypeText
             Current = current;
         }
 
+        /// <summary>The attributes a plain insert reads the formats in effect into, reused with the position.</summary>
+        internal Attributes? SpareAttributes;
+
+        private bool _rented;
+
+        /// <summary>
+        /// The document's spare position when it is free, else a new one: an edit that gives it back with <see cref="Return"/> allocates
+        /// neither the position nor its map (BUD-07, ADR 0009). Only the lock holder touches the spare.
+        /// </summary>
+        internal static Position Rent(Doc doc, ItemRef left, ItemRef right, int index)
+        {
+            if (doc.SpareTextPosition is { _rented: false } spare)
+            {
+                spare._rented = true;
+                spare.Left = left;
+                spare.Right = right;
+                spare.Index = index;
+                spare.Current.Clear();
+                return spare;
+            }
+
+            return new Position(left, right, index, new OrderedDictionary<string, YValue>(StringComparer.Ordinal)) { _rented = true };
+        }
+
+        /// <summary>Gives the position back for the next edit; the caller keeps no reference to it or its map.</summary>
+        internal void Return(Doc doc)
+        {
+            _rented = false;
+            doc.SpareTextPosition = this;   // a spare some other edit kept rented is replaced
+        }
+
         /// <summary>Yjs <c>forward</c>: steps over <see cref="Right"/>, which must exist.</summary>
         public void Forward(StructStore store)
         {
@@ -59,11 +90,14 @@ internal static class TypeText
             return attributes;
         }
 
-        public static Attributes From(OrderedDictionary<string, YValue> current)
+        public static Attributes From(OrderedDictionary<string, YValue> current) => From(current, new Attributes());
+
+        /// <summary>The formats in <paramref name="current"/>, written into <paramref name="into"/> (emptied first) so it can be reused.</summary>
+        public static Attributes From(OrderedDictionary<string, YValue> current, Attributes into)
         {
-            var attributes = new Attributes();
-            foreach (var m in current) attributes._members.Add(m);
-            return attributes;
+            into._members.Clear();
+            foreach (var m in current) into._members.Add(m);
+            return into;
         }
 
         /// <summary><c>attributes[key]</c>: undefined when absent.</summary>
@@ -89,6 +123,7 @@ internal static class TypeText
         /// <summary>The members in <c>for...in</c> order.</summary>
         public KeyValuePair<string, YValue>[] InJsOrder()
         {
+            if (_members.Count == 0) return Array.Empty<KeyValuePair<string, YValue>>();
             var keys = new string[_members.Count];
             for (var i = 0; i < keys.Length; i++) keys[i] = _members[i].Key;
             var order = new int[keys.Length];
@@ -131,30 +166,30 @@ internal static class TypeText
     /// <summary>Yjs <c>findPosition</c>: the position at <paramref name="index"/> (clamped to the end), from a search marker when allowed.</summary>
     public static Position FindPosition(Doc doc, Branch parent, int index, bool useSearchMarker)
     {
-        var current = new OrderedDictionary<string, YValue>(StringComparer.Ordinal);
         if (useSearchMarker && parent.MarkersFor(doc.Store)?.Find(parent, index) is { } marker)
         {
             var p = new ItemRef(marker.Item);
-            return FindNextPosition(doc.Store, new Position(p.Left, p, marker.Index, current), index - marker.Index);
+            return FindNextPosition(doc.Store, Position.Rent(doc, p.Left, p, marker.Index), index - marker.Index);
         }
 
-        return FindNextPosition(doc.Store, new Position(ItemRef.Null, StructStore.StartOf(parent), 0, current), index);
+        return FindNextPosition(doc.Store, Position.Rent(doc, ItemRef.Null, StructStore.StartOf(parent), 0), index);
     }
 
     // ------------------------------------------------------------------ insert and format
 
     /// <summary>Yjs <c>insertNegatedAttributes</c>: ends the formats the insertion started, unless the text to the right already does.</summary>
-    private static void InsertNegatedAttributes(Transaction tx, Doc doc, Branch parent, Position pos, OrderedDictionary<string, YValue> negated)
+    private static void InsertNegatedAttributes(Transaction tx, Doc doc, Branch parent, Position pos, OrderedDictionary<string, YValue>? negated)
     {
         var store = doc.Store;
         while (!pos.Right.IsNull &&
                (pos.Right.IsDeleted ||
                 (pos.Right.Kind == ContentKind.Format && EqualAttrs(GetOrUndefined(negated, Format(store, pos.Right).Key), Format(store, pos.Right).Value))))
         {
-            if (!pos.Right.IsDeleted) negated.Remove(Format(store, pos.Right).Key);
+            if (!pos.Right.IsDeleted) negated?.Remove(Format(store, pos.Right).Key);
             pos.Forward(store);
         }
 
+        if (negated is null) return;
         foreach (var (key, value) in negated)
         {
             pos.Right = IntegrateFormat(tx, doc, parent, pos.Left, pos.Right, key, value);
@@ -178,15 +213,18 @@ internal static class TypeText
         }
     }
 
-    /// <summary>Yjs <c>insertAttributes</c>: a format item for each attribute that differs from the one in effect; returns what each was before.</summary>
-    private static OrderedDictionary<string, YValue> InsertAttributes(Transaction tx, Doc doc, Branch parent, Position pos, Attributes attributes)
+    /// <summary>
+    /// Yjs <c>insertAttributes</c>: a format item for each attribute that differs from the one in effect; returns what each was before, or
+    /// null when none differs.
+    /// </summary>
+    private static OrderedDictionary<string, YValue>? InsertAttributes(Transaction tx, Doc doc, Branch parent, Position pos, Attributes attributes)
     {
-        var negated = new OrderedDictionary<string, YValue>(StringComparer.Ordinal);
+        OrderedDictionary<string, YValue>? negated = null;
         foreach (var (key, value) in attributes.InJsOrder())
         {
             var current = pos.Current.TryGetValue(key, out var c) ? NullIfUndefined(c) : YValue.Null;
             if (EqualAttrs(current, value)) continue;
-            negated[key] = current;
+            (negated ??= new OrderedDictionary<string, YValue>(StringComparer.Ordinal))[key] = current;
             pos.Right = IntegrateFormat(tx, doc, parent, pos.Left, pos.Right, key, value);
             pos.Forward(doc.Store);
         }
@@ -245,7 +283,7 @@ internal static class TypeText
     {
         var store = doc.Store;
         MinimizeAttributeChanges(store, pos, attributes);
-        var negated = InsertAttributes(tx, doc, parent, pos, attributes);
+        var negated = InsertAttributes(tx, doc, parent, pos, attributes) ?? new OrderedDictionary<string, YValue>(StringComparer.Ordinal);
         while (!pos.Right.IsNull &&
                (length > 0 || (negated.Count > 0 && (pos.Right.IsDeleted || pos.Right.Kind == ContentKind.Format))))
         {
@@ -304,15 +342,15 @@ internal static class TypeText
     /// Yjs <c>cleanupFormattingGap</c>: after content between <paramref name="start"/> and the next content item was deleted, deletes the format
     /// items in the gap that are overwritten or redundant. Returns how many it deleted.
     /// </summary>
-    private static int CleanupFormattingGap(Transaction tx, Doc doc, ItemRef start, ItemRef curr, OrderedDictionary<string, YValue> startAttributes,
+    private static int CleanupFormattingGap(Transaction tx, Doc doc, ItemRef start, ItemRef curr, OrderedDictionary<string, YValue>? startAttributes,
         OrderedDictionary<string, YValue> currAttributes)
     {
         var store = doc.Store;
         var end = start;
-        var endFormats = new Dictionary<string, ItemRef>(StringComparer.Ordinal);
+        Dictionary<string, ItemRef>? endFormats = null;   // a gap without formats, the usual one, needs none
         while (!end.IsNull && (!end.IsCountable || end.IsDeleted))
         {
-            if (!end.IsDeleted && end.Kind == ContentKind.Format) endFormats[Format(store, end).Key] = end;
+            if (!end.IsDeleted && end.Kind == ContentKind.Format) (endFormats ??= new Dictionary<string, ItemRef>(StringComparer.Ordinal))[Format(store, end).Key] = end;
             end = end.Right;
         }
 
@@ -324,8 +362,8 @@ internal static class TypeText
             if (!start.IsDeleted && start.Kind == ContentKind.Format)
             {
                 var format = Format(store, start);
-                var startValue = startAttributes.TryGetValue(format.Key, out var s) ? NullIfUndefined(s) : YValue.Null;
-                if (!endFormats.TryGetValue(format.Key, out var endFormat) || endFormat != start || StrictEquals(startValue, format.Value))
+                var startValue = startAttributes is not null && startAttributes.TryGetValue(format.Key, out var s) ? NullIfUndefined(s) : YValue.Null;
+                if (endFormats is null || !endFormats.TryGetValue(format.Key, out var endFormat) || endFormat != start || StrictEquals(startValue, format.Value))
                 {
                     // either this format is overwritten or it is not needed because the attribute was already in effect
                     doc.DeleteItem(tx, start);
@@ -396,7 +434,7 @@ internal static class TypeText
     {
         var store = doc.Store;
         var startLength = length;
-        var startAttributes = new OrderedDictionary<string, YValue>(pos.Current, StringComparer.Ordinal);
+        var startAttributes = pos.Current.Count == 0 ? null : new OrderedDictionary<string, YValue>(pos.Current, StringComparer.Ordinal);
         var start = pos.Right;
         while (length > 0 && !pos.Right.IsNull)
         {
@@ -563,7 +601,7 @@ internal static class TypeText
         else current[format.Key] = format.Value;
     }
 
-    private static YValue GetOrUndefined(OrderedDictionary<string, YValue> map, string key) => map.TryGetValue(key, out var v) ? v : default;
+    private static YValue GetOrUndefined(OrderedDictionary<string, YValue>? map, string key) => map is not null && map.TryGetValue(key, out var v) ? v : default;
 
     /// <summary>JS <c>value ?? null</c>.</summary>
     private static YValue NullIfUndefined(in YValue value) => value.Kind == YValueKind.Undefined ? YValue.Null : value;

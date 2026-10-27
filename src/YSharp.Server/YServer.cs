@@ -11,11 +11,13 @@ namespace YSharp.Server;
 /// its socket and the returned <see cref="YConnection"/>. The host edits and reads a document through <see cref="EditAsync"/>,
 /// <see cref="ReadAsync{T}"/> and <see cref="SubscribeAsync"/>, which run on the document's mailbox (TASK-5.8). A document with no connections,
 /// subscribers or queued work is closed after <see cref="YServerOptions.DocumentIdleTimeout"/> and loaded from the store again on next use.
+/// <see cref="DeleteAsync"/> closes a document and removes it from the store.
 /// </summary>
 public sealed class YServer : IAsyncDisposable
 {
     private readonly object _gate = new();
     private readonly Dictionary<string, DocumentMailbox> _documents = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, Task> _deleting = new(StringComparer.Ordinal);   // documents being deleted: opening one waits
     private bool _disposed;
 
     public YServer(YServerOptions? options = null)
@@ -39,7 +41,7 @@ public sealed class YServer : IAsyncDisposable
         while (true)
         {
             // a mailbox whose document failed to load, or that was evicted, stops taking messages: the next Open loads the document again
-            var mailbox = Open(documentId);
+            var mailbox = await OpenAsync(documentId).ConfigureAwait(false);
             var connection = new YConnection(mailbox, context ?? ConnectionContext.Anonymous, Options.SubscriberQueueCapacity);
             if (await PostAttachedAsync(mailbox, new Envelope(EnvelopeKind.Connect, connection, null), cancellationToken).ConfigureAwait(false))
                 return connection;
@@ -86,23 +88,82 @@ public sealed class YServer : IAsyncDisposable
     {
         ArgumentNullException.ThrowIfNull(documentId);
         var work = new MailboxWork<T>(run);
-        while (!await PostAttachedAsync(Open(documentId), new Envelope(EnvelopeKind.Work, null, null, work), cancellationToken).ConfigureAwait(false))
+        while (!await PostAttachedAsync(await OpenAsync(documentId).ConfigureAwait(false), new Envelope(EnvelopeKind.Work, null, null, work), cancellationToken)
+                   .ConfigureAwait(false))
         {
         }
 
         return await work.Task.ConfigureAwait(false);
     }
 
-    /// <summary>Opens and attaches to a document (SRV-20): the mailbox is not evicted until what is attached leaves.</summary>
-    private DocumentMailbox Open(string documentId)
+    /// <summary>
+    /// Closes <paramref name="documentId"/> and removes it from the store (docs/api-decisions.md E3). The document's mailbox stops taking
+    /// messages and handles the ones it already accepted, then its connections close with <see cref="ConnectionCloseReason.DocumentDeleted"/>
+    /// and the store deletes the log. A connection, edit, read or subscription that comes meanwhile waits, and then finds an empty document.
+    /// Deleting through <see cref="IUpdateStore.DeleteAsync"/> directly leaves an open document serving its old state until it is evicted.
+    /// </summary>
+    /// <exception cref="ObjectDisposedException">The server is shut down.</exception>
+    public async ValueTask DeleteAsync(string documentId, CancellationToken cancellationToken = default)
     {
-        lock (_gate)
+        ArgumentNullException.ThrowIfNull(documentId);
+        var done = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        DocumentMailbox? mailbox;
+        while (true)
         {
-            ObjectDisposedException.ThrowIf(_disposed, this);
-            if (!_documents.TryGetValue(documentId, out var mailbox))
-                _documents[documentId] = mailbox = new DocumentMailbox(this, documentId, Options);
-            mailbox.Attached++;
-            return mailbox;
+            Task? other;
+            lock (_gate)
+            {
+                ObjectDisposedException.ThrowIf(_disposed, this);
+                if (!_deleting.TryGetValue(documentId, out other))
+                {
+                    _deleting[documentId] = done.Task;
+                    if (_documents.Remove(documentId, out mailbox)) mailbox.CloseReason = ConnectionCloseReason.DocumentDeleted;
+                    break;
+                }
+            }
+
+            await other.WaitAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        try
+        {
+            if (mailbox is not null)
+            {
+                mailbox.Complete();
+                await mailbox.Worker.ConfigureAwait(false);
+            }
+
+            await Options.Store.DeleteAsync(documentId, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            lock (_gate) _deleting.Remove(documentId);
+            done.SetResult();
+        }
+    }
+
+    /// <summary>
+    /// Opens and attaches to a document (SRV-20): the mailbox is not evicted until what is attached leaves. Waits while the document is being
+    /// deleted.
+    /// </summary>
+    private async ValueTask<DocumentMailbox> OpenAsync(string documentId)
+    {
+        while (true)
+        {
+            Task? deleting;
+            lock (_gate)
+            {
+                ObjectDisposedException.ThrowIf(_disposed, this);
+                if (!_deleting.TryGetValue(documentId, out deleting))
+                {
+                    if (!_documents.TryGetValue(documentId, out var mailbox))
+                        _documents[documentId] = mailbox = new DocumentMailbox(this, documentId, Options);
+                    mailbox.Attached++;
+                    return mailbox;
+                }
+            }
+
+            await deleting.ConfigureAwait(false);
         }
     }
 

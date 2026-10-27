@@ -339,7 +339,11 @@ public sealed partial class Doc
             HookGarbageCollection(tx);
             // a remote update that wrote with our client id: someone else uses it, so pick a new one (Yjs cleanupTransactions)
             var client = ClientId;
-            if (!tx.IsLocal && tx.AfterClock(client) != tx.BeforeClock(client)) ClientId = GenerateClientId();
+            if (!tx.IsLocal && tx.AfterClock(client) != tx.BeforeClock(client))
+            {
+                RetireClientId(client);
+                ClientId = GenerateClientId();
+            }
             HookAfterTransactionCleanup(tx);
             HookSubdocs(tx);
         }

@@ -10,4 +10,9 @@
     <AnalysisMode>Default</AnalysisMode>
     <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
   </PropertyGroup>
+  <PropertyGroup>
+    <!-- MIT, as Yjs, lib0 and y-protocols are (LICENSE, THIRD-PARTY-NOTICES.md) -->
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Copyright>Copyright (c) 2026 Jason Cannon</Copyright>
+  </PropertyGroup>
 </Project>

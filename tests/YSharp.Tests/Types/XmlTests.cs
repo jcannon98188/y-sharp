@@ -117,7 +117,7 @@ public sealed class XmlTests
         net.Compare();
     }
 
-    [Fact, PortOf("y-xml.tests.js:testEvents", "X-E5", "Y-1")]
+    [Fact, PortOf("y-xml.tests.js:testEvents", "X-E5", "X-F8", "Y-1")]
     [Requires(Feature.TextFormat, Feature.Text, Feature.Events)]
     [Requires(Feature.Sync)]
     public void Xml_AttributeAndChildChanges_RaiseEventsLocallyAndRemotely()
@@ -150,7 +150,7 @@ public sealed class XmlTests
         net.Compare();
     }
 
-    [Fact, PortOf("y-xml.tests.js:testTreewalker", "X-E4")]
+    [Fact, PortOf("y-xml.tests.js:testTreewalker", "X-E4", "X-F7")]
     [Requires(Feature.Text, Feature.Sync)]
     public void Xml_TreeWalker_VisitsNodesInDocumentOrder()
     {
@@ -200,7 +200,7 @@ public sealed class XmlTests
         Assert.Null(new YXmlElement("x").NextSibling);
     }
 
-    [Fact, PortOf("y-xml.tests.js:testInsertafter", "X-E4")]
+    [Fact, PortOf("y-xml.tests.js:testInsertafter", "X-E4", "X-F1", "X-F3")]
     [Requires(Feature.Text)]
     public void Xml_InsertAfterNestedNodes_KeepsTheOrderAndRejectsInvalidUse()
     {
@@ -300,7 +300,7 @@ public sealed class XmlTests
         Assert.Equal(new[] { "a:Add:-", "a:Update:1", "a:Update:2;b:Add:-", "a:Delete:4" }, seen);
     }
 
-    [Fact, Covers("X-E4")]
+    [Fact, Covers("X-E4", "X-F4")]
     public void FirstChild_DeletedChildren_AreSkipped()
     {
         var fragment = NewDoc().GetXmlFragment("f");
@@ -319,7 +319,7 @@ public sealed class XmlTests
 
     private static YValue Arr(params YValue[] items) => YValue.Array(items);
 
-    [Fact]
+    [Fact, Covers("X-F2")]
     public void Push_AfterDeletedTrailingChildren_InsertsAfterTheLastLiveChild()
     {
         // JS push is insert(length): the new child's origin is the last undeleted child, not the deleted ones after it
@@ -332,7 +332,7 @@ public sealed class XmlTests
         Assert.Equal("010301000701016603016181010002c7010001010301640101010102", Hex(doc));
     }
 
-    [Fact]
+    [Fact, Covers("X-F3", "X-F5")]
     [Requires(Feature.Text)]
     public void InsertAfter_IntegratedReferenceOrNull_InsertsAfterItOrAtTheStart()
     {
@@ -348,7 +348,7 @@ public sealed class XmlTests
         Assert.Throws<ArgumentException>(() => fragment.InsertAfter(new YXmlElement("q"), Nodes(new YXmlElement("r"))));
     }
 
-    [Fact]
+    [Fact, Covers("X-T2", "X-T3")]
     [Requires(Feature.Text, Feature.TextFormat)]
     public void XmlText_ToString_RendersEachFormatAsASortedNestedTag()
     {
@@ -406,7 +406,7 @@ public sealed class XmlTests
             Hex(doc));
     }
 
-    [Fact]
+    [Fact, Covers("X-H1", "X-H2", "X-F5")]
     [Requires(Feature.Map)]
     public void Hook_InAFragment_PrintsAsAnObject_AndItsCloneKeepsTheName()
     {
@@ -422,7 +422,7 @@ public sealed class XmlTests
         Assert.Equal("01050100070101660502686b28000100016b017d018701000301618701020502686b28000103016b017d0100", Hex(doc));
     }
 
-    [Fact, Covers("X-E4")]
+    [Fact, Covers("X-E4", "X-F7")]
     [Requires(Feature.Text)]
     public void QuerySelectorAll_NestedElements_MatchesInDocumentOrderIgnoringCaseAndDeletedNodes()
     {
@@ -439,5 +439,66 @@ public sealed class XmlTests
         Assert.Equal(new[] { a, b, c }, fragment.QuerySelectorAll("div"));
         Assert.Equal("div,DIV,div,text,x", string.Join(",", fragment.TreeWalk().Select(n => n is YXmlElement el ? el.NodeName : "text")));
         Assert.Same(a, fragment.QuerySelector("Div"));
+    }
+
+    [Fact, Covers("X-F6")]
+    [Requires(Feature.Text)]
+    public void Length_BeforeAttach_IsThePrelimContentLength()
+    {
+        var el = new YXmlElement("p");
+        el.Insert(0, Nodes(new YXmlText("a"), new YXmlElement("b")));
+        el.Insert(1, Nodes(new YXmlElement("c")));
+        Assert.Equal(3, el.Length);
+        var fragment = NewDoc().GetXmlFragment("f");
+        fragment.Insert(0, Nodes(el));
+        Assert.Equal(3, el.Length);
+        Assert.Equal("<p>a<c></c><b></b></p>", fragment.ToString());
+    }
+
+    [Fact, Covers("X-F5")]
+    [Requires(Feature.Text)]
+    public void ToJson_OfAFragment_IsItsXmlString()
+    {
+        var fragment = NewDoc().GetXmlFragment("f");
+        var el = new YXmlElement("p");
+        el.SetAttribute("k", "v");
+        fragment.Insert(0, Nodes(new YXmlText("t"), el));
+        Assert.Equal("t<p k=\"v\"></p>", fragment.ToString());
+        Assert.Equal(fragment.ToString(), fragment.ToJson().AsString());
+    }
+
+    [Fact, Covers("X-T1")]
+    [Requires(Feature.Text)]
+    public void XmlText_HasTextBehaviour_Attributes_AndSiblings()
+    {
+        var fragment = NewDoc().GetXmlFragment("f");
+        var before = new YXmlElement("a");
+        var text = new YXmlText("hello");
+        var after = new YXmlElement("b");
+        fragment.Insert(0, Nodes(before, text, after));
+        text.Insert(5, " world");
+        text.Delete(0, 1);
+        text.SetAttribute("lang", "en");
+        Assert.Equal("ello world", text.ToString());
+        Assert.Equal(10, text.Length);
+        Assert.True(text.TryGetAttribute("lang", out var lang));
+        Assert.Equal("en", lang.AsString());
+        Assert.Same(before, text.PrevSibling);
+        Assert.Same(after, text.NextSibling);
+    }
+
+    [Fact, Covers("X-H3")]
+    [Requires(Feature.Map)]
+    public void HookName_SurvivesEncodeAndDecode()
+    {
+        var doc = NewDoc();
+        var hook = new YXmlHook("my-hook");
+        hook.Set("k", 1);
+        doc.GetXmlFragment("f").Insert(0, Nodes(hook));
+        var peer = NewDoc(2);
+        peer.ApplyUpdate(doc.EncodeStateAsUpdate());
+        var copy = Assert.IsType<YXmlHook>(peer.GetXmlFragment("f")[0]);
+        Assert.Equal("my-hook", copy.HookName);
+        Assert.Equal(1, copy.Get("k").AsNumber());
     }
 }

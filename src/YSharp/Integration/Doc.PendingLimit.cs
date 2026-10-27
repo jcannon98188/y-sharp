@@ -12,7 +12,10 @@ namespace YSharp;
 
 // MaxPendingBytes (ADR 0005, ERR-10): what is measured is the V1 encoding of the pending state retained after the update, so an update that would
 // take it above the limit is rejected whole. The pending state an update leaves is only known by integrating it, so a dry run walks the same
-// loop first (IntegrateStructs with a PendingDryRun) against a virtual state, and the update is integrated only when the prediction fits.
+// loop first (IntegrateStructs with a PendingDryRun) against a virtual state, and the update is integrated only when the prediction fits. The dry
+// run leaves the held pending structs as they are and measures the merge from their kept size, so parking an update costs time proportional
+// to the update, not to what is already pending (TASK-11); only a retry re-reads them all, as the integration that follows does. The pending
+// delete set is measured the same way, from its kept size and the clients the update reaches (TASK-12).
 public sealed partial class Doc
 {
     /// <summary>
@@ -47,6 +50,7 @@ public sealed partial class Doc
         {
             rejected = IntegrateUpdate(h.Tx, update);
             Debug.Assert(V1Bytes(_pending, _pendingDeletes) == predicted, "The dry run predicted a different pending state than the update left.");
+            Debug.Assert(_pendingDeleteSize.Bytes == (_pendingDeletes is null ? 0 : DeleteSetBytes(_pendingDeletes)), "The kept pending delete size is off.");
         }
         finally
         {
@@ -57,25 +61,24 @@ public sealed partial class Doc
     }
 
     /// <summary>
-    /// The V1 size of the pending state <paramref name="update"/> would leave: <see cref="ReadUpdate"/> step by step on copies, with every struct
-    /// placed in a virtual state instead of the store. Exact, rejections included: the dry walk resolves dependencies, parents and collected
-    /// neighbours from the store and the structs it has placed. The caller holds the write lock.
+    /// The V1 size of the pending state <paramref name="update"/> would leave: <see cref="ReadUpdate"/> step by step without changing the held
+    /// pending state, with every struct placed in a virtual state instead of the store. Exact, rejections included: the dry walk resolves
+    /// dependencies, parents and collected neighbours from the store and the structs it has placed. The caller holds the write lock.
     /// </summary>
     internal long PredictPendingBytes(UpdateRefs update)
     {
         if (NothingCanWait(update)) return 0;
         var dry = new PendingDryRun();
-        var pending = _pending?.Clone();
-        DeleteRanges? pendingDeletes = null;
-        if (_pendingDeletes is { } current)
-        {
-            pendingDeletes = new DeleteRanges();
-            for (var i = 0; i < current.Count; i++) pendingDeletes.Add(current[i].Client, current[i].Clock, current[i].Length);
-        }
-
-        DryReadUpdate(dry, update.Copy(), ref pending, ref pendingDeletes);
-        return V1Bytes(pending, pendingDeletes);
+        var pendingDeletes = _pendingDeletes;   // changed only on a copy, for a retry
+        var deleteSize = _pendingDeleteSize;
+        var structBytes = DryReadUpdate(dry, update, _pending, ref pendingDeletes, ref deleteSize);
+        var hasDeletes = deleteSize.Clients > 0;
+        if (structBytes is null && !hasDeletes) return 0;
+        return (structBytes ?? EmptySectionBytes) + (hasDeletes ? deleteSize.Bytes : EmptySectionBytes);
     }
+
+    /// <summary>The V1 size of an empty struct or delete section: a client count of 0.</summary>
+    private const long EmptySectionBytes = 1;
 
     /// <summary>
     /// The hot path, without allocating: nothing is pending, every client's structs follow on from its state with no gap, every dependency on
@@ -108,55 +111,56 @@ public sealed partial class Doc
 
     private bool Known(ItemId? dep, ulong client) => dep is not { } d || d.Client == client || d.Clock < Store.GetState(d.Client);
 
-    /// <summary><see cref="ReadUpdate"/> against a dry run's virtual state, on the caller's copies of the pending state. Keep the two in step.</summary>
-    private void DryReadUpdate(PendingDryRun dry, UpdateRefs update, ref PendingStructs? pending, ref DeleteRanges? pendingDeletes)
+    /// <summary>
+    /// <see cref="ReadUpdate"/> against a dry run's virtual state. <paramref name="held"/> is the document's pending structs, or null on the retry,
+    /// and is not changed; the result is the V1 size of the struct section the walk would leave, or null when no structs would wait. The pending
+    /// delete set is followed by its size, and changed only when a retry reads it, on a copy. Keep the two in step.
+    /// </summary>
+    private long? DryReadUpdate(PendingDryRun dry, UpdateRefs update, PendingStructs? held, ref DeleteRanges? pendingDeletes, ref PendingDeleteSize deleteSize)
     {
+        Debug.Assert(held is null || ReferenceEquals(held, _pending), "The dry run reads the document's pending structs or none.");
+        var reach = ReachableDeleteClients(update, pendingDeletes);
+        update = update.Copy();
         var rejected = 0;
         var rest = IntegrateStructs(null!, update, ref rejected, dry);
         var retry = false;
-        if (pending is not null)
+        if (held is not null)
         {
-            foreach (var (client, clock) in pending.Missing)
+            // as ReadUpdate: the store flags a missing clock its state passed, and only the clients the walk placed can pass one more
+            retry = Store.AwaitedPassed;
+            foreach (var client in dry.Clients)
             {
-                if (clock < dry.StateOf(Store, client))
-                {
-                    retry = true;
-                    break;
-                }
+                if (retry) break;
+                retry = held.Missing.TryGetValue(client, out var clock) && clock < dry.StateOf(Store, client);
             }
 
-            if (rest is not null) pending.MergeFrom(rest);
-        }
-        else
-        {
-            pending = rest;
+            Debug.Assert(retry == AnyAwaitedPassed(held.Missing, dry), "The dry retry check disagrees with the missing clocks.");
         }
 
+        // the retry reads the pending deletes this step leaves: only then is the set copied, and the copy changed
         var dsRest = Unapplied(dry, update.Deletes);
-        if (pendingDeletes is { } pendingDs)
-        {
-            var dsRest2 = Unapplied(dry, InWriteOrder(pendingDs));
-            if (dsRest is not null && dsRest2 is not null)
-            {
-                for (var i = 0; i < dsRest2.Count; i++) dsRest.Add(dsRest2[i].Client, dsRest2[i].Clock, dsRest2[i].Length);
-                pendingDeletes = dsRest;
-            }
-            else
-            {
-                pendingDeletes = dsRest ?? dsRest2;
-            }
-        }
-        else
-        {
-            pendingDeletes = dsRest;
-        }
+        if (retry) pendingDeletes = pendingDeletes?.Clone();
+        SettlePendingDeletes(null, dry, reach, dsRest, ref pendingDeletes, ref deleteSize, change: retry);
 
         if (retry)
         {
-            var again = pending!.ToUpdate();
-            pending = null;
-            DryReadUpdate(dry, again, ref pending, ref pendingDeletes);
+            // the retry re-reads every pending struct, as ReadUpdate's does: only here is the held state copied
+            var merged = held!.Clone();
+            if (rest is not null) merged.MergeFrom(rest);
+            return DryReadUpdate(dry, merged.ToUpdate(), null, ref pendingDeletes, ref deleteSize);
         }
+
+        if (held is null) return rest?.StructBytes;
+        return rest is null ? held.StructBytes : held.StructBytesAfterMerge(rest);
+    }
+
+    /// <summary>The V1 size of <paramref name="deletes"/> written as an update's delete set.</summary>
+    private static long DeleteSetBytes(DeleteRanges deletes)
+    {
+        using var w = new Lib0Writer(256);
+        var encoder = new UpdateEncoderV1(w);
+        UpdateWriter.WriteDeleteRuns(ref encoder, InWriteOrder(deletes));
+        return w.Length;
     }
 
     /// <summary>The part of each range <see cref="ApplyDeleteSet"/> would leave unapplied, against the dry run's state.</summary>
@@ -209,10 +213,10 @@ public sealed partial class Doc
     private long StateOf(ulong client, PendingDryRun? dry) => dry is null ? Store.GetState(client) : dry.StateOf(Store, client);
 
     /// <summary>
-    /// The V1 encoding size of a pending state as one update: each client's structs (clients descending, a gap between two structs written as a
+    /// The V1 encoding size of a pending state as one update, encoded in full: what the prediction is checked against: each client's structs (clients descending, a gap between two structs written as a
     /// Skip, as Yjs's merged pending update holds it), then the pending delete set. Nothing pending is 0.
     /// </summary>
-    private static long V1Bytes(PendingStructs? pending, DeleteRanges? deletes)
+    internal static long V1Bytes(PendingStructs? pending, DeleteRanges? deletes)
     {
         if (pending is null && (deletes is null || deletes.Count == 0)) return 0;
         using var w = new Lib0Writer(256);
@@ -251,6 +255,9 @@ public sealed partial class Doc
 internal sealed class PendingDryRun
 {
     private readonly Dictionary<ulong, List<(long Clock, long End, ContentKind Kind)>> _placed = new();
+
+    /// <summary>The clients the walk placed structs for: the only ones whose state it moves.</summary>
+    public Dictionary<ulong, List<(long Clock, long End, ContentKind Kind)>>.KeyCollection Clients => _placed.Keys;
 
     public long StateOf(StructStore store, ulong client) =>
         _placed.TryGetValue(client, out var placed) ? placed[^1].End : store.GetState(client);

@@ -64,15 +64,17 @@ public static class AllocationBudgets
         // TASK-4.20, M3 gate: one-character inserts applied one update at a time (CodecBudgetTests), 1069 bytes per call in Release for V1 and V2.
         ["BUD-08:V1"] = WithHeadroom(1069),
         ["BUD-08:V2"] = WithHeadroom(1069),
-        // TASK-4.27, owner sign-off 2026-10-26 (TASK-8 tries for zero after TASK-5): zero is out of reach while every insert allocates an Item and every transaction its 24-byte
-        // Transaction (BUD-01 option A), so these paths are bounded. Measured in Release once Events landed: a map Set with a handler on
-        // another type 215 bytes, an insert-and-delete commit 974, a one-character insert at the end 606. TASK-4.28 re-measures.
-        ["BUD-04"] = WithHeadroom(215),
-        ["BUD-05"] = WithHeadroom(974),
-        ["BUD-07"] = WithHeadroom(606),
-        // TASK-4.28, M4 gate: a scalar Push on an array 128 bytes per call, a scalar Set on a map 200, measured in Release.
+        // TASK-4.27 made these bounded (owner sign-off 2026-10-26); TASK-8 tried for zero. Zero is out of reach while every insert allocates
+        // an Item and every transaction its 24-byte Transaction (BUD-01 option A); what else remains is the amortized growth of the store's
+        // buffers. Measured in Release after TASK-8: a map Set with a handler on another type 151 bytes (was 215), an insert-and-delete
+        // commit 118 (was 974), a one-character insert at the end 118 (was 606).
+        ["BUD-04"] = WithHeadroom(151),
+        ["BUD-05"] = WithHeadroom(118),
+        ["BUD-07"] = WithHeadroom(118),
+        // TASK-4.28, M4 gate: a scalar Push on an array 128 bytes per call, a scalar Set on a map 200, measured in Release; TASK-8 brought
+        // the Set to 136 (each key's string is made once).
         ["BUD-09:Push"] = WithHeadroom(128),
-        ["BUD-09:Set"] = WithHeadroom(200),
+        ["BUD-09:Set"] = WithHeadroom(136),
         // TASK-4.37, M6 gate: a sync Step1/Step2 round trip 1464 bytes, awareness encode 376 and apply 704 per operation, measured in Release.
         ["BUD-10"] = WithHeadroom(1464),
         ["BUD-11:Encode"] = WithHeadroom(376),

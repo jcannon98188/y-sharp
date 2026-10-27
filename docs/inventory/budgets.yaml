@@ -44,7 +44,7 @@
   owner: 14
   status: active
   ref: "adr 0009"
-  note: "active (TASK-4.27), bounded by owner sign-off (2026-10-26; TASK-8 tries for zero after TASK-5): every insert allocates an Item and every transaction its Transaction (BUD-01 option A), so zero is out of reach. Measured 215 bytes per operation in Release; limit plus 25%. TASK-4.28 re-measures."
+  note: "active, bounded (TASK-4.27; TASK-8 tried for zero). Measured 151 bytes per operation in Release after TASK-8 (was 215): what still allocates is the Item each insert needs and the 24-byte Transaction of each transaction (BUD-01 option A), plus the amortized growth of the store's buffers, so zero is out of reach. Limit plus 25%."
 
 - id: BUD-05
   title: "A commit with no Update subscriber stays within its recorded limit"
@@ -55,7 +55,7 @@
   owner: 14
   status: active
   ref: "adr 0009"
-  note: "active (TASK-4.27), bounded by owner sign-off (2026-10-26; TASK-8 tries for zero after TASK-5): every insert allocates an Item and every transaction its Transaction (BUD-01 option A), so zero is out of reach. Measured 974 bytes per operation in Release; limit plus 25%. TASK-4.28 re-measures."
+  note: "active, bounded (TASK-4.27; TASK-8 tried for zero). Measured 118 bytes per operation in Release after TASK-8 (was 974): what still allocates is the Item each insert needs and the 24-byte Transaction of each transaction (BUD-01 option A), plus the amortized growth of the store's buffers, so zero is out of reach. Limit plus 25%."
 
 - id: BUD-06
   title: "EncodeStateAsUpdate into a pre-sized writer allocates zero bytes"
@@ -77,7 +77,7 @@
   owner: 14
   status: active
   ref: "adr 0009"
-  note: "active (TASK-4.27), bounded by owner sign-off (2026-10-26; TASK-8 tries for zero after TASK-5): every insert allocates an Item and every transaction its Transaction (BUD-01 option A), so zero is out of reach. Measured 606 bytes per operation in Release; limit plus 25%. TASK-4.28 re-measures."
+  note: "active, bounded (TASK-4.27; TASK-8 tried for zero). Measured 118 bytes per operation in Release after TASK-8 (was 606): what still allocates is the Item each insert needs and the 24-byte Transaction of each transaction (BUD-01 option A), plus the amortized growth of the store's buffers, so zero is out of reach. Limit plus 25%."
 
 - id: BUD-08
   title: "TryApplyUpdate (V1 and V2) stays within a bounded allocation budget"
@@ -99,7 +99,7 @@
   owner: 14
   status: active
   ref: "adr 0009"
-  note: "TASK-4.28, M4 gate: recorded from Release measurements (Push 128 bytes per call, Set 200) plus 25% headroom."
+  note: "TASK-4.28, M4 gate: recorded from Release measurements (Push 128 bytes per call, Set 200) plus 25% headroom. TASK-8 re-measured the Set at 136 (each key's string is now made once)."
 
 - id: BUD-10
   title: "A sync Step1/Step2 round trip stays within a bounded allocation budget"

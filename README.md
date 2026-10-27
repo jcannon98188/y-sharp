@@ -3,7 +3,13 @@
 A pure C# port of [Yjs](https://github.com/yjs/yjs) v13, the CRDT library for building collaborative applications.
 
 > **Status: the core library is implemented; pre-release.**
-> All 44 implementation specs (milestones M0 to M7) have landed and passed the release gate. Every feature gate is open: documents, transactions, the V1 and V2 codecs, the shared types, events, snapshots, relative positions, the undo manager, subdocuments, permanent user data, and the awareness, sync and auth protocols. A server tier (`YSharp.Server`) sits on top of it. Nothing is published to NuGet yet, so build from source. The public API may still change before a first release.
+> All 44 implementation specs (milestones M0 to M7) have landed and passed the release gate. Every feature gate is open: documents, transactions, the V1 and V2 codecs, the shared types, events, snapshots, relative positions, the undo manager, subdocuments, permanent user data, and the awareness, sync and auth protocols. A server tier (`YSharp.Server`) sits on top of it. Nothing is published to NuGet yet (TASK-15 tracks it), so build from source. The public API may still change before a first release.
+
+## Documentation
+
+- **[How y-sharp works](docs/guide.md)**: documents, shared types, transactions and threads, updates, the sync protocol, awareness, undo, limits, and the server tier.
+- **[Hosting the server](docs/server.md)**: wiring `YSharp.Server` into a host, storage backends, validation hooks, and server-side edits.
+- **[API decisions](docs/api-decisions.md)** and the **[architecture decision records](docs/adr/)**: why the library is built the way it is.
 
 ## What it is
 
@@ -22,8 +28,8 @@ y-sharp aims to be a drop-in .NET peer for Yjs. A y-sharp document and a Yjs doc
 - **Transport-neutral.** The host accepts sockets, authenticates them and moves bytes. `YServer.ConnectAsync` returns a `YConnection` that takes and emits y-websocket messages (sync, awareness, auth).
 - **One mailbox per document.** Each document has a bounded queue with a single worker, so its work runs in order. Different documents run in parallel. Each update is encoded once, and every peer gets that same buffer. A slow peer is closed, so it cannot hold the document up.
 - **Relay first.** `YRelay` holds a document as its merged update and answers sync byte for byte as Yjs `mergeUpdates` and `diffUpdate` would, without building a `Doc`. A `Doc` is built only when a validation hook, a server-side edit or read, or an indexing subscriber needs one. It is dropped again when the document goes idle.
-- **Check, persist, then broadcast.** Every update is checked against `YLimits`, the optional validation hook, the relay's pending bound and the hot `Doc`, then persisted, then broadcast. So the log never holds an update the server refused, and nothing is sent before it is durable.
-- **Pluggable storage.** `IUpdateStore` is an append-only V2 log per document, with compaction. The in-memory default is not durable. A host plugs in its own backend and checks it with the conformance suite in `YSharp.Server.Testing`.
+- **Check, persist, then broadcast.** Every update is checked against `YLimits`, the optional validation hook, the relay's pending bound and the hot `Doc`, then persisted, then broadcast. So the log never holds an update the server refused, and nothing is sent before it is durable. A peer's update is decoded once: the hook, the relay and the hot `Doc` take that decode, and the stored V2 record is written from it.
+- **Pluggable storage.** `IUpdateStore` is an append-only V2 log per document, with compaction. The in-memory default is not durable. A host plugs in its own backend and checks it with the conformance suite in `YSharp.Server.Testing`. A stored log is loaded into the relay with one merge, however many records it holds.
 
 ## How correctness is tested
 
@@ -38,7 +44,7 @@ Interop is the core requirement, so the test suite was designed and built before
 - **Memory budgets.** Allocation tests assert bytes per operation, and a slow tier checks bytes per item against the Yjs figures. The storage model was chosen by a measured spike (ADR 0018, 0023).
 - **Feature gates.** Tests declare the feature they need (`[Requires(...)]`), so the suite stays green as features land. Changes to existing tests during implementation follow strict rules (ADR 0020, 0022).
 
-The full suite has about 4,700 tests. The skipped ones belong to the nightly tier or run only in Release (allocation tests); no test is skipped for a missing feature.
+The full suite has about 5,000 tests. The skipped ones belong to the nightly tier or run only in Release (allocation tests); no test is skipped for a missing feature.
 
 CI runs on GitHub Actions: gating on Linux, Windows and macOS; fixture drift; a differential smoke job; and a nightly tier for the slow differential, fuzz, soak, memory and benchmark runs.
 
@@ -74,4 +80,8 @@ This runs the gating tier and needs no Node. The live differential tests need No
 
 ## Project management
 
-Work is tracked with [Backlog.md](https://github.com/MrLesk/Backlog.md) under `backlog/`. The implementation plan, TASK-4, is done: 44 specs across milestones M0 to M7. TASK-5 is the server tier. The open follow-ups are TASK-6 to TASK-10, which cover registry rows, an undo ordering detail, zero-allocation budgets, the relay's fold cost and the API surface baseline.
+Work is tracked with [Backlog.md](https://github.com/MrLesk/Backlog.md) under `backlog/`. The implementation plan, TASK-4, is done: 44 specs across milestones M0 to M7. TASK-5 is the server tier. The follow-ups TASK-6 to TASK-13 are done: registry rows, an undo ordering detail, zero-allocation budgets, the API surface baseline, and work proportional to the update rather than the held state in the relay's folds, the document's pending state and loading a stored log. TASK-14 decodes a peer's update once on the server. The owner's API decisions on the server-tier surface (E1 to E6 in [docs/api-decisions.md](docs/api-decisions.md)) are applied, including `YServer.DeleteAsync`. TASK-15 is publishing the packages to NuGet.
+
+## License
+
+y-sharp is released under the [MIT License](LICENSE). It ports Yjs, lib0 and y-protocols, which are MIT-licensed too; their notices are in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

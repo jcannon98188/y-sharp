@@ -96,7 +96,7 @@ public sealed class RelayHostileProperties
         var model = Waiting(3, 'y');
         var bytes = format == UpdateFormat.V2 ? UpdateBuilder.V2(model) : UpdateBuilder.V1(model);
         Assert.Equal(YError.LimitExceeded, relay.TryApplyUpdate(bytes, format).Error);
-        Assert.Equal(YError.LimitExceeded, relay.TryPrepareUpdate(bytes, format, out var prepared).Error);
+        Assert.Equal(YError.LimitExceeded, relay.TryPrepareUpdate(bytes, out var prepared, format).Error);
         Assert.Null(prepared);
         var truncated = bytes[..^3];
         Assert.Equal(YError.Malformed, relay.TryApplyUpdate(truncated, format).Error);

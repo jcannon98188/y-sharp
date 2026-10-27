@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using YSharp.Server.Tests.Mailbox;
@@ -13,8 +14,11 @@ namespace YSharp.Server.Tests.Simulation;
 /// <summary>
 /// The server tier end to end (TASK-5.7): seeded runs of y-protocols peers editing a text, an array and a map through <see cref="YServer"/>,
 /// with peers dropping off and editing offline, the server restarting over the same store, and the log compacted both while the document is
-/// open and between restarts. At the end every peer, a fresh peer loading from the store, and a <see cref="Doc"/> that applied every local
-/// edit directly hold the same state. The edits are <see cref="RelayWorkload.Edit"/>'s, the relay tests' workload, without surrogate pairs:
+/// open and between restarts. At the end every peer and a fresh peer loading from the store hold the same state, byte for byte, and a
+/// <see cref="Doc"/> that applied every local edit directly holds the same content. Not the same bytes: a remote change to formatted text
+/// makes a replica delete the format items it left redundant (Yjs cleanupYTextAfterTransaction), and which ones depends on the order the
+/// changes arrived in. The peers send their cleanup deletes as their own updates, and the run settles until none is left unsent; the direct
+/// Doc's stay its own. The edits are <see cref="RelayWorkload.Edit"/>'s, the relay tests' workload, without surrogate pairs:
 /// a format that changes nothing, at an index inside a pair, turns the pair into two U+FFFD in that replica only and emits no update (as in
 /// Yjs, yjs#248), so no path converges there. Every third seed runs with a validation hook, so the hot Doc is in the path too.
 /// </summary>
@@ -31,8 +35,12 @@ public sealed class ServerSimulationTests
         var rng = new Random(seed);
         var store = new InMemoryUpdateStore();
         ValidationHook accept = (in ValidationRequest _) => ValidationResult.Accept;
-        // slow subscribers are MailboxTests' concern: here a peer may leave its queue unread for the whole run
-        YServer Start() => new(new YServerOptions { Store = store, Validation = hooked ? _ => accept : null, SubscriberQueueCapacity = 1 << 16 });
+        // slow subscribers are MailboxTests' concern: here a peer may leave its queue unread for the whole run. So is the hook's deadline: under
+        // a loaded test run a stall past it rejected an edit, which the server then never had
+        YServer Start() => new(new YServerOptions
+        {
+            Store = store, Validation = hooked ? _ => accept : null, SubscriberQueueCapacity = 1 << 16, ValidationDeadline = Timeout.InfiniteTimeSpan,
+        });
 
         // the Doc-only path: every local edit of every peer, applied directly
         var reference = new Doc();
@@ -100,12 +108,23 @@ public sealed class ServerSimulationTests
         }
 
         foreach (var p in peers.Where(p => !online.Contains(p))) await p.ReconnectAsync(server);
-        for (var round = 0; round < 2; round++)
+        // settle: a peer applying a format change deletes the format items it left redundant, and sends those deletes as its own update
+        for (var round = 0; ; round++)
+        {
+            Assert.True(round < 10, "the peers did not settle");
+            foreach (var p in peers) await p.SendUnsentAsync();
             foreach (var p in peers) await p.FlushAsync();
-        foreach (var p in peers) await p.DrainAsync();
+            foreach (var p in peers) await p.FlushAsync();
+            foreach (var p in peers) await p.DrainAsync();
+            if (!peers.Any(p => p.HasUnsent)) break;
+        }
 
-        var expected = reference.EncodeStateAsUpdate();
+        Assert.All(peers, p => Assert.Empty(p.Denied));
+        var expected = peers[0].Doc.EncodeStateAsUpdate();
         foreach (var p in peers) Assert.Equal(expected, p.Doc.EncodeStateAsUpdate());
+        Assert.Equal(FormattedText(reference), FormattedText(peers[0].Doc));
+        Assert.Equal(reference.GetArray("array").ToJson(), peers[0].Doc.GetArray("array").ToJson());
+        Assert.Equal(MapEntries(reference), MapEntries(peers[0].Doc));
 
         await server.DisposeAsync();
         await using var final = Start();
@@ -113,5 +132,18 @@ public sealed class ServerSimulationTests
         await late.FlushAsync();
         Assert.Equal(expected, late.Doc.EncodeStateAsUpdate());
         Assert.True(restarts >= 1);
+    }
+
+    // content, not JSON: an object's members compare in order, and a map's keys are in the order this replica first saw them
+
+    /// <summary>The text with its formatting, run by run.</summary>
+    private static List<(string? Text, YValue Attributes)> FormattedText(Doc doc) =>
+        doc.GetText("text").ToDelta().Select(op => (op.Text, op.Attributes)).ToList();
+
+    /// <summary>The map's entries, by key.</summary>
+    private static List<KeyValuePair<string, YValue>> MapEntries(Doc doc)
+    {
+        Assert.True(doc.GetMap("map").ToJson().TryGetObject(out var map));
+        return Enumerable.Range(0, map.Count).Select(i => map[i]).OrderBy(e => e.Key, StringComparer.Ordinal).ToList();
     }
 }

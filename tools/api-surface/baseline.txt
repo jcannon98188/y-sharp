@@ -72,6 +72,12 @@ YSharp.Awareness|property System.Collections.Generic.IReadOnlyDictionary<System.
 YSharp.Awareness|property System.UInt64 ClientId {get;}
 YSharp.Awareness|property YSharp.YValue LocalState {get;}
 YSharp.Awareness|sealed class
+YSharp.DecodedUpdate|base System.Object
+YSharp.DecodedUpdate|method System.Void Encode(System.Buffers.IBufferWriter<System.Byte> output, YSharp.UpdateFormat format = 0)
+YSharp.DecodedUpdate|property System.Boolean IsEmpty {get;}
+YSharp.DecodedUpdate|property System.Collections.Generic.IReadOnlyList<YSharp.UpdateDeleteRange> Deletes {get;}
+YSharp.DecodedUpdate|property System.Collections.Generic.IReadOnlyList<YSharp.UpdateStruct> Structs {get;}
+YSharp.DecodedUpdate|sealed class
 YSharp.DeleteSet|base System.Object
 YSharp.DeleteSet|ctor()
 YSharp.DeleteSet|method System.Boolean Contains(YSharp.ItemId id)
@@ -138,6 +144,7 @@ YSharp.Doc|method System.Void TransactWithTimeout(System.Action<YSharp.Transacti
 YSharp.Doc|method TResult Transact<TResult>(System.Func<YSharp.Transaction, TResult> body, System.Object origin = null)
 YSharp.Doc|method TResult Transact<TState, TResult>(TState state, System.Func<TState, YSharp.Transaction, TResult> body, System.Object origin = null)
 YSharp.Doc|method YSharp.ApplyResult TryApplyUpdate(System.ReadOnlySpan<System.Byte> update, System.Object origin = null, YSharp.UpdateFormat format = 0)
+YSharp.Doc|method YSharp.ApplyResult TryApplyUpdate(YSharp.DecodedUpdate update, System.Object origin = null)
 YSharp.Doc|method YSharp.StateVector GetStateVector()
 YSharp.Doc|method YSharp.TransactionScope BeginReadTransaction()
 YSharp.Doc|method YSharp.TransactionScope BeginTransaction(System.Object origin = null)
@@ -271,7 +278,6 @@ YSharp.StackItemEvent|property System.Object Origin {get;set;}
 YSharp.StackItemEvent|property YSharp.StackItem Item {get;set;}
 YSharp.StackItemEvent|struct readonly
 YSharp.StackItem|base System.Object
-YSharp.StackItem|ctor()
 YSharp.StackItem|property System.Collections.Generic.Dictionary<System.Object, System.Object> Meta {get;}
 YSharp.StackItem|property YSharp.DeleteSet Deletions {get;}
 YSharp.StackItem|property YSharp.DeleteSet Insertions {get;}
@@ -390,6 +396,35 @@ YSharp.UndoManager|property System.Boolean CanUndo {get;}
 YSharp.UndoManager|property System.Collections.Generic.IReadOnlyList<YSharp.StackItem> RedoStack {get;}
 YSharp.UndoManager|property System.Collections.Generic.IReadOnlyList<YSharp.StackItem> UndoStack {get;}
 YSharp.UndoManager|sealed class
+YSharp.UpdateContentKind|enum
+YSharp.UpdateContentKind|enum Any = 3
+YSharp.UpdateContentKind|enum Binary = 5
+YSharp.UpdateContentKind|enum Deleted = 1
+YSharp.UpdateContentKind|enum Doc = 9
+YSharp.UpdateContentKind|enum Embed = 6
+YSharp.UpdateContentKind|enum Format = 7
+YSharp.UpdateContentKind|enum Json = 4
+YSharp.UpdateContentKind|enum None = 0
+YSharp.UpdateContentKind|enum String = 2
+YSharp.UpdateContentKind|enum Type = 8
+YSharp.UpdateContentKind|implements System.IComparable
+YSharp.UpdateContentKind|implements System.IConvertible
+YSharp.UpdateContentKind|implements System.IFormattable
+YSharp.UpdateContentKind|implements System.ISpanFormattable
+YSharp.UpdateDeleteRange|base System.ValueType
+YSharp.UpdateDeleteRange|ctor(System.UInt64 Client, System.Int64 Clock, System.Int64 Length)
+YSharp.UpdateDeleteRange|implements System.IEquatable<YSharp.UpdateDeleteRange>
+YSharp.UpdateDeleteRange|method System.Void Deconstruct(out System.UInt64 Client, out System.Int64 Clock, out System.Int64 Length)
+YSharp.UpdateDeleteRange|method override System.Boolean Equals(System.Object obj)
+YSharp.UpdateDeleteRange|method override System.Int32 GetHashCode()
+YSharp.UpdateDeleteRange|method override System.String ToString()
+YSharp.UpdateDeleteRange|method sealed-override System.Boolean Equals(YSharp.UpdateDeleteRange other)
+YSharp.UpdateDeleteRange|method static System.Boolean op_Equality(YSharp.UpdateDeleteRange left, YSharp.UpdateDeleteRange right)
+YSharp.UpdateDeleteRange|method static System.Boolean op_Inequality(YSharp.UpdateDeleteRange left, YSharp.UpdateDeleteRange right)
+YSharp.UpdateDeleteRange|property System.Int64 Clock {get;set;}
+YSharp.UpdateDeleteRange|property System.Int64 Length {get;set;}
+YSharp.UpdateDeleteRange|property System.UInt64 Client {get;set;}
+YSharp.UpdateDeleteRange|struct readonly
 YSharp.UpdateFormat|enum
 YSharp.UpdateFormat|enum V1 = 0
 YSharp.UpdateFormat|enum V2 = 1
@@ -405,6 +440,30 @@ YSharp.UpdateHandler|implements System.Runtime.Serialization.ISerializable
 YSharp.UpdateHandler|method virtual System.IAsyncResult BeginInvoke(System.ReadOnlySpan<System.Byte> update, System.Object origin, YSharp.Doc doc, YSharp.Transaction tx, System.AsyncCallback callback, System.Object object)
 YSharp.UpdateHandler|method virtual System.Void EndInvoke(System.IAsyncResult result)
 YSharp.UpdateHandler|method virtual System.Void Invoke(System.ReadOnlySpan<System.Byte> update, System.Object origin, YSharp.Doc doc, YSharp.Transaction tx)
+YSharp.UpdateStructKind|enum
+YSharp.UpdateStructKind|enum Gc = 1
+YSharp.UpdateStructKind|enum Item = 0
+YSharp.UpdateStructKind|enum Skip = 2
+YSharp.UpdateStructKind|implements System.IComparable
+YSharp.UpdateStructKind|implements System.IConvertible
+YSharp.UpdateStructKind|implements System.IFormattable
+YSharp.UpdateStructKind|implements System.ISpanFormattable
+YSharp.UpdateStruct|base System.ValueType
+YSharp.UpdateStruct|property System.Int64 Length {get;}
+YSharp.UpdateStruct|property System.Nullable<YSharp.ItemId> Origin {get;}
+YSharp.UpdateStruct|property System.Nullable<YSharp.ItemId> ParentId {get;}
+YSharp.UpdateStruct|property System.Nullable<YSharp.ItemId> RightOrigin {get;}
+YSharp.UpdateStruct|property System.ReadOnlyMemory<System.Byte> Bytes {get;}
+YSharp.UpdateStruct|property System.ReadOnlyMemory<YSharp.YValue> Values {get;}
+YSharp.UpdateStruct|property System.String Key {get;}
+YSharp.UpdateStruct|property System.String ParentRoot {get;}
+YSharp.UpdateStruct|property System.String ParentSub {get;}
+YSharp.UpdateStruct|property System.String Text {get;}
+YSharp.UpdateStruct|property System.String TypeName {get;}
+YSharp.UpdateStruct|property YSharp.ItemId Id {get;}
+YSharp.UpdateStruct|property YSharp.UpdateContentKind Content {get;}
+YSharp.UpdateStruct|property YSharp.UpdateStructKind Kind {get;}
+YSharp.UpdateStruct|struct readonly
 YSharp.YArrayEvent|base YSharp.YEvent
 YSharp.YArrayEvent|property System.ReadOnlySpan<YSharp.ListDeltaOp> Delta {get;}
 YSharp.YArrayEvent|sealed class
@@ -557,11 +616,29 @@ YSharp.YPathSegment|method static System.Boolean op_Inequality(YSharp.YPathSegme
 YSharp.YPathSegment|property System.Int32 Index {get;set;}
 YSharp.YPathSegment|property System.String Key {get;set;}
 YSharp.YPathSegment|struct readonly
+YSharp.YRelay.PreparedUpdate|base System.Object
+YSharp.YRelay.PreparedUpdate|property YSharp.StateVector StateVector {get;}
+YSharp.YRelay.PreparedUpdate|sealed class
+YSharp.YRelay|base System.Object
+YSharp.YRelay|ctor(YSharp.YLimits limits = null)
+YSharp.YRelay|method System.Byte[] EncodeStateAsUpdate(System.ReadOnlySpan<System.Byte> targetStateVector = default, YSharp.UpdateFormat format = 0)
+YSharp.YRelay|method System.Void Commit(YSharp.YRelay.PreparedUpdate prepared)
+YSharp.YRelay|method System.Void EncodeStateAsUpdate(System.Buffers.IBufferWriter<System.Byte> writer, System.ReadOnlySpan<System.Byte> targetStateVector = default, YSharp.UpdateFormat format = 0)
+YSharp.YRelay|method System.Void EncodeStateVector(System.Buffers.IBufferWriter<System.Byte> writer)
+YSharp.YRelay|method YSharp.StateVector GetStateVector()
+YSharp.YRelay|method YSharp.YStatus TryApplyUpdate(System.ReadOnlySpan<System.Byte> update, YSharp.UpdateFormat format = 0)
+YSharp.YRelay|method YSharp.YStatus TryEncodeStateAsUpdate(System.Buffers.IBufferWriter<System.Byte> writer, System.ReadOnlySpan<System.Byte> targetStateVector = default, YSharp.UpdateFormat format = 0)
+YSharp.YRelay|method YSharp.YStatus TryPrepareUpdate(System.ReadOnlySpan<System.Byte> update, out YSharp.YRelay.PreparedUpdate prepared, YSharp.UpdateFormat format = 0)
+YSharp.YRelay|method YSharp.YStatus TryPrepareUpdate(YSharp.DecodedUpdate update, out YSharp.YRelay.PreparedUpdate prepared)
+YSharp.YRelay|property System.Boolean IsEmpty {get;}
+YSharp.YRelay|property YSharp.YLimits Limits {get;}
+YSharp.YRelay|sealed class
 YSharp.YSnapshot|base System.Object
-YSharp.YSnapshot|ctor()
 YSharp.YSnapshot|implements System.IEquatable<YSharp.YSnapshot>
 YSharp.YSnapshot|method System.Boolean ContainsUpdate(System.ReadOnlySpan<System.Byte> update, YSharp.UpdateFormat format = 0)
 YSharp.YSnapshot|method System.Void Encode(System.Buffers.IBufferWriter<System.Byte> writer, YSharp.UpdateFormat format = 0)
+YSharp.YSnapshot|method override System.Boolean Equals(System.Object obj)
+YSharp.YSnapshot|method override System.Int32 GetHashCode()
 YSharp.YSnapshot|method sealed-override System.Boolean Equals(YSharp.YSnapshot other)
 YSharp.YSnapshot|method static YSharp.Doc CreateDoc(YSharp.Doc origin, YSharp.YSnapshot snapshot, YSharp.Doc target = null)
 YSharp.YSnapshot|method static YSharp.YSnapshot Create(YSharp.Doc doc)
@@ -576,9 +653,12 @@ YSharp.YStatus|property System.Boolean Ok {get;}
 YSharp.YStatus|property YSharp.YError Error {get;}
 YSharp.YStatus|struct readonly
 YSharp.YSync|base System.Object
+YSharp.YSync|method static System.Void WriteStep1(System.Buffers.IBufferWriter<System.Byte> writer, System.ReadOnlySpan<System.Byte> stateVector)
 YSharp.YSync|method static System.Void WriteStep1(System.Buffers.IBufferWriter<System.Byte> writer, YSharp.Doc doc)
+YSharp.YSync|method static System.Void WriteStep2(System.Buffers.IBufferWriter<System.Byte> writer, System.ReadOnlySpan<System.Byte> update)
 YSharp.YSync|method static System.Void WriteStep2(System.Buffers.IBufferWriter<System.Byte> writer, YSharp.Doc doc, System.ReadOnlySpan<System.Byte> targetStateVector = default)
 YSharp.YSync|method static System.Void WriteUpdate(System.Buffers.IBufferWriter<System.Byte> writer, System.ReadOnlySpan<System.Byte> update)
+YSharp.YSync|method static YSharp.YStatus TryReadFrame(ref System.ReadOnlySpan<System.Byte> input, out YSharp.SyncMessageType type, out System.ReadOnlySpan<System.Byte> payload)
 YSharp.YSync|method static YSharp.YStatus TryReadMessage(ref System.ReadOnlySpan<System.Byte> input, System.Buffers.IBufferWriter<System.Byte> reply, YSharp.Doc doc, System.Object origin, out YSharp.SyncReadResult result, System.Action<YSharp.YError> errorHandler = null)
 YSharp.YSync|static class
 YSharp.YTextEvent|base YSharp.YEvent
@@ -627,6 +707,7 @@ YSharp.YUntyped|method override YSharp.YValue ToJson()
 YSharp.YUntyped|sealed class
 YSharp.YUpdate|base System.Object
 YSharp.YUpdate|method static YSharp.YStatus TryConvert(System.ReadOnlySpan<System.Byte> update, YSharp.UpdateFormat from, YSharp.UpdateFormat to, System.Buffers.IBufferWriter<System.Byte> output, YSharp.YLimits limits = null)
+YSharp.YUpdate|method static YSharp.YStatus TryDecode(System.ReadOnlySpan<System.Byte> update, out YSharp.DecodedUpdate decoded, YSharp.UpdateFormat format = 0, YSharp.YLimits limits = null)
 YSharp.YUpdate|method static YSharp.YStatus TryDiff(System.ReadOnlySpan<System.Byte> update, System.ReadOnlySpan<System.Byte> stateVector, System.Buffers.IBufferWriter<System.Byte> output, YSharp.UpdateFormat format = 0, YSharp.YLimits limits = null)
 YSharp.YUpdate|method static YSharp.YStatus TryMerge(System.Collections.Generic.IReadOnlyList<System.ReadOnlyMemory<System.Byte>> updates, System.Buffers.IBufferWriter<System.Byte> output, YSharp.UpdateFormat format = 0, YSharp.YLimits limits = null)
 YSharp.YUpdate|method static YSharp.YStatus TryStateVectorFromUpdate(System.ReadOnlySpan<System.Byte> update, System.Buffers.IBufferWriter<System.Byte> output, YSharp.UpdateFormat format = 0, YSharp.YLimits limits = null)

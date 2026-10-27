@@ -335,7 +335,7 @@ public sealed class RelayTests
     public void Prepare_ChangesNothing_UntilCommit_AndACommitIsSpentOnce()
     {
         var relay = new YRelay();
-        Assert.True(relay.TryPrepareUpdate(U0, UpdateFormat.V1, out var prepared).Ok);
+        Assert.True(relay.TryPrepareUpdate(U0, out var prepared).Ok);
         Assert.True(relay.IsEmpty);
         Assert.Equal(1, prepared!.StateVector[1]);
         relay.Commit(prepared);
@@ -344,12 +344,67 @@ public sealed class RelayTests
         HexAssert.Equal(Encode(direct, UpdateFormat.V1), Encode(relay, UpdateFormat.V1), "prepare then commit is a fold");
 
         Assert.Throws<InvalidOperationException>(() => relay.Commit(prepared));                 // already committed
-        Assert.True(relay.TryPrepareUpdate(U1, UpdateFormat.V1, out var stale).Ok);
+        Assert.True(relay.TryPrepareUpdate(U1, out var stale).Ok);
         Assert.True(relay.TryApplyUpdate(U2).Ok);
         Assert.Throws<InvalidOperationException>(() => relay.Commit(stale!));                   // the relay changed after it was prepared
         Assert.Throws<InvalidOperationException>(() => new YRelay().Commit(prepared));          // prepared by another relay
 
-        Assert.Equal(YError.Malformed, relay.TryPrepareUpdate(U1[..^2], UpdateFormat.V1, out var none).Error);
+        Assert.Equal(YError.Malformed, relay.TryPrepareUpdate(U1[..^2], out var none).Error);
         Assert.Null(none);
+    }
+
+    // ------------------------------------------------------------------ TASK-9: folds proportional to the update
+
+    [Theory, Covers("RLY-7")]
+    [MemberData(nameof(Seeds))]
+    public void ThePendingSizeKeptPerClient_IsThePendingSizeMeasuredOverTheWholeState(UpdateFormat format, int seed)
+    {
+        // shuffled, so clients gain and fill gaps and deleted ranges land before and after their client's state
+        var relay = new YRelay();
+        foreach (var update in Shuffled(RelayWorkload.Updates(seed, 120, format), seed))
+        {
+            Assert.True(relay.TryApplyUpdate(update, format).Ok);
+            Assert.Equal(relay.PendingBytesRecomputed, relay.PendingBytes);
+        }
+    }
+
+    [Theory, Covers("RLY-1")]
+    [InlineData(UpdateFormat.V1)]
+    [InlineData(UpdateFormat.V2)]
+    public void UpdatesInOrder_KeepThePerClientForm_AndMergeNothingHeld(UpdateFormat format)
+    {
+        var relay = new YRelay();
+        foreach (var update in RelayWorkload.Updates(3, 200, format))
+        {
+            Assert.True(relay.TryApplyUpdate(update, format).Ok);
+            Assert.False(relay.IsFlat);
+            Assert.Equal(0, relay.MergedHeldStructs);   // each update only appends to its client's history
+        }
+    }
+
+    [Fact, Covers("RLY-1")]
+    public void AFold_AllocatesInProportionToTheUpdate_NotTheState()
+    {
+        // a client typing one character at a time: the 1700th keystroke costs what the 300th did
+        var doc = new Doc(new DocOptions { ClientId = 1 });
+        var updates = new List<byte[]>();
+        doc.Update += (u, _, _, _) => updates.Add(u.ToArray());
+        var text = doc.GetText("t");
+        for (var i = 0; i < 2100; i++) text.Insert(i % 7 == 0 ? 0 : text.Length, "ab"[i % 2].ToString());
+
+        long Cost(int from, int count)
+        {
+            var relay = new YRelay();
+            for (var i = 0; i < from; i++) Assert.True(relay.TryApplyUpdate(updates[i]).Ok);
+            Assert.True(relay.TryApplyUpdate(updates[from]).Ok);   // warm up
+            var before = GC.GetAllocatedBytesForCurrentThread();
+            for (var i = from + 1; i <= from + count; i++) relay.TryApplyUpdate(updates[i]);
+            return (GC.GetAllocatedBytesForCurrentThread() - before) / count;
+        }
+
+        // windows that cross no power of two, where the held lists double their capacity (amortized, it is the update's cost)
+        var small = Cost(300, 50);
+        var large = Cost(1700, 50);
+        Assert.True(large < small * 2, $"a fold allocated {large} bytes on a 1700-update state and {small} on a 300-update one");
     }
 }

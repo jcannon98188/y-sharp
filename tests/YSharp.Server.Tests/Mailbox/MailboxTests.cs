@@ -198,6 +198,31 @@ public sealed class MailboxTests
         Assert.Equal(a.Text, c.Text);
     }
 
+    [Fact, Covers("SRV-8", "SRV-10")]
+    public async Task AnUpdateWhoseDeletesDoNotSurviveV2_IsServedAsStored_BeforeAndAfterARestart()
+    {
+        // client 1's deletions (2,2) then (1,1) go back within the client: V2 writes the second as a step back from clock 4, which reads as
+        // other ranges (in Yjs as here). The relay and the hot Doc take the stored form, so a restart serves what was served (TASK-14)
+        var store = new InMemoryUpdateStore();
+        var server = new YServer(new YServerOptions { Store = store });
+        var a = await Peer.JoinAsync(server, "doc", 1);
+        await a.InsertAsync("hello");
+        await a.FlushAsync();
+        await a.SendAsync(Frame.Update(new byte[] { 0, 1, 1, 2, 2, 2, 1, 1 }));
+        var live = await Peer.JoinAsync(server, "doc", 2);
+        await live.FlushAsync();
+        Assert.False(a.Connection.IsClosed);
+        await a.DisposeAsync();
+        await live.DisposeAsync();
+        await server.DisposeAsync();
+
+        await using var restarted = new YServer(new YServerOptions { Store = store });
+        var late = await Peer.JoinAsync(restarted, "doc", 3);
+        await late.FlushAsync();
+        Assert.Equal(live.Doc.EncodeStateAsUpdate(), late.Doc.EncodeStateAsUpdate());
+        Assert.Equal("heo", late.Text);   // (2,2) and a range past the end, not (1,3)
+    }
+
     [Fact, Covers("SRV-8")]
     public async Task AFailedPersist_IsNotAppliedOrBroadcast_AndClosesOnlyTheSender()
     {

@@ -63,16 +63,19 @@ internal static class UpdateMerge
 
     private sealed class Source
     {
-        private readonly List<StructRef> _structs;
-        private int _index = -1;
+        private readonly IReadOnlyList<StructRef> _structs;
+        private readonly int _end;
+        private int _index;
 
-        public Source(List<StructRef> structs)
+        public Source(IReadOnlyList<StructRef> structs, int start, int end)
         {
             _structs = structs;
+            _index = start - 1;
+            _end = end;
             Next();
         }
 
-        public bool HasCurr => _index < _structs.Count;
+        public bool HasCurr => _index < _end;
 
         public StructRef Curr => _structs[_index];
 
@@ -80,97 +83,122 @@ internal static class UpdateMerge
         public void Next()
         {
             do _index++;
-            while (_index < _structs.Count && _structs[_index].Kind == RefKind.Skip);
+            while (_index < _end && _structs[_index].Kind == RefKind.Skip);
         }
     }
 
     /// <summary>Yjs <c>mergeUpdatesV2</c> on structs: one merged list, clients in descending order, structs of a client in clock order.</summary>
     public static List<StructRef> Merge(IReadOnlyList<List<StructRef>> updates)
     {
-        var sources = new List<Source>(updates.Count);
-        var total = 0;
-        foreach (var u in updates)
+        var ranges = new (IReadOnlyList<StructRef>, int, int)[updates.Count];
+        for (var i = 0; i < ranges.Length; i++) ranges[i] = (updates[i], 0, updates[i].Count);
+        return Merge(ranges, null);
+    }
+
+    /// <summary>
+    /// <see cref="Merge(IReadOnlyList{List{StructRef}})"/> over a range of each list. With <paramref name="write"/>, the merge resumes where Yjs
+    /// would be at the top of its loop holding that struct as <c>currWrite</c>: the output starts with it, as it is extended or sliced.
+    /// </summary>
+    public static List<StructRef> Merge(IReadOnlyList<(IReadOnlyList<StructRef> Structs, int Start, int End)> updates, StructRef? write)
+    {
+        // Yjs sorts all its readers (a stable sort) on every pass and takes the first. Only that one moves between passes, and its next
+        // struct sorts no earlier, so the sort puts it back before the first reader that does not sort before it: in front of every reader it
+        // ties with. A queue ordered by struct, then by a stamp that is the input index at first and lower than any before for each reader put
+        // back, takes the same reader each pass in O(log n) rather than O(n), so merging n updates is not O(n) per struct (TASK-13).
+        var queue = new PriorityQueue<Source, (StructRef Curr, long Stamp)>(updates.Count, SourceOrder.Instance);
+        var total = write.HasValue ? 1 : 0;
+        long stamp = 0;
+        foreach (var (structs, start, end) in updates)
         {
-            sources.Add(new Source(u));
-            total += u.Count;
+            var s = new Source(structs, start, end);
+            if (s.HasCurr) queue.Enqueue(s, (s.Curr, stamp++));
+            total += end - start;
         }
 
         // the merge writes at most one struct per input struct, plus a Skip per gap (HOS-AMP: no doubling on large merges)
         var output = new List<StructRef>(total);
-        var hasWrite = false;
-        StructRef write = default;
-        while (true)
+        var hasWrite = write.HasValue;
+        var curWrite = write.GetValueOrDefault();
+        long putBack = -1;
+        while (queue.TryDequeue(out var source, out _))
         {
-            sources.RemoveAll(s => !s.HasCurr);
-            if (sources.Count == 0) break;
-            StableSort(sources);
-            var source = sources[0];
             var firstClient = source.Curr.Client;
             if (hasWrite)
             {
                 var iterated = false;
                 // skip what was already written
-                while (source.HasCurr && source.Curr.End <= write.End && source.Curr.Client >= write.Client)
+                while (source.HasCurr && source.Curr.End <= curWrite.End && source.Curr.Client >= curWrite.Client)
                 {
                     source.Next();
                     iterated = true;
                 }
 
-                if (!source.HasCurr || source.Curr.Client != firstClient || (iterated && source.Curr.Clock > write.End)) continue;
-                var curr = source.Curr;
-                if (firstClient != write.Client)
+                if (source.HasCurr && source.Curr.Client == firstClient && !(iterated && source.Curr.Clock > curWrite.End))
                 {
-                    output.Add(write);
-                    write = curr;
-                    source.Next();
-                }
-                else if (write.End < curr.Clock)
-                {
-                    if (write.Kind == RefKind.Skip)
+                    var curr = source.Curr;
+                    if (firstClient != curWrite.Client)
                     {
-                        write.Length = curr.End - write.Clock;
+                        output.Add(curWrite);
+                        curWrite = curr;
+                        source.Next();
+                    }
+                    else if (curWrite.End < curr.Clock)
+                    {
+                        if (curWrite.Kind == RefKind.Skip)
+                        {
+                            curWrite.Length = curr.End - curWrite.Clock;
+                        }
+                        else
+                        {
+                            output.Add(curWrite);
+                            curWrite = StructRef.Skip(firstClient, curWrite.End, curr.Clock - curWrite.End);
+                        }
                     }
                     else
                     {
-                        output.Add(write);
-                        write = StructRef.Skip(firstClient, write.End, curr.Clock - write.End);
-                    }
-                }
-                else
-                {
-                    var diff = write.End - curr.Clock;
-                    if (diff > 0)
-                    {
-                        // prefer to slice a Skip, the other struct may carry more information
-                        if (write.Kind == RefKind.Skip) write.Length -= diff;
-                        else curr = curr.Slice(diff);
+                        var diff = curWrite.End - curr.Clock;
+                        if (diff > 0)
+                        {
+                            // prefer to slice a Skip, the other struct may carry more information
+                            if (curWrite.Kind == RefKind.Skip) curWrite.Length -= diff;
+                            else curr = curr.Slice(diff);
+                        }
+
+                        if (!TryMergeWith(ref curWrite, curr))
+                        {
+                            output.Add(curWrite);
+                            curWrite = curr;
+                            source.Next();
+                        }
                     }
 
-                    if (!TryMergeWith(ref write, curr))
-                    {
-                        output.Add(write);
-                        write = curr;
-                        source.Next();
-                    }
+                    WriteRun(source, firstClient, ref curWrite, output);
                 }
             }
             else
             {
-                write = source.Curr;
+                curWrite = source.Curr;
                 hasWrite = true;
                 source.Next();
+                WriteRun(source, firstClient, ref curWrite, output);
             }
 
-            while (source.HasCurr && source.Curr.Client == firstClient && source.Curr.Clock == write.End && source.Curr.Kind != RefKind.Skip)
-            {
-                output.Add(write);
-                write = source.Curr;
-                source.Next();
-            }
+            if (source.HasCurr) queue.Enqueue(source, (source.Curr, putBack--));
         }
 
-        if (hasWrite) output.Add(write);
+        if (hasWrite) output.Add(curWrite);
         return output;
+    }
+
+    /// <summary>Writes the structs of <paramref name="source"/> that continue <paramref name="curWrite"/> without a gap.</summary>
+    private static void WriteRun(Source source, ulong client, ref StructRef curWrite, List<StructRef> output)
+    {
+        while (source.HasCurr && source.Curr.Client == client && source.Curr.Clock == curWrite.End && source.Curr.Kind != RefKind.Skip)
+        {
+            output.Add(curWrite);
+            curWrite = source.Curr;
+            source.Next();
+        }
     }
 
     /// <summary>Yjs <c>mergeWith</c> on structs that were never integrated: GC joins GC and Skip joins Skip; items never join (their <c>right</c> is unset).</summary>
@@ -181,25 +209,19 @@ internal static class UpdateMerge
         return true;
     }
 
-    /// <summary>
-    /// The order Yjs sorts the readers in: descending client; within a client ascending clock, and at the same clock a Skip after anything else.
-    /// Stable, as <c>Array.prototype.sort</c> is.
-    /// </summary>
-    private static void StableSort(List<Source> sources)
+    /// <summary>The order Yjs sorts the readers in (<see cref="Compare"/>), ties broken by stamp as its stable sort leaves them.</summary>
+    private sealed class SourceOrder : IComparer<(StructRef Curr, long Stamp)>
     {
-        for (var i = 1; i < sources.Count; i++)
-        {
-            var s = sources[i];
-            var j = i - 1;
-            while (j >= 0 && Compare(sources[j].Curr, s.Curr) > 0)
-            {
-                sources[j + 1] = sources[j];
-                j--;
-            }
+        public static readonly SourceOrder Instance = new();
 
-            sources[j + 1] = s;
+        public int Compare((StructRef Curr, long Stamp) x, (StructRef Curr, long Stamp) y)
+        {
+            var c = UpdateMerge.Compare(x.Curr, y.Curr);
+            return c != 0 ? c : x.Stamp.CompareTo(y.Stamp);
         }
     }
+
+    /// <summary>The order Yjs sorts the readers in: descending client; within a client ascending clock, and at the same clock a Skip after anything else.</summary>
 
     private static int Compare(in StructRef a, in StructRef b)
     {

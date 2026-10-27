@@ -85,6 +85,7 @@ internal sealed class DocumentMailbox
     private readonly List<DocumentSubscription> _subscribers = new();
     private readonly TimeProvider _time;
     private YRelay _relay = null!;
+    private YLimits? _peerLimits;
     private Exception? _loadFailure;
     private long _lastActivity;
     private bool _closed;
@@ -116,6 +117,9 @@ internal sealed class DocumentMailbox
 
     /// <summary>Connections, posted work and subscriptions that hold the document open; guarded by the server's lock (SRV-20).</summary>
     internal int Attached;
+
+    /// <summary>Why the remaining connections close once the mailbox is complete and drained: set before <see cref="Complete"/>.</summary>
+    internal ConnectionCloseReason CloseReason = ConnectionCloseReason.ServerShutdown;
 
     /// <summary>The relay state. Read on the worker, or after it stops.</summary>
     internal YRelay Relay => _relay;
@@ -176,7 +180,7 @@ internal sealed class DocumentMailbox
             if (more is null) Evict();
         }
 
-        foreach (var connection in _connections) connection.Close(ConnectionCloseReason.ServerShutdown);
+        foreach (var connection in _connections) connection.Close(CloseReason);
         _connections.Clear();
     }
 
@@ -233,13 +237,7 @@ internal sealed class DocumentMailbox
         var log = _server.Log;
         _relay = new YRelay(log.StoredLimits);
         var doc = _hook is null ? null : new Doc(new DocOptions { Limits = log.StoredLimits });
-        await foreach (var record in log.Store.ReadSinceAsync(DocumentId, 0).ConfigureAwait(false))
-        {
-            var status = _relay.TryApplyUpdate(record.UpdateV2.Span, UpdateFormat.V2);
-            if (!status.Ok) throw new InvalidDataException($"Document '{DocumentId}': record {record.Sequence} is not a valid update ({status.Error}).");
-            doc?.ApplyUpdate(record.UpdateV2.Span, this, UpdateFormat.V2);
-        }
-
+        await log.FoldAsync(DocumentId, 0, _relay, doc, this, CancellationToken.None).ConfigureAwait(false);
         HotDocument = doc;
     }
 
@@ -335,6 +333,16 @@ internal sealed class DocumentMailbox
     }
 
     /// <summary>
+    /// What a peer's update is decoded under: the server's limits, with the string and nesting bounds of the relay and the hot Doc where those
+    /// are tighter, so the one decode checks what decoding it for each of them checked.
+    /// </summary>
+    private YLimits PeerLimits => _peerLimits ??= _options.Limits with
+    {
+        MaxStringBytes = Math.Min(_options.Limits.MaxStringBytes, _relay.Limits.MaxStringBytes),
+        MaxAnyDepth = Math.Min(_options.Limits.MaxAnyDepth, _relay.Limits.MaxAnyDepth),
+    };
+
+    /// <summary>
     /// SRV-8: structural validation, the hook, then the relay and the hot Doc are checked before the append, so an update that either refuses
     /// is never persisted (RLY-7, TASK-5.3): the relay prepares the merged state without changing, and the hot Doc applies. Persist, then the
     /// relay commits and the update is broadcast. When the hot Doc changes and the update does not go on (a partly rejected update, or a failed
@@ -344,8 +352,8 @@ internal sealed class DocumentMailbox
     {
         if (update.Span.SequenceEqual(EmptyUpdateV1)) return;   // an up-to-date peer's Step2: nothing to store or send
 
-        var v2 = new ArrayBufferWriter<byte>(update.Length + 16);
-        var status = YUpdate.TryConvert(update.Span, UpdateFormat.V1, UpdateFormat.V2, v2, _options.Limits);
+        // decoded once (TASK-14): the hook, the relay and the hot Doc take the decoded update, and the stored record is written from it
+        var status = YUpdate.TryDecode(update.Span, out var decoded, UpdateFormat.V1, PeerLimits);
         if (!status.Ok)
         {
             Close(connection, ConnectionCloseReason.ProtocolError, $"update: {status.Error}");
@@ -354,7 +362,7 @@ internal sealed class DocumentMailbox
 
         if (_hook is not null)
         {
-            var verdict = Validate(connection, update);
+            var verdict = Validate(connection, update, decoded);
             if (!verdict.Accepted)
             {
                 Reject(connection, verdict.Reason!, resync: type == SyncMessageType.Update);
@@ -362,8 +370,21 @@ internal sealed class DocumentMailbox
             }
         }
 
+        var v2 = new ArrayBufferWriter<byte>(update.Length + 16);
+        decoded.Encode(v2, UpdateFormat.V2);
+        if (!SurvivesV2(decoded))
+        {
+            // the relay and the hot Doc take what is stored, as a restart reads it back
+            status = YUpdate.TryDecode(v2.WrittenSpan, out decoded, UpdateFormat.V2, PeerLimits);
+            if (!status.Ok)
+            {
+                Close(connection, ConnectionCloseReason.ProtocolError, $"update: {status.Error}");
+                return;
+            }
+        }
+
         // the relay's pending bound (RLY-7) and the hot Doc's (ADR 0005) are checked here, before anything is stored
-        status = _relay.TryPrepareUpdate(v2.WrittenSpan, UpdateFormat.V2, out var prepared);
+        status = _relay.TryPrepareUpdate(decoded, out var prepared);
         if (!status.Ok)
         {
             Close(connection, ConnectionCloseReason.ProtocolError, $"update: {status.Error}");
@@ -372,7 +393,7 @@ internal sealed class DocumentMailbox
 
         if (HotDocument is { } doc)
         {
-            var applied = doc.TryApplyUpdate(update.Span, connection);
+            var applied = doc.TryApplyUpdate(decoded, connection);
             if (!applied.Ok)
             {
                 // Malformed and LimitExceeded change nothing; Rejected applied the structs that could be integrated
@@ -426,16 +447,18 @@ internal sealed class DocumentMailbox
         }
 
         if (update is null) return false;
-        var v2 = new ArrayBufferWriter<byte>(update.Length + 16);
-        var status = YUpdate.TryConvert(update, UpdateFormat.V1, UpdateFormat.V2, v2);
+        // decoded once, under the relay's limits: the relay prepares it and the stored record is written from it (TASK-14)
+        var status = YUpdate.TryDecode(update, out var decoded, UpdateFormat.V1, _relay.Limits);
         YRelay.PreparedUpdate? prepared = null;
-        if (status.Ok) status = _relay.TryPrepareUpdate(v2.WrittenSpan, UpdateFormat.V2, out prepared);
+        if (status.Ok) status = _relay.TryPrepareUpdate(decoded, out prepared);
         if (!status.Ok)
         {
             RebuildHotDocument();
             throw new InvalidOperationException($"Document '{DocumentId}': the edit's update was refused ({status.Error}).");
         }
 
+        var v2 = new ArrayBufferWriter<byte>(update.Length + 16);
+        decoded.Encode(v2, UpdateFormat.V2);
         try
         {
             await _server.Log.Store.AppendAsync(DocumentId, v2.WrittenMemory).ConfigureAwait(false);
@@ -540,10 +563,28 @@ internal sealed class DocumentMailbox
     }
 
     /// <summary>SRV-14: the hook in one read transaction, with a deadline; a throw or an overrun is a reject.</summary>
-    private ValidationResult Validate(YConnection connection, ReadOnlyMemory<byte> update)
+    /// <summary>
+    /// Whether the update reads back from its V2 form as it was decoded. V2 writes a client's delete ranges as steps from the end of the one
+    /// before, so ranges that overlap or go back within a client come back as other ranges (in Yjs as here); the structs always survive. The
+    /// V2 writer groups a client's ranges in read order, so each client's ranges are checked in read order.
+    /// </summary>
+    private static bool SurvivesV2(DecodedUpdate decoded)
+    {
+        var deletes = decoded.Deletes;
+        if (deletes.Count < 2) return true;
+        var ends = new Dictionary<ulong, long>();
+        foreach (var d in deletes)
+        {
+            if (ends.TryGetValue(d.Client, out var end) && d.Clock < end) return false;
+            ends[d.Client] = d.Clock + d.Length;
+        }
+
+        return true;
+    }
+
+    private ValidationResult Validate(YConnection connection, ReadOnlyMemory<byte> update, DecodedUpdate decoded)
     {
         var doc = EnsureHotDocument();
-        YUpdate.TryDecode(update.Span, out var decoded, UpdateFormat.V1, _options.Limits);
         using var deadline = new CancellationTokenSource(_options.ValidationDeadline);
         var request = new ValidationRequest(DocumentId, doc, update, decoded, connection.Context, deadline.Token);
         var verdict = default(ValidationResult);
