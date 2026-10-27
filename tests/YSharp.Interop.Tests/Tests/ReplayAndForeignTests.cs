@@ -182,6 +182,27 @@ public sealed class MutatedFormatInArrayTests(OracleHost host)
     }
 }
 
+/// <summary>
+/// The Nightly differential find of 2026-10-27 (tree-scripts, run 40547040408): peer c's text keeps search markers, and a delete midway
+/// between two of them walked from the earlier one, where Yjs <c>findMarker</c> keeps the later one. The walk stopped on a's bold end with
+/// no attributes, so the delete's format cleanup deleted it too, and every peer's update after that differed from the oracle's.
+/// </summary>
+[Requires(Feature.V1, Feature.V2, Feature.Text, Feature.TextFormat, Feature.Sync, Feature.Events)]
+[NeedsNode]
+[Tier(Tier.Smoke)]
+public sealed class EquallyNearMarkersTests(OracleHost host)
+{
+    [Fact, Covers("DIFF-01", "A-14")]
+    public void DeleteBetweenTwoEquallyNearMarkers_MatchesTheOracle()
+    {
+        host.RequireOrSkip();
+        const string script = """{"schema":1,"replicas":[{"name":"a","clientId":101,"gc":true},{"name":"b","clientId":102,"gc":true},{"name":"c","clientId":103,"gc":true}],"steps":[{"step":"text.insert","doc":"a","target":{"root":"t","kind":"text"},"at":0,"value":"na\u00efvebc"},{"step":"transact","doc":"a","steps":[{"step":"text.format","doc":"a","target":{"root":"t","kind":"text"},"at":1,"len":1,"attributes":{"$":"obj","pairs":[["italic",true]]}},{"step":"text.format","doc":"a","target":{"root":"t","kind":"text"},"at":1,"len":3,"attributes":{"$":"obj","pairs":[["bold",true]]}}]},{"step":"sync","from":"a","to":"b"},{"step":"sync","from":"a","to":"c"},{"step":"text.insert","doc":"c","target":{"root":"t","kind":"text"},"at":4,"value":"\u65e5\u672c"},{"step":"text.insert","doc":"c","target":{"root":"t","kind":"text"},"at":7,"value":"\u20ac"},{"step":"text.delete","doc":"c","target":{"root":"t","kind":"text"},"at":4,"len":1},{"step":"sync","from":"b","to":"a"},{"step":"sync","from":"a","to":"c"},{"step":"sync","from":"c","to":"b"},{"step":"sync","from":"a","to":"b"},{"step":"sync","from":"a","to":"c"},{"step":"sync","from":"b","to":"a"},{"step":"sync","from":"b","to":"c"},{"step":"sync","from":"c","to":"a"},{"step":"sync","from":"c","to":"b"},{"step":"sync","from":"a","to":"b"},{"step":"sync","from":"a","to":"c"},{"step":"sync","from":"b","to":"a"},{"step":"sync","from":"b","to":"c"},{"step":"sync","from":"c","to":"a"},{"step":"sync","from":"c","to":"b"}]}""";
+        var run = new DiffRun(host, "equally-near-markers") { Label = "a delete midway between two search markers" };
+        try { run.Run(script, (oracle, sharp) => DiffRun.Convergence(oracle, "the oracle") ?? DiffRun.Convergence(sharp, "y-sharp"), DiffRun.PlanExtras); }
+        catch (DifferentialFailure f) { Assert.Fail(f.Persist(run.Directory)); }
+    }
+}
+
 /// <summary>The <c>applyForeign</c> step (ADR 0012, 0016) on the C# interpreter and its generated fixture. No Node needed.</summary>
 [LibraryIndependent]
 public sealed class ApplyForeignTests

@@ -37,10 +37,12 @@ internal sealed class SearchMarkers
     {
         if (parent.Start is null || index == 0) return null;
 
+        // Yjs reduce((a, b) => |index - a.index| < |index - b.index| ? a : b): of two equally near markers the later one wins, and the walk
+        // from the other can stop on a format item where the later one's stops on content (a delete's cleanup then differed, nightly 2026-10-27)
         var best = -1;
         for (var i = 0; i < _count; i++)
         {
-            if (best < 0 || Math.Abs(index - _indexes[i]) < Math.Abs(index - _indexes[best])) best = i;
+            if (best < 0 || Math.Abs(index - _indexes[i]) <= Math.Abs(index - _indexes[best])) best = i;
         }
 
         var p = parent.Start;
@@ -99,7 +101,7 @@ internal sealed class SearchMarkers
         var best = 0;
         for (var i = 1; i < _count; i++)
         {
-            if (Math.Abs(index - _indexes[i]) < Math.Abs(index - _indexes[best])) best = i;
+            if (Math.Abs(index - _indexes[i]) <= Math.Abs(index - _indexes[best])) best = i;
         }
 
         var p = _items[best]!;
