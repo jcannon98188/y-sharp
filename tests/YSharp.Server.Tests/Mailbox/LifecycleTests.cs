@@ -14,7 +14,8 @@ namespace YSharp.Server.Tests.Mailbox;
 /// <summary>
 /// The hot-Doc lifecycle (ADR 0024 SRV-5, SRV-18, SRV-20; TASK-5.8): a host's edits, reads and subscribers run on the document's mailbox and
 /// materialize a <see cref="Doc"/> only when they ask, an edit is persisted and broadcast like a peer's update, and an idle document drops its
-/// hot Doc and then itself, to be loaded from the store again with nothing lost. A deleted document closes its peers and is gone from the store.
+/// hot Doc and then itself, to be loaded from the store again with nothing lost; the host's unloading hook gets its state first (SRV-23). A
+/// deleted document closes its peers and is gone from the store.
 /// </summary>
 [Requires(Feature.UpdateFunctions, Feature.V2, Feature.V2Functions, Feature.Sync, Feature.Awareness, Feature.Text, Feature.Map, Feature.Events)]
 public sealed class LifecycleTests
@@ -437,5 +438,127 @@ public sealed class LifecycleTests
         var replayed = new Doc();
         foreach (var r in await Records(store, "doc")) replayed.ApplyUpdate(r.UpdateV2.Span, null, UpdateFormat.V2);
         Assert.Equal(expected, replayed.GetText("text").ToString());
+    }
+
+    // ------------------------------------------------------------------ SRV-23: the unloading hook
+
+    private static YServerOptions Unloading(VirtualTimeProvider time, Func<string, ReadOnlyMemory<byte>, CancellationToken, ValueTask> hook,
+        TimeSpan? deadline = null) => new()
+    {
+        TimeProvider = time,
+        DocumentUnloading = hook,
+        DocumentUnloadingDeadline = deadline ?? TimeSpan.FromSeconds(5),
+    };
+
+    [Fact, Covers("SRV-23"), Covers("SRV-20")]
+    public async Task TheUnloadingHook_GetsTheIdleDocumentsState_OnItsWorker_BeforeItIsUnloaded()
+    {
+        var time = new VirtualTimeProvider();
+        var calls = new List<(string DocId, string Text, bool Loaded)>();
+        YServer? self = null;
+        await using var server = new YServer(Unloading(time, (docId, state, _) =>
+        {
+            var doc = new Doc();
+            doc.ApplyUpdate(state.ToArray());
+            calls.Add((docId, doc.GetText("text").ToString(), self!.Mailbox(docId) is not null));
+            return ValueTask.CompletedTask;
+        }));
+        self = server;
+        var a = await Peer.JoinAsync(server, "doc", 1);
+        await a.FlushAsync();
+        await a.InsertAsync("kept");
+        await a.FlushAsync();
+
+        // a connected peer keeps the document, so the hook is not called
+        time.Advance(TimeSpan.FromHours(1));
+        await a.FlushAsync();
+        Assert.Empty(calls);
+
+        var mailbox = server.Mailbox("doc")!;
+        await a.DisposeAsync();
+        await AdvanceUntil(time, () => server.Mailbox("doc") is null, "the document is unloaded after the hook");
+        await mailbox.Worker.WaitAsync(TimeSpan.FromSeconds(30), Ct);
+        Assert.Equal([("doc", "kept", true)], calls);
+    }
+
+    [Fact, Covers("SRV-23")]
+    public async Task AFailingUnloadingHook_DoesNotKeepTheDocumentLoaded_AndLosesNothing()
+    {
+        var time = new VirtualTimeProvider();
+        var calls = 0;
+        await using var server = new YServer(Unloading(time, (_, _, _) =>
+        {
+            calls++;
+            throw new InvalidOperationException("snapshot store down");
+        }));
+        var a = await Peer.JoinAsync(server, "doc", 1);
+        await a.FlushAsync();
+        await a.InsertAsync("kept");
+        await a.FlushAsync();
+        await a.DisposeAsync();
+        await AdvanceUntil(time, () => server.Mailbox("doc") is null, "the document is unloaded although the hook threw");
+        Assert.Equal(1, calls);
+
+        var b = await Peer.JoinAsync(server, "doc", 2);
+        await b.FlushAsync();
+        Assert.Equal("kept", b.Text);
+    }
+
+    [Fact, Covers("SRV-23")]
+    public async Task AnUnloadingHookThatOverrunsItsDeadline_IsCancelled_AndTheDocumentIsUnloadedWithoutIt()
+    {
+        var time = new VirtualTimeProvider();
+        var token = new TaskCompletionSource<CancellationToken>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var never = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        await using var server = new YServer(Unloading(time, (_, _, ct) =>
+        {
+            token.TrySetResult(ct);
+            return new ValueTask(never.Task);   // ignores its token
+        }));
+        var a = await Peer.JoinAsync(server, "doc", 1);
+        await a.FlushAsync();
+        await a.DisposeAsync();
+        await AdvanceUntil(time, () => server.Mailbox("doc") is null, "the document is unloaded once the hook's deadline passes");
+        Assert.True((await token.Task.WaitAsync(TimeSpan.FromSeconds(30), Ct)).IsCancellationRequested);
+        never.SetResult();
+    }
+
+    [Fact, Covers("SRV-23"), Covers("SRV-20")]
+    public async Task ADocumentOpenedWhileTheUnloadingHookRuns_StaysLoaded_AndTheHookRunsAgainWhenItIsNextIdle()
+    {
+        var time = new VirtualTimeProvider();
+        var calls = 0;
+        var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        await using var server = new YServer(Unloading(time, async (_, _, _) =>
+        {
+            if (Interlocked.Increment(ref calls) == 1)
+            {
+                entered.SetResult();
+                await release.Task;
+            }
+        }, Timeout.InfiniteTimeSpan));
+        var a = await Peer.JoinAsync(server, "doc", 1);
+        await a.FlushAsync();
+        await a.InsertAsync("kept");
+        await a.FlushAsync();
+        await a.DisposeAsync();
+        var mailbox = server.Mailbox("doc")!;
+        for (var i = 0; i < 1000 && !entered.Task.IsCompleted; i++)
+        {
+            time.Advance(TimeSpan.FromSeconds(10));
+            await Task.Delay(2, Ct);
+        }
+
+        Assert.True(entered.Task.IsCompleted, "the hook is called once the document is idle");
+        var b = await Peer.JoinAsync(server, "doc", 2);   // waits in the mailbox while the hook runs
+        release.SetResult();
+        await b.FlushAsync();
+        Assert.Equal("kept", b.Text);
+        Assert.Same(mailbox, server.Mailbox("doc"));
+
+        await b.DisposeAsync();
+        await AdvanceUntil(time, () => server.Mailbox("doc") is null, "the document is unloaded when it is next idle");
+        Assert.Equal(2, Volatile.Read(ref calls));
     }
 }
