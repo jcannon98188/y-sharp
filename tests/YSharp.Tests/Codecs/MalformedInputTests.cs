@@ -215,7 +215,9 @@ public sealed class MalformedInputTests
     {
         var update = Hex.Bytes(hex);
         AssertRejected(update);
+        Assert.Equal(YError.Malformed, YUpdate.TryValidate(update).Error);
         Assert.Equal(YError.Malformed, YUpdate.TryConvert(update, UpdateFormat.V1, UpdateFormat.V2, new ArrayBufferWriter<byte>()).Error);
+        Assert.Equal(YError.Malformed, YUpdate.TryMerge([Hex.Bytes(HiV1), update], new ArrayBufferWriter<byte>()).Error);
     }
 
     [Fact, Covers("ENC-51"), Diverges("ENC-51", adr: "0005")]

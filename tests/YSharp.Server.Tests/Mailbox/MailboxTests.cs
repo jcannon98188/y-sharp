@@ -253,6 +253,7 @@ public sealed class MailboxTests
     [InlineData(new byte[] { 0, 2, 9, 1 })]         // a payload cut short
     [InlineData(new byte[] { 0, 7, 0 })]            // no such sync message
     [InlineData(new byte[] { 0, 0, 2, 1, 1 })]      // a malformed state vector
+    [InlineData(new byte[] { 0, 2, 6, 0, 1, 0, 1, 0, 0 })]   // a delete range of length 0, which Yjs throws on (ENC-51, TASK-17.2)
     public async Task AMessageThatDoesNotParse_ClosesTheSender_AndChangesNothing(byte[] message)
     {
         var store = new InMemoryUpdateStore();
