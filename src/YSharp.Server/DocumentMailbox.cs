@@ -659,15 +659,24 @@ internal sealed class DocumentMailbox
 
     /// <summary>SRV-14: the hook in one read transaction, with a deadline; a throw or an overrun is a reject.</summary>
     /// <summary>
-    /// Whether the update reads back from its V2 form as it was decoded. V2 writes a client's delete ranges as steps from the end of the one
-    /// before, so ranges that overlap or go back within a client come back as other ranges (in Yjs as here); the structs always survive. The
-    /// V2 writer groups a client's ranges in read order, so each client's ranges are checked in read order.
+    /// Whether the update reads back from its V2 form as it was decoded. The writer groups a client's structs in read order and writes the
+    /// first one's clock and then lengths, so a struct not starting where its client's previous one ends (a client listed twice, a zero-length
+    /// GC going back) comes back at another clock: the relay skipped it live and a reload integrated it (the nightly HOS-MUT find of
+    /// 2026-10-27, TASK-18). V2 writes a client's delete ranges as steps from the end of the one before, so ranges that overlap or go back
+    /// within a client come back as other ranges (in Yjs as here). Both are checked per client in read order.
     /// </summary>
     private static bool SurvivesV2(DecodedUpdate decoded)
     {
+        var ends = new Dictionary<ulong, long>();
+        foreach (var s in decoded.Structs)
+        {
+            if (ends.TryGetValue(s.Id.Client, out var end) && s.Id.Clock != end) return false;
+            ends[s.Id.Client] = s.Id.Clock + s.Length;
+        }
+
         var deletes = decoded.Deletes;
         if (deletes.Count < 2) return true;
-        var ends = new Dictionary<ulong, long>();
+        ends.Clear();
         foreach (var d in deletes)
         {
             if (ends.TryGetValue(d.Client, out var end) && d.Clock < end) return false;
